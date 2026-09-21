@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Caltrans Pitch Day Demo Scope</title>
+<style>
+  @page { size: Letter; margin: 0.62in; }
+  body { font: 9.8pt/1.36 "Segoe UI", Arial, sans-serif; color: #1a1a1a; }
+  h1 { font-size: 18pt; margin: 0 0 2pt; }
+  .sub { color: #555; margin: 0 0 10pt; }
+  h2 { font-size: 12pt; margin: 13pt 0 4pt; border-bottom: 1px solid #bbb; padding-bottom: 2pt; break-after: avoid; }
+  h3 { font-size: 10.5pt; margin: 7pt 0 2pt; break-after: avoid; }
+  p { margin: 4pt 0; }
+  table { border-collapse: collapse; width: 100%; margin: 5pt 0 6pt; font-size: 9pt; }
+  tr { break-inside: avoid; }
+  th, td { border: 1px solid #c8c8c8; padding: 3pt 5pt; text-align: left; vertical-align: top; }
+  th { background: #eef1f4; }
+  ul, ol { margin: 3pt 0 5pt 16pt; padding: 0; }
+  li { margin: 1.5pt 0; }
+  .box { background: #f4f6f8; border-left: 3px solid #35608f; padding: 5pt 9pt; margin: 6pt 0; break-inside: avoid; }
+</style></head><body>
+
+<h1>SWYFT Record Twin: Caltrans Pitch Day Demo Scope</h1>
+<p class="sub">3D Continuum · AI Problem Statement #6, Automated Data Extraction and Digital Twin</p>
+
+<h2>1. The event</h2>
+<table>
+<tr><th style="width:22%">What</th><td>Caltrans Vendor Pitch Day, in person. One 25-minute breakout presentation to the problem statement champion (Mark Counts, Right of Way / Land Surveys) and other Caltrans staff.</td></tr>
+<tr><th>When and where</th><td>Monday, October 5. May Lee State Office Complex, Sacramento. Slot assigned between 10:30 a.m. and 3:00 p.m.</td></tr>
+<tr><th>Format</th><td>Live demo on a laptop, with a recorded fallback. No dependence on venue network.</td></tr>
+<tr><th>What it can lead to</th><td>Market research only; no contract is implied. The realistic win is an invitation to scope a pilot or proof of concept.</td></tr>
+</table>
+
+<h2>2. What the demo has to prove</h2>
+<p>The submission makes four claims that distinguish 3DC from point-cloud asset-inventory vendors. The demo shows each one working on real Caltrans data rather than describing it.</p>
+<ol>
+<li><b>It targets the record.</b> A Caltrans right of way record map goes in; structured, queryable survey objects come out.</li>
+<li><b>AI proposes, geodesy disposes.</b> Models read the sheet. Every coordinate, closure, and transformation is deterministic computation with published residuals.</li>
+<li><b>QA is a product.</b> Every object carries a confidence score, a link to its source region, and a verification record. Reviewers work an exception queue instead of checking everything.</li>
+<li><b>One object model across sources.</b> The extracted record and LiDAR sit in the same georeferenced frame and check each other.</li>
+</ol>
+
+<h2>3. Sample data in hand</h2>
+<table>
+<tr><th style="width:17%">Source</th><th style="width:40%">What it is</th><th>What it means for the demo</th></tr>
+<tr><td>R/W Record Map R-10434.2</td>
+<td>District 4, San Francisco, Route 101 (Presidio Parkway), PM 8.9, sheet 3 of 4, 1" = 100'. CCS83 Zone 3, epoch 1991.35, grid-to-ground factor 1.0000704. Drafted in Civil 3D.</td>
+<td>Vector PDF: about 15,800 vector paths, no raster. Linework is exact geometry. Nearly all annotation is stroked glyphs, not text, so it must be read by OCR or a vision model. The sheet prints its own ground truth: a 7-point coordinates table, line table L1–L21, curve tables C1–C23, radial line table, alignment data, roughly 15 N/E callouts, and an 11-parcel recordation table.</td></tr>
+<tr><td>LiDAR point cloud</td>
+<td>29.97 million points, about 15.6 pts/m², 2.06 × 0.93 km over the same area. Airborne, flown September 2025 (four flightlines, scan angle ±30°), intensity recorded but no colour, already ASPRS-classified including ground, vegetation, building, water, and bridge deck. NAD83(2011) UTM 10N, metres. Public data via OpenTopography.</td>
+<td>Usable immediately with no model training. It is not mobile LiDAR: monuments, markers, signs, and curbs are not recoverable at this density and the demo will not claim them. Requires reprojection to CCS83 Zone 3 (US survey feet).</td></tr>
+<tr><td>Terrain raster</td><td>1 m DEM (GeoTIFF) over the same extent, elevation 0–95 m.</td><td>Hillshade backdrop for the map view. Derived from the same points, so not used as an independent QA reference.</td></tr>
+</table>
+
+<h2>4. Demo scope</h2>
+<h3>Track A: Record extraction (the core)</h3>
+<ol>
+<li><b>Ingest.</b> Load the sheet; separate vector linework from rendered annotation.</li>
+<li><b>Extract.</b> A locally hosted model reads the tables and on-drawing callouts into typed objects: bearings, distances, curve data (R, Δ, L), coordinate callouts, parcel numbers, grantors, areas, document numbers. Each value gets a confidence score and the bounding region it came from.</li>
+<li><b>Verify deterministically.</b> Drawn vector length × scale against the extracted distance; curve R/Δ/L internal consistency; line-table rows against on-drawing labels; traverse closure where a parcel figure is complete. Failures are reported, never adjusted.</li>
+<li><b>Georeference.</b> Fit sheet space to CCS83 Zone 3 using the printed N/E control. Publish the residuals table per control point.</li>
+<li><b>Adjudicate.</b> One exception queue of low-confidence values and failed checks. Clicking an item opens the sheet at the source region.</li>
+<li><b>Publish.</b> Parcels and R/W lines as GeoJSON / GeoPackage with provenance attributes; a parcel query view (for example, temporary easements and their expiry).</li>
+</ol>
+<h3>Track B: LiDAR fusion and QA</h3>
+<ol>
+<li><b>Common frame.</b> Reproject the point cloud and DEM to the sheet's coordinate system; drape extracted R/W lines and parcels over hillshade and the LiDAR intensity image.</li>
+<li><b>Encroachment screen.</b> Flag building-class returns that fall inside right of way and easement polygons. Deterministic, and directly meaningful to a Right of Way audience.</li>
+<li><b>Record-to-terrain tie.</b> The sheet carries four tunnel easement parcels (61985-1 to -4) and a high viaduct easement. Show the surface above the tunnels and the bridge-deck class on the viaduct against those parcels.</li>
+<li><b>Vendor-neutral QA.</b> Independently score the delivered point cloud using checks that do not depend on the vendor's own products: elevation agreement between overlapping flightlines, and classification consistency (ground points above the local surface, building points that are not planar), with statistics and flagged tiles. This demonstrates the QA layer on a deliverable 3DC did not produce.</li>
+</ol>
+<div class="box"><b>Stage framing for Track B.</b> "Public airborne data standing in for your MTLS. The pipeline, object model, and QA layer are the same; the feature classes change with the sensor."</div>
+
+<h2>5. Out of scope for the demo</h2>
+<ul>
+<li>Training or fine-tuning any point-cloud segmentation model.</li>
+<li>Monument, marker, sign, and curb recovery (needs mobile LiDAR).</li>
+<li>Imagery track; edge-device inference; MicroStation DGN output; Caltrans identity integration.</li>
+<li>Multi-sheet matchline stitching across R-10434.1 to .4.</li>
+<li>Any boundary determination or signed survey product.</li>
+</ul>
+
+<h2>6. Risks</h2>
+<table>
+<tr><th style="width:24%">Risk</th><th style="width:36%">Why it matters</th><th>Mitigation</th></tr>
+<tr><td>Reading rotated, stroked survey text</td><td>Bearings and distances run along lines at arbitrary angles in CAD stroke fonts. If the reader is unreliable, Track A has nothing to verify. This is the main technical unknown.</td><td>Prototype first (section 7). Tables are axis-aligned and cover most values, so they are the fallback source; on-drawing labels become the cross-check rather than the primary.</td></tr>
+<tr><td>The sample sheet is the easy case</td><td>A clean 2020 CAD export is not the decades-old scanned paper the submission is about. The champion will notice.</td><td>Add one older scanned sheet from the public District 4 R/W map viewer. Show the same pipeline with lower confidence and a longer exception queue: graceful degradation, honestly shown.</td></tr>
+<tr><td>Airborne, not mobile, LiDAR</td><td>The problem statement is written around mobile collection.</td><td>Frame it plainly on stage; claim only what the data supports. A small real MTLS tile from any source would strengthen the track.</td></tr>
+<tr><td>Datum and epoch mismatch between sheet and LiDAR</td><td>The sheet is CCS83 epoch 1991.35; the LiDAR is NAD83(2011). Crustal motion in the Bay Area over that interval is on the order of half a metre. A surveyor audience will ask.</td><td>Handle it explicitly with a documented epoch transformation and show the before and after offset. It is a live example of deterministic geodesy, not a nuisance.</td></tr>
+<tr><td>Live demo failure</td><td>25 minutes, one shot.</td><td>Everything runs locally and offline. Precompute heavy steps; record a full run as fallback.</td></tr>
+<tr><td>Submission says components "exist today"</td><td>Questions may probe production maturity.</td><td>Agree in advance what is described as working prototype versus production, and keep the demo inside that line.</td></tr>
+</table>
+
+<h2>7. Build plan</h2>
+<table>
+<tr><th style="width:15%">Phase</th><th>Work</th><th style="width:30%">Exit test</th></tr>
+<tr><td>Text spike<br>(days 1–2)</td><td>Text-reading prototype on the sheet: render at high resolution, read the line and curve tables and a sample of rotated on-drawing labels with two or three candidate local readers, score against values keyed by hand.</td><td>Table values ≥ 95% correct; a go/no-go and chosen approach for rotated labels.</td></tr>
+<tr><td>LiDAR spike<br>(days 1–2, parallel)</td><td>Confirm acquisition date against construction; transform hand-keyed sheet control into the LiDAR frame and check it lands on the roadway; measure the epoch offset; test whether building-class returns actually fall inside R/W polygons; test flightline-overlap QA; settle how 30 million points are shown live on a laptop.</td><td>Control points sit on the hillshade where the sheet says they should; a yes/no on each Track B segment having something to show.</td></tr>
+<tr><td>Week 1</td><td>Track A end to end: vector parse, extraction to objects, deterministic checks, georeferencing with residuals, exports.</td><td>Sheet georeferenced with residuals published; line and curve tables reconcile against drawn geometry.</td></tr>
+<tr><td>Week 2, first half</td><td>Track B: reprojection, overlay, encroachment screen, classification QA. Review interface: sheet viewer, exception queue, map view, parcel query.</td><td>Full run on a laptop, offline, inside 10 minutes of stage time.</td></tr>
+<tr><td>Week 2, second half</td><td>Older scanned sheet through the same pipeline. Rehearsal, recorded fallback, slides for the non-demo minutes.</td><td>Two timed rehearsals; fallback recording in hand.</td></tr>
+</table>
+
+<h2>8. Run of show (25 minutes)</h2>
+<table>
+<tr><th style="width:12%">Minutes</th><th>Segment</th></tr>
+<tr><td>0–3</td><td>The problem in Caltrans' own words: the authoritative record is paper and the digital delivery milestones are close.</td></tr>
+<tr><td>3–13</td><td>Live, Track A: sheet in, objects out, checks, residuals, exception queue, parcel query.</td></tr>
+<tr><td>13–17</td><td>Live, Track B: record over LiDAR, encroachment screen, QA score on the delivered classification.</td></tr>
+<tr><td>17–19</td><td>The older scanned sheet: what degrades and how the queue absorbs it.</td></tr>
+<tr><td>19–22</td><td>Pilot proposal: one county or corridor, records-first, read-only, measured baseline.</td></tr>
+<tr><td>22–25</td><td>Questions, if they fall inside the slot.</td></tr>
+</table>
+
+<h2>9. Open items</h2>
+<ul>
+<li>Caltrans has not yet confirmed whether a live demo is expected or whether Q&amp;A is inside the 25 minutes. The run of show flexes either way.</li>
+<li>Which existing SWYFT components, if any, should the demo build on rather than alongside.</li>
+<li>Whether a real mobile LiDAR tile can be sourced for Track B.</li>
+<li>Attendee names, titles, and emails are owed to Caltrans to receive the presentation time.</li>
+</ul>
+
+</body></html>

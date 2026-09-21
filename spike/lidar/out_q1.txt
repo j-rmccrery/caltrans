@@ -1,0 +1,15 @@
+global_encoding.gps_time_type bit = 0 (GPS week time (per header))
+points scanned: 29965408
+raw gps_time range across file: 442980246.571 .. 442981140.913
+NOTE: header bit says GPS week time, but raw values (~4.4e8) exceed one GPS week
+(604800s) by ~730x -- values are actually Adjusted Standard GPS Time (mislabeled header).
+Decoding with: date = GPS_EPOCH + (value + 1e9) seconds. Leap seconds (~18s) ignored (date-level only).
+
+flightline       first_date_utc        last_date_utc   span_sec
+      2321 2025-09-27T03:50:46.570953+00:00 2025-09-27T03:50:58.467726+00:00       11.9
+      2322 2025-09-27T03:55:20.577584+00:00 2025-09-27T03:55:55.341531+00:00       34.8
+      2323 2025-09-27T04:00:17.582123+00:00 2025-09-27T04:00:51.260874+00:00       33.7
+      2324 2025-09-27T04:05:05.949174+00:00 2025-09-27T04:05:40.912694+00:00       35.0
+
+overall date range: 2025-09-27T03:50:46.570953+00:00 .. 2025-09-27T04:05:40.912694+00:00
+after ~2015 Presidio Parkway completion? YES

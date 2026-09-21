@@ -1,0 +1,23 @@
+Control point DEM elevation (m):
+  1: E=547441.78 N=4183980.49 Z=13.29
+  2: E=547245.74 N=4183930.96 Z=30.29
+  3: E=547183.96 N=4183949.60 Z=32.39
+  4: E=547178.53 N=4183972.24 Z=31.77
+  5: E=547148.26 N=4183953.96 Z=33.45
+  6: E=547101.81 N=4183960.45 Z=28.66
+  7: E=547108.57 N=4183988.10 Z=27.79
+Alignment point DEM elevation (m):
+  A: E=547715.71 N=4184040.58 Z=6.37
+  B: E=547544.93 N=4183967.63 Z=12.18
+  D: E=547533.34 N=4183978.03 Z=10.49
+  C: E=547283.19 N=4183945.08 Z=29.69
+  E: E=547234.53 N=4183961.35 Z=30.60
+  G: E=546840.39 N=4184061.39 Z=29.73
+  F: E=546847.92 N=4184070.16 Z=38.04
+  H: E=546829.59 N=4184052.12 Z=39.04
+RGB channel all-zero across whole point cloud: True (no camera colour in this dataset -- consistent with a nighttime flight per Q1)
+wrote q2_control_on_hillshade.png
+RGB ortho is uniformly black (no colour data) -- skipping it as a real deliverable;
+using intensity-return ortho instead for visual context.
+wrote q2_control_on_intensity_ortho.png
+DONE Q2

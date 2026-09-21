@@ -1,0 +1,63 @@
+corridor vertices: ['A', 'B', 'D', 'C', 'E', 'G', 'F', 'H'], total polyline length 948.8 m
+prefilter bbox: E 546764-547782  N 4183879-4184136
+class-6 (building) points in bbox: 511118
+class-17 (bridge deck) points in bbox: 216854
+class-6 points within 100ft buffer: 14775
+class-6 points within 200ft buffer: 134383
+class-17 (bridge deck) points within 200ft buffer: 203100 / 216854 total in bbox
+  bridge deck station range along corridor: 639.4 - 948.8 m
+  bridge deck elevation range: 26.76 - 42.12 m
+
+[100ft buffer] 14775 class-6 pts -> 18 clusters (1m grid, 8-connected)
+    centroid=(547132.1,4183979.3) footprint=221m2 npts=2346 height_above_dem=1.73m
+    centroid=(547406.8,4183945.0) footprint=181m2 npts=2229 height_above_dem=4.56m
+    centroid=(547247.1,4183986.6) footprint=144m2 npts=1843 height_above_dem=0.09m
+    centroid=(547716.8,4184011.6) footprint=117m2 npts=1602 height_above_dem=0.58m
+    centroid=(547295.5,4183974.9) footprint=112m2 npts=1467 height_above_dem=0.17m
+    centroid=(547171.2,4183982.4) footprint=102m2 npts=860 height_above_dem=9.80m
+    centroid=(547740.8,4184048.4) footprint=87m2 npts=842 height_above_dem=9.31m
+    centroid=(547625.2,4184033.1) footprint=83m2 npts=988 height_above_dem=0.75m
+    centroid=(547588.5,4183982.6) footprint=57m2 npts=496 height_above_dem=1.59m
+    centroid=(547714.5,4184022.5) footprint=57m2 npts=448 height_above_dem=2.32m
+    centroid=(547677.4,4183993.2) footprint=47m2 npts=554 height_above_dem=1.34m
+    centroid=(547559.1,4183955.1) footprint=38m2 npts=322 height_above_dem=3.49m
+    centroid=(547396.8,4183976.1) footprint=37m2 npts=354 height_above_dem=1.01m
+    centroid=(547578.6,4184006.1) footprint=29m2 npts=251 height_above_dem=1.59m
+    centroid=(547647.6,4184044.0) footprint=18m2 npts=113 height_above_dem=3.95m
+    centroid=(546944.3,4184066.3) footprint=8m2 npts=57 height_above_dem=1.74m
+
+[200ft buffer] 134383 class-6 pts -> 32 clusters (1m grid, 8-connected)
+    centroid=(547611.3,4184046.6) footprint=2613m2 npts=39977 height_above_dem=5.38m
+    centroid=(546947.5,4184085.0) footprint=1083m2 npts=15850 height_above_dem=5.21m
+    centroid=(547684.7,4183973.9) footprint=1016m2 npts=15180 height_above_dem=7.01m
+    centroid=(547039.5,4184066.1) footprint=673m2 npts=9481 height_above_dem=29.09m
+    centroid=(547624.3,4183952.1) footprint=504m2 npts=6757 height_above_dem=0.04m
+    centroid=(547259.7,4183903.4) footprint=454m2 npts=6259 height_above_dem=2.33m
+    centroid=(547715.7,4184002.9) footprint=432m2 npts=6610 height_above_dem=0.94m
+    centroid=(547118.7,4184037.9) footprint=412m2 npts=4359 height_above_dem=10.02m
+    centroid=(547544.3,4183914.0) footprint=349m2 npts=5012 height_above_dem=0.37m
+    centroid=(547407.9,4183938.8) footprint=274m2 npts=3002 height_above_dem=6.05m
+    centroid=(547132.1,4183979.3) footprint=219m2 npts=2346 height_above_dem=1.73m
+    centroid=(547292.3,4183976.5) footprint=169m2 npts=2338 height_above_dem=0.05m
+    centroid=(547748.3,4184052.9) footprint=165m2 npts=1557 height_above_dem=1.02m
+    centroid=(547248.3,4183986.8) footprint=158m2 npts=2241 height_above_dem=0.05m
+    centroid=(547572.7,4183937.0) footprint=139m2 npts=1514 height_above_dem=6.12m
+    centroid=(547293.2,4183888.6) footprint=134m2 npts=1916 height_above_dem=1.78m
+    centroid=(547325.2,4183895.9) footprint=117m2 npts=1536 height_above_dem=0.56m
+    centroid=(546847.0,4184127.1) footprint=115m2 npts=2033 height_above_dem=0.75m
+    centroid=(547171.2,4183982.4) footprint=98m2 npts=860 height_above_dem=9.80m
+    centroid=(547107.2,4184049.3) footprint=93m2 npts=933 height_above_dem=21.13m
+    centroid=(547030.0,4183954.3) footprint=82m2 npts=1087 height_above_dem=0.51m
+    centroid=(547500.9,4184010.7) footprint=65m2 npts=805 height_above_dem=0.74m
+    centroid=(547714.5,4184022.5) footprint=55m2 npts=448 height_above_dem=2.32m
+    centroid=(547588.5,4183982.6) footprint=53m2 npts=496 height_above_dem=1.59m
+    centroid=(547559.1,4183955.1) footprint=41m2 npts=322 height_above_dem=3.49m
+    centroid=(547593.8,4183947.9) footprint=40m2 npts=353 height_above_dem=2.89m
+    centroid=(547396.8,4183976.1) footprint=37m2 npts=354 height_above_dem=1.01m
+    centroid=(547578.6,4184006.1) footprint=29m2 npts=251 height_above_dem=1.59m
+    centroid=(547596.9,4183932.7) footprint=28m2 npts=265 height_above_dem=0.62m
+    centroid=(547136.7,4184040.3) footprint=21m2 npts=127 height_above_dem=22.04m
+    centroid=(547571.3,4183914.0) footprint=17m2 npts=110 height_above_dem=1.95m
+    centroid=(547504.7,4183912.9) footprint=1m2 npts=4 height_above_dem=0.51m
+wrote q4_encroachment.png
+DONE Q4

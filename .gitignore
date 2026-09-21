@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+
+# source data and 3DC documents stay out of the repo
+Sample Data/
+3DC Submission/
+Problem Statement/
+
+# regenerable
+spike/lidar/cache/
+spike/out/blocks_overlay.png

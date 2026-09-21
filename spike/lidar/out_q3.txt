@@ -1,0 +1,16 @@
+HTDP request succeeded. Raw <pre> block:
+
+ HTDP OUTPUT, VERSION 3.6.0   
+
+ DISPLACEMENTS IN METERS RELATIVE TO NAD_83(2011/CORS96/2007)
+ FROM 05-08-1991 TO 01-01-2010 (month-day-year)
+ FROM 1991.350 TO 2010.000 (decimal years)
+
+NAME OF SITE             LATITUDE          LONGITUDE            NORTH    EAST    UP 
+PresidioParkway          37 48  0.00000 N  122 27 36.00000 W    0.561  -0.362  -0.025
+
+
+=== MEASURED (NGS HTDP v3.6.0, NAD_83(2011/CORS96/2007), 1991.350 -> 2010.000) ===
+North: +0.561 m   East: -0.362 m   Up: -0.025 m
+Horizontal magnitude: 0.668 m (2.190 ft)
+Direction: N32.8W of north (-32.8 deg, +east of north)

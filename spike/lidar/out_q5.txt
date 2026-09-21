@@ -1,0 +1,27 @@
+grid 1033 x 466 = 481378 cells at 2.0 m
+ground-class points scanned: 13980536
+flightlines found: [np.uint16(2321), np.uint16(2322), np.uint16(2323), np.uint16(2324)]
+
+=== Classification-consistency check ===
+ground-class points > 0.3 m above local min-Z in their 2m cell: 993044 / 13980536 = 7.10%
+
+=== Flightline overlap dz (ground class, 2m grid) ===
+pair 2321-2322: overlap cells=1038
+  WITHOUT slope excl: mean=+0.010 median=+0.006 rmse=0.049 p95|dz|=0.089 (m)
+  WITH slope>10deg excluded (513 cells kept): mean=+0.002 median=+0.004 rmse=0.038 p95|dz|=0.050 (m)
+pair 2321-2323: overlap cells=991
+  WITHOUT slope excl: mean=+0.008 median=+0.006 rmse=0.050 p95|dz|=0.099 (m)
+  WITH slope>10deg excluded (508 cells kept): mean=+0.004 median=+0.004 rmse=0.029 p95|dz|=0.059 (m)
+pair 2322-2323: overlap cells=274246
+  WITHOUT slope excl: mean=-0.001 median=-0.002 rmse=0.121 p95|dz|=0.098 (m)
+  WITH slope>10deg excluded (189067 cells kept): mean=-0.003 median=-0.002 rmse=0.022 p95|dz|=0.031 (m)
+pair 2322-2324: overlap cells=92874
+  WITHOUT slope excl: mean=-0.004 median=-0.003 rmse=0.085 p95|dz|=0.106 (m)
+  WITH slope>10deg excluded (73855 cells kept): mean=-0.004 median=-0.003 rmse=0.025 p95|dz|=0.043 (m)
+pair 2323-2324: overlap cells=122606
+  WITHOUT slope excl: mean=-0.001 median=+0.001 rmse=0.084 p95|dz|=0.115 (m)
+  WITH slope>10deg excluded (89733 cells kept): mean=+0.001 median=+0.001 rmse=0.020 p95|dz|=0.034 (m)
+
+cells covered by 2+ flightlines (any pair): 304833
+wrote q5_flightline_overlap_dz.png
+DONE Q5
