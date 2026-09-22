@@ -1,0 +1,342 @@
+[
+ {
+  "tag": "?C1",
+  "issue": "tag partly unread",
+  "region": [
+   1231,
+   794,
+   1259,
+   809
+  ]
+ },
+ {
+  "tag": "?L1?",
+  "issue": "tag partly unread",
+  "region": [
+   2238,
+   496,
+   2265,
+   510
+  ]
+ },
+ {
+  "tag": "?L2?",
+  "issue": "tag partly unread",
+  "region": [
+   2240,
+   518,
+   2269,
+   532
+  ]
+ },
+ {
+  "tag": "?C3",
+  "issue": "tag partly unread",
+  "region": [
+   1032,
+   643,
+   1062,
+   658
+  ]
+ },
+ {
+  "tag": "C2",
+  "issue": "no leader, no curve beside the tag",
+  "region": [
+   981,
+   596,
+   1009,
+   611
+  ]
+ },
+ {
+  "tag": "C2?",
+  "issue": "tag partly unread",
+  "region": [
+   1356,
+   634,
+   1384,
+   649
+  ]
+ },
+ {
+  "tag": "C4",
+  "issue": "6 curves beside the tag",
+  "region": [
+   1076,
+   622,
+   1103,
+   636
+  ]
+ },
+ {
+  "tag": "C5",
+  "issue": "leader points at no curve",
+  "region": [
+   1110,
+   567,
+   1139,
+   581
+  ]
+ },
+ {
+  "tag": "C6",
+  "issue": "3 curves beside the tag",
+  "region": [
+   1107,
+   555,
+   1135,
+   569
+  ]
+ },
+ {
+  "tag": "C7",
+  "issue": "22 curves beside the tag",
+  "region": [
+   1409,
+   725,
+   1438,
+   740
+  ]
+ },
+ {
+  "tag": "C8",
+  "issue": "5 curves beside the tag",
+  "region": [
+   1405,
+   707,
+   1433,
+   721
+  ]
+ },
+ {
+  "tag": "C9??",
+  "issue": "tag partly unread",
+  "region": [
+   1613,
+   718,
+   1641,
+   732
+  ]
+ },
+ {
+  "tag": "C10",
+  "issue": "no leader, no curve beside the tag",
+  "region": [
+   1630,
+   710,
+   1658,
+   723
+  ]
+ },
+ {
+  "tag": "C11",
+  "issue": "drawn arc 123.10 ft vs table 9.98 ft",
+  "region": [
+   1596,
+   795,
+   1624,
+   809
+  ]
+ },
+ {
+  "tag": "C13",
+  "issue": "drawn arc 48.12 ft vs table 26.52 ft",
+  "region": [
+   1647,
+   674,
+   1675,
+   688
+  ]
+ },
+ {
+  "tag": "C14",
+  "issue": "drawn arc 48.12 ft vs table 21.58 ft",
+  "region": [
+   1640,
+   609,
+   1667,
+   623
+  ]
+ },
+ {
+  "tag": "C15",
+  "issue": "drawn arc 52.21 ft vs table 45.93 ft",
+  "region": [
+   1649,
+   658,
+   1677,
+   672
+  ]
+ },
+ {
+  "tag": "C16",
+  "issue": "drawn arc 501.10 ft vs table 521.76 ft",
+  "region": [
+   1374,
+   620,
+   1401,
+   634
+  ]
+ },
+ {
+  "tag": "C18",
+  "issue": "drawn arc 52.21 ft vs table 6.24 ft",
+  "region": [
+   1686,
+   643,
+   1714,
+   657
+  ]
+ },
+ {
+  "tag": "C21",
+  "issue": "drawn arc 68.93 ft vs table 876.88 ft",
+  "region": [
+   1590,
+   713,
+   1619,
+   728
+  ]
+ },
+ {
+  "tag": "C22",
+  "issue": "drawn arc 64.67 ft vs table 434.47 ft",
+  "region": [
+   262,
+   299,
+   293,
+   314
+  ]
+ },
+ {
+  "tag": "C23",
+  "issue": "3 curves beside the tag",
+  "region": [
+   1133,
+   522,
+   1161,
+   536
+  ]
+ },
+ {
+  "tag": "L1",
+  "issue": "drawn 1108.21 ft vs table 1.86 ft",
+  "region": [
+   1083,
+   554,
+   1110,
+   568
+  ]
+ },
+ {
+  "tag": "L1",
+  "issue": "drawn bearing off by 5237.7 arcmin",
+  "region": [
+   1083,
+   554,
+   1110,
+   568
+  ]
+ },
+ {
+  "tag": "L2",
+  "issue": "leader points at no line",
+  "region": [
+   1125,
+   598,
+   1155,
+   613
+  ]
+ },
+ {
+  "tag": "L3",
+  "issue": "8 lines beside the tag",
+  "region": [
+   991,
+   634,
+   1021,
+   649
+  ]
+ },
+ {
+  "tag": "L5",
+  "issue": "2 lines beside the tag",
+  "region": [
+   1092,
+   657,
+   1122,
+   672
+  ]
+ },
+ {
+  "tag": "L7",
+  "issue": "10 lines beside the tag",
+  "region": [
+   1101,
+   647,
+   1131,
+   662
+  ]
+ },
+ {
+  "tag": "L10",
+  "issue": "2 lines beside the tag",
+  "region": [
+   1062,
+   562,
+   1089,
+   576
+  ]
+ },
+ {
+  "tag": "L14??",
+  "issue": "tag partly unread",
+  "region": [
+   1633,
+   768,
+   1661,
+   782
+  ]
+ },
+ {
+  "tag": "L15",
+  "issue": "leader points at no line",
+  "region": [
+   1628,
+   661,
+   1656,
+   675
+  ]
+ },
+ {
+  "tag": "L19",
+  "issue": "leader points at no line",
+  "region": [
+   411,
+   367,
+   439,
+   381
+  ]
+ },
+ {
+  "tag": "L21",
+  "issue": "drawn 187.00 ft vs table 1529.50 ft",
+  "region": [
+   537,
+   457,
+   567,
+   472
+  ]
+ },
+ {
+  "tag": "L21",
+  "issue": "drawn bearing off by 13.3 arcmin",
+  "region": [
+   537,
+   457,
+   567,
+   472
+  ]
+ }
+]

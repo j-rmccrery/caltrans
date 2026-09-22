@@ -93,7 +93,7 @@ def lines_on_sheet(segs, circles, max_turn_deg=0.6):
             order = np.argsort((pts - a0) @ d0)
             P = pts[order]
             chains.append({"pts": P, "len_pt": float(sum(np.hypot(*(segs[k][1] - segs[k][0])) for k in chain)), "n": len(chain),
-                           "radius_pt": float("nan")})
+                           "radius_pt": float("nan"), "width": w0})
             continue
         al = (pts - a0) @ d0
         p0, p1 = a0 + d0 * al.min(), a0 + d0 * al.max()
@@ -111,7 +111,7 @@ def lines_on_sheet(segs, circles, max_turn_deg=0.6):
     return chains
 
 
-def linework_segments(page):
+def linework_segments(page, max_gray=0.6):
     """Like georef.segments, but without glyph strokes: a character is a small multi-stroke path."""
     segs = []
     for pid, d in enumerate(page.get_drawings()):
@@ -119,7 +119,7 @@ def linework_segments(page):
         if max(r.width, r.height) <= 12 and len(d["items"]) > 1:
             continue
         c = d.get("color")
-        if c is None or max(c) > 0.6:
+        if c is None or max(c) > max_gray:
             continue  # white masks and light grey hatch are not lines a label describes
         for it in d["items"]:
             if it[0] == "l":
@@ -149,7 +149,7 @@ def arcs_on_sheet(page):
                     A, B, C = P[0], P[len(P) // 2], P[-1]
                     den = 2 * abs((A[0] - C[0]) * (B[1] - A[1]) - (A[0] - B[0]) * (C[1] - A[1]))
                     R = float(np.hypot(*(A - B)) * np.hypot(*(B - C)) * np.hypot(*(C - A)) / den) if den > 1e-6 else float("inf")
-                    out.append({"pts": P, "len_pt": L, "radius_pt": R})
+                    out.append({"pts": P, "len_pt": L, "radius_pt": R, "width": round(d.get("width") or 0, 2), "color": c})
                 run = []
     return out
 
