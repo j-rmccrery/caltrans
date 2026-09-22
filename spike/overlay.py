@@ -23,7 +23,8 @@ ROOT = Path(__file__).resolve().parent.parent
 PDF = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
 OUT = Path(__file__).parent / "out"
 CACHE = Path(__file__).parent / "lidar" / "cache"
-HTDP_DN, HTDP_DE = 0.561, -0.362  # m, from NGS HTDP v3.6.0 (spike/lidar/out_q3.txt)
+_h = json.loads((Path(__file__).parent / "lidar" / "htdp.json").read_text())  # cached NGS HTDP result (spike/lidar/q3)
+HTDP_DN, HTDP_DE = _h["dN_m"], _h["dE_m"]
 MAP_AREA = (255, 60, 2400, 1285)  # pt; inside the border, above the parcel table and title block
 FURNITURE = [t[0] for t in TABLES.values()] + [(255, 60, 620, 125), (2030, 60, 2400, 120)]
 

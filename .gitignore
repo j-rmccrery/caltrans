@@ -16,3 +16,5 @@ spike/out/r65/
 !spike/out/r_*/georef.json
 !spike/out/r_*/georef_ticks.json
 !spike/out/r_*/log.txt
+!spike/out/lidar_intensity.tif
+!spike/out/lidar_hillshade.tif

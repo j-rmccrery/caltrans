@@ -33,20 +33,25 @@ for k, v in fields.items():
     body += f"--{boundary}\r\nContent-Disposition: form-data; name=\"{k}\"\r\n\r\n{v}\r\n"
 body += f"--{boundary}--\r\n"
 
-req = urllib.request.Request(URL, data=body.encode(), method="POST",
-                              headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
-try:
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        html = resp.read().decode(errors="replace")
-    ok = True
-except Exception as e:
-    ok = False
-    html = ""
-    print(f"HTDP request FAILED: {e}")
-
 cache_file = os.path.join(CACHE, "htdp_response.html")
-with open(cache_file, "w", encoding="utf-8") as f:
-    f.write(html)
+result_file = os.path.join(os.path.dirname(CACHE), "htdp.json")  # kept in the repo: the demo must not need the network
+if os.path.exists(cache_file) and os.path.getsize(cache_file) > 200:
+    html = open(cache_file, encoding="utf-8").read()
+    ok = "<pre>" in html
+    print("HTDP: using cached NGS response", cache_file)
+else:
+    req = urllib.request.Request(URL, data=body.encode(), method="POST",
+                                  headers={"Content-Type": f"multipart/form-data; boundary={boundary}"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            html = resp.read().decode(errors="replace")
+        ok = True
+        with open(cache_file, "w", encoding="utf-8") as f:
+            f.write(html)
+    except Exception as e:
+        ok = False
+        html = ""
+        print(f"HTDP request FAILED: {e}")
 
 if ok:
     print("HTDP request succeeded. Raw <pre> block:")
@@ -66,6 +71,10 @@ if ok:
     bearing_from_north = math.degrees(math.atan2(east_m, north_m))  # + = east of north
     compass = "N" + f"{abs(bearing_from_north):.1f}" + ("E" if bearing_from_north >= 0 else "W")
 
+    import json
+    with open(result_file, "w") as f:
+        json.dump({"source": "NGS HTDP v3.6.0, NAD_83(2011/CORS96/2007)", "from_epoch": 1991.35, "to_epoch": 2010.0,
+                   "lat": 37.80, "lon": -122.46, "dN_m": north_m, "dE_m": east_m, "dUp_m": up_m}, f, indent=1)
     print()
     print("=== MEASURED (NGS HTDP v3.6.0, NAD_83(2011/CORS96/2007), 1991.350 -> 2010.000) ===")
     print(f"North: {north_m:+.3f} m   East: {east_m:+.3f} m   Up: {up_m:+.3f} m")

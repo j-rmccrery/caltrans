@@ -142,12 +142,24 @@ def cluster_report(mask, buf_name):
         footprint_cells = int((labels == lab).sum())
         ground = dem_at(np.array([cx]), np.array([cy]))[0]
         height = float(zs[pm].max() - ground) if not np.isnan(ground) else float("nan")
+        # is it a roof? per-cell top surface should be flat: buildings have most cells within 1 m of the
+        # cluster's median top; trees and cut slopes classified as "building" do not
+        cell = iy[pm] * w + ix[pm]
+        top = {}
+        for c_, z_ in zip(cell, zs[pm]):
+            top[c_] = max(top.get(c_, -1e9), z_)
+        tops = np.array(list(top.values()))
+        flat = float(np.mean(np.abs(tops - np.median(tops)) < 1.0)) if len(tops) else 0.0
+        verdict = "building" if footprint_cells >= 20 and 2.5 <= height <= 25 and flat >= 0.6 else "vegetation/terrain (filtered)"
         clusters.append(dict(centroid=(cx, cy), footprint_m2=footprint_cells, npts=int(pm.sum()),
-                              height_above_dem=height))
+                              height_above_dem=height, flat_top=flat, verdict=verdict))
     clusters.sort(key=lambda c: -c["footprint_m2"])
     for c in clusters:
         print(f"    centroid=({c['centroid'][0]:.1f},{c['centroid'][1]:.1f}) "
-              f"footprint={c['footprint_m2']}m2 npts={c['npts']} height_above_dem={c['height_above_dem']:.2f}m")
+              f"footprint={c['footprint_m2']}m2 npts={c['npts']} height_above_dem={c['height_above_dem']:.2f}m "
+              f"flat_top={c['flat_top']:.2f} -> {c['verdict']}")
+    nb = sum(c["verdict"] == "building" for c in clusters)
+    print(f"[{buf_name}] building-like clusters: {nb} of {len(clusters)}")
     return clusters
 
 
