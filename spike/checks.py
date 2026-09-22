@@ -28,6 +28,7 @@ DIST = re.compile(r"^(\d{1,4}\.\d{2})'?(\(T\))?$")
 ANG = re.compile(r"^[Δ△]?=?(\d{1,3})°(\d{2})'(\d{2})\"(\(T\))?$")
 RAD = re.compile(r"^R=(\d{1,5}\.\d{2})'?$")
 LEN = re.compile(r"^L=(\d{1,5}\.\d{2})'?(\(T\))?$")
+TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2}'?(?:\(T\))?(?![\d])")
 DIST_TOL = 0.30   # ft, plus 0.05 %
 BEAR_TOL = 0.05   # degrees (3 arc-minutes)
 
@@ -433,8 +434,10 @@ def main():
     for bi, b in enumerate(blocks):
         if any(x0 <= b["cx"] <= x1 and y0 <= b["cy"] <= y1 for x0, y0, x1, y1 in FURNITURE):
             continue  # table cells and title block: the record, not labels on the drawing
-        parts = b["text"].replace(" ", "").split("|")
-        curve_data = any(ANG.match(t) or RAD.match(t) or LEN.match(t) or re.match(r"^[RL][=\-:]", t) for t in parts)
+        lines = b["text"].replace(" ", "").split("|")
+        curve_data = any(ANG.match(t) or RAD.match(t) or LEN.match(t) or re.match(r"^[RL][=\-:]", t) for t in lines)
+        # a bearing and its distance often come back as one OCR line: take the tokens inside each line
+        parts = [m.group(0) for t in lines for m in TOKEN.finditer(t)] or lines
         for part in parts:
             if BEAR.match(part) and BEAR.match(part)[6]:
                 rows.append(["bearing (R)", part, "", "", "radial: not checked"]); continue

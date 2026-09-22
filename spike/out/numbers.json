@@ -3,22 +3,22 @@
   "sheet": "r_10434_002_2020-09-16",
   "credible": true,
   "control_points": null,
-  "rms_ft": 0.042,
+  "rms_ft": 0.043,
   "scale_ft_per_pt": 1.38886,
   "rotation_deg": 0.536
  },
  "checks": {
   "distance": {
-   "checked": 47,
-   "pass": 25
+   "checked": 41,
+   "pass": 15
   },
   "bearing": {
-   "checked": 20,
-   "pass": 12
+   "checked": 17,
+   "pass": 9
   },
   "arc length": {
-   "checked": 12,
-   "pass": 3
+   "checked": 16,
+   "pass": 2
   },
   "curve L=R*delta": {
    "checked": 0,
@@ -26,34 +26,34 @@
   },
   "pass_residual_ft": {
    "median": 0.03,
-   "max": 0.09
+   "max": 0.07
   },
   "pass_residual_arcmin": {
-   "median": 0.4,
+   "median": 0.9,
    "max": 2.5
   }
  },
  "exceptions": {
-  "total": 61,
-  "unmatched": 18,
-  "matchline": 4,
-  "disagree_small": 8,
-  "wrong_line": 31
+  "total": 80,
+  "unmatched": 27,
+  "matchline": 5,
+  "disagree_small": 12,
+  "wrong_line": 36
  },
  "tags": {
   "table_rows": 44,
-  "read": 36,
+  "read": 37,
   "distinct": 36,
-  "partial_queued": 7,
-  "associated": 21,
-  "by_leader": 20,
-  "queued": 32,
+  "partial_queued": 9,
+  "associated": 18,
+  "by_leader": 18,
+  "queued": 34,
   "distance": {
-   "checked": 10,
+   "checked": 8,
    "pass": 8
   },
   "bearing": {
-   "checked": 11,
+   "checked": 9,
    "pass": 9
   },
   "radius": {
@@ -61,20 +61,20 @@
    "pass": 5
   },
   "arc length": {
-   "checked": 6,
-   "pass": 2
+   "checked": 5,
+   "pass": 1
   }
  },
  "parcels": {
-  "faces": 27,
-  "named": 6,
-  "with_table_area": 5,
+  "faces": 60,
+  "named": 5,
+  "with_table_area": 4,
   "within_1pct": 0
  },
  "lidar_features": {
   "pavement": {
-   "polygons": 32,
-   "area_m2": 119219
+   "polygons": 35,
+   "area_m2": 132757
   },
   "viaduct deck": {
    "polygons": 11,
@@ -87,15 +87,14 @@
   "buildings_roof_test": 175
  },
  "encroachment": {
-  "clusters": 73,
-  "building_verdict": 9,
-  "in_named_parcels": 6,
+  "clusters": 91,
+  "building_verdict": 15,
+  "in_named_parcels": 10,
   "parcels": [
    "61806-2",
    "61806-9|63269|61806",
    "61985-2",
-   "61985-4",
-   "63269"
+   "61985-4"
   ]
  },
  "tunnel": {
@@ -106,8 +105,8 @@
   },
   "61985-4": {
    "length_m": 595,
-   "ground_min_m": 24.2,
-   "ground_max_m": 66.2
+   "ground_min_m": 20.1,
+   "ground_max_m": 73.1
   }
  },
  "htdp": {

@@ -15,6 +15,7 @@ HERE = Path(__file__).parent
 PY = sys.executable
 STEPS = [
     ("text blocks", ["blocks.py"]),
+    ("sheet frame", ["frame.py"]),
     ("read text", ["ocr.py", "rapid"]),
     ("georeference", ["solve.py"]),
     ("linework on LiDAR", ["overlay.py"]),

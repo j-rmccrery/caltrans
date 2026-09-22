@@ -25,8 +25,12 @@ OUT = Path(__file__).parent / "out"
 CACHE = Path(__file__).parent / "lidar" / "cache"
 _h = json.loads((Path(__file__).parent / "lidar" / "htdp.json").read_text())  # cached NGS HTDP result (spike/lidar/q3)
 HTDP_DN, HTDP_DE = _h["dN_m"], _h["dE_m"]
-MAP_AREA = (255, 60, 2400, 1285)  # pt; inside the border, above the parcel table and title block
-FURNITURE = [t[0] for t in TABLES.values()] + [(255, 60, 620, 125), (2030, 60, 2400, 120)]
+# the sheet's own frame (frame.py) and its tables (alphabet.py) when they exist; the Presidio constants otherwise
+from blocks import OUT as _SHEET_OUT  # noqa: E402  (SHEET-aware, unlike OUT above)
+_frame = json.loads((_SHEET_OUT / "frame.json").read_text()) if (_SHEET_OUT / "frame.json").exists() else None
+_tables = json.loads((_SHEET_OUT / "tables.json").read_text(encoding="utf-8")).get("_regions", []) if (_SHEET_OUT / "tables.json").exists() else []
+MAP_AREA = tuple(_frame["map_area"]) if _frame else (255, 60, 2400, 1285)  # pt; inside the border, above the parcel table and title block
+FURNITURE = ([tuple(x) for x in _frame["furniture"]] + [tuple(x) for x in _tables]) if _frame else [t[0] for t in TABLES.values()] + [(255, 60, 620, 125), (2030, 60, 2400, 120)]
 
 
 def bezier(p0, p1, p2, p3, n=12):

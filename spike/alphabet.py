@@ -146,13 +146,16 @@ def label_row_cell(gs, gh, kind_hint, M):
     big = cap-height glyph (digit or letter), small = symbol; order decides which symbol."""
     big = [g for g in gs if g["h"] > SMALL * gh]
     small = [g for g in gs if g["h"] <= SMALL * gh]
+    if not big:
+        return None
+    gh = float(np.median([g["h"] for g in big if g["h"] < 1.4 * gh] or [gh]))  # the cell's own cap height: (T) rows are set smaller
     reads = {}
     for g in big:
         d = M.dist(bitmap(g, 0.0, gh)[None, :])[0]; k = int(d.argmin())
         reads[id(g)] = M.Y[k] if d[k] < EXACT_JUNK else "?"
     r = lambda g: reads[id(g)]
     suffix, suffix_lab = "", []
-    if len(big) >= 6 and not any(r(g).isdigit() for g in big[-3:]) and all(r(g).isdigit() for g in big[-5:-3]):  # a (T) total
+    if len(big) >= 6 and big[-3]["h"] > 1.25 * gh and big[-1]["h"] > 1.25 * gh and big[-2]["h"] < 1.25 * gh:  # (T): two tall parens round a capital
         suffix, suffix_lab = "(T)", list(zip(big[-3:], "(T)"))
         big = big[:-3]
     nb, ns = len(big), len(small)
@@ -221,6 +224,8 @@ def main():
             b = c["b"]
             vals = []
             for k, gs in enumerate(row_cells(G, tree, b, rules)):
+                if len(vals) < (2 if kind == "line" else 3):  # the table's own columns; a neighbouring table shares the rows
+                    col["x1"] = max(col.get("x1", 0), max(g["x1"] for g in gs))
                 r = label_row_cell(gs, b["glyph_h"], "", M)
                 if r is None and len(gs) <= 1:
                     continue  # a stray piece in the row (a rule end, a tick), not a cell
@@ -251,7 +256,7 @@ def main():
     regions = []
     for col in cols:
         ys = [c["b"]["cy"] for c in col["cells"]]; x0 = min(c["b"]["cx"] for c in col["cells"]) - 20
-        regions.append([round(x0), round(min(ys) - 30), round(x0 + 440), round(max(ys) + 14)])
+        regions.append([round(x0), round(min(ys) - 30), round(col.get("x1", x0 + 200) + 12), round(max(ys) + 14)])
     rows["_regions"] = regions
     (OUT / "tables.json").write_text(json.dumps(rows, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"alphabet: {len(keep)} distinct exemplars over {''.join(sorted(set(Y)))} ({added} self-matched); rows read: {len(rows)}")

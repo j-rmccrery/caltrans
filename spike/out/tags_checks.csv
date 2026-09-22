@@ -1,21 +1,23 @@
 tag,check,printed,drawn,difference,result,association
-L4,bearing,"S75°12'02""E","S75°12'43""E",0.7',pass,leader
+L4,bearing,"S75°12'02""E","S75°12'42""E",0.7',pass,leader
 L4,distance,48.55,48.56,+0.01,pass,leader
-L6,bearing,"S70°11'40""E","S69°26'37""E",45.1',pass,leader
+L6,bearing,"S70°11'40""E","S69°26'36""E",45.1',pass,leader
 L6,distance,6.29,6.25,-0.04,pass,leader
-L8,bearing,"S75°11'28""E","S75°12'00""E",0.5',pass,leader
+L8,bearing,"S75°11'28""E","S75°11'59""E",0.5',pass,leader
 L8,distance,139.90,139.90,-0.00,pass,leader
-L9,bearing,"S76°56'20""E","S76°55'32""E",0.8',pass,leader
+L9,bearing,"S76°56'20""E","S76°55'31""E",0.8',pass,leader
 L9,distance,59.89,59.85,-0.04,pass,leader
-L11,bearing,"S21°04'16""W","S21°03'49""W",0.5',pass,leader
+L11,bearing,"S21°04'16""W","S21°03'50""W",0.4',pass,leader
 L11,distance,21.90,21.96,+0.06,pass,leader
-L12,bearing,"S61°07'09""W","S61°03'40""W",3.5',pass,leader
+L12,bearing,"S61°07'09""W","S61°03'41""W",3.5',pass,leader
 L12,distance,34.89,34.86,-0.03,pass,leader
-L13,bearing,"N10°18'39""E","N10°16'54""E",1.7',pass,leader
+L13,bearing,"N10°18'39""E","N10°16'56""E",1.7',pass,leader
 L13,distance,39.97,39.96,-0.01,pass,leader
-L16,bearing,"S88°01'40""E","S88°18'18""E",16.6',pass,leader
+L16,bearing,"S88°01'40""E","S88°18'17""E",16.6',pass,leader
 L16,distance,6.44,6.42,-0.02,pass,leader
-C11,radius,179.38,179.37,-0.01%,pass,leader
+L17,bearing,"S4°41'30""E","S4°39'01""E",2.5',pass,leader
+L17,distance,70.80(T),71.11,,total over several segments; not checked,leader
+C11,radius,179.38,179.37,-0.00%,pass,leader
 C11,arc length,9.98,123.10,+113.12,FAIL,leader
 C13,radius,60.00,60.04,+0.07%,pass,leader
 C13,arc length,26.52,48.12 = 26.52 + 21.58,+0.02,pass as a run of 2: the boundary between these arcs is not drawn,leader
@@ -29,7 +31,7 @@ C16,radius,1470.00,1469.71,-0.02%,pass,leader
 C16,arc length,521.76,521.73,-0.03,pass,leader
 C19,radius,1520.00,1728.40,+13.71%,FAIL,leader
 C19,arc length,60.41,590.89,+530.48,FAIL,leader
-C21,radius,1380.00,1387.38,+0.53%,pass,leader
+C21,radius,1380.00,1387.38,+0.54%,pass,leader
 C21,arc length,876.88,115.15,-761.73,FAIL,leader
-C22,radius,3600.00,4385.35,+21.82%,FAIL,leader
+C22,radius,3600.00,4385.36,+21.82%,FAIL,leader
 C22,arc length,434.47,816.08,+381.61,FAIL,leader
