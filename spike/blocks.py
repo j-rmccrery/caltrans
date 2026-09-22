@@ -37,6 +37,21 @@ def glyph_paths(page):
         stroke = len(d["items"]) > 1 or m < 2.5
         if GLYPH_MIN <= m <= GLYPH_MAX and d["type"] != "f" and black and stroke:
             yield d
+        elif m > GLYPH_MAX and min(r.width, r.height) <= GLYPH_MAX and d["type"] != "f" and black and text_run(d):
+            yield d  # some drafters export a whole number or word as one path
+
+
+def text_run(d):
+    """A path that is a run of characters: many short segments in many directions, not a dashed line."""
+    segs = [(it[1], it[2]) for it in d["items"] if it[0] == "l"]
+    if len(segs) < 6:
+        return False
+    v = np.array([[b.x - a.x, b.y - a.y] for a, b in segs])
+    ln = np.hypot(*v.T)
+    if ln.max() > GLYPH_MAX:
+        return False
+    v = v[ln > 0.2] / ln[ln > 0.2, None]
+    return len(v) >= 6 and np.abs(v @ v[np.argmax(ln[ln > 0.2])]).mean() < 0.85  # directions are spread out
 
 
 def single_strokes(page):
@@ -77,7 +92,7 @@ def assemble(blocks, singles):
     blocks that continue each other along the reading axis. Multi-line blocks are left alone."""
     for b in blocks:
         b["pts"] = _corners(b)
-    one_line = lambda b: b["h"] < 1.9 * b["glyph_h"]
+    one_line = lambda b: b["h"] < 2.3 * b["glyph_h"]  # commas, periods and whole-word paths fatten a one-line box
 
     for _ in range(3):  # a few rounds: "11", "1-1"
         C = np.array([[b["cx"], b["cy"]] for b in blocks])
@@ -118,7 +133,7 @@ def assemble(blocks, singles):
             P = np.array(b["pts"]) - c
             al, pe = P @ u, P @ n
             gap = max(al.min() - a["w"] / 2, -a["w"] / 2 - al.max())
-            if -1.5 * a["glyph_h"] < gap < 0.8 * a["glyph_h"] and abs(pe).max() < 0.5 * a["h"] + 0.4 * a["glyph_h"]:
+            if -1.5 * a["glyph_h"] < gap < 1.2 * a["glyph_h"] and abs(pe).max() < 0.5 * a["h"] + 0.4 * a["glyph_h"]:
                 parent[find(j)] = find(i)
     groups = {}
     for i in range(len(blocks)):
@@ -183,7 +198,9 @@ def main():
                 pts = np.array([[q.ul.x * S, q.ul.y * S], [q.ur.x * S, q.ur.y * S], [q.lr.x * S, q.lr.y * S], [q.ll.x * S, q.ll.y * S]], np.int32) if it[0] == "qu" else                     np.array([[q.x0 * S, q.y0 * S], [q.x1 * S, q.y0 * S], [q.x1 * S, q.y1 * S], [q.x0 * S, q.y1 * S]], np.int32)
                 cv2.polylines(mask, [pts], True, 255, 2)
         r = d["rect"]
-        centers.append(((r.x0 + r.x1) / 2 * S, (r.y0 + r.y1) / 2 * S, max(r.width, r.height)))
+        # a character's height is its larger side; a whole-word path is wider than tall, so its smaller side
+        gh = max(r.width, r.height) if max(r.width, r.height) <= GLYPH_MAX else min(r.width, r.height)
+        centers.append(((r.x0 + r.x1) / 2 * S, (r.y0 + r.y1) / 2 * S, gh))
 
     k = int(DILATE * S) * 2 + 1
     merged = cv2.dilate(mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))

@@ -91,7 +91,7 @@ def main(name):
         blocks = json.loads(cache.read_text(encoding="utf-8"))
     else:
         for b in blocks:
-            b["text"], b["conf"] = read(level_crop(img, b), b["h"] < 1.9 * b["glyph_h"])
+            b["text"], b["conf"] = read(level_crop(img, b), b["h"] < 2.3 * b["glyph_h"])  # commas and a slight tilt fatten a one-line box
         cache.write_text(json.dumps(blocks, indent=1, ensure_ascii=False), encoding="utf-8")
     secs = time.time() - t0
 

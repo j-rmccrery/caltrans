@@ -21,13 +21,13 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
 PDF = Path(os.environ.get("SHEET", DEFAULT))  # SHEET=<pdf> runs another sheet; its outputs go to out/<stem>/
 OUT = Path(__file__).parent / "out" / (PDF.stem if "SHEET" in os.environ else "")
-NUM = re.compile(r"^([NEXY])?[:.]?(\d{0,2},?\d{3},?\d{3}\.\d{2,4})$")  # CCS27/83, ft or m, 2-4 decimals
+NUM = re.compile(r"^([NEXY])?[:.]?(\d[\d,]{2,9}\.\d{2,4})$")  # 4-8 integer digits: local grids, CCS27/83, ft or m
 
 
 def number(text):
     """(axis letter or None, value) for a printed coordinate, else None."""
     m = NUM.match(text.replace(" ", "").upper())
-    if not m:
+    if not m or not 4 <= len(m[2].split(".")[0].replace(",", "")) <= 8:
         return None
     return {"N": "N", "Y": "N", "E": "E", "X": "E"}.get(m[1]), float(m[2].replace(",", ""))
 
@@ -85,11 +85,15 @@ def callouts(blocks, skip):
                 continue
             d = np.array([eb["cx"], eb["cy"]]) - c
             al, pe = abs(d @ u), d @ n
-            if al < 0.6 * max(nb["w"], eb["w"]) and 1.0 * nb["glyph_h"] < pe < 3.2 * nb["glyph_h"] and (best is None or pe < best[3]):
+            row = max(3.2 * nb["glyph_h"], 2.2 * max(nb["h"], eb["h"]))  # row pitch scales with the box, not just the glyph
+            if al < 0.6 * max(nb["w"], eb["w"]) and 1.0 * nb["glyph_h"] < pe < row and (best is None or pe < best[3]):
                 best = (eb, ea, ev, pe)
         if not best:
             continue
         eb, ea, ev, _ = best
+        short = max(nv, ev) < 1e5  # local-grid values: only trust a pair that carries an N or E letter
+        if short and na is None and ea is None:
+            continue
         is_n = na == "N" or ea == "E" or (na is None and ea is None and nv < ev)
         if na == "E" or ea == "N" or (na is None and ea is None and nv > ev):
             is_n = False
@@ -135,11 +139,11 @@ def trace_leader(co, segs, ends_tree, ends_idx):
         for k, (a, b, w, pid) in enumerate(segs):
             for p0, p1 in ((a, b), (b, a)):
                 d0, d1 = p0 - mid, p1 - mid
-                bu, bn = half_w + 2.0 * gh, 2.5 * gh  # the text box, a little padded
+                bu, bn = half_w + 6.0 * gh, 2.5 * gh  # the text box plus room for the "N " prefix block
                 inside = abs(d0 @ u) < bu and abs(d0 @ n) < bn
                 far = abs(d1 @ u) > bu or abs(d1 @ n) > bn  # a glyph stroke stays inside; a leader leaves
                 edge = max(abs(d0 @ u) / bu, abs(d0 @ n) / bn)  # 1.0 = starts right at the box edge
-                if inside and far and np.hypot(*(p1 - p0)) > 1.5 * gh and (sep is None or edge > sep[1]):
+                if inside and far and np.hypot(*(p1 - p0)) > 2.0 * gh and (sep is None or edge > sep[1]):
                     sep = (k, edge)
         if sep is None:
             return None
