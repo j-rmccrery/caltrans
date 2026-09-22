@@ -148,6 +148,12 @@ def split_at(P, circles, chains, tol=2.0):
     return pieces
 
 
+def shape(seg):
+    """The drawn line or arc a check measured, as points (pt), for the exception page."""
+    P = seg["pts"][:: max(1, len(seg["pts"]) // 20)] if "pts" in seg else [seg["p0"], seg["p1"]]
+    return [[round(float(x), 1), round(float(y), 1)] for x, y in P]
+
+
 def seg_dist(p, a, b):
     ab = b - a
     t = np.clip(((p - a) @ ab) / max(ab @ ab, 1e-9), 0, 1)
@@ -243,9 +249,9 @@ def main():
                 ok_d = abs(drawn - row["dist"]) <= DIST_TOL + 0.0005 * row["dist"]
                 out.append([t["tag"], "distance", f"{row['dist']:.2f}", f"{drawn:.2f}", f"{drawn - row['dist']:+.2f}", "pass" if ok_d else "FAIL", how])
                 if not ok_d:
-                    queue.append({"tag": t["tag"], "issue": f"drawn {drawn:.2f} ft vs table {row['dist']:.2f} ft", "region": region})
+                    queue.append({"tag": t["tag"], "issue": f"drawn {drawn:.2f} ft vs table {row['dist']:.2f} ft", "region": region, "line": shape(seg)})
             if not ok_b:
-                queue.append({"tag": t["tag"], "issue": f"drawn bearing off by {dbrg * 60:.1f} arcmin", "region": region})
+                queue.append({"tag": t["tag"], "issue": f"drawn bearing off by {dbrg * 60:.1f} arcmin", "region": region, "line": shape(seg)})
         else:
             drawn = seg["len_pt"] * scale
             sagitta = seg["len_pt"] ** 2 / (8 * row["R"] / scale)  # pt; a 46 ft arc on R=1470 bulges 0.1 pt: no radius in that
@@ -262,9 +268,9 @@ def main():
                 ok_l = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "pass" if ok_l else "FAIL", how])
                 if not ok_l:
-                    queue.append({"tag": t["tag"], "issue": f"drawn arc {drawn:.2f} ft vs table {row['L']:.2f} ft", "region": region})
+                    queue.append({"tag": t["tag"], "issue": f"drawn arc {drawn:.2f} ft vs table {row['L']:.2f} ft", "region": region, "line": shape(seg)})
             if not ok_r:
-                queue.append({"tag": t["tag"], "issue": f"fitted radius {R:.1f} ft vs table {row['R']:.2f} ft", "region": region})
+                queue.append({"tag": t["tag"], "issue": f"fitted radius {R:.1f} ft vs table {row['R']:.2f} ft", "region": region, "line": shape(seg)})
 
     with open(OUT / "tags_checks.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["tag", "check", "printed", "drawn", "difference", "result", "association"]); w.writerows(out)

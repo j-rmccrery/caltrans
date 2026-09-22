@@ -26,6 +26,7 @@ STEPS = [
     ("encroachment", ["encroach.py"]),
     ("rasters for QGIS", ["export_rasters.py"]),
     ("object record", ["objects.py"]),
+    ("exception page", ["exceptions_page.py"]),
 ]
 
 

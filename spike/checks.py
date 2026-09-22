@@ -215,6 +215,11 @@ def main():
     def region(b):
         return [round(b["cx"] - b["w"] / 2 - 4), round(b["cy"] - b["h"] / 2 - 4), round(b["cx"] + b["w"] / 2 + 4), round(b["cy"] + b["h"] / 2 + 4)]
 
+    def shape(seg):
+        """The drawn line or arc a check measured, as points (pt), so the exception page can show it."""
+        P = seg["pts"][:: max(1, len(seg["pts"]) // 20)] if "pts" in seg else [seg["p0"], seg["p1"]]
+        return [[round(float(x), 1), round(float(y), 1)] for x, y in P]
+
     for b in blocks:
         for part in b["text"].replace(" ", "").split("|"):
             if BEAR.match(part) and BEAR.match(part)[6]:
@@ -232,7 +237,7 @@ def main():
                 ok = diff <= BEAR_TOL
                 rows.append(["bearing", part, fmt_bearing(az if abs((az - want + 180) % 360 - 180) < 90 else az + 180), f"{diff * 60:.1f}'", "pass" if ok else "FAIL"])
                 if not ok:
-                    exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b)})
+                    exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b), "line": shape(ln)})
             elif DIST.match(part) and not b.get("real"):
                 m = DIST.match(part)
                 if m[2] or re.search(r"R=|L=|Δ|△", b["text"]):  # (T) totals and curve data are not line lengths
@@ -246,7 +251,7 @@ def main():
                         ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
                         rows.append(["arc length", part, f"{drawn:.2f} (R={arc['radius_pt'] * scale:.1f})", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
                         if not ok:
-                            exceptions.append({"kind": "arc length", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b)})
+                            exceptions.append({"kind": "arc length", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
                         continue
                 if ln is None:
                     exceptions.append({"kind": "distance", "text": part, "issue": "no line found beside label", "region": region(b)}); continue
@@ -258,7 +263,7 @@ def main():
                 ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
                 rows.append(["distance", part, f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
                 if not ok:
-                    exceptions.append({"kind": "distance", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b)})
+                    exceptions.append({"kind": "distance", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(ln)})
 
     # curves: R, delta and L printed together (same block or stacked)
     curve_blocks = [b for b in blocks if any(RAD.match(t) or ANG.match(t) or LEN.match(t) for t in b["text"].replace(" ", "").split("|"))]
