@@ -1,0 +1,23 @@
+glyph paths 26225 | blocks 925 | rotated(>3deg) 486
+glyphs/block percentiles 50/90/99/max: [  4.  31. 401. 648.]
+biggest blocks (likely merged tables): [432, 442, 493, 518, 520, 533, 582, 648]
+reader=rapid blocks=925 time=103s (112 ms/block)
+table          gt  hit  recall   misses (gt value -> nearest unmatched reads)
+coordinates    14    0    0.0%   ['2,120,414.20', '5,995,116.26', '2,120,268.92', '5,994,468.77', '2,120,335.49', '5,994,267.73'] | unmatched reads: ['LICENSED', 'LANDSURI', 'DSURVEYOR', 'MAY', 'Y', '30,', '2008', '6']
+alignment      32    0    0.0%   ['65+48.80', 'EC', 'EC', 'EC', '2,120,587.32', '5,996,020.18'] | unmatched reads: ['MAINTENANCE(376SGM.', 'EASEMENTFT.)SQ.', '8207', 'SQ.', '58371-1,59555-1,(TRANSFERDOC.)1', 'FROM', 'FROM', 'A-01144.01']
+curve1         32    0    0.0%   ['C1', '50.22', '50.22', '12°44\'55"', '11.18', 'C2'] | unmatched reads: ['FERRARI', 'S', 'N', '3723', 'OR', '486', '-', '17225']
+curve2         60    0    0.0%   ['C9(T)', '179.38', '179.38', '179.38', '39°19\'30"(T)', '123.12(T)'] | unmatched reads: ['CONSTRUCHIONTENANCEEASEMENT', 'FERRARI', '3723', '1', '283+53.07)', '14+98.339', "FIM'", '64+2']
+line           63    0    0.0%   ['L1', 'N18°06\'50"E(R)', '1.86', 'L2', 'N14°18\'16"E', '3.76'] | unmatched reads: ['9', '/11', '1', '1', '152.541M', "13.232M(43.42'R15)", 'R', '0']
+radial         26    0    0.0%   ['R-1', 'S2°05\'39"W(R)', 'R-2', 'S10°39\'16"E(R)', 'R-3', 'S77°43\'21"E(R)'] | unmatched reads: ['S', 'N', '474', 'POT', '315627.93)1591350.01)', '/L']
+ALL TABLES    227    0    0.0%
+callouts paired 0 | leaders traced 0
+Traceback (most recent call last):
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 206, in <module>
+    main()
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 171, in main
+    p = similarity(src[inl], dst[inl])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 113, in similarity
+    A[0::2] = np.c_[src[:, 0], -src[:, 1], np.ones(len(src)), np.zeros(len(src))]
+                    ~~~^^^^^^
+IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed

@@ -1,0 +1,23 @@
+glyph paths 5242 | blocks 654 | rotated(>3deg) 433
+glyphs/block percentiles 50/90/99/max: [  5.  16.  35. 231.]
+biggest blocks (likely merged tables): [35, 35, 40, 45, 75, 130, 135, 231]
+reader=rapid blocks=654 time=42s (65 ms/block)
+table          gt  hit  recall   misses (gt value -> nearest unmatched reads)
+coordinates    14    0    0.0%   ['2,120,414.20', '5,995,116.26', '2,120,268.92', '5,994,468.77', '2,120,335.49', '5,994,267.73'] | unmatched reads: ['12198?', '86122', 'LINE', '"B4"', '16']
+alignment      32    0    0.0%   ['65+48.80', 'EC', 'EC', 'EC', '2,120,587.32', '5,996,020.18'] | unmatched reads: ['-(HILLCREST', 'RD)', '(9457-DD)']
+curve1         32    0    0.0%   ['C1', '50.22', '50.22', '12°44\'55"', '11.18', 'C2'] | unmatched reads: ['64.74\'30"M', '24.77', '9+', '+5', '\'AS"605+90.417EC', '11', '511816.38', 'Y']
+curve2         60    0    0.0%   ['C9(T)', '179.38', '179.38', '179.38', '39°19\'30"(T)', '123.12(T)'] | unmatched reads: ['1505953\'00"', 'L-87.', "06'", '88°19\'30"W', '88°19\'30"W', 'N', 'N', "N1904/30E43,08'"]
+line           63    0    0.0%   ['L1', 'N18°06\'50"E(R)', '1.86', 'L2', 'N14°18\'16"E', '3.76'] | unmatched reads: ['0°', '129.99', '52269-1', '512000', 'Y', '49\'30"E', "50'", "50'"]
+radial         26    0    0.0%   ['R-1', 'S2°05\'39"W(R)', 'R-2', 'S10°39\'16"E(R)', 'R-3', 'S77°43\'21"E(R)'] | unmatched reads: ['186.35', '186.35', 'T.C.E(1-195)', '423.60', '49068-1', '8十', '10976', 'EN']
+ALL TABLES    227    0    0.0%
+callouts paired 0 | leaders traced 0
+Traceback (most recent call last):
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 206, in <module>
+    main()
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 171, in main
+    p = similarity(src[inl], dst[inl])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 113, in similarity
+    A[0::2] = np.c_[src[:, 0], -src[:, 1], np.ones(len(src)), np.zeros(len(src))]
+                    ~~~^^^^^^
+IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed

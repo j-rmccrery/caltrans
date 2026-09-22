@@ -9,3 +9,10 @@ Problem Statement/
 # regenerable
 spike/lidar/cache/
 spike/out/blocks_overlay.png
+
+# per-sheet runs: keep only the small result files
+spike/out/r_*/*
+spike/out/r65/
+!spike/out/r_*/georef.json
+!spike/out/r_*/georef_ticks.json
+!spike/out/r_*/log.txt

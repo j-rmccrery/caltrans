@@ -1,0 +1,13 @@
+{
+ "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; ground units and datum as printed on the sheet",
+ "params": [
+  0.7618678280344162,
+  -0.14759653815324844,
+  1544970.3500979713,
+  512972.6385200288
+ ],
+ "scale_per_pt": 0.7760330698293095,
+ "rotation_deg": -10.964083805047897,
+ "rms": 0.0401323645401267,
+ "lines_used": 12
+}

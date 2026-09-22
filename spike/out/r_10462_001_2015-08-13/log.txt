@@ -1,0 +1,23 @@
+glyph paths 5075 | blocks 810 | rotated(>3deg) 455
+glyphs/block percentiles 50/90/99/max: [  3.  12.  41. 547.]
+biggest blocks (likely merged tables): [42, 46, 54, 62, 79, 154, 176, 547]
+reader=rapid blocks=810 time=62s (77 ms/block)
+table          gt  hit  recall   misses (gt value -> nearest unmatched reads)
+coordinates    14    0    0.0%   ['2,120,414.20', '5,995,116.26', '2,120,268.92', '5,994,468.77', '2,120,335.49', '5,994,267.73'] | unmatched reads: ['←', '8511', "00'", 'D', '1600', 'R', 'RIGH', 'WAY']
+alignment      32    0    0.0%   ['65+48.80', 'EC', 'EC', 'EC', '2,120,587.32', '5,996,020.18'] | unmatched reads: ['尺E', '八', 'N', 'M', '人', '2']
+curve1         32    0    0.0%   ['C1', '50.22', '50.22', '12°44\'55"', '11.18', 'C2'] | unmatched reads: ['（', 'STERN', 'WESSAVE', 'FRANCISCO', 'PIER']
+curve2         60    0    0.0%   ['C9(T)', '179.38', '179.38', '179.38', '39°19\'30"(T)', '123.12(T)'] | unmatched reads: ['AVE', 'R', '0', '0', 'N', 'E', '58', 'S']
+line           63    0    0.0%   ['L1', 'N18°06\'50"E(R)', '1.86', 'L2', 'N14°18\'16"E', '3.76'] | unmatched reads: ['STREET', 'PARKWAY', 'CHMOND', 'RICI', 'BLVD.', 'BLVD.', 'TOBERK', '！']
+radial         26    0    0.0%   ['R-1', 'S2°05\'39"W(R)', 'R-2', 'S10°39\'16"E(R)', 'R-3', 'S77°43\'21"E(R)'] | unmatched reads: ['TRO', 'CAS', 'M', 'CUTTI']
+ALL TABLES    227    0    0.0%
+callouts paired 0 | leaders traced 0
+Traceback (most recent call last):
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 206, in <module>
+    main()
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 171, in main
+    p = similarity(src[inl], dst[inl])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\johnr\projects\caltrans\spike\georef.py", line 113, in similarity
+    A[0::2] = np.c_[src[:, 0], -src[:, 1], np.ones(len(src)), np.zeros(len(src))]
+                    ~~~^^^^^^
+IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed

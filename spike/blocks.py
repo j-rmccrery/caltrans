@@ -6,6 +6,7 @@ take each blob's min-area rectangle -> text block with exact orientation.
 Outputs spike/out/blocks.json and an overlay PNG for eyeballing.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -14,8 +15,9 @@ import numpy as np
 import pymupdf
 
 ROOT = Path(__file__).resolve().parent.parent
-PDF = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
-OUT = Path(__file__).parent / "out"
+DEFAULT = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
+PDF = Path(os.environ.get("SHEET", DEFAULT))  # SHEET=<pdf> runs another sheet; its outputs go to out/<stem>/
+OUT = Path(__file__).parent / "out" / (PDF.stem if "SHEET" in os.environ else "")
 
 S = 4            # mask pixels per PDF point
 GLYPH_MAX = 12   # pt; paths larger than this are linework, not characters
@@ -134,6 +136,35 @@ def assemble(blocks, singles):
     return out
 
 
+def split_rows(b, pts, gh):
+    """Stacked lines (an N over an E callout) merge into one blob. Split by the gaps between rows of
+    glyph centres measured across the reading axis; keep the parent's angle."""
+    if b["h"] < 1.9 * gh or len(pts) < 4:
+        return [b]
+    t = np.radians(b["angle"])
+    u, nrm = np.array([np.cos(t), np.sin(t)]), np.array([-np.sin(t), np.cos(t)])
+    c = np.array([b["cx"], b["cy"]])
+    al, pe = (pts - c) @ u, (pts - c) @ nrm
+    order = np.argsort(pe)
+    rows, cur = [], [order[0]]
+    for i, j in zip(order, order[1:]):
+        if pe[j] - pe[i] > 0.7 * gh:
+            rows.append(cur); cur = []
+        cur.append(j)
+    rows.append(cur)
+    if len(rows) < 2:
+        return [b]
+    out = []
+    for r in rows:
+        r = np.array(r)
+        if len(r) < 2:
+            continue
+        cc = c + u * (al[r].max() + al[r].min()) / 2 + nrm * pe[r].mean()
+        out.append({"cx": float(cc[0]), "cy": float(cc[1]), "w": float(al[r].max() - al[r].min() + gh), "h": float(1.3 * gh),
+                    "angle": b["angle"], "glyphs": int(len(r)), "glyph_h": b["glyph_h"]})
+    return out or [b]
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     W, H = int(page.rect.width * S), int(page.rect.height * S)
@@ -147,6 +178,10 @@ def main():
             elif it[0] == "c":
                 pts = np.array([[p.x * S, p.y * S] for p in it[1:5]], np.int32)
                 cv2.polylines(mask, [pts], False, 255, 2)
+            elif it[0] in ("qu", "re"):  # decimal points and periods are often tiny quads
+                q = it[1]
+                pts = np.array([[q.ul.x * S, q.ul.y * S], [q.ur.x * S, q.ur.y * S], [q.lr.x * S, q.lr.y * S], [q.ll.x * S, q.ll.y * S]], np.int32) if it[0] == "qu" else                     np.array([[q.x0 * S, q.y0 * S], [q.x1 * S, q.y0 * S], [q.x1 * S, q.y1 * S], [q.x0 * S, q.y1 * S]], np.int32)
+                cv2.polylines(mask, [pts], True, 255, 2)
         r = d["rect"]
         centers.append(((r.x0 + r.x1) / 2 * S, (r.y0 + r.y1) / 2 * S, max(r.width, r.height)))
 
@@ -156,10 +191,12 @@ def main():
 
     counts = np.zeros(n, int)
     heights = [[] for _ in range(n)]
+    members = [[] for _ in range(n)]
     for x, y, h in centers:
         lab = labels[min(int(y), H - 1), min(int(x), W - 1)]
         counts[lab] += 1
         heights[lab].append(h)
+        members[lab].append((x, y))
 
     blocks = []
     for lab in range(1, n):
@@ -172,17 +209,19 @@ def main():
         if w < h:  # make w the long (reading) axis
             w, h, ang = h, w, ang + 90
         ang = (ang + 90) % 180 - 90  # text reads left-to-right: keep angle in (-90, 90]
-        blocks.append({
-            "id": len(blocks), "cx": cx / S, "cy": cy / S, "w": w / S, "h": h / S,
-            "angle": round(float(ang), 2), "glyphs": int(counts[lab]),
-            "glyph_h": round(float(np.median(heights[lab])), 2),
-        })
+        gh = float(np.median(heights[lab]))
+        b = {"cx": cx / S, "cy": cy / S, "w": w / S, "h": h / S, "angle": round(float(ang), 2),
+             "glyphs": int(counts[lab]), "glyph_h": round(gh, 2)}
+        blocks += split_rows(b, np.array(members[lab]) / S, gh)
+
+    for i, b in enumerate(blocks):
+        b["id"] = i
 
     blocks = assemble(blocks, single_strokes(page))
     for i, b in enumerate(blocks):
         b["id"] = i
 
-    OUT.mkdir(exist_ok=True)
+    OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "blocks.json").write_text(json.dumps(blocks, indent=1))
 
     pix = page.get_pixmap(matrix=pymupdf.Matrix(S, S), alpha=False)

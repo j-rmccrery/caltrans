@@ -3,6 +3,7 @@
 usage: python spike/ocr.py rapid        (reader name; results -> spike/out/read_<reader>.json)
 """
 import json
+import os
 import re
 import sys
 import time
@@ -17,8 +18,9 @@ sys.path.insert(0, str(Path(__file__).parent))
 from gt import TABLES  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-PDF = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
-OUT = Path(__file__).parent / "out"
+DEFAULT = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
+PDF = Path(os.environ.get("SHEET", DEFAULT))  # SHEET=<pdf> runs another sheet; its outputs go to out/<stem>/
+OUT = Path(__file__).parent / "out" / (PDF.stem if "SHEET" in os.environ else "")
 Z = 5  # render pixels per PDF point
 
 

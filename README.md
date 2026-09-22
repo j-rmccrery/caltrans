@@ -16,11 +16,22 @@ with no hand-typed coordinates, draws the sheet's linework on the LiDAR in groun
 | Find text blocks from vector glyph strokes, with exact box and angle | `spike/blocks.py` | 1,345 blocks, 605 rotated |
 | Level each crop, read with RapidOCR, parse survey notation | `spike/ocr.py rapid` | 208 / 227 table values correct (91.6%); misses are mostly row IDs such as `R-1` |
 | Hand-keyed ground truth, self-checked with L = R·Δ on all 23 curves | `spike/gt.py` | 227 values |
-| Pair N/E callouts, trace leader lines to the labelled point, fit sheet to CCS83 Zone 3 | `spike/georef.py` | 12 of 14 control points used, 2 bad traces rejected; RMS 0.04 ft; scale 1.38885 ft/pt against a plot scale of 1.38889 |
+| Pair N/E callouts, trace leader lines to the labelled point, fit sheet to CCS83 Zone 3 | `spike/georef.py` | 19 of 19 control points, RMS 0.04 ft; scale 1.38885 ft/pt against a plot scale of 1.38889 |
 | Transform linework to NAD83(2011) UTM 10N with the HTDP epoch shift, draw on LiDAR intensity, export GeoJSON | `spike/overlay.py` | `spike/out/overlay_zoom.png`, `spike/out/sheet_linework.geojson` |
+| Second control path: grid tick labels give one linear equation per grid-line stub | `spike/georef_ticks.py` | CC-680: 12/12 lines, RMS 0.04 ft; ALA-84: 13/13, RMS 0.05 ft |
+| Generalisation run over unrelated District 4 record maps from the public index | `spike/batch.py` | `spike/out/batch.csv`; per-sheet logs in `spike/out/<sheet>/` |
 | LiDAR checks: flight date, control on terrain, epoch offset, building points in corridor, flightline overlap QA | `spike/lidar/q1..q5` | logs in `spike/lidar/out_q*.txt`, plots in `spike/lidar/out/` |
 
 Epoch offset 1991.35 to 2010.0 at the site, from NGS HTDP v3.6.0: 0.668 m (2.19 ft), N33°W.
+
+## Other sheets
+
+The D4 map index (a public ArcGIS feature service) links every District 4 record map and, for most,
+Caltrans' own georeferenced package. Across 11 vector sheets: 8 georeference automatically and agree
+with the Caltrans package to about 1 ft or better (0.05 m on a metric sheet); 3 are refused with a
+reason (no on-sheet control, or too few agreeing points). `SHEET=<pdf>` runs any sheet; outputs go
+to `spike/out/<sheet>/`. Scanned sheets (most of the archive, including the 1969 predecessors of the
+sample sheet) are not handled yet.
 
 ## Run
 
