@@ -1,6 +1,7 @@
 # Loading the demo layers in QGIS
 
-Open `spike/out/demo.qgz` (built by `spike/qgis_project.py`, last step of `demo.py`): all layers below plus
+Open `spike/out/demo.qgz` (built by `spike/qgis_project.py` under QGIS's own Python, last step of `demo.py`; the
+opening view it renders is `demo_render.png`): all layers below plus
 the object record (points / lines / polygons, coloured by status: green verified, orange queued, red refused,
 grey record-only) with a map tip on hover (sheet, region, printed, measured, residual, rule, status). Relative
 paths: the whole `spike/out` folder moves as one. Needs QGIS 3.28 or later.
