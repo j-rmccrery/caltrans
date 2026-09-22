@@ -22,6 +22,7 @@ with no hand-typed coordinates, draws the sheet's linework on the LiDAR in groun
 | One solver over every control type (callouts, monument notes, grid lines) with consensus and per-axis redundancy | `spike/solve.py` | SON-121: 1 callout + 4 grid lines, 0.31 ft from Caltrans' package, flagged weak in northing |
 | Generalisation run over unrelated District 4 record maps from the public index | `spike/batch.py` | `spike/out/batch.csv`; per-sheet logs in `spike/out/<sheet>/` |
 | Scanned sheets: OCR detection on tiles of a 300 dpi render, then callouts and circle candidates through the same solver | `spike/scan_read.py`, `spike/scan_georef.py` | 1969 R-65.2: 273 boxes found; two readers (RapidOCR and a local vision model) on 87 numeric boxes; 4-pair fits appear but are refused because their scale disagrees with the grid labels, which is the correct verdict: not georeferenced yet |
+| LiDAR feature extraction at airborne density: pavement (dark, flat, dry ground connected to the corridor), viaduct deck, building footprints with a roof test; then record against ground | `spike/lidar/extract.py` | 32 pavement, 11 deck, 175 building polygons; 81% of highway pavement inside the drawn R/W faces, 9,014 m² outside within 15 m for review; `spike/out/extracted_features.geojson` |
 | LiDAR checks: flight date, control on terrain, epoch offset, building points in corridor, flightline overlap QA | `spike/lidar/q1..q5` | logs in `spike/lidar/out_q*.txt`, plots in `spike/lidar/out/` |
 
 Epoch offset 1991.35 to 2010.0 at the site, from NGS HTDP v3.6.0: 0.668 m (2.19 ft), N33°W.
@@ -58,7 +59,8 @@ python -m venv .venv
 - One-stroke characters (`1`, `-`, the `Δ=` prefix) and occasional merged table cells are the reader's weak spots.
 - Callout leader lines share the heavy line weight with R/W lines and are drawn with them.
 - No parcel polygons, no label-to-line association, no closure checks, no UI yet.
-- The LiDAR is public airborne data, not mobile LiDAR; it has no colour channel.
+- The LiDAR is public airborne data, not mobile LiDAR; it has no colour channel. Pavement, deck and building polygons are what 15 pts/m² supports; curbs, signs and monuments are not.
+- The right-of-way faces used for record-against-ground are the 6 named of 27; the corridor is incomplete where easement strips are dashed.
 - On a scan, four callouts agreeing to 1 ft can happen by chance when each has dozens of circle candidates; a scan fit is only accepted when its scale also matches the grid labels. Two such chance fits were caught on R-65.2.
 - Hand lettering: neither RapidOCR nor a local vision model (qwen2.5vl:7b, `spike/scan_vlm.py`) reads it reliably alone; where the two agree the read is right, which is the usable confidence signal.
 - Some drafters end leaders in an arrowhead a few points short of the point symbol (CC-580); the trace lands about 8 ft off and the sheet is refused.
