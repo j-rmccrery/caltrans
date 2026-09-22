@@ -29,6 +29,29 @@ def repair(t):
     return f"{m[1]}{m[2][:-2]}.{m[2][-2:]}" if m else t
 
 
+def vlm_read(img, b):
+    """Second, independent reader for a box: local vision model. Agreement between readers is the confidence signal."""
+    import base64
+    import urllib.request
+    q = np.array(b["px"], np.float32)
+    (cx, cy), (w, h), ang = cv2.minAreaRect(q)
+    if w < h:
+        w, h, ang = h, w, ang + 90
+    M = cv2.getRotationMatrix2D((cx, cy), ang, 1.0)
+    rot = cv2.warpAffine(img, M, (img.shape[1], img.shape[0]), flags=cv2.INTER_CUBIC, borderValue=255)
+    crop = cv2.getRectSubPix(rot, (int(w * 1.15) + 20, int(h * 1.6) + 12), (cx, cy))
+    crop = cv2.resize(crop, None, fx=3, fy=3, interpolation=cv2.INTER_CUBIC)
+    _, buf = cv2.imencode(".png", crop)
+    req = {"model": "qwen2.5vl:7b", "stream": False, "options": {"temperature": 0},
+           "prompt": "Transcribe exactly the hand-lettered survey annotation in this image. It may be a coordinate (the letter N or E, then digits with two decimal places), a bearing, a distance, or a station. Copy only what is written; if it is unreadable reply UNREADABLE. Reply with only the transcription.",
+           "images": [base64.b64encode(buf.tobytes()).decode()]}
+    try:
+        r = urllib.request.urlopen(urllib.request.Request("http://localhost:11434/api/generate", json.dumps(req).encode(), {"Content-Type": "application/json"}), timeout=300)
+        return json.load(r)["response"].strip()
+    except Exception as e:  # one bad crop must not lose the whole sheet
+        return f"<error {getattr(e, 'code', e)}>"
+
+
 def main():
     from rapidocr_onnxruntime import RapidOCR
     eng = RapidOCR()
@@ -63,9 +86,15 @@ def main():
     for b in found:
         if all(abs(b["cx"] - k["cx"]) > 0.5 * min(b["w"], k["w"]) or abs(b["cy"] - k["cy"]) > 0.6 * max(b["h"], k["h"]) for k in keep):
             keep.append(b)
+    import re
+    n_vlm = 0
     for i, b in enumerate(keep):
         b["id"] = i
         b["text"] = repair(b["text"])
+        if re.search(r"\d{4}", b["text"]) or re.match(r"^[NE]", b["text"].replace(" ", "").upper()):
+            b["vlm"] = repair(vlm_read(img, b))
+            n_vlm += 1
+    print(f"vision-model second reads on {n_vlm} numeric boxes")
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "read_rapid.json").write_text(json.dumps(keep, indent=1, ensure_ascii=False), encoding="utf-8")
 

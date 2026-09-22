@@ -1,0 +1,42 @@
+{
+ "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; units as printed on the sheet (local grid)",
+ "params": [
+  2.212355906349814,
+  -0.6394889476584951,
+  11574.573716158337,
+  11540.440624469087
+ ],
+ "scale_ft_per_pt": 2.302925263776112,
+ "rotation_deg": -16.122116418290716,
+ "credible": false,
+ "control": [
+  {
+   "E": 12640.84,
+   "N": 10162.42,
+   "residual_ft": 0.09221619987004248,
+   "used": true,
+   "label": "N10I62.42 / E.12640.84"
+  },
+  {
+   "E": 13410.89,
+   "N": 10010.89,
+   "residual_ft": 0.4732957867852082,
+   "used": true,
+   "label": "N.10010.89 / E.13410.89"
+  },
+  {
+   "E": 13534.57,
+   "N": 9861.38,
+   "residual_ft": 0.375694802282212,
+   "used": true,
+   "label": "N.9861.88 / E18534.57"
+  },
+  {
+   "E": 13440.25,
+   "N": 10001.91,
+   "residual_ft": 0.0920502945178596,
+   "used": true,
+   "label": "N0001.91 / EI84402"
+  }
+ ]
+}
