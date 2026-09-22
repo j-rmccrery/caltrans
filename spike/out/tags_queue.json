@@ -1,5 +1,15 @@
 [
  {
+  "tag": "?L0?",
+  "issue": "tag partly unread",
+  "region": [
+   1989,
+   545,
+   2017,
+   559
+  ]
+ },
+ {
   "tag": "?C1",
   "issue": "tag partly unread",
   "region": [
@@ -10,23 +20,13 @@
   ]
  },
  {
-  "tag": "?L1?",
-  "issue": "tag partly unread",
-  "region": [
-   2238,
-   496,
-   2265,
-   510
-  ]
- },
- {
   "tag": "?L2?",
   "issue": "tag partly unread",
   "region": [
-   2240,
-   518,
-   2269,
-   532
+   2244,
+   517,
+   2271,
+   530
   ]
  },
  {
@@ -40,23 +40,33 @@
   ]
  },
  {
+  "tag": "?L21",
+  "issue": "tag partly unread",
+  "region": [
+   533,
+   455,
+   564,
+   470
+  ]
+ },
+ {
+  "tag": "C1",
+  "issue": "no such table row",
+  "region": [
+   964,
+   627,
+   993,
+   641
+  ]
+ },
+ {
   "tag": "C2",
-  "issue": "no leader, no curve beside the tag",
+  "issue": "no such table row",
   "region": [
    981,
    596,
    1009,
    611
-  ]
- },
- {
-  "tag": "C2?",
-  "issue": "tag partly unread",
-  "region": [
-   1356,
-   634,
-   1384,
-   649
   ]
  },
  {
@@ -130,6 +140,16 @@
   ]
  },
  {
+  "tag": "C20",
+  "issue": "leader points at no curve",
+  "region": [
+   1356,
+   634,
+   1384,
+   649
+  ]
+ },
+ {
   "tag": "C23",
   "issue": "3 curves beside the tag",
   "region": [
@@ -141,47 +161,17 @@
  },
  {
   "tag": "L1",
-  "issue": "drawn 1108.21 ft vs table 1.86 ft",
+  "issue": "no such table row",
   "region": [
-   1083,
+   1082,
    554,
-   1110,
+   1111,
    568
-  ],
-  "line": [
-   [
-    1292.3,
-    594.6
-   ],
-   [
-    525.1,
-    375.4
-   ]
-  ]
- },
- {
-  "tag": "L1",
-  "issue": "drawn bearing off by 5237.7 arcmin",
-  "region": [
-   1083,
-   554,
-   1110,
-   568
-  ],
-  "line": [
-   [
-    1292.3,
-    594.6
-   ],
-   [
-    525.1,
-    375.4
-   ]
   ]
  },
  {
   "tag": "L2",
-  "issue": "leader points at no line",
+  "issue": "no such table row",
   "region": [
    1125,
    598,
@@ -250,6 +240,16 @@
   ]
  },
  {
+  "tag": "L17",
+  "issue": "no such table row",
+  "region": [
+   1676,
+   655,
+   1704,
+   669
+  ]
+ },
+ {
   "tag": "L19",
   "issue": "leader points at no line",
   "region": [
@@ -257,46 +257,6 @@
    367,
    439,
    381
-  ]
- },
- {
-  "tag": "L21",
-  "issue": "drawn 187.00 ft vs table 1529.50 ft",
-  "region": [
-   537,
-   457,
-   567,
-   472
-  ],
-  "line": [
-   [
-    538.4,
-    445.4
-   ],
-   [
-    408.4,
-    410.3
-   ]
-  ]
- },
- {
-  "tag": "L21",
-  "issue": "drawn bearing off by 13.3 arcmin",
-  "region": [
-   537,
-   457,
-   567,
-   472
-  ],
-  "line": [
-   [
-    538.4,
-    445.4
-   ],
-   [
-    408.4,
-    410.3
-   ]
   ]
  },
  {

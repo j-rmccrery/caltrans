@@ -454,7 +454,7 @@ def main():
                 rows.append(["bearing", part, fmt_bearing(az if abs((az - want + 180) % 360 - 180) < 90 else az + 180), f"{diff * 60:.1f}'", "pass" if ok else "FAIL"])
                 if not ok:
                     exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b), "line": shape(ln)})
-            elif DIST.match(part) and not b.get("real"):
+            elif DIST.match(part):
                 m = DIST.match(part)
                 if m[2] or curve_data:  # (T) totals and curve data (R=, Δ, L=) are not line lengths
                     continue

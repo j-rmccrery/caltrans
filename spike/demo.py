@@ -20,6 +20,7 @@ STEPS = [
     ("linework on LiDAR", ["overlay.py"]),
     ("parcels", ["parcels.py"]),
     ("checks + exception queue", ["checks.py"]),
+    ("sheet alphabet + tables", ["alphabet.py"]),
     ("segment tags", ["tags.py"]),
     ("table checks via tags", ["tables.py"]),
     ("LiDAR features", ["lidar/extract.py"]),

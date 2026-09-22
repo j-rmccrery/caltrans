@@ -15,6 +15,22 @@ Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run every
 | D9–10 LiDAR refresh | Done as far as it can be without traverse parcels (none came out of D3–6, so the faces are the same). `spike/slide_numbers.py` → `out/numbers.md` + `numbers.json`: every number to quote, from the run's files (georef, checks, exceptions, tags, parcels, LiDAR features, encroachment, tunnel profile, HTDP), plus `tunnel_profile.png`. `spike/figures.py` (PyQGIS, renders from `demo.qgz`): `fig_record.png` (checks on the LiDAR), `fig_parcels.png`, `fig_tunnel.png`, `fig_htdp.png` (linework before/after the 0.668 m epoch shift on the intensity image). Both are the last `demo.py` steps. numbers.md carries the caveat that the 61985-4 face is the unclosed 37-acre polygon, so its tunnel profile runs along the wrong figure. |
 | D11 fallback recording, Q&A sheet | Q&A answers are in `ROADMAP.md`. |
 
+## Alphabet without keying, and other sheets
+
+`spike/alphabet.py`: a sheet's own alphabet from its tables. Seed = the public-domain Hershey simplex font (parent of AutoCAD's txt/simplex; digits within 0–2.5 of this lettering, 0 and 6 at 5–7). The seed finds the line/curve tables' NO. cells (L1, L2, … / C1, C2, …), the consecutive run validates them, their glyphs become exact exemplars, a second pass finds the columns the seed misread, and the row cells to the right are labelled by structure (cap-height glyphs are digits/letters, the small glyphs are ° ' " . in fixed order; N|S and E|W picked among letters; `(T)` suffixes; E's separate middle bar merged). Presidio: **95/101 table cells exact vs the hand-keyed tables, 0 wrong**, the 6 misses are `(T)` total cells left as `?`; L1/L2/C1/C2 not found (no cell of their own under the header). `gt.py` is now a validation set; `tags.py` and `tables.py` read `alphabet.npz` / `tables.json` and fall back to it only when absent. With the bootstrapped alphabet Presidio tags 36/40 rows, table checks bearing 8/8, distance 8/8, radius 5/7, arc 5/9.
+
+`spike/sheets.py --run` (alphabet → tags → tables → checks on every sheet with a credible fit; `out/sheets.csv`):
+
+| sheet | lettering | tables read (rows / clean) | tags read | tag checks pass/fail | label checks distance, bearing, arc | exceptions (wrong-line) |
+|---|---|---|---|---|---|---|
+| R-10434.2 Presidio | stroked | 41 / 35 | 36 | 26 / 6 | 25/46, 12/20, 3/13 | 61 (31) |
+| R-10434.1 sibling | stroked, same drafter | 23 / 11 | 15 | 17 / 9 | 13/41, 3/17, 5/25 | 84 (57) |
+| R-10434.3 sibling | stroked, same drafter | 77 / 26 | 59 (+30 partial) | 7 / 16 | 19/122, 10/55, 6/22 | 208 (151) |
+| R-17x.1, R-102.1aa, R-105.14 | real PDF text (Times) | no stroked tables | — | — | 13/42 9/16 0/22 · 4/13 24/28 0/8 · 13/29 17/25 0/12 | 94 (49) · 27 (20) · 48 (28) |
+| R-10258.1 | real text (RomanS), few labels | — | — | — | 0/0, 3/7, 0/2 | 7 (3) |
+
+What it says: the alphabet and table reader carry to the same drafter's other sheets (clean rows 48 % and 34 %: more `(T)` and other cell formats to add). Tag association on the siblings is weak (13 and 12 associated): `MAP_AREA` / `FURNITURE` are still Presidio's frame, and .3 is a denser sheet. The real-text sheets skip the whole glyph path (their tables are not stroked; `real_text_blocks` feeds the label checks directly, and distances from real text are now checked). Wrong-line counts on every other sheet say the leader/tick conventions differ per drafter: that is the adapter work, per sheet, and it is now measurable.
+
 ## Numbers to quote (measured, from the run)
 
 - Georeferencing: 8 of 11 D4 vector sheets credible, 1 weak, 2 refused; Presidio 19/19 control, RMS 0.04 ft; vs Caltrans' own package ~0.6–1.1 ft (raster-limited).
@@ -37,6 +53,8 @@ Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run every
 - The exception page's "reader measured a different line" group is the fastest diagnostic there is: render the measured line, look at 12 crops, fix the biggest cause, repeat. Four rounds took the wrong-line count 103 → 31.
 - Qt reads an 8-digit hex colour as #AARRGGBB, not #RRGGBBAA: buildings came out magenta. Use `QColor(hex6)` + `setAlpha`.
 - `QgsMapSettings.setLayers` takes the stack top-first (legend order); rasters listed first paint over everything.
+- `blocks.py`'s vectorisation kept the block *set* but not the id order; `read_rapid.json` (OCR, not re-run under `--fast`) is now id-misaligned with `blocks.json`. Nothing joins the two by id any more, but re-run `ocr.py` before anything does.
+- The tag reader must mask the tables wherever they are on a sheet (`_regions` in `tables.json`), not Presidio's coordinates: on R-10434.3 every NO. cell read as a drawing tag until it did.
 - Never name a script after a stdlib module: `spike/numbers.py` shadowed `numbers` and broke numpy in every process that had `spike/` on `sys.path`.
 - QGIS project files: do not hand-write the XML. QGIS regenerates layer ids on save (layer-tree links break) and half-specified renderers load "valid" but draw nothing. Build with PyQGIS and render a PNG as the check.
 - Windows: Bash heredocs eat backslashes in regexes; write patch scripts with the Write tool. `PYTHONIOENCODING=utf-8` for any script printing survey symbols.
