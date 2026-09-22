@@ -1,0 +1,1789 @@
+[
+ {
+  "kind": "distance",
+  "text": "245.00'",
+  "issue": "no line found beside label",
+  "region": [
+   298,
+   394,
+   355,
+   441
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "289.24",
+  "issue": "no line found beside label",
+  "region": [
+   298,
+   394,
+   355,
+   441
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "359.00'",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2284,
+   410,
+   2358,
+   439
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "19.22'",
+  "issue": "no line found beside label",
+  "region": [
+   2014,
+   437,
+   2077,
+   465
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S7°55'32\"E",
+  "drawn": "S89°27'50\"W",
+  "off_arcmin": 4956.6,
+  "region": [
+   2063,
+   432,
+   2118,
+   458
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "14.73'",
+  "drawn_ft": 17.33,
+  "off_ft": 2.6,
+  "region": [
+   2063,
+   432,
+   2118,
+   458
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "3.06",
+  "issue": "no line found beside label",
+  "region": [
+   2180,
+   435,
+   2237,
+   462
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "820.50",
+  "drawn_ft": 1108.22,
+  "off_ft": 287.72,
+  "region": [
+   778,
+   451,
+   818,
+   467
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S71°35'42\"W",
+  "issue": "no line found beside label",
+  "region": [
+   2071,
+   456,
+   2132,
+   483
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "59.42'",
+  "issue": "no line found beside label",
+  "region": [
+   2071,
+   456,
+   2132,
+   483
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S4°36'53\"E(R)",
+  "drawn": "S89°47'58\"W",
+  "off_arcmin": 5135.1,
+  "region": [
+   1524,
+   469,
+   1599,
+   522
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N41°58'03\"W(R)",
+  "drawn": "S89°47'58\"W",
+  "off_arcmin": 2894.0,
+  "region": [
+   1524,
+   469,
+   1599,
+   522
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "860.77",
+  "issue": "no line found beside label",
+  "region": [
+   882,
+   485,
+   952,
+   531
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "36.10",
+  "drawn_ft": 12.83,
+  "off_ft": -23.27,
+  "region": [
+   1622,
+   486,
+   1685,
+   512
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "17.71",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2104,
+   521,
+   2165,
+   548
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "171.66'",
+  "drawn_ft": 20.24,
+  "off_ft": -151.42,
+  "region": [
+   1740,
+   526,
+   1790,
+   554
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "55.92'",
+  "drawn_ft": 15.5,
+  "off_ft": -40.42,
+  "region": [
+   1628,
+   520,
+   1689,
+   546
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "22.56'",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2199,
+   530,
+   2233,
+   546
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N68°25'10\"E",
+  "drawn": "S71°46'47\"W",
+  "off_arcmin": 201.6,
+  "region": [
+   2269,
+   526,
+   2329,
+   565
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "50.14",
+  "drawn_ft": 20.24,
+  "off_ft": -29.9,
+  "region": [
+   1753,
+   542,
+   1816,
+   568
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "33.41",
+  "drawn_ft": 1048.92,
+  "off_ft": 1015.51,
+  "region": [
+   1056,
+   536,
+   1090,
+   553
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S6°24'18\"E(R)",
+  "drawn": "N14°05'47\"W",
+  "off_arcmin": 461.5,
+  "region": [
+   1651,
+   569,
+   1718,
+   588
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N70°55'00\"E",
+  "drawn": "N71°13'36\"E",
+  "off_arcmin": 18.6,
+  "region": [
+   1992,
+   558,
+   2053,
+   574
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "335.98'",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2220,
+   557,
+   2276,
+   585
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "82.72'",
+  "drawn_ft": 1543.52,
+  "off_ft": 1460.8,
+  "region": [
+   860,
+   553,
+   919,
+   580
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N15°16'05\"E",
+  "drawn": "N75°06'45\"W",
+  "off_arcmin": 5377.2,
+  "region": [
+   860,
+   553,
+   919,
+   580
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "176.36",
+  "issue": "no line found beside label",
+  "region": [
+   993,
+   552,
+   1032,
+   579
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S21°34'50\"E",
+  "drawn": "N68°25'20\"E",
+  "off_arcmin": 5399.8,
+  "region": [
+   2328,
+   564,
+   2397,
+   593
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "7.68",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2328,
+   564,
+   2397,
+   593
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S2°52'43\"E(R)",
+  "drawn": "S89°53'53\"W",
+  "off_arcmin": 5233.4,
+  "region": [
+   1530,
+   558,
+   1599,
+   587
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1.60'",
+  "drawn_ft": 303.41,
+  "off_ft": 301.81,
+  "region": [
+   2062,
+   564,
+   2125,
+   599
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "85.59'",
+  "drawn_ft": 751.53,
+  "off_ft": 665.94,
+  "region": [
+   969,
+   564,
+   1004,
+   582
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "17.60'",
+  "drawn_ft": 16.25,
+  "off_ft": -1.35,
+  "region": [
+   712,
+   565,
+   772,
+   592
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N21°34'50\"W",
+  "drawn": "S71°24'19\"W",
+  "off_arcmin": 5220.9,
+  "region": [
+   2159,
+   574,
+   2231,
+   611
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "5.50",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2159,
+   574,
+   2231,
+   611
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "152.50'",
+  "drawn_ft": 175.4,
+  "off_ft": 22.9,
+  "region": [
+   1948,
+   577,
+   1987,
+   594
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "32.32",
+  "drawn_ft": 10.02,
+  "off_ft": -22.3,
+  "region": [
+   1011,
+   583,
+   1095,
+   633
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N16°09'26\"E",
+  "drawn": "S75°42'41\"E",
+  "off_arcmin": 5287.9,
+  "region": [
+   1011,
+   583,
+   1095,
+   633
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N62°34'15\"W(R)",
+  "drawn": "S89°53'53\"W",
+  "off_arcmin": 1651.9,
+  "region": [
+   1528,
+   583,
+   1604,
+   612
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "315.19",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2205,
+   601,
+   2249,
+   619
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N70°50'05\"E",
+  "drawn": "S66°15'57\"W",
+  "off_arcmin": 274.1,
+  "region": [
+   2316,
+   609,
+   2388,
+   642
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "269.94'",
+  "issue": "no line found beside label",
+  "region": [
+   936,
+   627,
+   1018,
+   669
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "10.71",
+  "drawn_ft": 9.96,
+  "off_ft": -0.75,
+  "region": [
+   877,
+   618,
+   935,
+   644
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "232.07",
+  "drawn_ft": 22.27,
+  "off_ft": -209.8,
+  "region": [
+   1737,
+   615,
+   1794,
+   667
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "22.32'",
+  "drawn_ft": 23.21,
+  "off_ft": 0.89,
+  "region": [
+   1207,
+   633,
+   1266,
+   662
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N67°37'21\"W",
+  "drawn": "N71°22'50\"W",
+  "off_arcmin": 225.5,
+  "region": [
+   1146,
+   633,
+   1213,
+   663
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "21.03'",
+  "drawn_ft": 120.18,
+  "off_ft": 99.15,
+  "region": [
+   2113,
+   638,
+   2184,
+   686
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S23°07'50\"E(R)",
+  "drawn": "S73°58'52\"W",
+  "off_arcmin": 4973.3,
+  "region": [
+   1959,
+   634,
+   2043,
+   684
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "5.67",
+  "drawn_ft": 80.85,
+  "off_ft": 75.18,
+  "region": [
+   1959,
+   634,
+   2043,
+   684
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "338.91",
+  "drawn_ft": 80.85,
+  "off_ft": -258.06,
+  "region": [
+   1959,
+   634,
+   2043,
+   684
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S75°07'35\"E",
+  "drawn": "N75°10'57\"W",
+  "off_arcmin": 3.4,
+  "region": [
+   886,
+   638,
+   946,
+   665
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "15.00'",
+  "drawn_ft": 19.58,
+  "off_ft": 4.58,
+  "region": [
+   2231,
+   640,
+   2280,
+   678
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "168.52'",
+  "drawn_ft": 174.08,
+  "off_ft": 5.56,
+  "region": [
+   1212,
+   669,
+   1251,
+   685
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S0°45'35\"W(R)",
+  "drawn": "S25°56'29\"E",
+  "off_arcmin": 1602.1,
+  "region": [
+   1342,
+   688,
+   1420,
+   724
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "115.04'",
+  "drawn_ft": 90.22,
+  "off_ft": -24.82,
+  "region": [
+   1666,
+   684,
+   1728,
+   722
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "113.39'",
+  "drawn_ft": 239.85,
+  "off_ft": 126.46,
+  "region": [
+   1192,
+   691,
+   1266,
+   726
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S86°03'39\"W",
+  "drawn": "S80°26'20\"E",
+  "off_arcmin": 810.0,
+  "region": [
+   1404,
+   684,
+   1466,
+   713
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "62.27",
+  "drawn_ft": 42.73,
+  "off_ft": -19.54,
+  "region": [
+   1404,
+   684,
+   1466,
+   713
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "232.04'",
+  "issue": "no line found beside label",
+  "region": [
+   833,
+   688,
+   888,
+   727
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "8.08",
+  "issue": "no line found beside label",
+  "region": [
+   1755,
+   693,
+   1858,
+   734
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "342.74'",
+  "drawn_ft": 17.16,
+  "off_ft": -325.58,
+  "region": [
+   1503,
+   704,
+   1553,
+   740
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "165.47'",
+  "drawn_ft": 17.16,
+  "off_ft": -148.31,
+  "region": [
+   1503,
+   704,
+   1553,
+   740
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "86.50",
+  "issue": "no line found beside label",
+  "region": [
+   1995,
+   722,
+   2064,
+   772
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "27.48",
+  "issue": "no line found beside label",
+  "region": [
+   1995,
+   722,
+   2064,
+   772
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "76.46'",
+  "drawn_ft": 15.28,
+  "off_ft": -61.18,
+  "region": [
+   1113,
+   741,
+   1170,
+   768
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N67°37'21\"W",
+  "drawn": "S89°27'50\"W",
+  "off_arcmin": 1374.8,
+  "region": [
+   1193,
+   740,
+   1255,
+   766
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "50.48",
+  "drawn_ft": 10.67,
+  "off_ft": -39.81,
+  "region": [
+   1193,
+   740,
+   1255,
+   766
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "73.82'",
+  "drawn_ft": 122.66,
+  "off_ft": 48.84,
+  "region": [
+   1610,
+   746,
+   1645,
+   763
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "44.49",
+  "drawn_ft": 23.14,
+  "off_ft": -21.35,
+  "region": [
+   1707,
+   756,
+   1761,
+   782
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "399.82'",
+  "drawn_ft": 13.58,
+  "off_ft": -386.24,
+  "region": [
+   1323,
+   773,
+   1371,
+   810
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1450.00'",
+  "drawn_ft": 171.69,
+  "off_ft": -1278.31,
+  "region": [
+   1392,
+   782,
+   1436,
+   820
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "60.39'",
+  "drawn_ft": 171.69,
+  "off_ft": 111.3,
+  "region": [
+   1392,
+   782,
+   1436,
+   820
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1570.73'",
+  "drawn_ft": 11.17,
+  "off_ft": -1559.56,
+  "region": [
+   1788,
+   784,
+   1835,
+   823
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N86°55'35\"E",
+  "drawn": "N27°26'39\"E",
+  "off_arcmin": 3568.9,
+  "region": [
+   1422,
+   801,
+   1481,
+   828
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "24.23",
+  "drawn_ft": 13.4,
+  "off_ft": -10.83,
+  "region": [
+   1422,
+   801,
+   1481,
+   828
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S2°27'57\"E(R)",
+  "drawn": "S89°27'50\"W",
+  "off_arcmin": 5284.2,
+  "region": [
+   1289,
+   814,
+   1356,
+   845
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S75°11'28\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 920.7,
+  "region": [
+   2254,
+   861,
+   2307,
+   877
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "96.27",
+  "drawn_ft": 190.91,
+  "off_ft": 94.64,
+  "region": [
+   2321,
+   862,
+   2353,
+   878
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "305.00'",
+  "drawn_ft": 13.25,
+  "off_ft": -291.75,
+  "region": [
+   1450,
+   864,
+   1497,
+   902
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "109.33'",
+  "drawn_ft": 13.25,
+  "off_ft": -96.08,
+  "region": [
+   1450,
+   864,
+   1497,
+   902
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S75°12'02\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 920.1,
+  "region": [
+   2255,
+   875,
+   2308,
+   891
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "207.17'",
+  "drawn_ft": 17.67,
+  "off_ft": -189.5,
+  "region": [
+   918,
+   886,
+   967,
+   923
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "249.97'",
+  "drawn_ft": 17.67,
+  "off_ft": -232.3,
+  "region": [
+   918,
+   886,
+   967,
+   923
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "19.34'",
+  "drawn_ft": 190.91,
+  "off_ft": 171.57,
+  "region": [
+   2322,
+   891,
+   2352,
+   907
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S79°17'24\"W",
+  "drawn": "N88°29'26\"W",
+  "off_arcmin": 733.2,
+  "region": [
+   696,
+   904,
+   758,
+   931
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "16.99",
+  "drawn_ft": 9.42,
+  "off_ft": -7.57,
+  "region": [
+   696,
+   904,
+   758,
+   931
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S70°11'40\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 1220.5,
+  "region": [
+   2256,
+   905,
+   2308,
+   920
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "6.29'",
+  "drawn_ft": 190.91,
+  "off_ft": 184.62,
+  "region": [
+   2324,
+   906,
+   2351,
+   921
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S74°42'15\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 949.9,
+  "region": [
+   2257,
+   919,
+   2311,
+   935
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "206.25'",
+  "drawn_ft": 9.42,
+  "off_ft": -196.83,
+  "region": [
+   692,
+   929,
+   741,
+   964
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "56.88",
+  "drawn_ft": 9.42,
+  "off_ft": -47.46,
+  "region": [
+   692,
+   929,
+   741,
+   964
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "139.90'",
+  "drawn_ft": 190.91,
+  "off_ft": 51.01,
+  "region": [
+   2318,
+   933,
+   2354,
+   949
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S75°11'28\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 920.7,
+  "region": [
+   2256,
+   933,
+   2309,
+   949
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "179.38'",
+  "drawn_ft": 220.66,
+  "off_ft": 41.28,
+  "region": [
+   1916,
+   940,
+   1953,
+   956
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S2°05'39\"W(R)",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 5242.2,
+  "region": [
+   2115,
+   946,
+   2184,
+   966
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "113.14'",
+  "drawn_ft": 220.66,
+  "off_ft": 107.52,
+  "region": [
+   2006,
+   956,
+   2040,
+   972
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N14°51'19\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 4476.5,
+  "region": [
+   2256,
+   962,
+   2308,
+   978
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "9.98'",
+  "drawn_ft": 220.66,
+  "off_ft": 210.68,
+  "region": [
+   2011,
+   972,
+   2039,
+   988
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N26°30'36\"W(R)",
+  "drawn": "S41°07'24\"W",
+  "off_arcmin": 4058.0,
+  "region": [
+   663,
+   996,
+   739,
+   1015
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S21°04'16\"W",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 4103.6,
+  "region": [
+   2254,
+   976,
+   2313,
+   993
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "21.90'",
+  "drawn_ft": 190.91,
+  "off_ft": 169.01,
+  "region": [
+   2322,
+   977,
+   2355,
+   993
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "60.00'",
+  "drawn_ft": 220.66,
+  "off_ft": 160.66,
+  "region": [
+   1920,
+   988,
+   1953,
+   1005
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "26.52'",
+  "drawn_ft": 220.66,
+  "off_ft": 194.14,
+  "region": [
+   2008,
+   1003,
+   2040,
+   1019
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N10°18'39\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 4749.2,
+  "region": [
+   2253,
+   1005,
+   2311,
+   1021
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "39.97",
+  "drawn_ft": 190.91,
+  "off_ft": 150.94,
+  "region": [
+   2320,
+   1005,
+   2354,
+   1022
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S7°57'05\"W(R)",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 4890.8,
+  "region": [
+   2115,
+   1009,
+   2184,
+   1029
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "50.22'",
+  "drawn_ft": 220.66,
+  "off_ft": 170.44,
+  "region": [
+   1715,
+   1012,
+   1750,
+   1028
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "21.58'",
+  "drawn_ft": 220.66,
+  "off_ft": 199.08,
+  "region": [
+   2007,
+   1019,
+   2038,
+   1034
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N89°32'10\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 4.3,
+  "region": [
+   2256,
+   1020,
+   2310,
+   1036
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "50.22'",
+  "drawn_ft": 220.66,
+  "off_ft": 170.44,
+  "region": [
+   1715,
+   1025,
+   1749,
+   1042
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "58.79'",
+  "drawn_ft": 220.66,
+  "off_ft": 161.87,
+  "region": [
+   1806,
+   1026,
+   1840,
+   1042
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S1°02'33\"W(R)",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 5305.3,
+  "region": [
+   2114,
+   1025,
+   2182,
+   1045
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "45.93'",
+  "drawn_ft": 220.66,
+  "off_ft": 174.73,
+  "region": [
+   2007,
+   1034,
+   2038,
+   1049
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "24.22'",
+  "drawn_ft": 190.91,
+  "off_ft": 166.69,
+  "region": [
+   2319,
+   1033,
+   2350,
+   1049
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N23°43'19\"E(R)",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 3944.5,
+  "region": [
+   2114,
+   1041,
+   2186,
+   1061
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "7.51'",
+  "drawn_ft": 220.66,
+  "off_ft": 213.15,
+  "region": [
+   1811,
+   1042,
+   1838,
+   1059
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1470.00'",
+  "drawn_ft": 220.66,
+  "off_ft": -1249.34,
+  "region": [
+   1913,
+   1048,
+   1953,
+   1063
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "521.76'",
+  "drawn_ft": 220.66,
+  "off_ft": -301.1,
+  "region": [
+   2004,
+   1048,
+   2039,
+   1064
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S88°01'40\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 150.5,
+  "region": [
+   2256,
+   1048,
+   2309,
+   1064
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "6.44'",
+  "drawn_ft": 190.91,
+  "off_ft": 184.47,
+  "region": [
+   2322,
+   1048,
+   2349,
+   1064
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N25°31'16\"E(R)",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 3836.6,
+  "region": [
+   2114,
+   1057,
+   2186,
+   1077
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "232.04'",
+  "drawn_ft": 220.66,
+  "off_ft": -11.38,
+  "region": [
+   1713,
+   1058,
+   1753,
+   1075
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S4°41'30\"E",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 5150.7,
+  "region": [
+   2257,
+   1062,
+   2305,
+   1078
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "342.74'",
+  "drawn_ft": 220.66,
+  "off_ft": -122.08,
+  "region": [
+   1915,
+   1063,
+   1952,
+   1079
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "55.50'",
+  "drawn_ft": 220.66,
+  "off_ft": 165.16,
+  "region": [
+   1718,
+   1074,
+   1752,
+   1091
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "41.07'",
+  "drawn_ft": 220.66,
+  "off_ft": 179.59,
+  "region": [
+   1805,
+   1074,
+   1838,
+   1091
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S52°37'35\"W(R)",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 2210.3,
+  "region": [
+   2113,
+   1074,
+   2188,
+   1093
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "6.24'",
+  "drawn_ft": 220.66,
+  "off_ft": 214.42,
+  "region": [
+   2009,
+   1078,
+   2035,
+   1094
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "34.50'",
+  "drawn_ft": 220.66,
+  "off_ft": 186.16,
+  "region": [
+   1718,
+   1090,
+   1752,
+   1106
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "44.62'",
+  "drawn_ft": 220.66,
+  "off_ft": 176.04,
+  "region": [
+   1805,
+   1090,
+   1840,
+   1106
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S55°48'55\"W(R)",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 2018.9,
+  "region": [
+   2112,
+   1090,
+   2187,
+   1124
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S2°19'35\"E(R)",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 5292.6,
+  "region": [
+   2112,
+   1090,
+   2187,
+   1124
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1334.50'",
+  "drawn_ft": 190.91,
+  "off_ft": -1143.59,
+  "region": [
+   2317,
+   1090,
+   2357,
+   1106
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N74°13'41\"W",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 978.5,
+  "region": [
+   2256,
+   1090,
+   2310,
+   1106
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1520.00'",
+  "drawn_ft": 220.66,
+  "off_ft": -1299.34,
+  "region": [
+   1915,
+   1093,
+   1955,
+   1108
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "60.41'",
+  "drawn_ft": 220.66,
+  "off_ft": 160.25,
+  "region": [
+   2008,
+   1093,
+   2038,
+   1109
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S68°24'07\"W",
+  "drawn": "N89°27'50\"E",
+  "off_arcmin": 1263.7,
+  "region": [
+   2256,
+   1104,
+   2311,
+   1120
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "609.42'",
+  "drawn_ft": 190.91,
+  "off_ft": -418.51,
+  "region": [
+   2319,
+   1105,
+   2355,
+   1121
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "399.82'",
+  "drawn_ft": 220.66,
+  "off_ft": -179.16,
+  "region": [
+   1713,
+   1106,
+   1753,
+   1122
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "22.51'",
+  "drawn_ft": 220.66,
+  "off_ft": 198.15,
+  "region": [
+   1806,
+   1107,
+   1839,
+   1123
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "997.48",
+  "drawn_ft": 220.66,
+  "off_ft": -776.82,
+  "region": [
+   2004,
+   1107,
+   2040,
+   1122
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1639.00'",
+  "drawn_ft": 220.66,
+  "off_ft": -1418.34,
+  "region": [
+   1914,
+   1108,
+   1954,
+   1123
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1529.50'",
+  "drawn_ft": 190.91,
+  "off_ft": -1338.59,
+  "region": [
+   2319,
+   1119,
+   2359,
+   1135
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "399.82'",
+  "drawn_ft": 220.66,
+  "off_ft": -179.16,
+  "region": [
+   1714,
+   1121,
+   1754,
+   1138
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "434.47'",
+  "drawn_ft": 220.66,
+  "off_ft": -213.81,
+  "region": [
+   2005,
+   1138,
+   2041,
+   1154
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "5.62'",
+  "drawn_ft": 220.66,
+  "off_ft": 215.04,
+  "region": [
+   2012,
+   1152,
+   2038,
+   1167
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1991.35",
+  "issue": "no line found beside label",
+  "region": [
+   1891,
+   1213,
+   1975,
+   1243
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "7.21",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   992,
+   1338,
+   1017,
+   1354
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "3.34",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   992,
+   1352,
+   1019,
+   1368
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "5.27",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   992,
+   1364,
+   1020,
+   1381
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "11.45",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   990,
+   1436,
+   1024,
+   1466
+  ]
+ }
+]
