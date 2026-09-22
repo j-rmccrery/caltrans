@@ -1,157 +1,89 @@
 check,printed,drawn,difference,result
 distance,138.21',138.24,+0.03,pass
-distance,168.12,168.13,+0.01,pass
+distance,168.12,182.59,+14.47,FAIL
 distance,182.62,182.59,-0.03,pass
 bearing,"S70°50'46""W","S70°51'10""W",0.4',pass
 bearing,"S7°55'32""E","N89°27'50""E",4956.6',FAIL
-distance,14.73',17.33,+2.60,FAIL
-arc length,820.50,612.90 (R=nan),-207.60,FAIL
+distance,14.73',6.25,-8.48,FAIL
+distance,3.06,3.03,-0.03,pass
+distance,820.50,699.80,-120.70,FAIL
+bearing,"S71°35'42""W","S71°35'16""W",0.4',pass
+distance,59.42',59.45,+0.03,pass
 bearing (R),"S4°36'53""E(R)",,,radial: not checked
 bearing (R),"N41°58'03""W(R)",,,radial: not checked
-distance,138.71',138.65,-0.06,pass
-bearing,"S82°04'27""W","S82°04'27""W",0.0',pass
 bearing,"S80°23'54""E","S80°23'28""E",0.4',pass
 distance,274.87',274.88,+0.01,pass
-distance,36.10,12.83,-23.27,FAIL
+distance,36.10,36.13,+0.03,pass
 bearing,"S77°45'13""E","S77°45'34""E",0.4',pass
-distance,154.98',154.94,-0.04,pass
+distance,154.98',29.52,-125.46,FAIL
 distance,290.55',290.52,-0.03,pass
-arc length,17.71,546.01 (R=nan),+528.30,FAIL
-distance,171.66',20.24,-151.42,FAIL
-distance,55.92',15.50,-40.42,FAIL
-bearing,"N68°25'10""E","N71°46'47""E",201.6',FAIL
-distance,50.14,20.24,-29.90,FAIL
-arc length,33.41,21.61 (R=28.0),-11.80,FAIL
+distance,17.71,17.79,+0.08,pass
+distance,55.92',53.27,-2.65,FAIL
+arc length,22.56',28.63 (R=nan),+6.07,FAIL
+distance,50.14,50.12,-0.02,pass
+arc length,33.41,40.18 (R=nan),+6.77,FAIL
 distance,156.89',156.92,+0.03,pass
 bearing (R),"S6°24'18""E(R)",,,radial: not checked
-bearing,"N70°55'00""E","N71°13'36""E",18.6',FAIL
-distance,82.72',865.78,+783.06,FAIL
-bearing,"N15°16'05""E","S75°12'09""E",5371.8',FAIL
+bearing,"N70°55'00""E","N70°53'41""E",1.3',pass
+arc length,335.98',322.42 (R=nan),-13.56,FAIL
+distance,82.72',76.82,-5.90,FAIL
+bearing,"N15°16'05""E","N15°13'35""E",2.5',pass
 bearing,"S21°34'50""E","N68°25'20""E",5399.8',FAIL
 bearing,"N68°25'10""E","N68°25'20""E",0.2',pass
 bearing (R),"S2°52'43""E(R)",,,radial: not checked
-distance,1.60',303.41,+301.81,FAIL
-distance,85.59',865.78,+780.19,FAIL
-distance,17.60',16.25,-1.35,FAIL
-bearing,"N21°34'50""W","S71°24'19""W",5220.9',FAIL
-arc length,5.50,606.49 (R=nan),+600.99,FAIL
-distance,152.50',175.40,+22.90,FAIL
-distance,149.83,149.82,-0.01,pass
-bearing,"S75°41'44""E","S75°42'41""E",0.9',pass
-distance,32.32,10.02,-22.30,FAIL
-bearing,"N16°09'26""E","S75°42'41""E",5287.9',FAIL
+distance,1.60',11.45,+9.85,FAIL
+arc length,85.59',82.39 (R=nan),-3.20,FAIL
+distance,17.60',17.63,+0.03,pass
+bearing,"N21°34'50""W","N68°25'02""E",5399.9',FAIL
+distance,152.50',78.80,-73.70,FAIL
 distance,208.34',208.35,+0.01,pass
 bearing (R),"N62°34'15""W(R)",,,radial: not checked
 distance,245.61,245.60,-0.01,pass
-bearing,"N70°50'05""E","N66°15'57""E",274.1',FAIL
-distance,10.71,9.96,-0.75,FAIL
+bearing,"N70°50'05""E","N70°44'18""E",5.8',FAIL
+arc length,269.94',144.03 (R=232.0),-125.91,FAIL
+distance,10.71,10.74,+0.03,pass
 distance,245.61',245.60,-0.01,pass
-distance,232.07,22.27,-209.80,FAIL
-distance,22.32',228.96,+206.64,FAIL
-bearing,"N67°37'21""W","N71°22'50""W",225.5',FAIL
-bearing,"N68°24'07""E","N68°24'45""E",0.6',pass
-distance,124.10,124.11,+0.01,pass
-arc length,21.03',13.31 (R=15.0),-7.72,FAIL
+distance,22.32',22.37,+0.05,pass
+bearing,"N67°37'21""W","N12°31'40""E",4809.0',FAIL
+arc length,21.03',21.08 (R=nan),+0.05,pass
 bearing (R),"S23°07'50""E(R)",,,radial: not checked
-distance,5.67,80.85,+75.18,FAIL
-arc length,338.91,424.74 (R=nan),+85.83,FAIL
-bearing,"S75°07'35""E","S75°10'57""E",3.4',FAIL
-distance,15.00',19.58,+4.58,FAIL
-distance,168.52',199.25,+30.73,FAIL
+distance,5.67,94.51,+88.84,FAIL
+arc length,338.91,200.02 (R=nan),-138.89,FAIL
+distance,168.52',115.07,-53.45,FAIL
 bearing (R),"S0°45'35""W(R)",,,radial: not checked
-distance,115.04',90.22,-24.82,FAIL
-distance,120.19',120.18,-0.01,pass
-arc length,113.39',216.23 (R=nan),+102.84,FAIL
-bearing,"S86°03'39""W","N81°04'28""W",771.9',FAIL
-distance,62.27,18.93,-43.34,FAIL
+distance,120.19',10.47,-109.72,FAIL
+distance,113.39',115.08,+1.69,FAIL
+bearing,"S86°03'39""W","S86°37'48""W",34.2',FAIL
+arc length,62.27,57.58 (R=nan),-4.69,FAIL
+distance,8.08,8.08,+0.00,pass
 arc length,342.74',165.46 (R=342.9),-177.28,FAIL
 arc length,165.47',165.46 (R=342.9),-0.01,pass
-distance,76.46',15.28,-61.18,FAIL
-bearing,"N67°37'21""W","S89°27'50""W",1374.8',FAIL
-arc length,50.48,43.57 (R=13.9),-6.91,FAIL
+distance,86.50,86.53,+0.03,pass
+arc length,27.48,0.00 (R=nan),-27.48,FAIL
+distance,76.46',64.94,-11.52,FAIL
+bearing,"N67°37'21""W","N67°07'54""W",29.5',FAIL
+distance,50.48,50.39,-0.09,pass
 bearing,"N77°39'22""E","N77°38'60""E",0.4',pass
-distance,73.82',122.66,+48.84,FAIL
-distance,44.49,23.14,-21.35,FAIL
-distance,399.82',13.58,-386.24,FAIL
-distance,1450.00',171.69,-1278.31,FAIL
-distance,60.39',171.69,+111.30,FAIL
+arc length,73.82',54.00 (R=nan),-19.82,FAIL
+distance,44.49,44.50,+0.01,pass
+distance,1450.00',170.01,-1279.99,FAIL
+distance,60.39',170.01,+109.62,FAIL
 bearing,"S10°09'24""W","S10°09'12""W",0.2',pass
 distance,101.10',101.09,-0.01,pass
 distance,391.93,391.96,+0.03,pass
-distance,1570.73',11.17,-1559.56,FAIL
-bearing,"N86°55'35""E","N27°26'39""E",3568.9',FAIL
-distance,24.23,13.40,-10.83,FAIL
+bearing,"N86°55'35""E","N86°37'48""E",17.8',FAIL
+distance,24.23,24.27,+0.04,pass
 bearing (R),"S2°27'57""E(R)",,,radial: not checked
-bearing,"S75°11'28""E","N89°27'50""E",920.7',FAIL
-distance,96.27,190.91,+94.64,FAIL
-distance,305.00',13.25,-291.75,FAIL
-distance,109.33',13.25,-96.08,FAIL
-bearing,"S75°12'02""E","N89°27'50""E",920.1',FAIL
-distance,207.17',17.67,-189.50,FAIL
-distance,249.97',17.67,-232.30,FAIL
-distance,19.34',190.91,+171.57,FAIL
-bearing,"S79°17'24""W","N88°29'26""W",733.2',FAIL
-arc length,16.99,24.47 (R=nan),+7.48,FAIL
-bearing,"S70°11'40""E","N89°27'50""E",1220.5',FAIL
-distance,6.29',190.91,+184.62,FAIL
-bearing,"S74°42'15""E","N89°27'50""E",949.9',FAIL
-arc length,206.25',24.47 (R=nan),-181.78,FAIL
-arc length,56.88,24.47 (R=nan),-32.41,FAIL
-distance,139.90',190.91,+51.01,FAIL
-bearing,"S75°11'28""E","N89°27'50""E",920.7',FAIL
-distance,179.38',220.66,+41.28,FAIL
-bearing (R),"S2°05'39""W(R)",,,radial: not checked
-distance,113.14',220.66,+107.52,FAIL
-bearing,"N14°51'19""E","N89°27'50""E",4476.5',FAIL
-distance,9.98',220.66,+210.68,FAIL
+distance,207.17',6.25,-200.92,FAIL
+distance,249.97',6.25,-243.72,FAIL
+bearing,"S79°17'24""W","S79°18'34""W",1.2',pass
+distance,16.99,17.02,+0.03,pass
+arc length,56.88,56.88 (R=206.3),-0.00,pass
 bearing (R),"N26°30'36""W(R)",,,radial: not checked
-bearing,"S21°04'16""W","S89°27'50""W",4103.6',FAIL
-distance,21.90',190.91,+169.01,FAIL
 bearing,"S52°28'06""E","S52°28'59""E",0.9',pass
 distance,110.52,110.59,+0.07,pass
-distance,60.00',220.66,+160.66,FAIL
-distance,26.52',220.66,+194.14,FAIL
-bearing,"N10°18'39""E","N89°27'50""E",4749.2',FAIL
-distance,39.97,190.91,+150.94,FAIL
-bearing (R),"S7°57'05""W(R)",,,radial: not checked
-distance,50.22',220.66,+170.44,FAIL
-distance,21.58',220.66,+199.08,FAIL
-bearing,"N89°32'10""E","N89°27'50""E",4.3',FAIL
-distance,50.22',220.66,+170.44,FAIL
-distance,58.79',220.66,+161.87,FAIL
-bearing (R),"S1°02'33""W(R)",,,radial: not checked
 bearing,"N37°30'09""E","N37°30'13""E",0.1',pass
-distance,45.93',220.66,+174.73,FAIL
-distance,24.22',190.91,+166.69,FAIL
-bearing (R),"N23°43'19""E(R)",,,radial: not checked
-distance,7.51',220.66,+213.15,FAIL
-distance,1470.00',220.66,-1249.34,FAIL
-distance,521.76',220.66,-301.10,FAIL
-bearing,"S88°01'40""E","N89°27'50""E",150.5',FAIL
-distance,6.44',190.91,+184.47,FAIL
-bearing (R),"N25°31'16""E(R)",,,radial: not checked
-distance,232.04',220.66,-11.38,FAIL
-bearing,"S4°41'30""E","N89°27'50""E",5150.7',FAIL
-distance,342.74',220.66,-122.08,FAIL
-distance,55.50',220.66,+165.16,FAIL
-distance,41.07',220.66,+179.59,FAIL
-bearing (R),"S52°37'35""W(R)",,,radial: not checked
-distance,6.24',220.66,+214.42,FAIL
-distance,34.50',220.66,+186.16,FAIL
-distance,44.62',220.66,+176.04,FAIL
-bearing (R),"S55°48'55""W(R)",,,radial: not checked
-bearing (R),"S2°19'35""E(R)",,,radial: not checked
-distance,1334.50',190.91,-1143.59,FAIL
-bearing,"N74°13'41""W","S89°27'50""W",978.5',FAIL
-distance,1520.00',220.66,-1299.34,FAIL
-distance,60.41',220.66,+160.25,FAIL
-bearing,"S68°24'07""W","S89°27'50""W",1263.7',FAIL
-distance,609.42',190.91,-418.51,FAIL
-distance,399.82',220.66,-179.16,FAIL
-distance,22.51',220.66,+198.15,FAIL
-distance,997.48,220.66,-776.82,FAIL
-distance,1639.00',220.66,-1418.34,FAIL
-distance,1529.50',190.91,-1338.59,FAIL
-distance,399.82',220.66,-179.16,FAIL
-distance,434.47',220.66,-213.81,FAIL
-distance,5.62',220.66,+215.04,FAIL
+distance,7.21,104.00,+96.79,FAIL
+distance,3.34,104.00,+100.66,FAIL
+distance,5.27,104.00,+98.73,FAIL
+distance,11.45,104.00,+92.55,FAIL

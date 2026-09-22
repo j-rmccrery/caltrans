@@ -22,7 +22,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from checks import BEAR_TOL, DIST_TOL, arcs_on_sheet, azimuth, fmt_bearing, lines_on_sheet, linework_segments  # noqa: E402
+from checks import BEAR_TOL, DIST_TOL, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, seg_dist, split_at, tag_leaders  # noqa: E402
 from georef import OUT, PDF, segments  # noqa: E402
 from gt import TABLES  # noqa: E402
 
@@ -30,63 +30,6 @@ RADIUS_TOL = 0.01  # fraction: a polyline arc's fitted radius vs the printed one
 BESIDE = 2.5       # glyph heights: how far from the tag a segment may sit to be "beside" it
 CLEAR = 1.5        # the nearest candidate must be this many times closer than the next, else ambiguous
 BOUNDARY = 0.8     # pt: R/W lines are 1.98, parcel and easement lines 0.84; hatch and ticks are 0.36-0.42
-
-
-def leaders(page):
-    """Leaders: thin stroked paths (this drafter's are curly, 15-30 pt, the same 1.02 weight as the
-    lettering) that end at a filled arrowhead triangle. (start, arrowhead) pairs."""
-    heads, paths = [], []
-    for pid, d in enumerate(page.get_drawings()):
-        c, w = d.get("color"), round(d.get("width") or 0, 2)
-        if c is None or max(c) > 0.6:
-            continue
-        r = d["rect"]
-        if d["type"] in ("f", "fs") and len(d["items"]) == 3 and max(r.width, r.height) < 12:
-            heads.append(np.array([[it[1].x, it[1].y] for it in d["items"]]))  # the triangle's corners
-        elif d["type"] == "s" and 0 < w < 1.1:
-            items = [it for it in d["items"] if it[0] in ("l", "c")]
-            if items:
-                pts = [np.array([it[1].x, it[1].y]) for it in items] + [np.array([items[-1][-1].x, items[-1][-1].y])]
-                paths.append((pts[0], pts[-1], sum(np.hypot(*(q - p)) for p, q in zip(pts, pts[1:])), pid))
-    if not heads:
-        return [], set()
-    tree = cKDTree(np.array([h.mean(0) for h in heads]))
-    out, pids = [], set()
-    for p0, p1, total, pid in paths:
-        if not 8 < total < 120:
-            continue
-        for start, end in ((p0, p1), (p1, p0)):
-            dist, j = tree.query(end)
-            if dist < 7:  # the leader stops at the triangle's base; the tip is the corner farthest from it
-                tip = heads[j][int(np.hypot(*(heads[j] - end).T).argmax())]
-                v = tip - heads[j].mean(0)
-                out.append((start, tip, v / max(np.hypot(*v), 1e-9))); pids.add(pid)
-    return out, pids
-
-
-def tag_leaders(tags, paths):
-    """Each leader to the one tag whose box its start is nearest (stacked tags L4/L5/L7 share a
-    neighbourhood; a leader is claimed once). {tag index: arrowhead tip}."""
-    pairs = []
-    for k, t in enumerate(tags):
-        gh = t["gh"]
-        c = np.array([t["cx"], t["cy"]])
-        th = np.radians(t["angle"])
-        u, n = np.array([np.cos(th), np.sin(th)]), np.array([-np.sin(th), np.cos(th)])
-        hw, hh = 0.45 * gh * len(t["tag"]) + 0.3 * gh, 0.7 * gh
-
-        def outside(p):  # distance from the tag's box, 0 inside
-            d = p - c
-            return float(np.hypot(max(abs(d @ u) - hw, 0), max(abs(d @ n) - hh, 0)))
-        for j, (start, head, _) in enumerate(paths):
-            dn = outside(start)
-            if dn < 1.5 * gh and outside(head) > dn:
-                pairs.append((dn, k, j))
-    out, taken = {}, set()
-    for dn, k, j in sorted(pairs):
-        if k not in out and j not in taken:
-            out[k] = paths[j][1:]; taken.add(j)
-    return out
 
 
 def table_rows():
@@ -115,57 +58,10 @@ def fit_radius(P):
     return float(math.sqrt(max(c + cx ** 2 + cy ** 2, 0)))
 
 
-def split_at(P, circles, chains, tol=2.0):
-    """A curved chain runs on through its tangent points; a vertex circle, or a line meeting the curve at
-    an angle (ending on it or crossing it), marks where one table arc ends (C15, C16 and C18 share one
-    drawn curve of R=1470). The cut is the exact meeting point, not the nearest facet vertex. A line
-    that continues the curve's own direction is one of its pieces."""
-    A = np.array([c["p0"] for c in chains]); B = np.array([c["p1"] for c in chains])
-    D = np.array([c["dir"] for c in chains]); LN = np.hypot(*(B - A).T)
-    ctree = cKDTree(circles) if len(circles) else None
-    sin10 = math.sin(math.radians(10))
-    pts, cut = [P[0]], [True]
-    for i in range(len(P) - 1):
-        p, q = P[i], P[i + 1]
-        t = q - p
-        L = max(np.hypot(*t), 1e-9); t = t / L
-        # lines meeting this facet (extended by tol so a line ending on the curve counts): p + s t = a + r d
-        den = t[0] * D[:, 1] - t[1] * D[:, 0]
-        ok = np.abs(den) > sin10
-        ap = A - p
-        s = np.where(ok, (ap[:, 0] * D[:, 1] - ap[:, 1] * D[:, 0]) / np.where(ok, den, 1), -1)
-        r = np.where(ok, (ap[:, 0] * t[1] - ap[:, 1] * t[0]) / np.where(ok, den, 1), -1)
-        for sk in sorted(s[ok & (s > 0.3) & (s < L - 0.3) & (r > -tol) & (r < LN + tol)]):
-            pts.append(p + sk * t); cut.append(True)
-        pts.append(q)
-        cut.append(bool(ctree is not None and ctree.query(q)[0] < 2 * tol))
-    cut[-1] = True
-    pieces, start = [], 0
-    for i in range(1, len(pts)):
-        if cut[i]:
-            pieces.append(np.array(pts[start:i + 1]))  # one facet is still an arc: C18 is 6 ft on R=1470
-            start = i
-    return pieces
-
-
 def shape(seg):
     """The drawn line or arc a check measured, as points (pt), for the exception page."""
     P = seg["pts"][:: max(1, len(seg["pts"]) // 20)] if "pts" in seg else [seg["p0"], seg["p1"]]
     return [[round(float(x), 1), round(float(y), 1)] for x, y in P]
-
-
-def seg_dist(p, a, b):
-    ab = b - a
-    t = np.clip(((p - a) @ ab) / max(ab @ ab, 1e-9), 0, 1)
-    return float(np.hypot(*(p - (a + t * ab))))
-
-
-def poly_dist(p, P):
-    """Distance from p to a polyline (its segments, not just its vertices: R/W curves are 15-40 pt facets)."""
-    A, B = P[:-1], P[1:]
-    AB = B - A
-    t = np.clip(((p - A) * AB).sum(1) / np.maximum((AB * AB).sum(1), 1e-9), 0, 1)
-    return float(np.hypot(*(p - (A + t[:, None] * AB)).T).min())
 
 
 def main():

@@ -174,6 +174,20 @@ def nearest_arc(b, arcs, tol_perp, tol_deg=8.0):
     return None if best is None else best[1]
 
 
+def seg_dist(p, a, b):
+    ab = b - a
+    t = np.clip(((p - a) @ ab) / max(ab @ ab, 1e-9), 0, 1)
+    return float(np.hypot(*(p - (a + t * ab))))
+
+
+def poly_dist(p, P):
+    """Distance from p to a polyline's segments (R/W curves are 15-40 pt facets, vertices are not enough)."""
+    A, B = P[:-1], P[1:]
+    AB = B - A
+    t = np.clip(((p - A) * AB).sum(1) / np.maximum((AB * AB).sum(1), 1e-9), 0, 1)
+    return float(np.hypot(*(p - (A + t[:, None] * AB)).T).min())
+
+
 def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0):  # a rotated label box carries 1-3 deg of angle error
     """The line a label describes: parallel, overlapping it along the reading direction, close beside it.
     A label often sits between two parallel lines; when a printed distance is known, a neighbour whose
@@ -198,6 +212,156 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0):  #
     return min(cands, key=lambda t: t[0])[1]
 
 
+def leaders(page, circles=()):
+    """Leaders: thin stroked paths (this drafter's are curly, 15-30 pt, the same 1.02 weight as the
+    lettering) that end at a filled arrowhead triangle, or at a point-symbol circle (coordinate
+    callouts). (start, tip, arrow direction) and the path ids."""
+    heads, paths = [], []
+    for cx, cy in circles:  # a circle as a "head": its centre is the tip, 3 corners at the centre
+        heads.append(np.array([[cx, cy]] * 3))
+    for pid, d in enumerate(page.get_drawings()):
+        c, w = d.get("color"), round(d.get("width") or 0, 2)
+        if c is None or max(c) > 0.6:
+            continue
+        r = d["rect"]
+        if d["type"] in ("f", "fs") and len(d["items"]) == 3 and max(r.width, r.height) < 12:
+            heads.append(np.array([[it[1].x, it[1].y] for it in d["items"]]))  # the triangle's corners
+        elif d["type"] == "s" and 0 < w < 1.1:
+            items = [it for it in d["items"] if it[0] in ("l", "c")]
+            if items:
+                pts = [np.array([it[1].x, it[1].y]) for it in items] + [np.array([items[-1][-1].x, items[-1][-1].y])]
+                paths.append((pts[0], pts[-1], sum(np.hypot(*(q - p)) for p, q in zip(pts, pts[1:])), pid))
+    if not heads:
+        return [], set()
+    tree = cKDTree(np.array([h.mean(0) for h in heads]))
+    out, pids = [], set()
+    for p0, p1, total, pid in paths:
+        if not 8 < total < 120:
+            continue
+        for start, end in ((p0, p1), (p1, p0)):
+            dist, j = tree.query(end)
+            if dist < 7:  # the leader stops at the triangle's base; the tip is the corner farthest from it
+                tip = heads[j][int(np.hypot(*(heads[j] - end).T).argmax())]
+                v = tip - heads[j].mean(0)
+                out.append((start, tip, v / max(np.hypot(*v), 1e-9))); pids.add(pid)
+    return out, pids
+
+
+def label_box(t):
+    """Centre, axes, half sizes of a label: a text block (w, h) or a tag (text length)."""
+    gh = t.get("gh") or t["glyph_h"]
+    c = np.array([t["cx"], t["cy"]])
+    th = np.radians(t["angle"])
+    u, n = np.array([np.cos(th), np.sin(th)]), np.array([-np.sin(th), np.cos(th)])
+    hw = t["w"] / 2 + 0.3 * gh if "w" in t else 0.45 * gh * len(t["tag"]) + 0.3 * gh
+    hh = t["h"] / 2 + 0.2 * gh if "h" in t else 0.7 * gh
+    return c, u, n, hw, hh, gh
+
+
+def tag_leaders(labels, paths):
+    """Each leader to the one label whose box its start is nearest (stacked tags L4/L5/L7 share a
+    neighbourhood; a leader is claimed once). {label index: (arrowhead tip, arrow direction)}."""
+    pairs = []
+    for k, t in enumerate(labels):
+        c, u, n, hw, hh, gh = label_box(t)
+
+        def outside(p):  # distance from the label's box, 0 inside
+            d = p - c
+            return float(np.hypot(max(abs(d @ u) - hw, 0), max(abs(d @ n) - hh, 0)))
+        for j, (start, head, _) in enumerate(paths):
+            dn = outside(start)
+            if dn < 1.5 * gh and outside(head) > dn:
+                pairs.append((dn, k, j))
+    out, taken = {}, set()
+    for dn, k, j in sorted(pairs):
+        if k not in out and j not in taken:
+            out[k] = paths[j][1:]; taken.add(j)
+    return out
+
+
+def split_chains(chains, circles, tol=2.0):
+    """A straight line on the sheet is one drawn run through several record segments: the record breaks
+    it at every vertex circle and wherever another line ends on it or crosses it at an angle. Cut the
+    chains there so a label's segment is a chain of its own (22.56 ft, not the 214 ft run)."""
+    A = np.array([c["p0"] for c in chains]); B = np.array([c["p1"] for c in chains])
+    D = np.array([c["dir"] for c in chains]); LN = np.hypot(*(B - A).T)
+    C = np.asarray(circles).reshape(-1, 2)
+    sin10 = math.sin(math.radians(10))
+    out = []
+    for k, c in enumerate(chains):
+        p, t, L = c["p0"], c["dir"], c["len_pt"]
+        n = np.array([-t[1], t[0]])
+        cuts = set()
+        if len(C):
+            d = C - p
+            al, pe = d @ t, d @ n
+            cuts.update(al[(np.abs(pe) < 3) & (al > 1) & (al < L - 1)].tolist())
+        angled = np.abs(t[0] * D[:, 1] - t[1] * D[:, 0]) > sin10
+        angled[k] = False
+        for E in (A, B):  # another line's end lying on this one
+            d = E - p
+            al, pe = d @ t, d @ n
+            cuts.update(al[angled & (np.abs(pe) < tol) & (al > 1) & (al < L - 1)].tolist())
+        den = t[0] * D[:, 1] - t[1] * D[:, 0]  # crossings: p + s t = a + r d
+        ok = angled
+        ap = A - p
+        s = np.where(ok, (ap[:, 0] * D[:, 1] - ap[:, 1] * D[:, 0]) / np.where(ok, den, 1), -1)
+        r = np.where(ok, (ap[:, 0] * t[1] - ap[:, 1] * t[0]) / np.where(ok, den, 1), -1)
+        cuts.update(s[ok & (s > 1) & (s < L - 1) & (r > tol) & (r < LN - tol)].tolist())
+        stops = [0.0] + sorted(cuts) + [L]
+        for s0, s1 in zip(stops, stops[1:]):
+            if s1 - s0 >= 1:
+                out.append({**c, "p0": p + t * s0, "p1": p + t * s1, "len_pt": float(s1 - s0)})
+    return out
+
+
+def split_at(P, circles, chains, tol=2.0):
+    """A curved chain runs on through its tangent points; a vertex circle, or a line meeting the curve at
+    an angle (ending on it or crossing it), marks where one table arc ends (C15, C16 and C18 share one
+    drawn curve of R=1470). The cut is the exact meeting point, not the nearest facet vertex. A line
+    that continues the curve's own direction is one of its pieces."""
+    A = np.array([c["p0"] for c in chains]); B = np.array([c["p1"] for c in chains])
+    D = np.array([c["dir"] for c in chains]); LN = np.hypot(*(B - A).T)
+    ctree = cKDTree(circles) if len(circles) else None
+    sin10 = math.sin(math.radians(10))
+    pts, cut = [P[0]], [True]
+    for i in range(len(P) - 1):
+        p, q = P[i], P[i + 1]
+        t = q - p
+        L = max(np.hypot(*t), 1e-9); t = t / L
+        # lines meeting this facet (extended by tol so a line ending on the curve counts): p + s t = a + r d
+        den = t[0] * D[:, 1] - t[1] * D[:, 0]
+        ok = np.abs(den) > sin10
+        ap = A - p
+        s = np.where(ok, (ap[:, 0] * D[:, 1] - ap[:, 1] * D[:, 0]) / np.where(ok, den, 1), -1)
+        r = np.where(ok, (ap[:, 0] * t[1] - ap[:, 1] * t[0]) / np.where(ok, den, 1), -1)
+        for sk in sorted(s[ok & (s > 0.3) & (s < L - 0.3) & (r > -tol) & (r < LN + tol)]):
+            pts.append(p + sk * t); cut.append(True)
+        pts.append(q)
+        cut.append(bool(ctree is not None and ctree.query(q)[0] < 2 * tol))
+    cut[-1] = True
+    pieces, start = [], 0
+    for i in range(1, len(pts)):
+        if cut[i]:
+            pieces.append(np.array(pts[start:i + 1]))  # one facet is still an arc: C18 is 6 ft on R=1470
+            start = i
+    return pieces
+
+
+
+def touches_label(chain, labels_tree, labels):
+    """A chain running along a label with an end inside its box is that label's underline (a callout's
+    separator line), not a line the label describes."""
+    for p in (chain["p0"], chain["p1"]):
+        for k in labels_tree.query_ball_point(p, 60):
+            c, u, n, hw, hh, gh = label_box(labels[k])
+            d = p - c
+            inside = abs(d @ u) < hw + 0.5 * gh and abs(d @ n) < hh + 0.5 * gh
+            if inside and abs(chain["dir"] @ u) > 0.9:  # an underline
+                return True
+    return False
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
@@ -205,12 +369,50 @@ def main():
     scale = float(np.hypot(a, bb))
     rot = np.degrees(np.arctan2(bb, a))
     blocks = json.loads((OUT / "read_rapid.json").read_text(encoding="utf-8")) + real_text_blocks(page)
-    segs = linework_segments(page)
+    # what a label can describe: black linework, minus leaders (their curly paths, then their stubs and
+    # the callout underlines, which end inside a label's box), minus thin 7-pt stationing ticks
     _, circles = segments(page)
-    chains = [c for c in lines_on_sheet(segs, circles) if c["len_pt"] >= 6]
-    # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers
-    arcs = arcs_on_sheet(page) + [c for c in lines_on_sheet(segs, circles, max_turn_deg=6.0) if c["n"] >= 3 and c["len_pt"] > 12]
+    paths, leader_pids = leaders(page, circles)
+    segs = [s for s in linework_segments(page, max_gray=0.2) if s[3] not in leader_pids]
+    ltree = cKDTree(np.array([[b["cx"], b["cy"]] for b in blocks]))
+    starts = cKDTree(np.array([p[0] for p in paths])) if paths else None
+    stub = lambda c: starts is not None and c["len_pt"] < 30 and min(starts.query(c["p0"])[0], starts.query(c["p1"])[0]) < 0.6  # joined to a leader
+    chains = [c for c in lines_on_sheet(segs, circles) if c["len_pt"] >= 1 and not (c["width"] < 0.8 and c["len_pt"] < 9)  # a 1.60 ft segment is 1.2 pt
+              and not stub(c) and not (c["len_pt"] < 150 and touches_label(c, ltree, blocks))]
+    chains = split_chains(chains, circles)
+    # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers; a drawn curve runs
+    # through several record arcs, so it is cut where lines meet it and at vertex circles
+    junction_lines = [c for c in chains if c["len_pt"] >= 9]
+    arcs = [x for x in arcs_on_sheet(page) if max(x["color"]) < 0.2 and np.hypot(*(x["pts"][0] - x["pts"][-1])) > 2]
+    for c in lines_on_sheet(segs, circles, max_turn_deg=20.0):
+        if c["n"] >= 3 and c["len_pt"] > 12:
+            for P in split_at(c["pts"], circles, junction_lines):
+                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
+    tips = tag_leaders(blocks, paths)
+    from overlay import FURNITURE
     rows, exceptions = [], []
+
+    def at_tip(bi, kind, want=None):
+        """The line or arc a label's leader points at (within 4 pt of the arrowhead), if it has a leader.
+        Several pieces meet at an arrowhead (the segment, a stub, a crossing line): the one whose length
+        matches the printed distance wins, else the nearest. Returns (led, segment); led False = no
+        leader, or the leader belongs to another value in the same block: fall back to 'beside'."""
+        if bi not in tips:
+            return False, None
+        tip = tips[bi][0]
+        if kind == "line":
+            cands = [(seg_dist(tip, c["p0"], c["p1"]), c) for c in chains if seg_dist(tip, c["p0"], c["p1"]) < 4.0]
+        else:
+            cands = [(poly_dist(tip, x["pts"]), x) for x in arcs if poly_dist(tip, x["pts"]) < 4.0]
+        if not cands:
+            return True, None
+        if want is not None:
+            close = [t for t in cands if abs(t[1]["len_pt"] * scale - want) < 1.0]
+            if close:
+                return True, min(close, key=lambda t: t[0])[1]
+            if sum(1 for t in blocks[bi]["text"].replace(" ", "").split("|") if DIST.match(t)) > 1:
+                return False, None  # two dimensions in one block, the leader is the other one's
+        return True, min(cands, key=lambda t: t[0])[1]
 
     def region(b):
         return [round(b["cx"] - b["w"] / 2 - 4), round(b["cy"] - b["h"] / 2 - 4), round(b["cx"] + b["w"] / 2 + 4), round(b["cy"] + b["h"] / 2 + 4)]
@@ -220,15 +422,21 @@ def main():
         P = seg["pts"][:: max(1, len(seg["pts"]) // 20)] if "pts" in seg else [seg["p0"], seg["p1"]]
         return [[round(float(x), 1), round(float(y), 1)] for x, y in P]
 
-    for b in blocks:
-        for part in b["text"].replace(" ", "").split("|"):
+    for bi, b in enumerate(blocks):
+        if any(x0 <= b["cx"] <= x1 and y0 <= b["cy"] <= y1 for x0, y0, x1, y1 in FURNITURE):
+            continue  # table cells and title block: the record, not labels on the drawing
+        parts = b["text"].replace(" ", "").split("|")
+        curve_data = any(ANG.match(t) or RAD.match(t) or LEN.match(t) or re.match(r"^[RL][=\-:]", t) for t in parts)
+        for part in parts:
             if BEAR.match(part) and BEAR.match(part)[6]:
                 rows.append(["bearing (R)", part, "", "", "radial: not checked"]); continue
             if BEAR.match(part):
-                mate = next((float(DIST.match(t)[1]) for t in b["text"].replace(" ", "").split("|") if DIST.match(t)), None)
-                ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale)
+                mate = next((float(DIST.match(t)[1]) for t in parts if DIST.match(t)), None)
+                led, ln = at_tip(bi, "line", mate)
+                if not led:
+                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale)
                 if ln is None:
-                    exceptions.append({"kind": "bearing", "text": part, "issue": "no line found beside label", "region": region(b)}); continue
+                    exceptions.append({"kind": "bearing", "text": part, "issue": "leader points at no line" if led else "no line found beside label", "region": region(b)}); continue
                 dx, dy = ln["dir"][0], -ln["dir"][1]                      # sheet direction, y up
                 gx, gy = a * dx - bb * dy, bb * dx + a * dy                # into the grid frame
                 az = math.degrees(math.atan2(gx, gy)) % 360               # from grid north, clockwise
@@ -240,12 +448,14 @@ def main():
                     exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b), "line": shape(ln)})
             elif DIST.match(part) and not b.get("real"):
                 m = DIST.match(part)
-                if m[2] or re.search(r"R=|L=|Δ|△", b["text"]):  # (T) totals and curve data are not line lengths
+                if m[2] or curve_data:  # (T) totals and curve data (R=, Δ, L=) are not line lengths
                     continue
-                ln = nearest_line(b, chains, 5.0 * b["glyph_h"], float(m[1]), scale)
                 want = float(m[1])
+                led, ln = at_tip(bi, "line", want)
+                if not led:
+                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale)
                 if ln is None or abs(ln["len_pt"] * scale - want) > 1.0:
-                    arc = nearest_arc(b, arcs, 5.0 * b["glyph_h"])
+                    arc = at_tip(bi, "arc", want)[1] if led else nearest_arc(b, arcs, 5.0 * b["glyph_h"])
                     if arc is not None and (ln is None or abs(arc["len_pt"] * scale - want) < abs(ln["len_pt"] * scale - want)):
                         drawn = arc["len_pt"] * scale
                         ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
@@ -254,7 +464,7 @@ def main():
                             exceptions.append({"kind": "arc length", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
                         continue
                 if ln is None:
-                    exceptions.append({"kind": "distance", "text": part, "issue": "no line found beside label", "region": region(b)}); continue
+                    exceptions.append({"kind": "distance", "text": part, "issue": "leader points at no line" if led else "no line found beside label", "region": region(b)}); continue
                 W = page.rect.width
                 if min(ln["p0"][0], ln["p1"][0]) < 262 or max(ln["p0"][0], ln["p1"][0]) > W - 50:
                     exceptions.append({"kind": "distance", "text": part, "issue": "line runs to the sheet edge (matchline); not checkable on this sheet", "region": region(b)}); continue
