@@ -84,7 +84,7 @@ def main():
                                             "encroachment": "building-class returns inside a parcel face, clustered, roof-flatness verdict"}.get(kind, "")
             feats.append(feat(f["geometry"], kind=kind, status=status_of(p), rule=rule, **p))
 
-    (OUT / "objects.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": feats}, ensure_ascii=False))
+    (OUT / "objects.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": feats}, ensure_ascii=False), encoding="utf-8")
     by = {}
     for f in feats:
         k = (f["properties"]["kind"], f["properties"]["status"]); by[k] = by.get(k, 0) + 1

@@ -27,6 +27,7 @@ STEPS = [
     ("rasters for QGIS", ["export_rasters.py"]),
     ("object record", ["objects.py"]),
     ("exception page", ["exceptions_page.py"]),
+    ("QGIS project", ["qgis_project.py"]),
 ]
 
 

@@ -1,6 +1,11 @@
 # Loading the demo layers in QGIS
 
-All layers are in `spike/out/`. Add them in this order (bottom to top):
+Open `spike/out/demo.qgz` (built by `spike/qgis_project.py`, last step of `demo.py`): all layers below plus
+the object record (points / lines / polygons, coloured by status: green verified, orange queued, red refused,
+grey record-only) with a map tip on hover (sheet, region, printed, measured, residual, rule, status). Relative
+paths: the whole `spike/out` folder moves as one. Needs QGIS 3.28 or later.
+
+If the project does not open, add the layers by hand in this order (bottom to top):
 
 | Layer | File | CRS |
 |---|---|---|
