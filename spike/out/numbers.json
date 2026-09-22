@@ -9,7 +9,7 @@
  },
  "checks": {
   "distance": {
-   "checked": 46,
+   "checked": 47,
    "pass": 25
   },
   "bearing": {
@@ -17,7 +17,7 @@
    "pass": 12
   },
   "arc length": {
-   "checked": 13,
+   "checked": 12,
    "pass": 3
   },
   "curve L=R*delta": {
@@ -47,7 +47,7 @@
   "partial_queued": 7,
   "associated": 21,
   "by_leader": 20,
-  "queued": 34,
+  "queued": 32,
   "distance": {
    "checked": 10,
    "pass": 8
@@ -57,11 +57,11 @@
    "pass": 9
   },
   "radius": {
-   "checked": 4,
-   "pass": 4
+   "checked": 7,
+   "pass": 5
   },
   "arc length": {
-   "checked": 10,
+   "checked": 6,
    "pass": 2
   }
  },

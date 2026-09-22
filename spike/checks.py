@@ -315,27 +315,36 @@ def split_chains(chains, circles, tol=2.0):
     return out
 
 
-def split_at(P, circles, chains, tol=2.0):
-    """A curved chain runs on through its tangent points; a vertex circle, or a line meeting the curve at
-    an angle (ending on it or crossing it), marks where one table arc ends (C15, C16 and C18 share one
-    drawn curve of R=1470). The cut is the exact meeting point, not the nearest facet vertex. A line
-    that continues the curve's own direction is one of its pieces."""
+def split_at(P, circles, chains, tol=2.0, ticks=()):
+    """A curved chain runs on through its tangent points. What the drawing puts where one record arc ends:
+    a vertex circle, a boundary line ENDING on the curve at an angle (not merely crossing it), or, on a
+    thin alignment curve, a short radial tick. Where nothing is drawn (the C15/C16 boundary on the
+    R=1470 curve) the record alone knows, so the caller compares the run against the sum of its arcs.
+    Cuts are the exact meeting points, not the nearest facet vertex."""
     A = np.array([c["p0"] for c in chains]); B = np.array([c["p1"] for c in chains])
     D = np.array([c["dir"] for c in chains]); LN = np.hypot(*(B - A).T)
+    T = np.asarray(ticks).reshape(-1, 2)
     ctree = cKDTree(circles) if len(circles) else None
-    sin10 = math.sin(math.radians(10))
+    sin30 = math.sin(math.radians(30))
     pts, cut = [P[0]], [True]
     for i in range(len(P) - 1):
         p, q = P[i], P[i + 1]
         t = q - p
         L = max(np.hypot(*t), 1e-9); t = t / L
-        # lines meeting this facet (extended by tol so a line ending on the curve counts): p + s t = a + r d
-        den = t[0] * D[:, 1] - t[1] * D[:, 0]
-        ok = np.abs(den) > sin10
+        n = np.array([-t[1], t[0]])
+        cuts = []
+        den = t[0] * D[:, 1] - t[1] * D[:, 0]  # lines meeting this facet: p + s t = a + r d, with r at one of the line's ends
+        ok = np.abs(den) > sin30
         ap = A - p
         s = np.where(ok, (ap[:, 0] * D[:, 1] - ap[:, 1] * D[:, 0]) / np.where(ok, den, 1), -1)
         r = np.where(ok, (ap[:, 0] * t[1] - ap[:, 1] * t[0]) / np.where(ok, den, 1), -1)
-        for sk in sorted(s[ok & (s > 0.3) & (s < L - 0.3) & (r > -tol) & (r < LN + tol)]):
+        ends = (np.abs(r) < tol) | (np.abs(r - LN) < tol)
+        cuts += s[ok & ends & (s > 0.3) & (s < L - 0.3)].tolist()
+        if len(T):
+            d = T - p
+            al, pe = d @ t, d @ n
+            cuts += al[(np.abs(pe) < tol) & (al > 0.3) & (al < L - 0.3)].tolist()
+        for sk in sorted(set(round(x, 2) for x in cuts)):
             pts.append(p + sk * t); cut.append(True)
         pts.append(q)
         cut.append(bool(ctree is not None and ctree.query(q)[0] < 2 * tol))
@@ -346,7 +355,6 @@ def split_at(P, circles, chains, tol=2.0):
             pieces.append(np.array(pts[start:i + 1]))  # one facet is still an arc: C18 is 6 ft on R=1470
             start = i
     return pieces
-
 
 
 def touches_label(chain, labels_tree, labels):

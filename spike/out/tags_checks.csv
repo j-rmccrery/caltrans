@@ -1,24 +1,4 @@
 tag,check,printed,drawn,difference,result,association
-C1,radius,50.22,,,arc too flat to measure a radius (sagitta 0.22 pt); not checked,beside
-C1,arc length,11.18,11.17,-0.01,pass,beside
-C11,radius,179.38,179.37,-0.01%,pass,leader
-C11,arc length,9.98,123.10,+113.12,FAIL,leader
-C13,radius,60.00,60.04,+0.07%,pass,leader
-C13,arc length,26.52,48.12,+21.60,FAIL,leader
-C14,radius,60.00,60.04,+0.07%,pass,leader
-C14,arc length,21.58,48.12,+26.54,FAIL,leader
-C15,radius,1470.00,,,arc too flat to measure a radius (sagitta 0.17 pt); not checked,leader
-C15,arc length,45.93,52.21,+6.28,FAIL,leader
-C16,radius,1470.00,1469.67,-0.02%,pass,leader
-C16,arc length,521.76,501.10,-20.66,FAIL,leader
-C18,radius,1470.00,,,arc too flat to measure a radius (sagitta 0.17 pt); not checked,leader
-C18,arc length,6.24,52.21,+45.97,FAIL,leader
-C19,radius,1520.00,,,arc too flat to measure a radius (sagitta 0.22 pt); not checked,leader
-C19,arc length,60.41,60.43,+0.02,pass,leader
-C21,radius,1380.00,,,arc too flat to measure a radius (sagitta 0.31 pt); not checked,leader
-C21,arc length,876.88,68.93,-807.95,FAIL,leader
-C22,radius,3600.00,,,arc too flat to measure a radius (sagitta 0.10 pt); not checked,leader
-C22,arc length,434.47,64.67,-369.80,FAIL,leader
 L1,bearing,"N18°06'50""E(R)","S74°35'26""E",5237.7',FAIL,leader
 L1,distance,1.86,1108.21,+1106.35,FAIL,leader
 L4,bearing,"S75°12'02""E","S75°12'43""E",0.7',pass,leader
@@ -41,3 +21,23 @@ L17,bearing,"S4°41'30""E","S4°39'02""E",2.5',pass,leader
 L17,distance,70.80(T),71.11,,total over several segments; not checked,leader
 L21,bearing,"N75°11'28""W","N75°24'43""W",13.3',FAIL,leader
 L21,distance,1529.50,187.00,-1342.50,FAIL,leader
+C1,radius,50.22,,,arc too flat to measure a radius (sagitta 0.22 pt); not checked,beside
+C1,arc length,11.18,11.17,-0.01,pass,beside
+C11,radius,179.38,179.37,-0.01%,pass,leader
+C11,arc length,9.98,123.10,+113.12,FAIL,leader
+C13,radius,60.00,60.04,+0.07%,pass,leader
+C13,arc length,26.52,48.12 = 26.52 + 21.58,+0.02,pass as a run of 2: the boundary between these arcs is not drawn,leader
+C14,radius,60.00,60.04,+0.07%,pass,leader
+C14,arc length,21.58,48.12 = 26.52 + 21.58,+0.02,pass as a run of 2: the boundary between these arcs is not drawn,leader
+C15,radius,1470.00,,,arc too flat to measure a radius (sagitta 0.17 pt); not checked,leader
+C15,arc length,45.93,52.22 = 45.93 + 6.24,+0.05,pass as a run of 2: the boundary between these arcs is not drawn,leader
+C18,radius,1470.00,,,arc too flat to measure a radius (sagitta 0.17 pt); not checked,leader
+C18,arc length,6.24,52.22 = 45.93 + 6.24,+0.05,pass as a run of 2: the boundary between these arcs is not drawn,leader
+C16,radius,1470.00,1469.71,-0.02%,pass,leader
+C16,arc length,521.76,521.73,-0.03,pass,leader
+C19,radius,1520.00,1728.40,+13.71%,FAIL,leader
+C19,arc length,60.41,590.89,+530.48,FAIL,leader
+C21,radius,1380.00,1387.38,+0.53%,pass,leader
+C21,arc length,876.88,115.15,-761.73,FAIL,leader
+C22,radius,3600.00,4385.35,+21.82%,FAIL,leader
+C22,arc length,434.47,816.08,+381.61,FAIL,leader

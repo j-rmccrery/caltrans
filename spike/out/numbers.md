@@ -8,21 +8,21 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 ## Printed vs drawn (labels on the drawing)
 | check | checked | pass |
 |---|---|---|
-| distance | 46 | 25 |
+| distance | 47 | 25 |
 | bearing | 20 | 12 |
-| arc length | 13 | 3 |
+| arc length | 12 | 3 |
 
 - Where a label passes, printed vs drawn agrees to 0.03 ft median (max 0.09) and 0.4′ median bearing.
 - Exception queue: 61 items = 8 genuine disagreements, 31 where the reader measured a different line, 18 labels with no line found, 4 lines leaving the sheet.
 
 ## Table tags (L#, C#) read from the glyph paths, no OCR
-- 36 of 44 table rows found on the drawing (36 distinct), 7 partial reads queued, 21 associated (20 by leader arrowhead), 34 queue items.
+- 36 of 44 table rows found on the drawing (36 distinct), 7 partial reads queued, 21 associated (20 by leader arrowhead), 32 queue items.
 | check | checked | pass |
 |---|---|---|
 | bearing | 11 | 9 |
 | distance | 10 | 8 |
-| radius | 4 | 4 |
-| arc length | 10 | 2 |
+| radius | 7 | 5 |
+| arc length | 6 | 2 |
 
 ## Parcels
 - 27 faces from the heavy linework, 6 named by a label or leader, 5 with a parcel-table area, 0 within 1 % of it (figures leave the sheet at matchlines; easement strips do not close).
