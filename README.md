@@ -19,6 +19,7 @@ with no hand-typed coordinates, draws the sheet's linework on the LiDAR in groun
 | Pair N/E callouts, trace leader lines to the labelled point, fit sheet to CCS83 Zone 3 | `spike/georef.py` | 19 of 19 control points, RMS 0.04 ft; scale 1.38885 ft/pt against a plot scale of 1.38889 |
 | Transform linework to NAD83(2011) UTM 10N with the HTDP epoch shift, draw on LiDAR intensity, export GeoJSON | `spike/overlay.py` | `spike/out/overlay_zoom.png`, `spike/out/sheet_linework.geojson` |
 | Second control path: grid tick labels give one linear equation per grid-line stub | `spike/georef_ticks.py` | CC-680: 12/12 lines, RMS 0.04 ft; ALA-84: 13/13, RMS 0.05 ft |
+| One solver over every control type (callouts, monument notes, grid lines) with consensus and per-axis redundancy | `spike/solve.py` | SON-121: 1 callout + 4 grid lines, 0.31 ft from Caltrans' package, flagged weak in northing |
 | Generalisation run over unrelated District 4 record maps from the public index | `spike/batch.py` | `spike/out/batch.csv`; per-sheet logs in `spike/out/<sheet>/` |
 | LiDAR checks: flight date, control on terrain, epoch offset, building points in corridor, flightline overlap QA | `spike/lidar/q1..q5` | logs in `spike/lidar/out_q*.txt`, plots in `spike/lidar/out/` |
 
@@ -28,8 +29,9 @@ Epoch offset 1991.35 to 2010.0 at the site, from NGS HTDP v3.6.0: 0.668 m (2.19 
 
 The D4 map index (a public ArcGIS feature service) links every District 4 record map and, for most,
 Caltrans' own georeferenced package. Across 11 vector sheets: 8 georeference automatically and agree
-with the Caltrans package to about 1 ft or better (0.05 m on a metric sheet); 3 are refused with a
-reason (no on-sheet control, or too few agreeing points). `SHEET=<pdf>` runs any sheet; outputs go
+with the Caltrans package to about 1 ft or better (0.05 m on a metric sheet); 1 more fits from mixed
+control but is flagged weak (its northing rests on one feature, and the sheet's own N grid label
+disagrees with its callout by 10 ft); 2 are refused (no on-sheet control, or only off-sheet monuments). `SHEET=<pdf>` runs any sheet; outputs go
 to `spike/out/<sheet>/`. Scanned sheets (most of the archive, including the 1969 predecessors of the
 sample sheet) are not handled yet.
 

@@ -38,20 +38,24 @@ def frame(b):
 
 
 def real_text_blocks(page):
-    """Selectable PDF text as blocks shaped like the stroke-derived ones. Newer sheets carry real text."""
+    """Selectable PDF text as blocks shaped like the stroke-derived ones. Newer sheets carry real text.
+    Box and angle come from the character boxes themselves, so rotated lines measure correctly."""
     out = []
-    for blk in page.get_text("dict")["blocks"]:
+    for blk in page.get_text("rawdict")["blocks"]:
         for ln in blk.get("lines", []):
-            text = "".join(sp["text"] for sp in ln["spans"]).strip()
-            if not text:
+            chars = [ch for sp in ln["spans"] for ch in sp["chars"] if ch["c"].strip()]
+            text = "".join(ch["c"] for sp in ln["spans"] for ch in sp["chars"]).strip()
+            if not chars or not text:
                 continue
-            x0, y0, x1, y1 = ln["bbox"]
             dx, dy = ln["dir"]
-            size = max(sp["size"] for sp in ln["spans"])
-            ext = np.hypot(x1 - x0, y1 - y0)
-            w = max(ext - size * abs(dx * dy) * 2, size * 0.6 * len(text)) if abs(dx) > 0.98 or abs(dy) > 0.98 else ext
-            out.append({"cx": (x0 + x1) / 2, "cy": (y0 + y1) / 2, "w": float(w), "h": float(size), "angle": float(np.degrees(np.arctan2(dy, dx))),
-                        "glyphs": len(text), "glyph_h": float(size * 0.7), "text": text, "conf": 1.0, "real": True})
+            u, n = np.array([dx, dy]), np.array([-dy, dx])
+            cs = np.array([[(ch["bbox"][0] + ch["bbox"][2]) / 2, (ch["bbox"][1] + ch["bbox"][3]) / 2] for ch in chars])
+            size = float(np.median([sp["size"] for sp in ln["spans"]]))
+            al, pe = cs @ u, cs @ n
+            c = u * (al.max() + al.min()) / 2 + n * pe.mean()
+            out.append({"cx": float(c[0]), "cy": float(c[1]), "w": float(al.max() - al.min() + 0.6 * size), "h": float(0.75 * size),
+                        "angle": float(np.degrees(np.arctan2(dy, dx))), "glyphs": len(chars), "glyph_h": float(0.7 * size),
+                        "text": text, "conf": 1.0, "real": True})
     return out
 
 
@@ -131,10 +135,12 @@ def trace_leader(co, segs, ends_tree, ends_idx):
         for k, (a, b, w, pid) in enumerate(segs):
             for p0, p1 in ((a, b), (b, a)):
                 d0, d1 = p0 - mid, p1 - mid
-                inside = abs(d0 @ u) < half_w + 2.5 * gh and abs(d0 @ n) < 2.5 * gh
-                outward = np.hypot(*d1) > np.hypot(*d0) + gh  # leader leaves the text; a glyph stroke does not
-                if inside and outward and np.hypot(*(p1 - p0)) > 1.5 * gh and (sep is None or np.hypot(*d0) < sep[1]):
-                    sep = (k, np.hypot(*d0))
+                bu, bn = half_w + 2.0 * gh, 2.5 * gh  # the text box, a little padded
+                inside = abs(d0 @ u) < bu and abs(d0 @ n) < bn
+                far = abs(d1 @ u) > bu or abs(d1 @ n) > bn  # a glyph stroke stays inside; a leader leaves
+                edge = max(abs(d0 @ u) / bu, abs(d0 @ n) / bn)  # 1.0 = starts right at the box edge
+                if inside and far and np.hypot(*(p1 - p0)) > 1.5 * gh and (sep is None or edge > sep[1]):
+                    sep = (k, edge)
         if sep is None:
             return None
         sep = sep[0]

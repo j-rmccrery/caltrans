@@ -45,8 +45,13 @@ def stub(label, segs):
         lo, hi = sorted(((a0 - c) @ u, (a1 - c) @ u))
         if np.hypot(*(a1 - a0)) < 6 or perp < 0.5 * b["h"]:
             continue  # a stroke of one of the label's own digits, not the grid line
-        if perp < 3.0 * b["glyph_h"] and lo < b["w"] / 2 and hi > -b["w"] / 2 and (best is None or perp < best[0]):
-            best = (perp, a0, a1)
+        # the stub sits under the text (rank 0), or, for grid crosses, just past the end of it (rank 1)
+        under = lo < b["w"] / 2 and hi > -b["w"] / 2
+        beside = lo < b["w"] / 2 + 1.2 * b["w"] and hi > -b["w"] / 2 - 1.2 * b["w"]
+        if perp < 3.0 * b["glyph_h"] and (under or beside):
+            key = (0 if under else 1, perp)
+            if best is None or key < best[0]:
+                best = (key, a0, a1)
     return None if best is None else best[1:]
 
 

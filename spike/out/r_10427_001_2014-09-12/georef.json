@@ -1,55 +1,64 @@
 {
- "crs": "EPSG:2227",
- "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy = -pdf_y; units US survey ft, epoch 1991.35",
+ "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; ground units and datum as printed on the sheet",
  "params": [
-  0.46783202756760234,
-  0.5200463790001605,
-  6431963.567120773,
-  1850662.921764995
+  0.4555660217637058,
+  0.524041471743423,
+  6432045.608178521,
+  1850654.3470740227
  ],
- "scale_ft_per_pt": 0.6995105734220123,
- "rotation_deg": 48.02555528800998,
- "rms_ft": 2.2332160888013608e-07,
+ "scale_ft_per_pt": 0.6943773212689351,
+ "rotation_deg": 48.998522840627636,
+ "rms_ft": 0.01761398445911971,
+ "credible": false,
+ "weak": true,
  "control": [
   {
-   "N": 851258.12,
-   "E": 6433019.62,
-   "sx": 1688.7999267578125,
-   "sy": -476.9600830078125,
-   "snapped": false,
-   "vertex": "1 of 1",
-   "residual_ft": 1000059.919009914,
-   "used": false
-  },
-  {
-   "N": 1850497.59,
    "E": 6432665.23,
-   "sx": 293.67999267578125,
-   "sy": -797.239990234375,
-   "snapped": false,
-   "vertex": "2 of 2",
-   "residual_ft": 159.42482295153897,
-   "used": false
-  },
-  {
-   "N": 1851285.58,
-   "E": 6433496.38,
-   "sx": 2127.280029296875,
-   "sy": -1033.760009765625,
-   "snapped": false,
-   "vertex": "1 of 2",
-   "residual_ft": 9.068447209033392e-08,
+   "N": 1850497.59,
+   "sx": 415.05999755859375,
+   "sy": -821.5400390625,
+   "residual_ft": 0.013538432370933558,
    "used": true
   },
   {
-   "N": 1851032.05,
    "E": 6433319.34,
+   "N": 1851032.05,
    "sx": 1688.5599365234375,
    "sy": -1088.0,
-   "snapped": false,
-   "vertex": "1 of 1",
-   "residual_ft": 3.0252505434644976e-07,
+   "residual_ft": 66.67794855609264,
+   "used": false
+  }
+ ],
+ "grid_lines": [
+  {
+   "axis": "E",
+   "value": 6432400.0,
+   "residual": 0.023646528832614422,
    "used": true
+  },
+  {
+   "axis": "E",
+   "value": 6433000.0,
+   "residual": 0.011255505494773388,
+   "used": true
+  },
+  {
+   "axis": "E",
+   "value": 6433600.0,
+   "residual": 0.02106614224612713,
+   "used": true
+  },
+  {
+   "axis": "E",
+   "value": 6433000.0,
+   "residual": 0.015438458882272243,
+   "used": true
+  },
+  {
+   "axis": "N",
+   "value": 1850500.0,
+   "residual": 10.029980333521962,
+   "used": false
   }
  ]
 }
