@@ -1,0 +1,121 @@
+{
+ "georef": {
+  "sheet": "r_10434_002_2020-09-16",
+  "credible": true,
+  "control_points": null,
+  "rms_ft": 0.042,
+  "scale_ft_per_pt": 1.38886,
+  "rotation_deg": 0.536
+ },
+ "checks": {
+  "distance": {
+   "checked": 46,
+   "pass": 25
+  },
+  "bearing": {
+   "checked": 20,
+   "pass": 12
+  },
+  "arc length": {
+   "checked": 13,
+   "pass": 3
+  },
+  "curve L=R*delta": {
+   "checked": 0,
+   "pass": 0
+  },
+  "pass_residual_ft": {
+   "median": 0.03,
+   "max": 0.09
+  },
+  "pass_residual_arcmin": {
+   "median": 0.4,
+   "max": 2.5
+  }
+ },
+ "exceptions": {
+  "total": 61,
+  "unmatched": 18,
+  "matchline": 4,
+  "disagree_small": 8,
+  "wrong_line": 31
+ },
+ "tags": {
+  "table_rows": 44,
+  "read": 36,
+  "distinct": 36,
+  "partial_queued": 7,
+  "associated": 21,
+  "by_leader": 20,
+  "queued": 34,
+  "distance": {
+   "checked": 10,
+   "pass": 8
+  },
+  "bearing": {
+   "checked": 11,
+   "pass": 9
+  },
+  "radius": {
+   "checked": 4,
+   "pass": 4
+  },
+  "arc length": {
+   "checked": 10,
+   "pass": 2
+  }
+ },
+ "parcels": {
+  "faces": 27,
+  "named": 6,
+  "with_table_area": 5,
+  "within_1pct": 0
+ },
+ "lidar_features": {
+  "pavement": {
+   "polygons": 32,
+   "area_m2": 119219
+  },
+  "viaduct deck": {
+   "polygons": 11,
+   "area_m2": 29292
+  },
+  "building": {
+   "polygons": 281,
+   "area_m2": 132129
+  },
+  "buildings_roof_test": 175
+ },
+ "encroachment": {
+  "clusters": 73,
+  "building_verdict": 9,
+  "in_named_parcels": 6,
+  "parcels": [
+   "61806-2",
+   "61806-9|63269|61806",
+   "61985-2",
+   "61985-4",
+   "63269"
+  ]
+ },
+ "tunnel": {
+  "61985-2": {
+   "length_m": 310,
+   "ground_min_m": 16.3,
+   "ground_max_m": 35.4
+  },
+  "61985-4": {
+   "length_m": 595,
+   "ground_min_m": 24.2,
+   "ground_max_m": 66.2
+  }
+ },
+ "htdp": {
+  "from_epoch": 1991.35,
+  "to_epoch": 2010.0,
+  "dN_m": 0.561,
+  "dE_m": -0.362,
+  "shift_m": 0.668,
+  "bearing_deg": 327.2
+ }
+}

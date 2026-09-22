@@ -28,6 +28,8 @@ STEPS = [
     ("object record", ["objects.py"]),
     ("exception page", ["exceptions_page.py"]),
     ("QGIS project", ["qgis_project.py"]),  # runs under QGIS's own Python, see QGIS_PY
+    ("figures", ["figures.py"]),            # same
+    ("numbers for the slides", ["slide_numbers.py"]),
 ]
 QGIS_PY = Path(__import__("os").environ.get("LOCALAPPDATA", "")) / "Programs" / "OSGeo4W" / "bin" / "python-qgis-ltr.bat"
 
@@ -41,9 +43,9 @@ def main():
         if fast and args[0] == "ocr.py" and (HERE / "out" / "read_rapid.json").exists():
             print(f"{name:26} skipped (--fast)"); continue
         t = time.time()
-        if args[0] == "qgis_project.py" and not QGIS_PY.exists():
+        if args[0] in ("qgis_project.py", "figures.py") and not QGIS_PY.exists():
             print(f"{name:26} skipped (QGIS not installed)"); continue
-        r = subprocess.run([str(QGIS_PY) if args[0] == "qgis_project.py" else PY, str(HERE / args[0]), *args[1:]], capture_output=True, text=True, encoding="utf-8", errors="replace",
+        r = subprocess.run([str(QGIS_PY) if args[0] in ("qgis_project.py", "figures.py") else PY, str(HERE / args[0]), *args[1:]], capture_output=True, text=True, encoding="utf-8", errors="replace",
                            env={**__import__("os").environ, "PYTHONIOENCODING": "utf-8"})
         last = [ln for ln in (r.stdout + r.stderr).splitlines() if ln.strip() and "Warning" not in ln][-1:]
         print(f"{name:26} {time.time() - t:6.1f}s  {'ok' if r.returncode == 0 else 'FAILED'}  {last[0][:90] if last else ''}")
