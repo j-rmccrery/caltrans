@@ -35,7 +35,7 @@ def heavy_lines(page):
     for d in page.get_drawings():
         r, c = d["rect"], d.get("color")
         w = round(d.get("width") or 0, 2)
-        if c is None or max(c) > 0.2 or max(r.width, r.height) <= 12:
+        if c is None or max(c) > 0.2:
             continue
         cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
         if not (x0 < cx < x1 and y0 < cy < y1):
@@ -43,8 +43,10 @@ def heavy_lines(page):
         # R/W lines are 1.98; parcel and easement boundaries share the 0.84 weight with leaders and
         # text, so only long 0.84 paths count. Centreline and hatch edges (0.72) are not boundaries.
         total = sum(np.hypot(it[2].x - it[1].x, it[2].y - it[1].y) for it in d["items"] if it[0] == "l") +             sum(np.hypot(it[4].x - it[1].x, it[4].y - it[1].y) for it in d["items"] if it[0] == "c")
-        if w == 0 or total < 12 or (w < 0.8 and total < 40):
-            continue  # fills, glyph-sized bits and short thin leaders; dangling leaders cannot close a face anyway
+        if w == 0 or total < 12 or (w < 0.8 and total < 40) or max(r.width, r.height) <= 12:
+            continue  # fills, characters, short thin leaders. ponytail: admitting the dashed easement strips
+            # (single short strokes) also admits stationing ticks and hatch edges and shatters the corridor
+            # into 70 faces; easement strips want a traverse from the line table instead
         if d["closePath"] and r.width < 90 and r.height < 24:
             continue  # the rounded box drawn around a parcel number is not a boundary
         pts = []
@@ -106,9 +108,29 @@ def main():
         E, N = a * sx - b * sy + tx, b * sx + a * sy + ty
         return E, N
 
+    # a label with a leader names the face the leader points into (tunnel easements, small strips)
+    from scipy.spatial import cKDTree
+    from georef import segments, trace_leader
+    segs, _ = segments(page)
+    ends = np.array([q for s0, s1, _, _ in segs for q in (s0, s1)])
+    idx = [(k, e) for k in range(len(segs)) for e in (0, 1)]
+    tree = cKDTree(ends)
+    label_blocks = [bl for bl in blocks if PARCEL.match(bl["text"].replace(" ", "")) and not bl.get("real")]
+    by_leader = {}
+    for bl in label_blocks:
+        tips = trace_leader({"nb": bl, "eb": bl}, segs, tree, idx) or []
+        for tip in tips[::-1]:  # farthest vertex first
+            pt = Point(tip)
+            hit = [i for i, f in enumerate(faces) if f.buffer(3).contains(pt)]
+            hit = [i for i in hit if not (faces[i].contains(Point(bl["cx"], bl["cy"])))]  # not the face the label itself sits in
+            if hit:
+                by_leader.setdefault(min(hit, key=lambda i: faces[i].area), []).append(PARCEL.match(bl["text"].replace(" ", "")).group(0))
+                break
+    print(f"labels naming a face through a leader: {sum(len(v) for v in by_leader.values())}")
+
     feats, rows = [], []
-    for f in faces:
-        names = [n for n, p in labels if f.contains(p)]
+    for fi, f in enumerate(faces):
+        names = by_leader.get(fi, []) or [n for n, p in labels if f.contains(p)]
         E, N = ground(np.array(f.exterior.coords))
         area_sf = 0.5 * abs(np.dot(E[:-1], N[1:]) - np.dot(N[:-1], E[1:]))
         lon, lat = to_ll.transform(E, N)

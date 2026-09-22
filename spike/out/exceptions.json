@@ -79,10 +79,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "820.50",
-  "drawn_ft": 1108.22,
-  "off_ft": 287.72,
+  "drawn_ft": 612.9,
+  "off_ft": -207.6,
   "region": [
    778,
    451,
@@ -113,30 +113,6 @@
   ]
  },
  {
-  "kind": "bearing",
-  "text": "S4°36'53\"E(R)",
-  "drawn": "S89°47'58\"W",
-  "off_arcmin": 5135.1,
-  "region": [
-   1524,
-   469,
-   1599,
-   522
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N41°58'03\"W(R)",
-  "drawn": "S89°47'58\"W",
-  "off_arcmin": 2894.0,
-  "region": [
-   1524,
-   469,
-   1599,
-   522
-  ]
- },
- {
   "kind": "distance",
   "text": "860.77",
   "issue": "no line found beside label",
@@ -160,9 +136,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "17.71",
-  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "drawn_ft": 546.01,
+  "off_ft": 528.3,
   "region": [
    2104,
    521,
@@ -230,27 +207,15 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "33.41",
-  "drawn_ft": 1048.92,
-  "off_ft": 1015.51,
+  "drawn_ft": 21.61,
+  "off_ft": -11.8,
   "region": [
    1056,
    536,
    1090,
    553
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "S6°24'18\"E(R)",
-  "drawn": "N14°05'47\"W",
-  "off_arcmin": 461.5,
-  "region": [
-   1651,
-   569,
-   1718,
-   588
   ]
  },
  {
@@ -279,8 +244,8 @@
  {
   "kind": "distance",
   "text": "82.72'",
-  "drawn_ft": 1543.52,
-  "off_ft": 1460.8,
+  "drawn_ft": 865.78,
+  "off_ft": 783.06,
   "region": [
    860,
    553,
@@ -291,8 +256,8 @@
  {
   "kind": "bearing",
   "text": "N15°16'05\"E",
-  "drawn": "N75°06'45\"W",
-  "off_arcmin": 5377.2,
+  "drawn": "N75°12'09\"W",
+  "off_arcmin": 5371.8,
   "region": [
    860,
    553,
@@ -335,18 +300,6 @@
   ]
  },
  {
-  "kind": "bearing",
-  "text": "S2°52'43\"E(R)",
-  "drawn": "S89°53'53\"W",
-  "off_arcmin": 5233.4,
-  "region": [
-   1530,
-   558,
-   1599,
-   587
-  ]
- },
- {
   "kind": "distance",
   "text": "1.60'",
   "drawn_ft": 303.41,
@@ -361,8 +314,8 @@
  {
   "kind": "distance",
   "text": "85.59'",
-  "drawn_ft": 751.53,
-  "off_ft": 665.94,
+  "drawn_ft": 865.78,
+  "off_ft": 780.19,
   "region": [
    969,
    564,
@@ -395,9 +348,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "5.50",
-  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "drawn_ft": 606.49,
+  "off_ft": 600.99,
   "region": [
    2159,
    574,
@@ -439,18 +393,6 @@
    583,
    1095,
    633
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N62°34'15\"W(R)",
-  "drawn": "S89°53'53\"W",
-  "off_arcmin": 1651.9,
-  "region": [
-   1528,
-   583,
-   1604,
-   612
   ]
  },
  {
@@ -514,8 +456,8 @@
  {
   "kind": "distance",
   "text": "22.32'",
-  "drawn_ft": 23.21,
-  "off_ft": 0.89,
+  "drawn_ft": 228.96,
+  "off_ft": 206.64,
   "region": [
    1207,
    633,
@@ -536,27 +478,15 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "21.03'",
-  "drawn_ft": 120.18,
-  "off_ft": 99.15,
+  "drawn_ft": 13.31,
+  "off_ft": -7.72,
   "region": [
    2113,
    638,
    2184,
    686
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "S23°07'50\"E(R)",
-  "drawn": "S73°58'52\"W",
-  "off_arcmin": 4973.3,
-  "region": [
-   1959,
-   634,
-   2043,
-   684
   ]
  },
  {
@@ -572,10 +502,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "338.91",
-  "drawn_ft": 80.85,
-  "off_ft": -258.06,
+  "drawn_ft": 424.74,
+  "off_ft": 85.83,
   "region": [
    1959,
    634,
@@ -610,25 +540,13 @@
  {
   "kind": "distance",
   "text": "168.52'",
-  "drawn_ft": 174.08,
-  "off_ft": 5.56,
+  "drawn_ft": 199.25,
+  "off_ft": 30.73,
   "region": [
    1212,
    669,
    1251,
    685
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "S0°45'35\"W(R)",
-  "drawn": "S25°56'29\"E",
-  "off_arcmin": 1602.1,
-  "region": [
-   1342,
-   688,
-   1420,
-   724
   ]
  },
  {
@@ -644,10 +562,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "113.39'",
-  "drawn_ft": 239.85,
-  "off_ft": 126.46,
+  "drawn_ft": 216.23,
+  "off_ft": 102.84,
   "region": [
    1192,
    691,
@@ -658,8 +576,8 @@
  {
   "kind": "bearing",
   "text": "S86°03'39\"W",
-  "drawn": "S80°26'20\"E",
-  "off_arcmin": 810.0,
+  "drawn": "S81°04'28\"E",
+  "off_arcmin": 771.9,
   "region": [
    1404,
    684,
@@ -670,8 +588,8 @@
  {
   "kind": "distance",
   "text": "62.27",
-  "drawn_ft": 42.73,
-  "off_ft": -19.54,
+  "drawn_ft": 18.93,
+  "off_ft": -43.34,
   "region": [
    1404,
    684,
@@ -702,22 +620,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "342.74'",
-  "drawn_ft": 17.16,
-  "off_ft": -325.58,
-  "region": [
-   1503,
-   704,
-   1553,
-   740
-  ]
- },
- {
-  "kind": "distance",
-  "text": "165.47'",
-  "drawn_ft": 17.16,
-  "off_ft": -148.31,
+  "drawn_ft": 165.46,
+  "off_ft": -177.28,
   "region": [
    1503,
    704,
@@ -772,10 +678,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "50.48",
-  "drawn_ft": 10.67,
-  "off_ft": -39.81,
+  "drawn_ft": 43.57,
+  "off_ft": -6.91,
   "region": [
    1193,
    740,
@@ -877,18 +783,6 @@
    801,
    1481,
    828
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "S2°27'57\"E(R)",
-  "drawn": "S89°27'50\"W",
-  "off_arcmin": 5284.2,
-  "region": [
-   1289,
-   814,
-   1356,
-   845
   ]
  },
  {
@@ -1000,10 +894,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "16.99",
-  "drawn_ft": 9.42,
-  "off_ft": -7.57,
+  "drawn_ft": 24.47,
+  "off_ft": 7.48,
   "region": [
    696,
    904,
@@ -1048,10 +942,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "206.25'",
-  "drawn_ft": 9.42,
-  "off_ft": -196.83,
+  "drawn_ft": 24.47,
+  "off_ft": -181.78,
   "region": [
    692,
    929,
@@ -1060,10 +954,10 @@
   ]
  },
  {
-  "kind": "distance",
+  "kind": "arc length",
   "text": "56.88",
-  "drawn_ft": 9.42,
-  "off_ft": -47.46,
+  "drawn_ft": 24.47,
+  "off_ft": -32.41,
   "region": [
    692,
    929,
@@ -1108,18 +1002,6 @@
   ]
  },
  {
-  "kind": "bearing",
-  "text": "S2°05'39\"W(R)",
-  "drawn": "N89°27'50\"E",
-  "off_arcmin": 5242.2,
-  "region": [
-   2115,
-   946,
-   2184,
-   966
-  ]
- },
- {
   "kind": "distance",
   "text": "113.14'",
   "drawn_ft": 220.66,
@@ -1153,18 +1035,6 @@
    972,
    2039,
    988
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N26°30'36\"W(R)",
-  "drawn": "S41°07'24\"W",
-  "off_arcmin": 4058.0,
-  "region": [
-   663,
-   996,
-   739,
-   1015
   ]
  },
  {
@@ -1240,18 +1110,6 @@
   ]
  },
  {
-  "kind": "bearing",
-  "text": "S7°57'05\"W(R)",
-  "drawn": "N89°27'50\"E",
-  "off_arcmin": 4890.8,
-  "region": [
-   2115,
-   1009,
-   2184,
-   1029
-  ]
- },
- {
   "kind": "distance",
   "text": "50.22'",
   "drawn_ft": 220.66,
@@ -1312,18 +1170,6 @@
   ]
  },
  {
-  "kind": "bearing",
-  "text": "S1°02'33\"W(R)",
-  "drawn": "N89°27'50\"E",
-  "off_arcmin": 5305.3,
-  "region": [
-   2114,
-   1025,
-   2182,
-   1045
-  ]
- },
- {
   "kind": "distance",
   "text": "45.93'",
   "drawn_ft": 220.66,
@@ -1345,18 +1191,6 @@
    1033,
    2350,
    1049
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N23°43'19\"E(R)",
-  "drawn": "N89°27'50\"E",
-  "off_arcmin": 3944.5,
-  "region": [
-   2114,
-   1041,
-   2186,
-   1061
   ]
  },
  {
@@ -1420,18 +1254,6 @@
   ]
  },
  {
-  "kind": "bearing",
-  "text": "N25°31'16\"E(R)",
-  "drawn": "N89°27'50\"E",
-  "off_arcmin": 3836.6,
-  "region": [
-   2114,
-   1057,
-   2186,
-   1077
-  ]
- },
- {
   "kind": "distance",
   "text": "232.04'",
   "drawn_ft": 220.66,
@@ -1492,18 +1314,6 @@
   ]
  },
  {
-  "kind": "bearing",
-  "text": "S52°37'35\"W(R)",
-  "drawn": "N89°27'50\"E",
-  "off_arcmin": 2210.3,
-  "region": [
-   2113,
-   1074,
-   2188,
-   1093
-  ]
- },
- {
   "kind": "distance",
   "text": "6.24'",
   "drawn_ft": 220.66,
@@ -1537,30 +1347,6 @@
    1090,
    1840,
    1106
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "S55°48'55\"W(R)",
-  "drawn": "N89°27'50\"E",
-  "off_arcmin": 2018.9,
-  "region": [
-   2112,
-   1090,
-   2187,
-   1124
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "S2°19'35\"E(R)",
-  "drawn": "N89°27'50\"E",
-  "off_arcmin": 5292.6,
-  "region": [
-   2112,
-   1090,
-   2187,
-   1124
   ]
  },
  {

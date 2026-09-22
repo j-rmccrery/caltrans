@@ -52,7 +52,7 @@ def fmt_bearing(az):
 GAP = 9.0  # pt: a line is interrupted where it passes through a point-symbol circle
 
 
-def lines_on_sheet(segs, circles):
+def lines_on_sheet(segs, circles, max_turn_deg=0.6):
     """Maximal collinear chains of segments: the lines a label describes. Chains bridge the gap where a
     line passes through a circle symbol, and a chain that ends at a circle is extended to its centre,
     because the circle marks the vertex the printed distance runs to."""
@@ -81,13 +81,20 @@ def lines_on_sheet(segs, circles):
                     d = (far - cur) / max(np.hypot(*(far - cur)), 1e-9)
                     if gap > 0.6 and (abs((near - cur) @ np.array([-cur_dir[1], cur_dir[0]])) > 0.8 or (near - cur) @ cur_dir < 0):
                         continue  # a gap must be straight ahead, not sideways or backwards
-                    if d @ cur_dir > 0.99995:  # within 0.6 degrees
+                    if d @ cur_dir > math.cos(math.radians(max_turn_deg)):
                         nxt = (k, far)
+                        cur_dir = d
                         break
                 if nxt is None:
                     break
                 used.add(nxt[0]); chain.append(nxt[0]); cur = nxt[1]
         pts = np.array([q for k in chain for q in segs[k][:2]])
+        if max_turn_deg > 1:  # a curved chain: keep the polyline, its length is the arc length
+            order = np.argsort((pts - a0) @ d0)
+            P = pts[order]
+            chains.append({"pts": P, "len_pt": float(sum(np.hypot(*(segs[k][1] - segs[k][0])) for k in chain)), "n": len(chain),
+                           "radius_pt": float("nan")})
+            continue
         al = (pts - a0) @ d0
         p0, p1 = a0 + d0 * al.min(), a0 + d0 * al.max()
         if ctree is not None:  # end at a circle: the vertex is its centre
@@ -120,6 +127,51 @@ def linework_segments(page):
                 if np.hypot(*(a - b)) > 1.0:
                     segs.append((a, b, round(d.get("width") or 0, 2), pid))
     return segs
+
+
+def arcs_on_sheet(page):
+    """Curved lines: runs of bezier items in a path, sampled; length and a circumradius estimate."""
+    from overlay import bezier
+    out = []
+    for d in page.get_drawings():
+        c = d.get("color")
+        if c is None or max(c) > 0.6:
+            continue
+        run = []
+        for it in d["items"] + [("end",)]:
+            if it[0] == "c":
+                pts = bezier(*[np.array([p.x, p.y]) for p in it[1:5]], n=16)
+                run = (run[:-1] if run else []) + list(pts)
+            elif run:
+                P = np.array(run)
+                L = float(np.sum(np.hypot(*np.diff(P, axis=0).T)))
+                if L > 6:
+                    A, B, C = P[0], P[len(P) // 2], P[-1]
+                    den = 2 * abs((A[0] - C[0]) * (B[1] - A[1]) - (A[0] - B[0]) * (C[1] - A[1]))
+                    R = float(np.hypot(*(A - B)) * np.hypot(*(B - C)) * np.hypot(*(C - A)) / den) if den > 1e-6 else float("inf")
+                    out.append({"pts": P, "len_pt": L, "radius_pt": R})
+                run = []
+    return out
+
+
+def nearest_arc(b, arcs, tol_perp, tol_deg=8.0):
+    """Arc whose nearest point lies beside the label with its tangent along the label's reading direction."""
+    c, u, n = frame(b)
+    best = None
+    for arc in arcs:
+        P = arc["pts"]
+        d = np.hypot(*(P - c).T)
+        k = int(d.argmin())
+        if d[k] > tol_perp + b["w"] / 2:
+            continue
+        t = P[min(k + 1, len(P) - 1)] - P[max(k - 1, 0)]
+        t = t / max(np.hypot(*t), 1e-9)
+        if abs(t @ n) > math.sin(math.radians(tol_deg)):
+            continue
+        perp = abs((P[k] - c) @ n)
+        if perp < tol_perp and (best is None or perp < best[0]):
+            best = (perp, arc)
+    return None if best is None else best[1]
 
 
 def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0):  # a rotated label box carries 1-3 deg of angle error
@@ -156,6 +208,8 @@ def main():
     segs = linework_segments(page)
     _, circles = segments(page)
     chains = [c for c in lines_on_sheet(segs, circles) if c["len_pt"] >= 6]
+    # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers
+    arcs = arcs_on_sheet(page) + [c for c in lines_on_sheet(segs, circles, max_turn_deg=6.0) if c["n"] >= 3 and c["len_pt"] > 12]
     rows, exceptions = [], []
 
     def region(b):
@@ -163,6 +217,8 @@ def main():
 
     for b in blocks:
         for part in b["text"].replace(" ", "").split("|"):
+            if BEAR.match(part) and BEAR.match(part)[6]:
+                rows.append(["bearing (R)", part, "", "", "radial: not checked"]); continue
             if BEAR.match(part):
                 mate = next((float(DIST.match(t)[1]) for t in b["text"].replace(" ", "").split("|") if DIST.match(t)), None)
                 ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale)
@@ -182,6 +238,16 @@ def main():
                 if m[2] or re.search(r"R=|L=|Δ|△", b["text"]):  # (T) totals and curve data are not line lengths
                     continue
                 ln = nearest_line(b, chains, 5.0 * b["glyph_h"], float(m[1]), scale)
+                want = float(m[1])
+                if ln is None or abs(ln["len_pt"] * scale - want) > 1.0:
+                    arc = nearest_arc(b, arcs, 5.0 * b["glyph_h"])
+                    if arc is not None and (ln is None or abs(arc["len_pt"] * scale - want) < abs(ln["len_pt"] * scale - want)):
+                        drawn = arc["len_pt"] * scale
+                        ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                        rows.append(["arc length", part, f"{drawn:.2f} (R={arc['radius_pt'] * scale:.1f})", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
+                        if not ok:
+                            exceptions.append({"kind": "arc length", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b)})
+                        continue
                 if ln is None:
                     exceptions.append({"kind": "distance", "text": part, "issue": "no line found beside label", "region": region(b)}); continue
                 W = page.rect.width
@@ -220,7 +286,7 @@ def main():
         k = kinds.setdefault(r[0], [0, 0]); k[0] += 1; k[1] += r[4] == "pass"
     print(f"lines on sheet {len(chains)} | scale {scale:.5f} ft/pt, grid north {rot:+.3f} deg from sheet up")
     for k, (n, ok) in kinds.items():
-        print(f"  {k:16} checked {n:3}  pass {ok:3}  fail {n - ok:3}")
+        print(f"  {k:16} checked {n:3}  pass {ok:3}  fail {n - ok:3}" if k != "bearing (R)" else f"  {k:16} {n:3} radial bearings, not checked against a line")
     print(f"  exceptions (fails + unmatched labels): {len(exceptions)}")
     for e in exceptions[:12]:
         print("   ", e)
