@@ -7,7 +7,7 @@ Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run every
 
 | Roadmap item | State |
 |---|---|
-| D1–2 `demo.py` one command | Done, 232 s. Over the 3-min target: `blocks.py` assembly is 207 s (Python double loop in `assemble()`); vectorise it. |
+| D1–2 `demo.py` one command | Done, 31 s (`--fast`). Was 232 s: `blocks.py` scanned the full 72-Mpx label image once per component (180 s) and `assemble()` was a Python double loop (25 s); both vectorised, output identical. |
 | D1–2 `objects.geojson` provenance record | Done (`spike/objects.py`). |
 | D1–2 QGIS project `demo.qgz` | Not built. Load order in `spike/out/QGIS_LAYERS.md`. |
 | D3–6 table traverse | Not started. Design: parse line/curve tables (reads exist in `spike/out/read_rapid.json`, keyed truth in `spike/gt.py`), associate short tags `L8`/`C16` on the drawing to line chains (`checks.lines_on_sheet`), walk parcel boundaries by tag sequence, closure per figure, parametrise curves from R/Δ/L. Assignment with uniqueness: ambiguous → queue. Target: tunnel easements 61985-1..4 closed and within 1% of the parcel table. |

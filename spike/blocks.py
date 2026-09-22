@@ -92,28 +92,35 @@ def assemble(blocks, singles):
     blocks that continue each other along the reading axis. Multi-line blocks are left alone."""
     for b in blocks:
         b["pts"] = _corners(b)
-    one_line = lambda b: b["h"] < 2.3 * b["glyph_h"]  # commas, periods and whole-word paths fatten a one-line box
+    # per-block arrays, kept in step with the dicts (a refit changes cx, cy, w, h)
+    GH = np.array([b["glyph_h"] for b in blocks])
+    rows = np.array([[b["cx"], b["cy"], b["w"], b["h"], b["angle"]] for b in blocks])
+    def row(b):
+        return [b["cx"], b["cy"], b["w"], b["h"], b["angle"]]
+    C, W, H = rows[:, :2], rows[:, 2], rows[:, 3]
+    T = np.radians(rows[:, 4])
+    U, N = np.column_stack([np.cos(T), np.sin(T)]), np.column_stack([-np.sin(T), np.cos(T)])
+    ONE = H < 2.3 * GH  # commas, periods and whole-word paths fatten a one-line box
 
     for _ in range(3):  # a few rounds: "11", "1-1"
-        C = np.array([[b["cx"], b["cy"]] for b in blocks])
         for x, y, ln, p0, p1 in singles:
-            near = np.nonzero(np.hypot(C[:, 0] - x, C[:, 1] - y) < 400)[0]
-            best, best_perp = None, 1e9
-            for i in near:
-                b = blocks[i]
-                if not one_line(b) or ln > 1.3 * b["glyph_h"]:
-                    continue
-                c, u, n = _frame(b)
-                al, pe = abs((np.array([x, y]) - c) @ u), abs((np.array([x, y]) - c) @ n)
-                if pe < 0.6 * b["glyph_h"] and b["w"] / 2 < al < b["w"] / 2 + 0.9 * b["glyph_h"] and pe < best_perp:
-                    best, best_perp = i, pe
-            if best is not None:
+            D = np.array([x, y]) - C
+            al, pe = np.abs((D * U).sum(1)), np.abs((D * N).sum(1))
+            ok = (np.hypot(D[:, 0], D[:, 1]) < 400) & ONE & (ln <= 1.3 * GH) & (pe < 0.6 * GH) & (W / 2 < al) & (al < W / 2 + 0.9 * GH)
+            if ok.any():
+                best = int(np.argmin(np.where(ok, pe, np.inf)))
                 b = blocks[best]
                 b["pts"] += [np.array(p0), np.array(p1)]
                 b["glyphs"] += 1
                 _refit(b, b["pts"])
+                rows[best] = row(b)
+                ONE[best] = b["h"] < 2.3 * b["glyph_h"]
 
-    # join collinear neighbours (union-find)
+    # join collinear neighbours (union-find); pair test vectorised over j with pts padded by NaN
+    n_pts = max(len(b["pts"]) for b in blocks)
+    P = np.full((len(blocks), n_pts, 2), np.nan)
+    for i, b in enumerate(blocks):
+        P[i, :len(b["pts"])] = b["pts"]
     parent = list(range(len(blocks)))
     def find(i):
         while parent[i] != i:
@@ -122,19 +129,15 @@ def assemble(blocks, singles):
         return i
     order = sorted(range(len(blocks)), key=lambda i: -blocks[i]["glyphs"])
     for i in order:
-        a = blocks[i]
-        if not one_line(a):
+        if not ONE[i]:
             continue
-        c, u, n = _frame(a)
-        for j in range(len(blocks)):
-            b = blocks[j]
-            if j == i or not one_line(b) or not 0.7 < b["glyph_h"] / a["glyph_h"] < 1.4:
-                continue
-            P = np.array(b["pts"]) - c
-            al, pe = P @ u, P @ n
-            gap = max(al.min() - a["w"] / 2, -a["w"] / 2 - al.max())
-            if -1.5 * a["glyph_h"] < gap < 1.2 * a["glyph_h"] and abs(pe).max() < 0.5 * a["h"] + 0.4 * a["glyph_h"]:
-                parent[find(j)] = find(i)
+        D = P - C[i]
+        al, pe = D @ U[i], D @ N[i]
+        gap = np.maximum(np.nanmin(al, 1) - W[i] / 2, -W[i] / 2 - np.nanmax(al, 1))
+        ok = ONE & (0.7 < GH / GH[i]) & (GH / GH[i] < 1.4) & (-1.5 * GH[i] < gap) & (gap < 1.2 * GH[i]) & (np.nanmax(np.abs(pe), 1) < 0.5 * H[i] + 0.4 * GH[i])
+        ok[i] = False
+        for j in np.nonzero(ok)[0]:
+            parent[find(j)] = find(i)
     groups = {}
     for i in range(len(blocks)):
         groups.setdefault(find(i), []).append(i)
@@ -215,11 +218,18 @@ def main():
         heights[lab].append(h)
         members[lab].append((x, y))
 
+    # ink pixels grouped by label in one pass (a full-image scan per label was 3 min on its own)
+    ys_all, xs_all = np.nonzero(mask)
+    labs = labels[ys_all, xs_all]
+    order = np.argsort(labs, kind="stable")
+    ys_all, xs_all, labs = ys_all[order], xs_all[order], labs[order]
+    starts = np.searchsorted(labs, np.arange(n + 1))
+
     blocks = []
     for lab in range(1, n):
         if counts[lab] < MIN_GLYPHS or max(heights[lab]) < 3:  # all-tiny blob = ticks, not text
             continue
-        ys, xs = np.nonzero((labels == lab) & (mask > 0))
+        ys, xs = ys_all[starts[lab]:starts[lab + 1]], xs_all[starts[lab]:starts[lab + 1]]
         if len(xs) < 5:
             continue
         (cx, cy), (w, h), ang = cv2.minAreaRect(np.column_stack([xs, ys]).astype(np.float32))
