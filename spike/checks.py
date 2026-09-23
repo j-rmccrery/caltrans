@@ -30,6 +30,9 @@ ANG = re.compile(r"^[Δ△]?=?(\d{1,3})°(\d{2})'(\d{2})\"(\(T\))?$")
 RAD = re.compile(r"^R=(\d{1,5}\.\d{2})'?$")
 LEN = re.compile(r"^L=(\d{1,5}\.\d{2})'?(\(T\))?$")
 TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2,3}'?(?:\(T\))?(?![\d])")
+STATION = re.compile(r"\d\+\d|\bSTA\b", re.I)  # a block naming a station: the number after + is never a distance,
+# even when it and its +prefix land in separate annotations (checked on the whole block, not the token)
+AREA_CTX = re.compile(r"SQ\.?\s?FT|ACRES?|±", re.I)  # a parcel-area figure, in a bubble or a legend: not a distance
 DIST_TOL = 0.30   # ft, plus 0.05 %
 ASSOC = set(filter(None, os.environ.get("ASSOC", "").split(",")))  # association experiments: bearing, unique, order, closure
 NOT_LINEWORK = re.compile(r"LBL|anno|ANNO|TBL|SHEET|Sheet|Wipeout|PNT|border|TEXT|TXT|Format|Seal", re.I)  # ASSOC=layers: CAD layer names that are not linework
@@ -431,6 +434,27 @@ def touches_label(chain, labels_tree, labels):
     return False
 
 
+def alignment_table_regions(blocks, gap=30):
+    """Bounding box of each 'ALIGNMENT DATA' (or coordinates) table keyed by its STATION/NORTHING/EASTING
+    header row: alphabet.py's tables.json only reads the L#/C# line and curve tables, so this one's station
+    numbers and coordinates would otherwise be read as sheet labels. Header row, then every block below it
+    in that column band, stopping at a gap -- same shape as tables.json's own _regions."""
+    headers = [b for b in blocks if b["text"].strip() in ("STATION", "NORTHING", "EASTING")]
+    regions = []
+    for st in (h for h in headers if h["text"].strip() == "STATION"):
+        row = [st] + [h for h in headers if h is not st and abs(h["cy"] - st["cy"]) < 15 and h["cx"] > st["cx"]]
+        x0 = min(h["cx"] - h.get("w", 40) / 2 for h in row) - 60  # room for the row letters (A, B, C...)
+        x1 = max(h["cx"] + h.get("w", 60) / 2 for h in row) + 20
+        col = sorted((b for b in blocks if x0 <= b["cx"] <= x1 and b["cy"] > st["cy"]), key=lambda b: b["cy"])
+        y1 = st["cy"] + 15
+        for b in col:
+            if b["cy"] - y1 > gap:
+                break
+            y1 = max(y1, b["cy"] + 15)
+        regions.append((round(x0), round(st["cy"] - 25), round(x1), round(y1)))
+    return regions
+
+
 def sheet_lines(page, blocks):
     """What a label can describe: black linework, minus leaders (their curly paths, then their stubs and
     the callout underlines, which end inside a label's box), minus thin 7-pt stationing ticks; split
@@ -465,6 +489,7 @@ def main():
                 arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
+    FURNITURE = list(FURNITURE) + alignment_table_regions(blocks)  # tables.json's _regions plus this table it doesn't cover
 
     def az_of(ln):
         """Grid azimuth of a drawn line (deg, clockwise from grid north), through the fit's rotation."""
@@ -533,8 +558,8 @@ def main():
                     exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b), "line": shape(ln)})
             elif DIST.match(part):
                 m = DIST.match(part)
-                if m[2] or curve_data:  # (T) totals and curve data (R=, Δ, L=) are not line lengths
-                    continue
+                if m[2] or curve_data or STATION.search(b["text"]) or AREA_CTX.search(b["text"]):
+                    continue  # (T) totals, curve data (R=, Δ, L=), a station number, or a parcel-area figure: not a line length
                 want = float(m[1])
                 baz = next((azimuth(t) for t in parts if BEAR.match(t) and not BEAR.match(t)[6]), None)  # the bearing printed with it
                 led, ln = at_tip(bi, "line", want)

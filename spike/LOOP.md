@@ -29,7 +29,9 @@ twice is skipped and logged; the diff is stashed as `loop-leg-N`.
 |---|---|---|---|---|
 | 0 | pass | 1 | 3 baseline rows, 17 columns | 8acedf0 |
 | 1 | pass on retry | 2 | tables 44/44, 25/25, 83/83 clean; keyed 111/111; georef 18/18 rms 0.04; but distance tokens skipped as curve-data 43/62/81 vs 0/10/24 glyph (annotations poured into merged glyph blocks), presidio bearing 14 < 16, .1 distance 18 < 20. Retry: one block per annotation, bearing+distance pairs only: distance 34/52, 27/35, 41/78; bearing 23/45, 18/29, 29/52; wrong-line 26/23/46; arc length 0 on all three (regression, to leg 2) | leg1 |
-| 2 | running | 1 | | |
+| 2 | skipped (failed twice), stash `loop-leg-2` | 2 | attempt 1, layers as hard filter: distance 27/35, 24/27, 32/52 vs leg 1 34/52, 27/35, 41/78; faces collapsed. Attempt 2, layers rank only: 34/51, 27/35, 37/64; bearing 23/18/28; wrong-line 27/27/43 vs leg 1 26/23/46: no gain. Finding: with annotation-quality reads, layer ranking adds nothing; layer exclusion trades recall for precision. Reusable from the stash: `layers.py`, lone `L=` arc-length fix (arc 0 -> 1), parcels additive parcel-sub lines (+13 faces on .2), table-class furniture clusters | - |
+| 3 | pass | 1 | stationing and table-region tokens checked: already 0 after leg 1 (annotation keeps `65+48.80` in one block); added alignment-data table regions (STATION/NORTHING headers) to FURNITURE and an area-context guard. Bench identical to leg 1: 34/52, 27/35, 41/78 | leg3 |
+| 4 | running | 1 | | |
 
 Dispatches used: 4 of 16. Started 2026-09-23 ~04:00 local.
 
