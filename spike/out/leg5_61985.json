@@ -4,19 +4,26 @@
   "how": "label position (no leader found)",
   "start_dist_pt": 150.1,
   "edges_walked": 2,
-  "edges_full_record": 2,
+  "edges_full_record": 1,
   "closed": false,
   "closure_ft": null,
   "record_area_sqft": null,
   "printed_area_sqft": 2518,
   "diff_pct": null,
   "missing": [
-   "only 2 edge(s) placed near this label (label position (no leader found), 150.1 pt away); the strip's own R=/delta=/L= curves have no drawn arc within 5 glyph heights matching the printed length"
+   "L=150.85': no printed radius (chord taken from the drawing)"
   ],
   "chain_src": [
-   "L9",
-   "L8"
-  ]
+   "L=150.85'",
+   "N67°37'21\"W + 50.48'"
+  ],
+  "strip_combined": {
+   "area_sqft": 48410.5,
+   "table_area_sqft": 70690,
+   "diff_pct": -31.52,
+   "cross_ties_found": 0
+  },
+  "strip_note": "no drawn cross-tie found between this easement and its neighbour(s) -- checked every short stroke (5-60 pt) in the strip region and every nearby printed R=/Δ=/L=/distance value's full matched line, all trace the north (R/W) boundary throughout, not a tie to south; only the combined four-easement envelope closes (see strip_combined), 31% under the table sum -- consistent with the task's own note that 61985-3 (TCE tieback) is wider than the dashed strip, with no additional boundary for that width found on this layer"
  },
  {
   "parcel": "61985-2",
@@ -35,42 +42,72 @@
   "chain_src": [
    "S74°57'42\"E + 113.39'",
    "S67°59'11\"E + 76.46'"
-  ]
+  ],
+  "strip_combined": {
+   "area_sqft": 48410.5,
+   "table_area_sqft": 70690,
+   "diff_pct": -31.52,
+   "cross_ties_found": 0
+  },
+  "strip_note": "no drawn cross-tie found between this easement and its neighbour(s) -- checked every short stroke (5-60 pt) in the strip region and every nearby printed R=/Δ=/L=/distance value's full matched line, all trace the north (R/W) boundary throughout, not a tie to south; only the combined four-easement envelope closes (see strip_combined), 31% under the table sum -- consistent with the task's own note that 61985-3 (TCE tieback) is wider than the dashed strip, with no additional boundary for that width found on this layer"
  },
  {
   "parcel": "61985-3",
   "how": "leader tip",
   "start_dist_pt": 13.3,
-  "edges_walked": 1,
-  "edges_full_record": 1,
+  "edges_walked": 3,
+  "edges_full_record": 2,
   "closed": false,
   "closure_ft": null,
   "record_area_sqft": null,
   "printed_area_sqft": 49552,
   "diff_pct": null,
   "missing": [
-   "only 1 edge(s) placed near this label (leader tip, 13.3 pt away); the strip's own R=/delta=/L= curves have no drawn arc within 5 glyph heights matching the printed length"
+   "L=150.85': no printed radius (chord taken from the drawing)"
   ],
   "chain_src": [
-   "N67°37'21\"W + 50.48'"
-  ]
+   "L=150.85'",
+   "L9",
+   "L8"
+  ],
+  "strip_combined": {
+   "area_sqft": 48410.5,
+   "table_area_sqft": 70690,
+   "diff_pct": -31.52,
+   "cross_ties_found": 0
+  },
+  "strip_note": "no drawn cross-tie found between this easement and its neighbour(s) -- checked every short stroke (5-60 pt) in the strip region and every nearby printed R=/Δ=/L=/distance value's full matched line, all trace the north (R/W) boundary throughout, not a tie to south; only the combined four-easement envelope closes (see strip_combined), 31% under the table sum -- consistent with the task's own note that 61985-3 (TCE tieback) is wider than the dashed strip, with no additional boundary for that width found on this layer"
  },
  {
   "parcel": "61985-4",
   "how": "label position (no leader found)",
   "start_dist_pt": 115.7,
-  "edges_walked": 1,
-  "edges_full_record": 1,
+  "edges_walked": 6,
+  "edges_full_record": 3,
   "closed": false,
   "closure_ft": null,
   "record_area_sqft": null,
   "printed_area_sqft": 3248,
   "diff_pct": null,
   "missing": [
-   "only 1 edge(s) placed near this label (label position (no leader found), 115.7 pt away); the strip's own R=/delta=/L= curves have no drawn arc within 5 glyph heights matching the printed length"
+   "L=249.97': no printed radius (chord taken from the drawing)",
+   "L=56.88': no printed radius (chord taken from the drawing)",
+   "S37°35'39\"W: no printed distance"
   ],
   "chain_src": [
-   "S10°09'24\"W + 101.10'"
-  ]
+   "S10°09'24\"W + 101.10'",
+   "L=249.97'",
+   "S79°17'24\"W + 16.99'",
+   "L=56.88'",
+   "S52°28'06\"E + 110.52'",
+   "S37°35'39\"W"
+  ],
+  "strip_combined": {
+   "area_sqft": 48410.5,
+   "table_area_sqft": 70690,
+   "diff_pct": -31.52,
+   "cross_ties_found": 0
+  },
+  "strip_note": "no drawn cross-tie found between this easement and its neighbour(s) -- checked every short stroke (5-60 pt) in the strip region and every nearby printed R=/Δ=/L=/distance value's full matched line, all trace the north (R/W) boundary throughout, not a tie to south; only the combined four-easement envelope closes (see strip_combined), 31% under the table sum -- consistent with the task's own note that 61985-3 (TCE tieback) is wider than the dashed strip, with no additional boundary for that width found on this layer"
  }
 ]

@@ -496,6 +496,17 @@ def main():
         if c["n"] >= 3 and c["len_pt"] > 12:
             for P in split_at(c["pts"], circles, junction_lines):
                 arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
+    # the dashed easement line (leg B): each dash is its own path, so nothing above sees it; chained
+    # into trains (dashes.py) and split at the same circles/junctions as the solid curves, so a train
+    # spanning several record segments (compound curve) becomes one arc per segment
+    from dashes import collect_dashes, dash_trains
+    for t in dash_trains(collect_dashes(page)):
+        if len(t["pts"]) < 3:
+            continue
+        for P in split_at(t["pts"], circles, junction_lines):
+            L = float(np.sum(np.hypot(*np.diff(P, axis=0).T)))
+            if L > 3:
+                arcs.append({"pts": P, "len_pt": L, "radius_pt": t["radius_pt"], "width": 0.84})
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
     FURNITURE = list(FURNITURE) + alignment_table_regions(blocks)  # tables.json's _regions plus this table it doesn't cover
@@ -554,6 +565,12 @@ def main():
                 if arc is None and not led:
                     near = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 5.0 * b["glyph_h"]]
                     close = [x for x in near if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
+                    if not close:  # some curve-data callouts (the tunnel-easement corridor, a busy curve
+                        # elsewhere) are drafted well clear of their curve for room, past 5 glyph heights;
+                        # widen the search but keep the same tight length match, so a coincidence this far
+                        # out would need to land within DIST_TOL by pure chance
+                        far = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 160.0]
+                        close = [x for x in far if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
                     arc = min(close, key=lambda x: abs(x["len_pt"] * scale - want)) if close else None
                 if arc is None:
                     exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc within 5 glyph heights matches the printed length", "region": region(b)})

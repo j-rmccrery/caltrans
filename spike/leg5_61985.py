@@ -24,7 +24,7 @@ from georef import OUT, PDF, READS, real_text_blocks  # noqa: E402
 from checks import leaders, tag_leaders, label_box  # noqa: E402
 from georef import segments as georef_segments  # noqa: E402
 from traverse import build_edges, NODE  # noqa: E402
-from parcels import TABLE_AREA  # noqa: E402
+from parcels import TABLE_AREA, SQFT_PER_ACRE, strip_boundary, strip_faces, strip_cross_lines  # noqa: E402
 
 NAMES = ["61985-1", "61985-2", "61985-3", "61985-4"]
 
@@ -172,6 +172,36 @@ def main():
         r["missing"] = r["missing"] or [f"only {r['edges_walked']} edge(s) placed near this label ({r['how']}, {r['start_dist_pt']} pt away); "
                                          "the strip's own R=/delta=/L= curves have no drawn arc within 5 glyph heights matching the printed length"]
     print(f"unmatched inline curve labels on the 61985 strip (checks.py exceptions, 'no arc within 5 glyph heights'): {[e['text'] for e in strip_curve_fails]}")
+
+    # leg B attempt 2: the strip as drawn geometry (dashes.py trains -> parcels.strip_boundary), built
+    # instead of polygonised. strip_cross_lines is the exhaustive search for a drawn cross-tie between
+    # the strip's north and south boundaries dividing the four easements -- none found (every nearby
+    # printed value traces the north boundary throughout, not a tie to south), so only the combined
+    # four-easement envelope closes; each of the four gets that combined finding attached, not a false
+    # individual closure.
+    strokes, _ = strip_cross_lines(page)
+    sfaces = strip_faces(page)
+    combined = None
+    if sfaces:
+        sf = sfaces[0]
+        P = np.array(sf["pts"])
+        sx, sy = P[:, 0], -P[:, 1]
+        E, N = a * sx - b * sy + tx, b * sx + a * sy + ty
+        area = 0.5 * abs(np.dot(E[:-1], N[1:]) - np.dot(N[:-1], E[1:]) + E[-1] * N[0] - N[-1] * E[0])
+        table_sum = sum(v if u == "SF" else v * SQFT_PER_ACRE for u, v in (TABLE_AREA[n] for n in NAMES))
+        combined = {"area_sqft": round(area, 1), "table_area_sqft": round(table_sum, 1),
+                    "diff_pct": round(100 * (area - table_sum) / table_sum, 2), "cross_ties_found": len(strokes)}
+        print(f"strip combined envelope (all four easements, undivided): {combined}")
+    for r in results:
+        r["strip_combined"] = combined
+        r["strip_note"] = ("no drawn cross-tie found between this easement and its neighbour(s) -- checked "
+                            "every short stroke (5-60 pt) in the strip region and every nearby printed R=/"
+                            "Δ=/L=/distance value's full matched line, all trace the north (R/W) boundary "
+                            "throughout, not a tie to south; only the combined four-easement envelope closes "
+                            "(see strip_combined), 31% under the table sum -- consistent with the task's own "
+                            "note that 61985-3 (TCE tieback) is wider than the dashed strip, with no additional "
+                            "boundary for that width found on this layer")
+
     for r in results:
         print(r)
     (OUT / "leg5_61985.json").write_text(json.dumps(results, indent=1, ensure_ascii=False), encoding="utf-8")
@@ -184,6 +214,54 @@ def main():
         pix = page.get_pixmap(clip=rct, matrix=pymupdf.Matrix(3, 3))
         pix.save(str(OUT / f"leg5_61985_{name.split('-')[1]}.png"))
     print("crops written for 61985-1..4")
+
+    render_strip(page, sfaces, combined)
+
+
+OVALS = {"61985-1": (1366, 881), "61985-2": (1202, 837), "61985-3": (1221, 782), "61985-4": (1035, 762)}
+
+
+def render_strip(page, sfaces, combined):
+    """spike/out/legB_61985.png: the strip's north/south boundary (dashes.py trains) and the constructed
+    combined envelope filled, with the combined area vs. the table sum, and each of the four ovals
+    annotated with its own table target since none of the four divides out individually (strip_note)."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Polygon as MplPolygon
+    from dashes import collect_dashes, dash_trains
+
+    x0, y0, x1, y1 = 700, 550, 1800, 1000
+    pix = page.get_pixmap(clip=pymupdf.Rect(x0, y0, x1, y1), matrix=pymupdf.Matrix(3, 3))
+    img = np.frombuffer(pix.samples, dtype=np.uint8).reshape(pix.height, pix.width, pix.n)
+    fig, ax = plt.subplots(figsize=(pix.width / 150, pix.height / 150), dpi=150)
+    ax.imshow(img, extent=(x0, x1, y1, y0))
+
+    trains = sorted(dash_trains(collect_dashes(page)), key=lambda t: -t["len_pt"])
+    if trains:
+        north = trains[0]["pts"]
+        ax.plot(north[:, 0], north[:, 1], "-", color="tab:blue", linewidth=2, label="north (train 0)")
+        for i, c in zip((2, 6, 1, 5), ("tab:green", "violet", "tab:orange", "saddlebrown")):
+            P = trains[i]["pts"]
+            ax.plot(P[:, 0], P[:, 1], "-", color=c, linewidth=2)
+    if sfaces:
+        poly = np.array(sfaces[0]["pts"])
+        ax.add_patch(MplPolygon(poly, closed=True, facecolor="gold", alpha=0.35, edgecolor="k", linewidth=1, label="combined envelope"))
+
+    for name, (ox, oy) in OVALS.items():
+        unit, want = TABLE_AREA[name]
+        want_sf = want if unit == "SF" else want * SQFT_PER_ACRE
+        ax.plot(ox, oy, "o", color="red", markersize=5)
+        ax.text(ox, oy + 14, f"{name}  table {want_sf:,.0f} SF\nnot individually divided", fontsize=7, color="darkred",
+                ha="left", va="top", bbox=dict(boxstyle="round", fc="white", ec="darkred", alpha=0.85))
+
+    title = "Leg B attempt 2: 61985-1..4 combined envelope, built from dashes.py's trains (not polygonised)"
+    if combined:
+        title += f"\ncombined {combined['area_sqft']:,.0f} SF vs table sum {combined['table_area_sqft']:,.0f} SF ({combined['diff_pct']:+.1f}%); no cross-tie found dividing the four ({combined['cross_ties_found']} strokes)"
+    ax.set_title(title, fontsize=9)
+    ax.set_xlim(x0, x1); ax.set_ylim(y1, y0); ax.legend(loc="lower left", fontsize=7)
+    fig.tight_layout(pad=0.4); fig.savefig(OUT / "legB_61985.png", dpi=150); plt.close(fig)
+    print(f"wrote {OUT / 'legB_61985.png'}")
 
 
 if __name__ == "__main__":
