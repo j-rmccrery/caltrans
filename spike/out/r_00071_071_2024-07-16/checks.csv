@@ -1,0 +1,30 @@
+check,printed,drawn,difference,result
+bearing,"S75°19'14""W","S75°19'30""W",0.3',pass
+distance,28.03',28.02,-0.01,pass
+distance,29.06',29.07,+0.01,pass
+distance,56.71',56.72,+0.01,pass
+distance,8.58',8.59,+0.01,pass
+arc length,18.26',4.96 (R=3.2),-13.30,FAIL
+distance,7.24',7.24,+0.00,pass
+distance,50.43,50.41,-0.02,pass
+bearing,"S3°01'01""W","S3°03'26""W",2.4',pass
+distance,52.93,52.71,-0.22,pass
+arc length,2.76',3.63 (R=8.4),+0.87,FAIL
+distance,139.54',139.55,+0.01,pass
+arc length,2.80',3.47 (R=4.5),+0.67,FAIL
+distance,20.03',20.03,+0.00,pass
+distance,32.69',32.68,-0.01,pass
+arc length,66.43',26.93 (R=nan),-39.50,FAIL
+distance,56.43',56.44,+0.01,pass
+distance,55.35',55.34,-0.01,pass
+bearing,"N86°56'50""W","N86°59'12""W",2.4',pass
+distance,24.89',24.85,-0.04,pass
+distance,188.89',188.60,-0.29,pass
+distance,133.36',133.23,-0.13,pass
+distance,161.29',0.75,-160.54,FAIL
+bearing,"S82°33'44""W","S82°24'18""W",9.4',FAIL
+bearing,"S81°58'19""W","S81°58'18""W",0.0',pass
+distance,28.56,110.23,+81.67,FAIL
+distance,101.50,95.27,-6.23,FAIL
+distance,28.56,23.32,-5.24,FAIL
+distance,71.71,0.77,-70.94,FAIL

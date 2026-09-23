@@ -1,0 +1,17 @@
+  vision model 0/273
+  vision model 20/273
+  vision model 40/273
+  vision model 60/273
+  vision model 80/273
+  vision model 100/273
+  vision model 120/273
+  vision model 140/273
+  vision model 160/273
+  vision model 180/273
+  vision model 200/273
+  vision model 220/273
+  vision model 240/273
+  vision model 260/273
+273 boxes: {'agree': 59, 'repaired': 0, 'queue': 214}; vision reads cached 273; grid range None
+   WRONG accepted: 15 agree R=584' truth 1015.13'
+vs truth (32 boxes): accepted right 15, accepted wrong 1, queued 16

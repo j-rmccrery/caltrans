@@ -1,0 +1,27 @@
+tag,check,printed,drawn,difference,result,association
+L2,bearing,"S75°44'54""E","S75°34'34""E",10.3',pass,leader
+L2,distance,9.31,9.31,-0.00,pass,leader
+L3,bearing,"S0°03'34""W","S0°06'58""W",3.4',pass,leader
+L3,distance,10.05,10.04,-0.01,pass,leader
+L4,bearing,"S75°10'18""W","S75°06'24""W",3.9',pass,leader
+L4,distance,9.32,9.30,-0.02,pass,leader
+L5,bearing,"N90°00'00""W","N89°57'45""W",2.3',pass,leader
+L5,distance,12.01,12.04,+0.03,pass,leader
+L6,bearing,"S75°10'18""W","N25°51'28""W",4738.2',FAIL,leader
+L6,distance,6.92,18.22,+11.30,FAIL,leader
+L8,bearing,"S75°44'54""E","S25°51'28""E",2993.4',FAIL,leader
+L8,distance,14.33,18.22,+3.89,FAIL,leader
+L9,bearing,"S60°50'50""E","S60°49'36""E",1.2',pass,leader
+L9,distance,22.35,22.32,-0.03,pass,leader
+L10,bearing,"N14°16'44""W","N14°15'58""W",0.8',pass,leader
+L10,distance,31.39,31.38,-0.01,pass,leader
+L11,bearing,"N11°49'32""W","N11°48'40""W",0.9',pass,leader
+L11,distance,19.74,19.73,-0.01,pass,leader
+L12,bearing,"N58°54'15""W","N58°54'25""W",0.2',pass,leader
+L12,distance,35.23,35.22,-0.01,pass,leader
+L17,bearing,"N74°58'44""W","N74°56'01""W",2.7',pass,beside
+L17,distance,163.87,163.86,-0.01,pass,beside
+L18,bearing,"N2°05'55""E","N2°08'59""E",3.1',FAIL,beside
+L18,distance,175.13,175.13,-0.00,pass,beside
+C3,radius,460.00,459.77,-0.05%,pass,beside
+C3,arc length,322.86,165.76,-157.10,FAIL,beside

@@ -1,0 +1,10 @@
+reader=rapid blocks=1173 time=39s (33 ms/block)
+table          gt  hit  recall   misses (gt value -> nearest unmatched reads)
+coordinates    14   10   71.4%   ['2,120,378.27', '5,993,999.17', '2,120,468.40', '5,994,023.77'] | unmatched reads: ['COORDINATES', 'JATESTABLE', 'POINT', 'NORTHIN', 'RTHING', 'EASTING', '{)', '①QD']
+alignment      32   16   50.0%   ['65+48.80', 'EC', 'EC', 'EC', '71+58.22', 'BC'] | unmatched reads: ['ALIGNMENTDATA', 'STATION', 'NORTHIN', 'ORTHING', 'EASTING', '①@0①@0@9', '65+48.80EC', '71+58.22BC']
+curve1         32   26   81.2%   ['C1', 'C2', '67°04\'05"', '58.79', '33°42\'44"', '136.53'] | unmatched reads: ['CURVEDATATABLE(1)', 'NO.', 'V', 'RADIUS', 'LENGTH', '35', '67°04\'05"58.79\'', '33°42\'44"136.53']
+curve2         60   58   96.7%   ['39°19\'30"(T)', '123.12(T)'] | unmatched reads: ['CURVEDATATABLE(2)', 'NO.', 'DV', 'RADIUS', 'LENGTH', '二', '二', '39°19\'30"(T)123.12(T)']
+line           63   60   95.2%   ['L1', 'L2', 'L14(T)'] | unmatched reads: ['LINEDATA', 'V', 'TABLE', 'DISTANCE', 'NO.', 'BEARING', '7门', '14(T)']
+radial         26    9   34.6%   ['R-1', 'R-2', 'R-3', 'R-4', 'R-5', 'R-6'] | unmatched reads: ['RADIALLINETABLE', 'NO.', 'BEARING', 'S2°05\'39"W(R)R-1R-2S10°39\'16"E(R)R-3S77°43\'21"E(R)R-4S45°23\'09"E(R)R-5S7°57\'05"W(R)R-6S1°02\'33"W(R)R-7N23°43\'19"E(R)R-8N25°31\'16"E(R)R-9S52°37\'35"W(R)R-10S55°48\'55"W(R)R-11S2°19\'35"E(R)R-12S11°37\'35"E(R)N5°44\'21"W(R)R-13', '6897', '-11S2°19\'35"E(R)']
+ALL TABLES    227  179   78.9%
+confidence: correct median 0.932 (p5 0.858) | wrong median 0.951 (max 1.000)

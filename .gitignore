@@ -18,3 +18,11 @@ spike/out/r65/
 !spike/out/r_*/log.txt
 !spike/out/lidar_intensity.tif
 !spike/out/lidar_hillshade.tif
+!spike/out/r_*/read_vlm.json
+!spike/out/r_*/read_scan.json
+!spike/out/r_*/labels.json
+!spike/out/r_*/tag_labels.json
+!spike/out/r_*/traverse.json
+!spike/out/r_*/tables.json
+!spike/out/r_*/checks.csv
+!spike/out/r_*/tags_checks.csv

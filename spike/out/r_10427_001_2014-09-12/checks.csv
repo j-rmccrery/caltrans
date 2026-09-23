@@ -1,0 +1,16 @@
+check,printed,drawn,difference,result
+distance,140.02,140.05,+0.03,pass
+bearing,"N5°40'51""W","N5°38'05""W",2.8',pass
+distance,219.22',219.18,-0.04,pass
+distance,67.61,60.16,-7.45,FAIL
+distance,50.04',60.16,+10.12,FAIL
+bearing,"N42°35'37""E","N41°00'06""E",95.5',FAIL
+distance,50.01',60.16,+10.15,FAIL
+distance,440.50',440.50,+0.00,pass
+distance,50.37',60.16,+9.79,FAIL
+bearing,"N40°14'00""E","N41°00'06""E",46.1',FAIL
+arc length,30.61,109.97 (R=nan),+79.36,FAIL
+arc length,565.02,197.27 (R=nan),-367.75,FAIL
+arc length,295.44,143.88 (R=nan),-151.56,FAIL
+arc length,312.07',219.30 (R=nan),-92.77,FAIL
+distance,1.28,1.67,+0.39,FAIL

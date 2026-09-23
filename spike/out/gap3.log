@@ -1,0 +1,72 @@
+=== r_10390_006_2016-12-12
+== alphabet
+no NO. column: no tables; alphabet from the font seed alone, 450 exemplars over ()012345678CELNRSTW
+== read_glyphs
+  round 1: 267 blocks read, 14 glyphs learned from rows that parse
+read 750 blocks by glyph: 271 fully read, 1265 unread glyphs
+== solve
+control found: 0 coordinate callouts (0 in notes), 0 grid lines
+record frame: rotation from 0/2 bearings, scale from 0/0 distances
+solve: not enough control for even one hypothesis, and too few bearings or distances for a record frame
+=== r_10301_001_2014-04-08
+== alphabet
+no NO. column: no tables; alphabet from the font seed alone, 335 exemplars over ()012345789CELNRST
+== read_glyphs
+  round 1: 243 blocks read, 4 glyphs learned from rows that parse
+read 515 blocks by glyph: 243 fully read, 687 unread glyphs
+== solve
+control found: 0 coordinate callouts (0 in notes), 0 grid lines
+record frame: rotation from 0/0 bearings, scale from 0/0 distances
+solve: not enough control for even one hypothesis, and too few bearings or distances for a record frame
+=== r_10237_001_2019-05-29
+== alphabet
+no NO. column: no tables; alphabet from the font seed alone, 662 exemplars over ()0123456789CELNRSTW
+== read_glyphs
+  round 1: 251 blocks read, 25 glyphs learned from rows that parse
+  round 2: 250 blocks read, 2 glyphs learned from rows that parse
+read 523 blocks by glyph: 250 fully read, 1016 unread glyphs
+== solve
+control found: 1 coordinate callouts (0 in notes), 0 grid lines
+record frame: rotation from 6/11 bearings, scale from 0/0 distances
+solve: not enough control for even one hypothesis, and too few bearings or distances for a record frame
+=== r_10334_001_2015-05-11
+== alphabet
+alphabet: 54 distinct exemplars over 1345678L (206 self-matched); rows read: 7
+== read_glyphs
+read 1238 blocks by glyph: 137 fully read, 4203 unread glyphs
+== solve
+control found: 0 coordinate callouts (0 in notes), 0 grid lines
+record frame: rotation from 0/0 bearings, scale from 0/1 distances
+solve: not enough control for even one hypothesis, and too few bearings or distances for a record frame
+=== r_10462_001_2015-08-13
+== alphabet
+no NO. column: no tables; alphabet from the font seed alone, 472 exemplars over ()0123456789CELNRSTW
+== read_glyphs
+  structure seed: 44 digit-slot glyphs in 7 clusters -> [('0', 8, 0.8), ('1', 3, 0.3), ('2', 2, 16.9), ('3', 4, 2.1), ('4', 4, 11.1), ('7', 7, 4.0), ('9', 2, 6.2)]
+read 875 blocks by glyph: 278 fully read, 1402 unread glyphs
+== solve
+control found: 4 coordinate callouts (0 in notes), 0 grid lines
+fit: 2/4 callouts + 0/0 grid lines | scale 0.70048 units/pt | rotation -0.3643 deg | rms 0.00 max 0.00
+NOT credible: too little agreeing control
+record frame: rotation from 4/4 bearings, scale from 0/13 distances
+record frame says rotation 0.1626 (off 0.5269 deg), scale 0.70048 (+0.00 %)
+vs Caltrans georeferenced package at 9 sheet points: median 8.47, max 13.35 (sheet units)
+    assert credible or weak, "fit is not credible"
+AssertionError: fit is not credible
+=== r_00071_070_2019-10-15
+== alphabet
+no NO. column: no tables; alphabet from the font seed alone, 336 exemplars over ()0123456789CELNRSTW
+== read_glyphs
+  structure seed: 130 digit-slot glyphs in 12 clusters -> [('0', 14, 5.9), ('1', 6, 0.0), ('2', 14, 1.8), ('3', 10, 2.0), ('4', 13, 1.0), ('5', 10, 3.4), ('6', 4, 6.3), ('7', 10, 1.6), ('8', 8, 4.3), 
+  slot NS: 9 glyphs, clusters [6, 3] -> ['N', 'S']
+  slot EW: 9 glyphs, clusters [5, 4] -> ['E', 'W']
+  round 1: 284 blocks read, 16 glyphs learned from rows that parse
+  round 2: 284 blocks read, 2 glyphs learned from rows that parse
+read 618 blocks by glyph: 284 fully read, 969 unread glyphs
+== solve
+control found: 2 coordinate callouts (2 in notes), 0 grid lines
+fit: 2/2 callouts + 0/0 grid lines | scale 42.17254 units/pt | rotation 89.8593 deg | rms 0.00 max 0.00
+NOT credible: too little agreeing control
+record frame: rotation from 0/2 bearings, scale from 4/10 distances
+    assert credible or weak, "fit is not credible"
+AssertionError: fit is not credible

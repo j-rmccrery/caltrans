@@ -905,7 +905,7 @@
  },
  {
   "kind": "distance",
-  "text": "17.60'",
+  "text": "17.60",
   "drawn_ft": 13.17,
   "off_ft": -4.43,
   "region": [
@@ -949,7 +949,7 @@
  },
  {
   "kind": "arc length",
-  "text": "85.59'",
+  "text": "85.59",
   "drawn_ft": 82.39,
   "off_ft": -3.2,
   "region": [
@@ -1089,17 +1089,6 @@
     2005.4,
     590.4
    ]
-  ]
- },
- {
-  "kind": "distance",
-  "text": "5149.83",
-  "issue": "leader points at no line",
-  "region": [
-   1007,
-   590,
-   1098,
-   607
   ]
  },
  {
@@ -1450,17 +1439,6 @@
  },
  {
   "kind": "distance",
-  "text": "15.00",
-  "issue": "no line found beside label",
-  "region": [
-   2224,
-   646,
-   2283,
-   663
-  ]
- },
- {
-  "kind": "distance",
   "text": "50.00'",
   "issue": "leader points at no line",
   "region": [
@@ -1479,17 +1457,6 @@
    684,
    1728,
    722
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N68°11'17\"E",
-  "issue": "no line found beside label",
-  "region": [
-   2017,
-   682,
-   2104,
-   735
   ]
  },
  {
@@ -1898,17 +1865,6 @@
     1604.6,
     787.7
    ]
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "S3°55'39\"E",
-  "issue": "no line found beside label",
-  "region": [
-   1690,
-   755,
-   1762,
-   784
   ]
  },
  {

@@ -1,0 +1,57 @@
+r_00071_070_2019-10-15     frame.py     ok  map area [364, 99, 2255, 1158] of 2448x1584; furniture: 16 dense text blocks
+r_00071_070_2019-10-15     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 562 exemplars over ()0123456789CELNRSTW
+r_00071_070_2019-10-15     read_glyphs.py ok  read 618 blocks by glyph: 259 fully read, 871 unread glyphs
+r_00071_070_2019-10-15     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_00071_071_2024-07-16     frame.py     ok  map area [197, 155, 1798, 1303] of 2448x1584; furniture: 18 dense text blocks
+r_00071_071_2024-07-16     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 491 exemplars over ()0123456789CELNRSTW
+r_00071_071_2024-07-16     read_glyphs.py ok  read 438 blocks by glyph: 238 fully read, 268 unread glyphs
+r_00071_071_2024-07-16     solve.py     ok  credible
+r_00071_071_2024-07-16     tags.py      ok    ?L0@1181,1297/1.4 C00?@808,554/1.68 C0?@256,1259/7.89 L00?@521,310/1.64 L0?@421,1245/0.0 L0?@982,1
+r_00071_071_2024-07-16     tables.py    ok  no table rows or no tags on this sheet: nothing to check
+r_00071_071_2024-07-16     checks.py    ok      {'kind': 'distance', 'text': '101.50', 'issue': 'line runs to the sheet edge (matchline); not ch
+r_10237_001_2019-05-29     frame.py     ok  map area [0, 0, 804, 792] of 1224x792; furniture: 13 dense text blocks
+r_10237_001_2019-05-29     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 800 exemplars over ()012356789CELNRSTW
+r_10237_001_2019-05-29     read_glyphs.py ok  read 523 blocks by glyph: 218 fully read, 847 unread glyphs
+r_10237_001_2019-05-29     solve.py     FAILED  solve: not enough control for even one hypothesis, and too few bearings or distances for a record fr
+r_10301_001_2014-04-08     frame.py     ok  map area [90, 219, 1330, 1584] of 2448x1584; furniture: 1 dense text blocks
+r_10301_001_2014-04-08     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 639 exemplars over ()01234579CELNRST
+r_10301_001_2014-04-08     read_glyphs.py ok  read 515 blocks by glyph: 280 fully read, 391 unread glyphs
+r_10301_001_2014-04-08     solve.py     FAILED  solve: not enough control for even one hypothesis, and too few bearings or distances for a record fr
+r_10327_001_2016-05-19     frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_10327_001_2016-05-19     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 6 exemplars over ()01
+r_10327_001_2016-05-19     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10327_001_2016-05-19     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_10334_001_2015-05-11     frame.py     ok  map area [191, 225, 2391, 985] of 2448x1584; furniture: 32 dense text blocks
+r_10334_001_2015-05-11     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 1532 exemplars over ()0123456789CELNRST
+r_10334_001_2015-05-11     read_glyphs.py ok  read 1238 blocks by glyph: 511 fully read, 1055 unread glyphs
+r_10334_001_2015-05-11     solve.py     FAILED  solve: not enough control for even one hypothesis, and too few bearings or distances for a record fr
+r_10390_006_2016-12-12     frame.py     ok  map area [225, 60, 2112, 1495] of 2448x1584; furniture: 2 dense text blocks
+r_10390_006_2016-12-12     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 625 exemplars over ()01345678CELNRSTW
+r_10390_006_2016-12-12     read_glyphs.py ok  read 750 blocks by glyph: 300 fully read, 794 unread glyphs
+r_10390_006_2016-12-12     solve.py     FAILED  solve: not enough control for even one hypothesis, and too few bearings or distances for a record fr
+r_10403_001_2013-12-03     frame.py     ok  map area [32, 121, 1548, 1584] of 2448x1584; furniture: 13 dense text blocks
+r_10403_001_2013-12-03     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 377 exemplars over ()0123456789CLNRST
+r_10403_001_2013-12-03     read_glyphs.py ok  read 501 blocks by glyph: 155 fully read, 589 unread glyphs
+r_10403_001_2013-12-03     solve.py     FAILED  solve: not enough control for even one hypothesis, and too few bearings or distances for a record fr
+r_10429_001_2021-06-08     blocks.py    FAILED  IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
+r_10462_001_2015-08-13     frame.py     ok  map area [190, 208, 2041, 1497] of 2448x1584; furniture: 2 dense text blocks
+r_10462_001_2015-08-13     alphabet.py  ok  no NO. column: no tables; alphabet from the font seed alone, 526 exemplars over ()0123456789CELNRSTW
+r_10462_001_2015-08-13     read_glyphs.py ok  read 875 blocks by glyph: 298 fully read, 1081 unread glyphs
+r_10462_001_2015-08-13     solve.py     FAILED  solve: not enough control for even one hypothesis, and too few bearings or distances for a record fr
+sheet r_00017x_001_2021-10-19 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 40/73 | bearing 21/38 | arc_length 0/30 | exceptions 135 | wrong_line 65
+sheet r_00071_070_2019-10-15 | georef refused | alphabet 562 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00071_071_2024-07-16 | georef credible | alphabet 491 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 6 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 15/20 | bearing 4/5 | arc_length 0/4 | exceptions 14 | wrong_line 7
+sheet r_00102_001aa_2026-01-12 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 9/24 | bearing 30/37 | arc_length 0/16 | exceptions 50 | wrong_line 36
+sheet r_00105_014_2021-05-21 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 37/62 | bearing 46/62 | arc_length 1/18 | exceptions 75 | wrong_line 42
+sheet r_10237_001_2019-05-29 | georef - | alphabet 800 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10258_001_2020-04-17 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 0/14 | bearing 6/13 | arc_length 0/12 | exceptions 39 | wrong_line 25
+sheet r_10301_001_2014-04-08 | georef - | alphabet 639 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10327_001_2016-05-19 | georef - | alphabet 6 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10334_001_2015-05-11 | georef - | alphabet 1532 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10390_006_2016-12-12 | georef - | alphabet 625 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10403_001_2013-12-03 | georef - | alphabet 377 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10427_001_2014-09-12 | georef refused | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 3/8 | bearing 1/3 | arc_length 0/4 | exceptions 19 | wrong_line 9
+sheet r_10429_001_2021-06-08 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10434_001_2020-09-16 | georef credible | alphabet 73 | table_rows 23 | rows_clean 12 | tags 15 | tags_partial 2 | tag_assoc 13 | tag_pass 20 | tag_fail 6 | distance 20/51 | bearing 10/19 | arc_length 4/19 | exceptions 76 | wrong_line 47
+sheet r_10434_003_2020-09-16 | georef credible | alphabet 131 | table_rows 77 | rows_clean 32 | tags 66 | tags_partial 38 | tag_assoc 24 | tag_pass 19 | tag_fail 28 | distance 26/95 | bearing 15/43 | arc_length 7/30 | exceptions 158 | wrong_line 93
+sheet r_10462_001_2015-08-13 | georef refused | alphabet 526 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -

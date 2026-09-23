@@ -1,0 +1,147 @@
+r_00014_035_2025-07-22     frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_00014_035_2025-07-22     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00014_035_2025-07-22     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00014_035_2025-07-22     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00022_016_2018-08-24     frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 2 dense text blocks
+r_00022_016_2018-08-24     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00022_016_2018-08-24     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00022_016_2018-08-24     solve.py     FAILED  solve: not enough control for even one hypothesis
+MuPDF error: format error: compression bomb detected
+
+r_00026_005_2020-08-03     frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_00026_005_2020-08-03     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00026_005_2020-08-03     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00026_005_2020-08-03     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_00033_027_2021-04-27     frame.py     ok  map area [199, 113, 2393, 1615] of 2592x1728; furniture: 0 dense text blocks
+r_00033_027_2021-04-27     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00033_027_2021-04-27     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00033_027_2021-04-27     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+MuPDF error: format error: compression bomb detected
+
+r_00057t_003_2026-02-10    frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 4 dense text blocks
+r_00057t_003_2026-02-10    alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00057t_003_2026-02-10    read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00057t_003_2026-02-10    solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00063_010_2022-02-03     frame.py     ok  map area [183, 95, 2245, 1456] of 2427x1551; furniture: 0 dense text blocks
+r_00063_010_2022-02-03     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00063_010_2022-02-03     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00063_010_2022-02-03     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00066t_018_sn-02035_2022 frame.py     ok  map area [199, 113, 2393, 1615] of 2592x1728; furniture: 1 dense text blocks
+r_00066t_018_sn-02035_2022 alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00066t_018_sn-02035_2022 read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00066t_018_sn-02035_2022 solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00071_070_2019-10-15     frame.py     ok  map area [364, 99, 2255, 1158] of 2448x1584; furniture: 16 dense text blocks
+r_00071_070_2019-10-15     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00071_070_2019-10-15     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00071_070_2019-10-15     solve.py     FAILED  AssertionError: fit is not credible
+r_00071_071_2024-07-16     frame.py     ok  map area [197, 155, 1798, 1303] of 2448x1584; furniture: 18 dense text blocks
+r_00071_071_2024-07-16     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00071_071_2024-07-16     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00071_071_2024-07-16     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_00073_009_2021-10-08     frame.py     ok  map area [182, 90, 2237, 1410] of 2419x1500; furniture: 0 dense text blocks
+r_00073_009_2021-10-08     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00073_009_2021-10-08     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00073_009_2021-10-08     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00073_016_2021-05-14     frame.py     ok  map area [199, 113, 2393, 1615] of 2592x1728; furniture: 0 dense text blocks
+r_00073_016_2021-05-14     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00073_016_2021-05-14     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00073_016_2021-05-14     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_00105_003_2018-10-09     frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 3 dense text blocks
+r_00105_003_2018-10-09     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00105_003_2018-10-09     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00105_003_2018-10-09     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00119_009_2021-01-08     frame.py     ok  map area [166, 95, 2094, 1451] of 2260x1545; furniture: 0 dense text blocks
+r_00119_009_2021-01-08     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00119_009_2021-01-08     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00119_009_2021-01-08     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00137_006_2026-02-10     frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_00137_006_2026-02-10     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00137_006_2026-02-10     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00137_006_2026-02-10     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_00157_011_2026-01-23     blocks.py    FAILED  IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
+r_00175_002_2019-11-15     frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_00175_002_2019-11-15     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00175_002_2019-11-15     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00175_002_2019-11-15     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00193x_012_2024-08-06    frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_00193x_012_2024-08-06    alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00193x_012_2024-08-06    read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00193x_012_2024-08-06    solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00193x_015_2024-08-06    frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_00193x_015_2024-08-06    alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00193x_015_2024-08-06    read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00193x_015_2024-08-06    solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_00506_017_2019-10-15     blocks.py    FAILED  IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
+r_00513_002_2021-05-14_sn- frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_00513_002_2021-05-14_sn- alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00513_002_2021-05-14_sn- read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00513_002_2021-05-14_sn- solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_10237_001_2019-05-29     frame.py     ok  map area [0, 0, 804, 792] of 1224x792; furniture: 13 dense text blocks
+r_10237_001_2019-05-29     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10237_001_2019-05-29     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10237_001_2019-05-29     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_10301_001_2014-04-08     frame.py     ok  map area [90, 219, 1330, 1584] of 2448x1584; furniture: 1 dense text blocks
+r_10301_001_2014-04-08     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10301_001_2014-04-08     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10301_001_2014-04-08     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_10327_001_2016-05-19     frame.py     ok  map area [185, 98, 2263, 1486] of 2448x1584; furniture: 0 dense text blocks
+r_10327_001_2016-05-19     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10327_001_2016-05-19     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10327_001_2016-05-19     solve.py     FAILED  ValueError: data must be of shape (n, m), where there are n points of dimension m
+r_10334_001_2015-05-11     frame.py     ok  map area [191, 225, 2391, 985] of 2448x1584; furniture: 32 dense text blocks
+r_10334_001_2015-05-11     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10334_001_2015-05-11     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10334_001_2015-05-11     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_10390_006_2016-12-12     frame.py     ok  map area [225, 60, 2112, 1495] of 2448x1584; furniture: 2 dense text blocks
+r_10390_006_2016-12-12     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10390_006_2016-12-12     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10390_006_2016-12-12     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_10403_001_2013-12-03     frame.py     ok  map area [32, 121, 1548, 1584] of 2448x1584; furniture: 13 dense text blocks
+r_10403_001_2013-12-03     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10403_001_2013-12-03     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10403_001_2013-12-03     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_10427_001_2014-09-12     frame.py     ok  map area [398, 104, 2239, 1492] of 2448x1584; furniture: 1 dense text blocks
+r_10427_001_2014-09-12     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10427_001_2014-09-12     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10427_001_2014-09-12     solve.py     ok  vs Caltrans georeferenced package at 9 sheet points: median 10.33, max 10.46 (sheet units)
+r_10427_001_2014-09-12     tags.py      ok  no alphabet for this sheet: no tags read
+r_10427_001_2014-09-12     tables.py    ok  no table rows or no tags on this sheet: nothing to check
+r_10427_001_2014-09-12     checks.py    ok      {'kind': 'arc length', 'text': '565.02', 'drawn_ft': 197.27, 'off_ft': -367.75, 'region': [445, 
+r_10462_001_2015-08-13     frame.py     ok  map area [190, 208, 2041, 1497] of 2448x1584; furniture: 2 dense text blocks
+r_10462_001_2015-08-13     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10462_001_2015-08-13     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10462_001_2015-08-13     solve.py     FAILED  AssertionError: fit is not credible
+sheet r_00014_035_2025-07-22 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00017x_001_2021-10-19 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 40/73 | bearing 21/38 | arc_length 0/30 | exceptions 135 | wrong_line 65
+sheet r_00022_016_2018-08-24 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00026_005_2020-08-03 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00033_027_2021-04-27 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00057t_003_2026-02-10 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00063_010_2022-02-03 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00066t_018_sn-02035_2022-04-25 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00071_070_2019-10-15 | georef refused | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00071_071_2024-07-16 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00073_009_2021-10-08 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00073_016_2021-05-14 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00102_001aa_2026-01-12 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 9/24 | bearing 30/37 | arc_length 0/16 | exceptions 50 | wrong_line 36
+sheet r_00105_003_2018-10-09 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00105_014_2021-05-21 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 37/62 | bearing 46/62 | arc_length 1/18 | exceptions 75 | wrong_line 42
+sheet r_00119_009_2021-01-08 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00137_006_2026-02-10 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00157_011_2026-01-23 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00175_002_2019-11-15 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00193x_012_2024-08-06 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00193x_015_2024-08-06 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00506_017_2019-10-15 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00513_002_2021-05-14_sn-04801 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10237_001_2019-05-29 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10258_001_2020-04-17 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 0/14 | bearing 6/13 | arc_length 0/12 | exceptions 39 | wrong_line 25
+sheet r_10301_001_2014-04-08 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10327_001_2016-05-19 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10334_001_2015-05-11 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10390_006_2016-12-12 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10403_001_2013-12-03 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10427_001_2014-09-12 | georef refused | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 3/8 | bearing 1/3 | arc_length 0/4 | exceptions 19 | wrong_line 9
+sheet r_10434_001_2020-09-16 | georef credible | alphabet 73 | table_rows 23 | rows_clean 12 | tags 15 | tags_partial 2 | tag_assoc 13 | tag_pass 20 | tag_fail 6 | distance 20/51 | bearing 10/19 | arc_length 4/19 | exceptions 76 | wrong_line 47
+sheet r_10434_003_2020-09-16 | georef credible | alphabet 131 | table_rows 77 | rows_clean 32 | tags 66 | tags_partial 38 | tag_assoc 24 | tag_pass 19 | tag_fail 28 | distance 26/95 | bearing 15/43 | arc_length 7/30 | exceptions 158 | wrong_line 93
+sheet r_10462_001_2015-08-13 | georef refused | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -

@@ -1,0 +1,135 @@
+r_00014_035_2025-07-22     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00017x_001_2021-10-19    frame.py     ok  map area [272, 89, 2392, 1249] of 2448x1584; furniture: 4 dense text blocks
+r_00017x_001_2021-10-19    alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00017x_001_2021-10-19    read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00017x_001_2021-10-19    solve.py     ok  vs Caltrans georeferenced package at 9 sheet points: median 1.08, max 1.30 (sheet units)
+r_00017x_001_2021-10-19    tags.py      ok  no alphabet for this sheet: no tags read
+r_00017x_001_2021-10-19    tables.py    ok  no table rows or no tags on this sheet: nothing to check
+r_00017x_001_2021-10-19    checks.py    ok      {'kind': 'arc length', 'text': "157.96'", 'drawn_ft': 220.24, 'off_ft': 62.28, 'region': [405, 2
+r_00022_016_2018-08-24     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+MuPDF error: format error: compression bomb detected
+
+r_00026_005_2020-08-03     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00033_027_2021-04-27     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+MuPDF error: format error: compression bomb detected
+
+r_00057t_003_2026-02-10    blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00063_010_2022-02-03     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00066t_018_sn-02035_2022 blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00071_070_2019-10-15     frame.py     ok  map area [364, 99, 2255, 1158] of 2448x1584; furniture: 16 dense text blocks
+r_00071_070_2019-10-15     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00071_070_2019-10-15     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00071_070_2019-10-15     solve.py     FAILED  AssertionError: fit is not credible
+r_00071_071_2024-07-16     blocks.py    ok  biggest blocks (likely merged tables): [51, 61, 72, 78, 79, 116, 119, 179]
+r_00071_071_2024-07-16     frame.py     ok  map area [197, 155, 1798, 1303] of 2448x1584; furniture: 18 dense text blocks
+r_00071_071_2024-07-16     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00071_071_2024-07-16     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00071_071_2024-07-16     solve.py     FAILED  FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\johnr\\projects\\caltrans\\spike
+r_00073_009_2021-10-08     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00073_016_2021-05-14     blocks.py    ok  biggest blocks (likely merged tables): [12, 13, 13, 14, 15, 16, 18, 115]
+r_00073_016_2021-05-14     frame.py     ok  map area [199, 113, 2393, 1615] of 2592x1728; furniture: 0 dense text blocks
+r_00073_016_2021-05-14     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00073_016_2021-05-14     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00073_016_2021-05-14     solve.py     FAILED  FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\johnr\\projects\\caltrans\\spike
+r_00102_001aa_2026-01-12   frame.py     ok  map area [281, 428, 2448, 1579] of 2448x1584; furniture: 5 dense text blocks
+r_00102_001aa_2026-01-12   alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00102_001aa_2026-01-12   read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00102_001aa_2026-01-12   solve.py     ok  vs Caltrans georeferenced package at 9 sheet points: median 0.64, max 1.30 (sheet units)
+r_00102_001aa_2026-01-12   tags.py      ok  no alphabet for this sheet: no tags read
+r_00102_001aa_2026-01-12   tables.py    ok  no table rows or no tags on this sheet: nothing to check
+r_00102_001aa_2026-01-12   checks.py    ok      {'kind': 'distance', 'text': "58.85'", 'drawn_ft': 109.35, 'off_ft': 50.5, 'region': [1223, 884,
+r_00105_003_2018-10-09     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00105_014_2021-05-21     frame.py     ok  map area [281, 200, 2509, 1479] of 2592x1728; furniture: 2 dense text blocks
+r_00105_014_2021-05-21     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_00105_014_2021-05-21     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_00105_014_2021-05-21     solve.py     ok  vs Caltrans georeferenced package at 9 sheet points: median 1.08, max 1.22 (sheet units)
+r_00105_014_2021-05-21     tags.py      ok  no alphabet for this sheet: no tags read
+r_00105_014_2021-05-21     tables.py    ok  no table rows or no tags on this sheet: nothing to check
+r_00105_014_2021-05-21     checks.py    ok      {'kind': 'arc length', 'text': "85.67'", 'drawn_ft': 142.15, 'off_ft': 56.48, 'region': [1211, 1
+r_00119_009_2021-01-08     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00137_006_2026-02-10     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00157_011_2026-01-23     blocks.py    FAILED  IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
+r_00175_002_2019-11-15     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00193x_012_2024-08-06    blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00193x_015_2024-08-06    blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_00506_017_2019-10-15     blocks.py    FAILED  IndexError: too many indices for array: array is 1-dimensional, but 2 were indexed
+r_00513_002_2021-05-14_sn- blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_10237_001_2019-05-29     blocks.py    FAILED  AssertionError: most glyphs unassigned
+r_10258_001_2020-04-17     frame.py     ok  map area [650, 422, 2322, 1628] of 2592x1728; furniture: 52 dense text blocks
+r_10258_001_2020-04-17     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10258_001_2020-04-17     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10258_001_2020-04-17     solve.py     ok  vs Caltrans georeferenced package at 9 sheet points: median 0.05, max 0.10 (sheet units)
+r_10258_001_2020-04-17     tags.py      ok  no alphabet for this sheet: no tags read
+r_10258_001_2020-04-17     tables.py    ok  no table rows or no tags on this sheet: nothing to check
+r_10258_001_2020-04-17     checks.py    ok      {'kind': 'distance', 'text': "92.85'", 'drawn_ft': 1.48, 'off_ft': -91.37, 'region': [2004, 595,
+r_10301_001_2014-04-08     blocks.py    FAILED  AssertionError: most glyphs unassigned
+r_10327_001_2016-05-19     blocks.py    FAILED  AssertionError: too few blocks: clustering is broken
+r_10334_001_2015-05-11     frame.py     ok  map area [191, 225, 2391, 985] of 2448x1584; furniture: 32 dense text blocks
+r_10334_001_2015-05-11     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10334_001_2015-05-11     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10334_001_2015-05-11     solve.py     FAILED  solve: not enough control for even one hypothesis
+r_10390_006_2016-12-12     blocks.py    ok  biggest blocks (likely merged tables): [22, 33, 34, 35, 36, 36, 38, 69]
+r_10390_006_2016-12-12     frame.py     ok  map area [225, 60, 2112, 1495] of 2448x1584; furniture: 2 dense text blocks
+r_10390_006_2016-12-12     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10390_006_2016-12-12     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10390_006_2016-12-12     solve.py     FAILED  FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\johnr\\projects\\caltrans\\spike
+r_10403_001_2013-12-03     blocks.py    FAILED  AssertionError: most glyphs unassigned
+r_10427_001_2014-09-12     frame.py     ok  map area [355, 104, 2239, 1492] of 2448x1584; furniture: 1 dense text blocks
+r_10427_001_2014-09-12     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10427_001_2014-09-12     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10427_001_2014-09-12     solve.py     ok  vs Caltrans georeferenced package at 9 sheet points: median 10.33, max 10.46 (sheet units)
+r_10427_001_2014-09-12     tags.py      ok  no alphabet for this sheet: no tags read
+r_10427_001_2014-09-12     tables.py    ok  no table rows or no tags on this sheet: nothing to check
+r_10427_001_2014-09-12     checks.py    FAILED  ValueError: The truth value of an array with more than one element is ambiguous. Use a.any() or a.al
+r_10434_001_2020-09-16     frame.py     ok  map area [200, 272, 2324, 1418] of 2448x1584; furniture: 5 dense text blocks
+r_10434_001_2020-09-16     alphabet.py  ok      ('C5', "141.63'", "41.07'")
+r_10434_001_2020-09-16     read_glyphs.py ok  read 1137 blocks by glyph: 540 fully read, 1531 unread glyphs
+r_10434_001_2020-09-16     solve.py     ok  credible
+r_10434_001_2020-09-16     tags.py      ok    C0?@813,679/1.71 C3@1291,1102/1.74 L1@886,1044/1814992.25 L2@888,1032/1814992.25 L3@924,1020/18149
+r_10434_001_2020-09-16     tables.py    ok     queue: C3 - drawn run 165.76 ft vs table 322.86 ft
+r_10434_001_2020-09-16     checks.py    ok      {'kind': 'arc length', 'text': "8.72'", 'drawn_ft': 16.75, 'off_ft': 8.03, 'region': [1582, 298,
+r_10434_003_2020-09-16     frame.py     ok  map area [180, 45, 2413, 1234] of 2448x1584; furniture: 7 dense text blocks
+r_10434_003_2020-09-16     alphabet.py  ok      ('L2', "5.75'", "3.76'")
+r_10434_003_2020-09-16     read_glyphs.py ok  read 1795 blocks by glyph: 1215 fully read, 1291 unread glyphs
+r_10434_003_2020-09-16     solve.py     ok  credible
+r_10434_003_2020-09-16     tags.py      ok    ?L0??@1714,1031/0.0 ?C1?@315,485/0.0 ?L1??@1223,215/0.0 ?L1??@1431,497/0.0 ?L1??@2069,991/0.0 ?L1@
+r_10434_003_2020-09-16     tables.py    ok  WARNING: only 24 of 66 read tags found their segment on this sheet (its leader convention may differ
+r_10434_003_2020-09-16     checks.py    ok      {'kind': 'bearing', 'text': 'N21°31\'36"W', 'drawn': 'N20°38\'20"W', 'off_arcmin': 53.3, 'region
+r_10462_001_2015-08-13     frame.py     ok  map area [190, 208, 2041, 1497] of 2448x1584; furniture: 2 dense text blocks
+r_10462_001_2015-08-13     alphabet.py  ok  no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no table
+r_10462_001_2015-08-13     read_glyphs.py ok  no alphabet for this sheet: nothing read by glyph
+r_10462_001_2015-08-13     solve.py     FAILED  AssertionError: fit is not credible
+sheet r_00014_035_2025-07-22 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00017x_001_2021-10-19 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 40/73 | bearing 21/38 | arc_length 0/30 | exceptions 135 | wrong_line 65
+sheet r_00022_016_2018-08-24 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00026_005_2020-08-03 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00033_027_2021-04-27 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00057t_003_2026-02-10 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00063_010_2022-02-03 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00066t_018_sn-02035_2022-04-25 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00071_070_2019-10-15 | georef refused | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00071_071_2024-07-16 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00073_009_2021-10-08 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00073_016_2021-05-14 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00102_001aa_2026-01-12 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 9/24 | bearing 30/37 | arc_length 0/16 | exceptions 50 | wrong_line 36
+sheet r_00105_003_2018-10-09 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00105_014_2021-05-21 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 37/62 | bearing 46/62 | arc_length 1/18 | exceptions 75 | wrong_line 42
+sheet r_00119_009_2021-01-08 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00137_006_2026-02-10 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00157_011_2026-01-23 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00175_002_2019-11-15 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00193x_012_2024-08-06 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00193x_015_2024-08-06 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00506_017_2019-10-15 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_00513_002_2021-05-14_sn-04801 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10237_001_2019-05-29 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10258_001_2020-04-17 | georef credible | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance 0/14 | bearing 6/13 | arc_length 0/12 | exceptions 39 | wrong_line 25
+sheet r_10301_001_2014-04-08 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10327_001_2016-05-19 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10334_001_2015-05-11 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10390_006_2016-12-12 | georef - | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10403_001_2013-12-03 | georef - | alphabet - | table_rows - | rows_clean - | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10427_001_2014-09-12 | georef refused | alphabet 0 | table_rows 0 | rows_clean 0 | tags 0 | tags_partial 0 | tag_assoc 0 | tag_pass 0 | tag_fail 0 | distance - | bearing - | arc_length - | exceptions - | wrong_line -
+sheet r_10434_001_2020-09-16 | georef credible | alphabet 73 | table_rows 23 | rows_clean 12 | tags 15 | tags_partial 2 | tag_assoc 13 | tag_pass 20 | tag_fail 6 | distance 20/51 | bearing 10/19 | arc_length 4/19 | exceptions 76 | wrong_line 47
+sheet r_10434_003_2020-09-16 | georef credible | alphabet 131 | table_rows 77 | rows_clean 32 | tags 66 | tags_partial 38 | tag_assoc 24 | tag_pass 19 | tag_fail 28 | distance 26/95 | bearing 15/43 | arc_length 7/30 | exceptions 158 | wrong_line 93
+sheet r_10462_001_2015-08-13 | georef refused | alphabet 0 | table_rows 0 | rows_clean 0 | tags - | tags_partial - | tag_assoc - | tag_pass - | tag_fail - | distance - | bearing - | arc_length - | exceptions - | wrong_line -

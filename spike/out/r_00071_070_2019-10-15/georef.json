@@ -11,6 +11,7 @@
  "rms_ft": 2.1470166959558487e-07,
  "credible": false,
  "weak": false,
+ "verified": null,
  "control": [
   {
    "E": 6668012.006,
