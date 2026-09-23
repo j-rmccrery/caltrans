@@ -22,7 +22,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from checks import BEAR_TOL, DIST_TOL, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, seg_dist, split_at, tag_leaders  # noqa: E402
+from checks import BEAR_TOL, DIST_TOL, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, seg_dist, span_for, split_at, split_chains, tag_leaders  # noqa: E402
 from georef import OUT, PDF, segments  # noqa: E402
 from gt import TABLES  # noqa: E402
 
@@ -102,6 +102,7 @@ def main():
     segs = [s for s in linework_segments(page, max_gray=0.2) if s[3] not in leader_pids]
     _, circles = segments(page)
     chains = [c for c in lines_on_sheet(segs, circles) if c["len_pt"] >= 1 and not (c["width"] < BOUNDARY and c["len_pt"] < 9)]  # thin stubs are stationing ticks
+    chains = split_chains(chains, circles)  # pieces between breaks; a tag's span is chosen among them by the table's distance
     junction_lines = [c for c in chains if c["len_pt"] >= 20]  # boundary lines of any weight; ticks are handled apart
     # short thin perpendicular strokes: radial ticks on the thin alignment curves mark where an arc ends
     ticks = np.array([(s0 + s1) / 2 for s0, s1, w, _ in linework_segments(page, max_gray=0.2) if w < BOUNDARY and 5 < np.hypot(*(s1 - s0)) < 9]).reshape(-1, 2)
@@ -157,6 +158,8 @@ def main():
         if len(cands) > 1 and cands[1][0] < CLEAR * cands[0][0]:
             queue.append({"tag": t["tag"], "issue": f"{len(cands)} {kind}s beside the tag", "region": region}); continue
         seg = cands[0][1]
+        if kind == "line" and not row["total"]:
+            seg = span_for(seg, row["dist"], scale, chains)
         if kind == "line":
             drawn = seg["len_pt"] * scale
             dx, dy = seg["dir"][0], -seg["dir"][1]

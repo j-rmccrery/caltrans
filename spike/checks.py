@@ -206,6 +206,9 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0):  #
             cands.append((perp, ln))
     if not cands:
         return None
+    on = [(p, ln) for p, ln in cands if p < 0.35 * b["glyph_h"]]  # the label is written on the line itself (some drafters)
+    if on:
+        cands = on
     if want_ft is not None:
         close = [(p, ln) for p, ln in cands if abs(ln["len_pt"] * scale - want_ft) < 1.0]
         if close:
@@ -312,7 +315,7 @@ def split_chains(chains, circles, tol=2.0):
         stops = [0.0] + sorted(cuts) + [L]
         for s0, s1 in zip(stops, stops[1:]):
             if s1 - s0 >= 1:
-                out.append({**c, "p0": p + t * s0, "p1": p + t * s1, "len_pt": float(s1 - s0)})
+                out.append({**c, "p0": p + t * s0, "p1": p + t * s1, "len_pt": float(s1 - s0), "run": k, "s0": float(s0), "s1": float(s1)})
     return out
 
 
@@ -356,6 +359,32 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
             pieces.append(np.array(pts[start:i + 1]))  # one facet is still an arc: C18 is 6 ft on R=1470
             start = i
     return pieces
+
+
+def span_for(piece, want_ft, scale, chains):
+    """The breaks on a drawn run (circles, line ends, crossings) are candidate endpoints; the printed
+    distance says which pair. Among the contiguous spans of pieces on the piece's run, the one whose
+    length matches the printed distance, if exactly one does; else the piece itself. The span carries
+    a note of how many pieces it joined."""
+    if want_ft is None or "run" not in piece:
+        return piece
+    run = sorted((c for c in chains if c.get("run") == piece["run"]), key=lambda c: c["s0"])
+    if len(run) < 2:
+        return piece
+    k = next(i for i, c in enumerate(run) if c["s0"] == piece["s0"])
+    tol = 1.0 + 0.001 * want_ft
+    hits = []
+    for i in range(0, k + 1):
+        for j in range(k, len(run)):
+            L = (run[j]["s1"] - run[i]["s0"]) * scale
+            if abs(L - want_ft) <= tol:
+                hits.append((i, j))
+    if len(hits) != 1:
+        return piece
+    i, j = hits[0]
+    if (i, j) == (k, k):
+        return piece
+    return {**piece, "p0": run[i]["p0"], "p1": run[j]["p1"], "len_pt": float(run[j]["s1"] - run[i]["s0"]), "s0": run[i]["s0"], "s1": run[j]["s1"], "joined": j - i + 1}
 
 
 def touches_label(chain, labels_tree, labels):
@@ -446,6 +475,8 @@ def main():
                 led, ln = at_tip(bi, "line", mate)
                 if not led:
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale)
+                if ln is not None:
+                    ln = span_for(ln, mate, scale, chains)
                 if ln is None:
                     exceptions.append({"kind": "bearing", "text": part, "issue": "leader points at no line" if led else "no line found beside label", "region": region(b)}); continue
                 dx, dy = ln["dir"][0], -ln["dir"][1]                      # sheet direction, y up
@@ -465,6 +496,8 @@ def main():
                 led, ln = at_tip(bi, "line", want)
                 if not led:
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale)
+                if ln is not None:
+                    ln = span_for(ln, want, scale, chains)
                 if ln is None or abs(ln["len_pt"] * scale - want) > 1.0:
                     arc = at_tip(bi, "arc", want)[1] if led else nearest_arc(b, arcs, 5.0 * b["glyph_h"])
                     if arc is not None and (ln is None or abs(arc["len_pt"] * scale - want) < abs(ln["len_pt"] * scale - want)):

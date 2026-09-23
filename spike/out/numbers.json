@@ -10,7 +10,7 @@
  "checks": {
   "distance": {
    "checked": 39,
-   "pass": 13
+   "pass": 17
   },
   "bearing": {
    "checked": 32,
@@ -34,20 +34,20 @@
   }
  },
  "exceptions": {
-  "total": 86,
+  "total": 82,
   "unmatched": 30,
   "matchline": 4,
   "disagree_small": 11,
-  "wrong_line": 41
+  "wrong_line": 37
  },
  "tags": {
   "table_rows": 44,
-  "read": 36,
+  "read": 37,
   "distinct": 36,
-  "partial_queued": 8,
+  "partial_queued": 10,
   "associated": 18,
   "by_leader": 18,
-  "queued": 32,
+  "queued": 36,
   "distance": {
    "checked": 8,
    "pass": 8
@@ -62,19 +62,19 @@
   },
   "arc length": {
    "checked": 5,
-   "pass": 1
+   "pass": 0
   }
  },
  "parcels": {
-  "faces": 52,
+  "faces": 60,
   "named": 4,
   "with_table_area": 3,
   "within_1pct": 0
  },
  "lidar_features": {
   "pavement": {
-   "polygons": 33,
-   "area_m2": 131754
+   "polygons": 35,
+   "area_m2": 132757
   },
   "viaduct deck": {
    "polygons": 11,
@@ -87,7 +87,7 @@
   "buildings_roof_test": 175
  },
  "encroachment": {
-  "clusters": 90,
+  "clusters": 91,
   "building_verdict": 15,
   "in_named_parcels": 9,
   "parcels": [
@@ -103,9 +103,9 @@
    "ground_max_m": 35.4
   },
   "61985-4": {
-   "length_m": 535,
-   "ground_min_m": 17.8,
-   "ground_max_m": 34.9
+   "length_m": 595,
+   "ground_min_m": 20.1,
+   "ground_max_m": 73.1
   }
  },
  "htdp": {

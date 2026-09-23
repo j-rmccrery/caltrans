@@ -27,11 +27,13 @@ Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run every
 
 | sheet | lettering | tables read (rows / clean) | tags read | tag checks pass / fail | label checks distance, bearing, arc | exceptions (wrong-line) |
 |---|---|---|---|---|---|---|
-| R-10434.2 Presidio | stroked | 41 / 41 | 37 (+9 partial) | 27 / 6 | 15/41, 9/17, 2/16 | 80 (·) |
-| R-10434.1 sibling | stroked, same drafter | 23 / 12 | 15 | 17 / 9 | 12/32, 5/14, 8/32 | 80 (48) |
-| R-10434.3 sibling | stroked, same drafter | 77 / 32 | 66 (+26 partial) | 22 / 29 | 19/61, 13/26, 8/35 | 136 (68) |
-| R-17x.1, R-102.1aa, R-105.14 | real PDF text (Times) | no stroked tables | — | — | 21/70 21/38 0/33 · 5/23 30/37 0/17 · 22/60 46/62 1/20 | 154 (82) · 54 (40) · 90 (59) |
-| R-10258.1 | real text (RomanS) | — | — | — | 0/13, 6/13, 0/13 | 39 (26) |
+| R-10434.2 Presidio | stroked, read by glyph | 41 / 41 | 36 (+8 partial) | 26 / 7 | 17/39, 17/32, 3/14 | 82 (37) |
+| R-10434.1 sibling | stroked, same drafter | 23 / 12 | 15 (+2) | 20 / 6 | 20/51, 10/19, 4/19 | 76 (47) |
+| R-10434.3 sibling | stroked, same drafter | 77 / 32 | 66 (+38) | 19 / 28 | 26/95, 15/43, 7/30 | 158 (93) |
+| R-17x.1, R-102.1aa, R-105.14 | real PDF text (Times) | no stroked tables | — | — | 40/73 21/38 0/30 · 9/24 30/37 0/16 · 37/62 46/62 1/18 | 135 (65) · 50 (36) · 75 (42) |
+| R-10258.1 | real text (RomanS) | — | — | — | 0/14, 6/13, 0/12 | 39 (25) |
+
+Association adapter (`checks.span_for`, `nearest_line` on-line rule): the breaks on a drawn run (circles, line ends, crossings) are candidate endpoints and the printed distance says which pair — the contiguous span of pieces whose length matches, if exactly one does, else the piece at the tip; and a label written on the line itself (the real-text drafters) takes that line over a parallel neighbour. Distances: Presidio 13→17 of 39, R-105.14 22→37 of 62, R-17x.1 21→40 of 73, R-10434.3 18→26 of 95. Bearings unchanged. Arcs untouched (spans not yet applied to curved runs).
 
 What it says: the alphabet and table reader carry to the same drafter's other sheets (clean rows 52 % and 42 %: more cell formats to add, e.g. `(R)` radials and stationing). Tag association on the siblings is 13 and 26 of 15 and 66. The real-text sheets skip the whole glyph path (`real_text_blocks` feeds the label checks; distances from real text are now checked). Wrong-line counts on every sheet, Presidio included, say the label → line association is the weakest link everywhere: that is the adapter work per drafter, and it is now measured.
 
