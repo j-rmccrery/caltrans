@@ -1,0 +1,76 @@
+[
+ {
+  "parcel": "61985-1",
+  "how": "label position (no leader found)",
+  "start_dist_pt": 150.1,
+  "edges_walked": 2,
+  "edges_full_record": 2,
+  "closed": false,
+  "closure_ft": null,
+  "record_area_sqft": null,
+  "printed_area_sqft": 2518,
+  "diff_pct": null,
+  "missing": [
+   "only 2 edge(s) placed near this label (label position (no leader found), 150.1 pt away); the strip's own R=/delta=/L= curves have no drawn arc within 5 glyph heights matching the printed length"
+  ],
+  "chain_src": [
+   "L9",
+   "L8"
+  ]
+ },
+ {
+  "parcel": "61985-2",
+  "how": "label position (no leader found)",
+  "start_dist_pt": 152.5,
+  "edges_walked": 2,
+  "edges_full_record": 2,
+  "closed": false,
+  "closure_ft": null,
+  "record_area_sqft": null,
+  "printed_area_sqft": 15372,
+  "diff_pct": null,
+  "missing": [
+   "only 2 edge(s) placed near this label (label position (no leader found), 152.5 pt away); the strip's own R=/delta=/L= curves have no drawn arc within 5 glyph heights matching the printed length"
+  ],
+  "chain_src": [
+   "S74°57'42\"E + 113.39'",
+   "S67°59'11\"E + 76.46'"
+  ]
+ },
+ {
+  "parcel": "61985-3",
+  "how": "leader tip",
+  "start_dist_pt": 13.3,
+  "edges_walked": 1,
+  "edges_full_record": 1,
+  "closed": false,
+  "closure_ft": null,
+  "record_area_sqft": null,
+  "printed_area_sqft": 49552,
+  "diff_pct": null,
+  "missing": [
+   "only 1 edge(s) placed near this label (leader tip, 13.3 pt away); the strip's own R=/delta=/L= curves have no drawn arc within 5 glyph heights matching the printed length"
+  ],
+  "chain_src": [
+   "N67°37'21\"W + 50.48'"
+  ]
+ },
+ {
+  "parcel": "61985-4",
+  "how": "label position (no leader found)",
+  "start_dist_pt": 115.7,
+  "edges_walked": 1,
+  "edges_full_record": 1,
+  "closed": false,
+  "closure_ft": null,
+  "record_area_sqft": null,
+  "printed_area_sqft": 3248,
+  "diff_pct": null,
+  "missing": [
+   "only 1 edge(s) placed near this label (label position (no leader found), 115.7 pt away); the strip's own R=/delta=/L= curves have no drawn arc within 5 glyph heights matching the printed length"
+  ],
+  "chain_src": [
+   "S10°09'24\"W + 101.10'"
+  ]
+ }
+]

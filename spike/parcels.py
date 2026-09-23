@@ -100,28 +100,82 @@ def faces_on_sheet(page):
 
 
 def face_names(page, faces, blocks):
-    """{face index: [parcel numbers]}: a label with a leader names the face the leader points into
-    (tunnel easements, small strips), else the face the label sits in."""
-    labels = [(m.group(0), Point(bl["cx"], bl["cy"])) for bl in blocks for m in [PARCEL.match(bl["text"].replace(" ", ""))] if m and not bl.get("real")]
+    """{face index: [parcel numbers]}: a label with a leader names the face the leader tip lands in
+    (tunnel easements, small strips, labels pulled clear of their own face for readability), else the
+    face the label sits in. Leaders: `checks.leaders` (curly stroked paths to a filled arrowhead or a
+    point-symbol circle -- the drafter's actual leader convention here) via `checks.tag_leaders` (each
+    leader claimed by the nearest label box, same machinery tables.py uses for the line/curve tags);
+    `georef.trace_leader` (built for two-row N/E coordinate callouts) is a second pass for whatever a
+    parcel-number oval's leader does not read as, in case its plain-box fallback catches a different one."""
     from scipy.spatial import cKDTree
     from georef import segments, trace_leader
-    segs, _ = segments(page)
+    from checks import leaders as checks_leaders, tag_leaders
+
+    labels = [(m.group(0), Point(bl["cx"], bl["cy"])) for bl in blocks for m in [PARCEL.match(bl["text"].replace(" ", ""))] if m and not bl.get("real")]
+    label_blocks = [bl for bl in blocks if PARCEL.match(bl["text"].replace(" ", "")) and not bl.get("real")]
+
+    segs, circles = segments(page)
     ends = np.array([q for s0, s1, _, _ in segs for q in (s0, s1)])
     idx = [(k, e) for k in range(len(segs)) for e in (0, 1)]
     tree = cKDTree(ends)
-    label_blocks = [bl for bl in blocks if PARCEL.match(bl["text"].replace(" ", "")) and not bl.get("real")]
-    by_leader = {}
+    paths, _ = checks_leaders(page, circles)
+    tips = tag_leaders(blocks, paths)  # {index into blocks: (arrowhead/circle tip, direction)}
+
+    def name_by_tip(bl, tip):
+        pt = Point(tip)
+        hit = [i for i, f in enumerate(faces) if f.buffer(3).contains(pt) and not f.contains(Point(bl["cx"], bl["cy"]))]
+        return min(hit, key=lambda i: faces[i].area) if hit else None
+
+    by_leader, resolved = {}, set()  # resolved: label instances (by id) already placed, one shot each
     for bl in label_blocks:
-        tips = trace_leader({"nb": bl, "eb": bl}, segs, tree, idx) or []
-        for tip in tips[::-1]:  # farthest vertex first
-            pt = Point(tip)
-            hit = [i for i, f in enumerate(faces) if f.buffer(3).contains(pt)]
-            hit = [i for i in hit if not (faces[i].contains(Point(bl["cx"], bl["cy"])))]  # not the face the label itself sits in
-            if hit:
-                by_leader.setdefault(min(hit, key=lambda i: faces[i].area), []).append(PARCEL.match(bl["text"].replace(" ", "")).group(0))
-                break
+        name = PARCEL.match(bl["text"].replace(" ", "")).group(0)
+        bi = blocks.index(bl)
+        fi = name_by_tip(bl, tips[bi][0]) if bi in tips else None
+        if fi is None:  # this drafter's arrowhead/circle leader wasn't there: try the callout tracer
+            for tip in (trace_leader({"nb": bl, "eb": bl}, segs, tree, idx) or [])[::-1]:  # farthest first
+                fi = name_by_tip(bl, tip)
+                if fi is not None:
+                    break
+        if fi is not None:
+            by_leader.setdefault(fi, []).append(name)
+            resolved.add(id(bl))
     print(f"labels naming a face through a leader: {sum(len(v) for v in by_leader.values())}; labels placed {len(labels)}")
-    return {fi: by_leader.get(fi, []) or [n for n, p in labels if f.contains(p)] for fi, f in enumerate(faces)}
+
+    # neither leader found: many parcel-number ovals are just nudged clear of their own face for
+    # readability, no leader drawn at all (checked: touching or a few pt off, next-nearest face
+    # 90-150 pt away -- not ambiguous). Each drawn occurrence of a number gets its own shot -- the same
+    # number can label two different, non-contiguous slivers of one parcel.
+    NEAR = 15.0  # pt
+    for bl in label_blocks:
+        if id(bl) in resolved:
+            continue
+        name = PARCEL.match(bl["text"].replace(" ", "")).group(0)
+        p = Point(bl["cx"], bl["cy"])
+        if any(f.contains(p) for f in faces):
+            continue  # the plain-containment fallback below already gets this one
+        d = sorted((f.distance(p), i) for i, f in enumerate(faces))
+        if d and d[0][0] < NEAR:
+            by_leader.setdefault(d[0][1], []).append(name)
+            resolved.add(id(bl))
+
+    # a label whose nearest touch is the sheet's one or two huge background faces (the whole corridor,
+    # never subdivided without the dashed easement lines) can still sit right beside a small, genuinely
+    # distinct sliver a bit further off: name that one too, evidence added not swapped, small faces only
+    # so this never reaches for the background face itself
+    NEAR2, SMALL_FACE = 70.0, 50_000.0  # pt, sq pt (~1.1 ac at this scale -- well under the corridor faces)
+    for bl in label_blocks:
+        name = PARCEL.match(bl["text"].replace(" ", "")).group(0)
+        p = Point(bl["cx"], bl["cy"])
+        for dist, fi in sorted((f.distance(p), i) for i, f in enumerate(faces)):
+            if dist >= NEAR2:
+                break
+            if faces[fi].area < SMALL_FACE and name not in by_leader.get(fi, []):
+                by_leader.setdefault(fi, []).append(name)
+                resolved.add(id(bl))
+    print(f"labels naming a face total (leader + proximity, within {NEAR:.0f}/{NEAR2:.0f} pt): {len(resolved)}")
+    # union, not "leader result or plain containment": a face a leader names for one label can still be
+    # the face a different label's own position simply sits inside (both are real evidence)
+    return {fi: sorted(set(by_leader.get(fi, []) + [n for n, p in labels if f.contains(p)])) for fi, f in enumerate(faces)}
 
 
 def main():

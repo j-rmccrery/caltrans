@@ -541,6 +541,30 @@ def main():
             continue  # table cells and title block: the record, not labels on the drawing
         lines = b["text"].replace(" ", "").split("|")
         curve_data = any(ANG.match(t) or RAD.match(t) or LEN.match(t) or re.match(r"^[RL][=\-:]", t) for t in lines)
+        if len(lines) == 1 and LEN.match(lines[0]):
+            # a standalone "L=573.93'" annotation (one block per annotation, since leg 1): TOKEN strips
+            # the "L=" prefix off its digit token, so this would otherwise fall into the DIST branch
+            # below and be dropped there (curve_data is always true for it) -- check it against the
+            # drawn arc directly: leader tip first, else the arc whose length matches within DIST_TOL
+            # among arcs within 5 glyph heights (never the nearest arc by distance alone).
+            m = LEN.match(lines[0])
+            want = float(m[1])
+            if not m[2]:  # (T): a run total over several tags, not a single arc; not checked here
+                led, arc = at_tip(bi, "arc", want)
+                if arc is None and not led:
+                    near = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 5.0 * b["glyph_h"]]
+                    close = [x for x in near if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
+                    arc = min(close, key=lambda x: abs(x["len_pt"] * scale - want)) if close else None
+                if arc is None:
+                    exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc within 5 glyph heights matches the printed length", "region": region(b)})
+                else:
+                    drawn = arc["len_pt"] * scale
+                    ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                    rows.append(["arc length", lines[0], f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
+                    labels.append({"kind": "arc", "printed": lines[0], "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
+                    if not ok:
+                        exceptions.append({"kind": "arc length", "text": lines[0], "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
+            continue
         # a bearing and its distance often come back as one OCR line: take the tokens inside each line
         parts = [m.group(0) for t in lines for m in TOKEN.finditer(t)] or lines
         for part in parts:

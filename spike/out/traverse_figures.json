@@ -1,15 +1,25 @@
 [
  {
-  "parcel": "61806-5|61806",
-  "edges": 147,
+  "parcel": "63269",
+  "edges": 3,
+  "by_record": 2,
+  "closure_ft": 323.3,
+  "record_area_sqft": 253743876.2,
+  "flags": [
+   "drawn"
+  ],
+  "table_area_sqft": 498761.99999999994,
+  "diff_pct": 50774.74
+ },
+ {
+  "parcel": "61806|61806-4|61806-5|61806-9|63269",
+  "edges": 139,
   "by_record": 23,
-  "closure_ft": 579.89,
-  "record_area_sqft": 538924334.0,
+  "closure_ft": 290.31,
+  "record_area_sqft": 613778551.1,
   "flags": [
    "partial record",
-   "drawn",
-   "drawn",
-   "drawn",
+   "partial record",
    "chord direction drawn",
    "drawn",
    "drawn",
@@ -38,12 +48,9 @@
    "drawn",
    "drawn",
    "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
+   "partial record",
+   "partial record",
+   "partial record",
    "partial record",
    "drawn",
    "drawn",
@@ -129,19 +136,16 @@
    "chord direction drawn",
    "chord direction drawn",
    "chord direction drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
+   "partial record",
    "drawn"
   ]
  },
  {
-  "parcel": "61985-2",
-  "edges": 86,
+  "parcel": "61806-4|61985-2",
+  "edges": 67,
   "by_record": 16,
   "closure_ft": 58.04,
-  "record_area_sqft": 99034851.2,
+  "record_area_sqft": 99034789.8,
   "flags": [
    "chord direction drawn",
    "partial record",
@@ -185,28 +189,9 @@
    "partial record",
    "chord direction drawn",
    "partial record",
+   "partial record",
    "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
+   "partial record",
    "partial record",
    "chord direction drawn",
    "drawn",
@@ -221,12 +206,10 @@
    "chord direction drawn",
    "chord direction drawn",
    "chord direction drawn"
-  ],
-  "table_area_sqft": 15372,
-  "diff_pct": 644154.82
+  ]
  },
  {
-  "parcel": "61806-9",
+  "parcel": "61806-2",
   "edges": 37,
   "by_record": 9,
   "closure_ft": 63.44,
@@ -261,15 +244,25 @@
    "partial record",
    "partial record"
   ],
-  "table_area_sqft": 6970,
-  "diff_pct": 2656610.02
+  "table_area_sqft": 314067.6,
+  "diff_pct": 58859.5
  },
  {
-  "parcel": "61985-4",
-  "edges": 69,
+  "parcel": "61806-9",
+  "edges": 6,
+  "by_record": 6,
+  "closure_ft": 138.22,
+  "record_area_sqft": 296073749.4,
+  "flags": [],
+  "table_area_sqft": 6970,
+  "diff_pct": 4247729.98
+ },
+ {
+  "parcel": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+  "edges": 64,
   "by_record": 20,
   "closure_ft": 326.66,
-  "record_area_sqft": 491635437.4,
+  "record_area_sqft": 491634850.8,
   "flags": [
    "drawn",
    "drawn",
@@ -298,6 +291,7 @@
    "partial record",
    "drawn",
    "drawn",
+   "partial record",
    "drawn",
    "drawn",
    "drawn",
@@ -305,13 +299,7 @@
    "drawn",
    "drawn",
    "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
-   "drawn",
+   "partial record",
    "partial record",
    "chord direction drawn",
    "partial record",
@@ -322,9 +310,7 @@
    "drawn",
    "drawn",
    "chord direction drawn"
-  ],
-  "table_area_sqft": 3248,
-  "diff_pct": 15136459.03
+  ]
  },
  {
   "parcel": "61806-5",
@@ -386,5 +372,18 @@
   ],
   "table_area_sqft": 229561.19999999998,
   "diff_pct": -98.76
+ },
+ {
+  "parcel": "61806",
+  "edges": 4,
+  "by_record": 0,
+  "closure_ft": 0.0,
+  "record_area_sqft": 4854.4,
+  "flags": [
+   "drawn",
+   "drawn",
+   "drawn",
+   "drawn"
+  ]
  }
 ]

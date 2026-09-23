@@ -27,6 +27,82 @@ NODE = 3.0  # pt: two edge ends this close meet
 SAME = 1.5  # pt: a bearing's line and a distance's line this close are one line
 
 
+def build_edges():
+    """Every placed record value (labels.json, tag_labels.json) as an edge, merged where a bearing and
+    a distance describe the same line. Shared by traverse.py's own walk and other consumers (e.g. the
+    tunnel-easement chains in leg5_61985.py) that need the same edge set without a full re-run."""
+    # edges: one per placed record, merged where a bearing and a distance sit on the same line
+    edges = []
+    for x in json.loads((OUT / "labels.json").read_text(encoding="utf-8")) if (OUT / "labels.json").exists() else []:
+        P = np.array(x["line"], float)
+        e = {"src": x["printed"], "kind": "arc" if x["kind"] == "arc" else "line", "p0": P[0], "p1": P[-1], "pts": P, "flags": [],
+             "region": tuple(x["region"]) if x.get("region") else None}
+        if x["kind"] == "bearing":
+            e["az"] = x["az"]
+        elif x["kind"] == "distance":
+            e["ft"] = x["ft"]
+        else:
+            e["L"] = x["ft"]
+        edges.append(e)
+    for x in json.loads((OUT / "tag_labels.json").read_text(encoding="utf-8")) if (OUT / "tag_labels.json").exists() else []:
+        P = np.array(x["line"], float)
+        e = {"src": x["tag"], "kind": "arc" if x["kind"] == "curve" else "line", "p0": P[0], "p1": P[-1], "pts": P, "flags": [], "region": None}
+        if x["kind"] == "line":
+            e["az"] = x["az"]
+            if not x["total"]:
+                e["ft"] = x["dist"]
+        else:
+            e["R"], e["L"] = x["R"], x["L"]
+        edges.append(e)
+
+    # pass 1: a bearing and a distance printed in the same annotation block (same region) are one edge
+    # with both values -- the block is the ground truth for "these describe the same line", not whether
+    # the two checks happened to land on geometrically identical spans (span_for can trim them a token
+    # or two apart even when they are the same printed call).
+    by_region = {}
+    merged = []
+    for e in edges:
+        if e["region"] is not None and e["kind"] == "line":
+            m = by_region.get(e["region"])
+            if m is None:
+                by_region[e["region"]] = e
+                merged.append(e)
+            else:
+                for k in ("az", "ft"):
+                    if k in e and k not in m:
+                        m[k] = e[k]
+                if e["src"] not in m["src"]:
+                    m["src"] += " + " + e["src"]
+        else:
+            merged.append(e)
+    edges = merged
+
+    # pass 2: the same line under two separate blocks (bearing beside, distance by leader elsewhere on
+    # the same run): one edge, matched by endpoint proximity
+    merged = []
+    for e in edges:
+        for m in merged:
+            if m["kind"] == e["kind"] and (np.hypot(*(m["p0"] - e["p0"])) < SAME and np.hypot(*(m["p1"] - e["p1"])) < SAME
+                                           or np.hypot(*(m["p0"] - e["p1"])) < SAME and np.hypot(*(m["p1"] - e["p0"])) < SAME):
+                for k in ("az", "ft", "R", "L"):
+                    if k in e and k not in m:
+                        m[k] = e[k]
+                m["src"] += " + " + e["src"]
+                break
+        else:
+            merged.append(e)
+    edges = merged
+    # A third pass tried pairing a leftover bearing-only edge with a leftover distance-only edge by
+    # collinearity + span overlap alone (no shared block, no shared endpoint): on this sheet the one
+    # geometrically plausible match it found (N77 deg 39'22"E paired with the drawn line under "391.93'")
+    # was wrong -- it broke a 5-edge chain that closed to 0.05 ft (391.93' walked from the drawing) into
+    # a 4-edge chain that misses by 173 ft (391.93' walked on the printed bearing instead). Two labels
+    # sitting near the same infinite line is not enough evidence that they are the same record edge;
+    # dropped rather than guess. A bearing-only or distance-only edge is left flagged.
+
+    return edges
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
@@ -40,41 +116,7 @@ def main():
         d = ground(q) - ground(p)
         return math.degrees(math.atan2(d[0], d[1])) % 360
 
-    # edges: one per placed record, merged where a bearing and a distance sit on the same line
-    edges = []
-    for x in json.loads((OUT / "labels.json").read_text(encoding="utf-8")) if (OUT / "labels.json").exists() else []:
-        P = np.array(x["line"], float)
-        e = {"src": x["printed"], "kind": "arc" if x["kind"] == "arc" else "line", "p0": P[0], "p1": P[-1], "pts": P, "flags": []}
-        if x["kind"] == "bearing":
-            e["az"] = x["az"]
-        elif x["kind"] == "distance":
-            e["ft"] = x["ft"]
-        else:
-            e["L"] = x["ft"]
-        edges.append(e)
-    for x in json.loads((OUT / "tag_labels.json").read_text(encoding="utf-8")) if (OUT / "tag_labels.json").exists() else []:
-        P = np.array(x["line"], float)
-        e = {"src": x["tag"], "kind": "arc" if x["kind"] == "curve" else "line", "p0": P[0], "p1": P[-1], "pts": P, "flags": []}
-        if x["kind"] == "line":
-            e["az"] = x["az"]
-            if not x["total"]:
-                e["ft"] = x["dist"]
-        else:
-            e["R"], e["L"] = x["R"], x["L"]
-        edges.append(e)
-    merged = []
-    for e in edges:  # the same line under two labels (bearing beside, distance by leader): one edge
-        for m in merged:
-            if m["kind"] == e["kind"] and (np.hypot(*(m["p0"] - e["p0"])) < SAME and np.hypot(*(m["p1"] - e["p1"])) < SAME
-                                           or np.hypot(*(m["p0"] - e["p1"])) < SAME and np.hypot(*(m["p1"] - e["p0"])) < SAME):
-                for k in ("az", "ft", "R", "L"):
-                    if k in e and k not in m:
-                        m[k] = e[k]
-                m["src"] += " + " + e["src"]
-                break
-        else:
-            merged.append(e)
-    edges = merged
+    edges = build_edges()
     print(f"record edges placed on the drawing: {len(edges)} ({sum(1 for e in edges if e['kind'] == 'line' and 'az' in e and 'ft' in e)} lines with bearing and distance, "
           f"{sum(1 for e in edges if e['kind'] == 'arc' and 'R' in e)} curves with R and L)")
 
