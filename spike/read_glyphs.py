@@ -110,6 +110,27 @@ def read_row(row, u, n, gh, M):
     return out + suffix
 
 
+def merge_pieces(row, c, u, n, gh):
+    """Characters from the paths in one row of a block: a path inside another's width (an E's bars) or
+    overlapping it along the line (a drafter's font that draws an N as three paths) joins it. Drops
+    stray ticks. Each glyph gets al/x0/x1 along the reading axis u from the block centre c."""
+    for g in row:
+        P = np.vstack(g["strokes"]); ext = ((P - c) @ u)
+        g["x0"], g["x1"] = ext.min(), ext.max()
+        g["al"] = float((g["c"] - c) @ u)
+    row = sorted(row, key=lambda g: g["al"])
+    merged = []
+    for g in row:
+        small_g = eff_h(g, n) <= SMALL * gh
+        inside = merged and g["x0"] >= merged[-1]["x0"] - 0.1 * gh and g["x1"] <= merged[-1]["x1"] + 0.1 * gh  # a bar within a letter's width
+        if merged and (inside or (g["x0"] < merged[-1]["x1"] - 0.15 * gh and not (small_g and eff_h(merged[-1], n) <= SMALL * gh))):
+            m = merged[-1]; m["strokes"] = m["strokes"] + g["strokes"]; Q = np.vstack(m["strokes"])
+            m["c"] = (Q.min(0) + Q.max(0)) / 2; m["h"] = float((Q.max(0) - Q.min(0)).max()); m["x1"] = max(m["x1"], g["x1"]); m["single"] = False
+        else:
+            merged.append(g)
+    return [g for g in merged if not (g["single"] and g["h"] < 0.5 * gh and eff_h(g, n) > 0.3 * gh)]  # a stray tick (short, across the line) is not a character
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     W, H = page.rect.width, page.rect.height
@@ -165,19 +186,7 @@ def main():
                 rows[k].append(g)
         texts = []
         for row in rows:
-            row.sort(key=lambda g: g["al"])
-            merged = []
-            for g in row:
-                P = np.vstack(g["strokes"]); ext = ((P - c) @ u)
-                g["x0"], g["x1"] = ext.min(), ext.max()
-                small_g = eff_h(g, n) <= SMALL * gh
-                inside = merged and g["x0"] >= merged[-1]["x0"] - 0.1 * gh and g["x1"] <= merged[-1]["x1"] + 0.1 * gh  # a bar within a letter's width
-                if merged and (inside or (g["x0"] < merged[-1]["x1"] - 0.15 * gh and not (small_g and eff_h(merged[-1], n) <= SMALL * gh))):
-                    m = merged[-1]; m["strokes"] = m["strokes"] + g["strokes"]; Q = np.vstack(m["strokes"])
-                    m["c"] = (Q.min(0) + Q.max(0)) / 2; m["h"] = float((Q.max(0) - Q.min(0)).max()); m["x1"] = max(m["x1"], g["x1"]); m["single"] = False
-                else:
-                    merged.append(g)
-            merged = [g for g in merged if not (g["single"] and g["h"] < 0.5 * gh and eff_h(g, n) > 0.3 * gh)]  # a stray tick (short, across the line) is not a character
+            merged = merge_pieces(row, c, u, n, gh)
             if merged:
                 texts.append(read_row(merged, u, n, gh, M))
         text = "|".join(t for t in texts if t)

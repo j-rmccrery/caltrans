@@ -25,8 +25,8 @@ def sheets():
                 page = pymupdf.open(pdf)[0]
             except Exception:
                 continue
-            if len(page.get_drawings()) < 200 and page.get_images():
-                continue  # a scan: not this chain
+            if sum(im[2] * im[3] for im in page.get_images()) > 1e6:
+                continue  # a scan (a full-sheet raster, in one image or strips, whatever border is drawn round it): not this chain
             yield pdf
             continue
         g = OUT / pdf.stem / "georef.json"
@@ -45,7 +45,7 @@ def summarise(pdf):
     o = OUT / pdf.stem
     row = {"sheet": pdf.stem}
     g = o / "georef.json"
-    row["georef"] = ("credible" if json.loads(g.read_text()).get("credible") else "refused") if g.exists() else "-"
+    row["georef"] = (("credible" if json.loads(g.read_text()).get("credible") else json.loads(g.read_text()).get("frame", "refused"))) if g.exists() else "-"
     if (o / "alphabet.npz").exists():
         import numpy as np
         z = np.load(o / "alphabet.npz"); row["alphabet"] = len(z["Y"]); row["chars"] = "".join(sorted(set(z["Y"].tolist())))

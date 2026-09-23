@@ -400,15 +400,10 @@ def touches_label(chain, labels_tree, labels):
     return False
 
 
-def main():
-    page = pymupdf.open(PDF)[0]
-    g = json.loads((OUT / "georef.json").read_text())
-    a, bb = g["params"][:2]
-    scale = float(np.hypot(a, bb))
-    rot = np.degrees(np.arctan2(bb, a))
-    blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
-    # what a label can describe: black linework, minus leaders (their curly paths, then their stubs and
-    # the callout underlines, which end inside a label's box), minus thin 7-pt stationing ticks
+def sheet_lines(page, blocks):
+    """What a label can describe: black linework, minus leaders (their curly paths, then their stubs and
+    the callout underlines, which end inside a label's box), minus thin 7-pt stationing ticks; split
+    at junctions. Returns (chains, circles, leader paths, segments)."""
     _, circles = segments(page)
     paths, leader_pids = leaders(page, circles)
     segs = [s for s in linework_segments(page, max_gray=0.2) if s[3] not in leader_pids]
@@ -417,7 +412,17 @@ def main():
     stub = lambda c: starts is not None and c["len_pt"] < 30 and min(starts.query(c["p0"])[0], starts.query(c["p1"])[0]) < 0.6  # joined to a leader
     chains = [c for c in lines_on_sheet(segs, circles) if c["len_pt"] >= 1 and not (c["width"] < 0.8 and c["len_pt"] < 9)  # a 1.60 ft segment is 1.2 pt
               and not stub(c) and not (c["len_pt"] < 150 and touches_label(c, ltree, blocks))]
-    chains = split_chains(chains, circles)
+    return split_chains(chains, circles), circles, paths, segs
+
+
+def main():
+    page = pymupdf.open(PDF)[0]
+    g = json.loads((OUT / "georef.json").read_text())
+    a, bb = g["params"][:2]
+    scale = float(np.hypot(a, bb))
+    rot = np.degrees(np.arctan2(bb, a))
+    blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
+    chains, circles, paths, segs = sheet_lines(page, blocks)
     # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers; a drawn curve runs
     # through several record arcs, so it is cut where lines meet it and at vertex circles
     junction_lines = [c for c in chains if c["len_pt"] >= 9]
@@ -428,7 +433,7 @@ def main():
                 arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
-    rows, exceptions = [], []
+    rows, exceptions, labels = [], [], []  # labels: every checked value with the line it was measured on (sheet pt), for the traverse
 
     def at_tip(bi, kind, want=None):
         """The line or arc a label's leader points at (within 4 pt of the arrowhead), if it has a leader.
@@ -486,6 +491,7 @@ def main():
                 diff = min(abs((az - want + 180) % 360 - 180), abs((az + 180 - want + 180) % 360 - 180))
                 ok = diff <= BEAR_TOL
                 rows.append(["bearing", part, fmt_bearing(az if abs((az - want + 180) % 360 - 180) < 90 else az + 180), f"{diff * 60:.1f}'", "pass" if ok else "FAIL"])
+                labels.append({"kind": "bearing", "printed": part, "az": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside"})
                 if not ok:
                     exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b), "line": shape(ln)})
             elif DIST.match(part):
@@ -504,6 +510,7 @@ def main():
                         drawn = arc["len_pt"] * scale
                         ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
                         rows.append(["arc length", part, f"{drawn:.2f} (R={arc['radius_pt'] * scale:.1f})", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
+                        labels.append({"kind": "arc", "printed": part, "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside"})
                         if not ok:
                             exceptions.append({"kind": "arc length", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
                         continue
@@ -516,6 +523,7 @@ def main():
                 want = float(m[1])
                 ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
                 rows.append(["distance", part, f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
+                labels.append({"kind": "distance", "printed": part, "ft": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside"})
                 if not ok:
                     exceptions.append({"kind": "distance", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(ln)})
 
@@ -537,6 +545,7 @@ def main():
             if not ok:
                 exceptions.append({"kind": "curve", "text": b["text"], "calc_L": round(calc, 2), "printed_L": L, "region": region(b)})
 
+    (OUT / "labels.json").write_text(json.dumps(labels, ensure_ascii=False), encoding="utf-8")
     with open(OUT / "checks.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["check", "printed", "drawn", "difference", "result"]); w.writerows(rows)
     (OUT / "exceptions.json").write_text(json.dumps(exceptions, indent=1, ensure_ascii=False), encoding="utf-8")

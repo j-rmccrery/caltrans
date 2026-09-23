@@ -51,12 +51,12 @@ def grid_range(reads):
     widened a little; None when the sheet has none."""
     ns, es = [], []
     for b in reads:
-        m = re.match(r"^([NE])[.:]?(\d{4,6}(?:000|500))$", b["text"].replace(" ", "").upper())
+        m = re.match(r"^([NE])[.:]?(\d{1,4}(?:000|500))$", b["text"].replace(" ", "").upper())
         if m:
             (ns if m[1] == "N" else es).append(float(m[2]))
-    if len(ns) < 2 or len(es) < 2:
+    if not ns or not es:
         return None
-    pad = 0.15 * max(max(ns) - min(ns), max(es) - min(es), 1000)
+    pad = max(0.15 * max(max(ns) - min(ns), max(es) - min(es)), 3000)  # one label read on an axis: a sheet spans a few thousand feet
     return (min(ns) - pad, max(ns) + pad), (min(es) - pad, max(es) + pad)
 
 

@@ -24,10 +24,12 @@ from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
 from blocks import OUT, PDF  # noqa: E402
+from read_glyphs import merge_pieces  # noqa: E402
 from tags import Matcher, axes, bitmap, glyphs  # noqa: E402
 
 SEED_JUNK = 9.0   # the font is close, not exact: the sheet's 0 and 6 sit at 5-7 from Hershey's
 EXACT_JUNK = 5.0
+FREE_JUNK = 14.0  # without tables to validate against, the seed's pick per character is the closest third under this; other fonts sit at 10-13
 SMALL = 0.45      # of glyph height: ° ' " . are 1.3-2.0 pt beside 6.5-pt capitals
 
 
@@ -42,29 +44,56 @@ def seed_exemplars(chars="0123456789LCNSEWRT()"):
     return np.array(X), np.array(Y)
 
 
-def cells(G, blocks, tree):
-    """Upright text blocks as ordered glyph lists (multi-stroke glyphs; a lone stroke is an E's middle bar)."""
+def cells(G, blocks, tree, upright=True):
+    """Upright text blocks as ordered glyph lists (multi-stroke glyphs; a lone stroke is an E's middle bar).
+    upright=False takes every block along its own axis, single strokes included so a letter's bars merge
+    into it (bitmaps then need the block's angle)."""
     out = []
     for b in blocks:
-        if abs(b["angle"]) > 2:
+        if upright and abs(b["angle"]) > 2:
             continue
-        u, n = axes(0.0)
+        u, n = axes(0.0 if upright else b["angle"])
         c = np.array([b["cx"], b["cy"]])
-        ids = [i for i in tree.query_ball_point(c, b["w"] / 2 + b["h"]) if not G[i]["single"]
+        ids = [i for i in tree.query_ball_point(c, b["w"] / 2 + b["h"]) if (upright and not G[i]["single"]) or (not upright and 0.3 < G[i]["h"] < 2.0 * b["glyph_h"])
                and abs((G[i]["c"] - c) @ u) < b["w"] / 2 + 0.6 * b["glyph_h"] and abs((G[i]["c"] - c) @ n) < b["h"] / 2 + 0.3 * b["glyph_h"]]
-        ids.sort(key=lambda i: G[i]["c"][0])
-        if ids:
-            out.append({"b": b, "ids": ids})
+        gs = merge_pieces([dict(G[i]) for i in ids], c, u, n, b["glyph_h"]) if ids else []  # a font that draws a letter as several paths
+        if gs:
+            out.append({"b": b, "ids": gs})
     return out
 
 
 def read(M, G, cell, junk):
     s = ""
     for i in cell["ids"]:
-        d = M.dist(bitmap(G[i], 0.0, cell["b"]["glyph_h"])[None, :])[0]
+        d = M.dist(bitmap(i, 0.0, cell["b"]["glyph_h"])[None, :])[0]
         k = int(d.argmin())
         s += M.Y[k] if d[k] < junk else "?"
     return s
+
+
+def free_alphabet(seed, G, cs):
+    """Alphabet for a sheet without line/curve tables: the font seed picks each character's closest
+    sheet glyphs, those become the exemplars, and a second pass with them widens the set. Nothing
+    validates it here; the georeference's control-point consensus does (a misread coordinate is
+    an outlier there, not a fit)."""
+    B = [(bitmap(i, c["b"]["angle"], c["b"]["glyph_h"]), len(i["strokes"])) for c in cs for i in c["ids"]]  # rotated blocks too: grid labels run along the border
+    if not B:
+        return np.zeros((0, 576), np.float32), np.array([], dtype="<U1"), np.array([], int)
+    bits = np.array([b for b, _ in B]); strokes = np.array([s for _, s in B])
+    X, Y, S = [], [], []
+    for M, junk, share in ((seed, FREE_JUNK, 0.3), (None, 3.0, 1.0)):
+        M = M or Matcher(np.array(X), np.array(Y))
+        d = M.dist(bits); k = d.argmin(1); best = d[np.arange(len(bits)), k]
+        X, Y, S = [], [], []
+        for ch in set(M.Y):
+            hit = np.where((M.Y[k] == ch) & (best < junk))[0]
+            hit = hit[np.argsort(best[hit])][:max(3, int(share * len(hit)))]  # pass 1: only the closest third of each character
+            X += list(bits[hit]); Y += [ch] * len(hit); S += list(strokes[hit])
+        if not X:
+            break
+    X, Y, S = np.array(X), np.array(Y), np.array(S)
+    _, keep = np.unique(X.round(2), axis=0, return_index=True) if len(X) else (None, np.array([], int))
+    return X[keep], Y[keep], S[keep]
 
 
 def no_columns(M, G, cs, junk, taken):
@@ -208,12 +237,13 @@ def main():
                 t = t + "(T)" if len(c["ids"]) == len(t) + 3 else t
                 if len(c["ids"]) == len(t):
                     for gi, ch in zip(c["ids"], t):
-                        X.append(bitmap(G[gi], 0.0, c["b"]["glyph_h"])); Y.append(ch); S.append(len(G[gi]["strokes"]))
+                        X.append(bitmap(gi, 0.0, c["b"]["glyph_h"])); Y.append(ch); S.append(len(gi["strokes"]))
         cols += new
         if not X:
-            np.savez(OUT / "alphabet.npz", X=np.zeros((0, 576), np.float32), Y=np.array([], dtype="<U1"))
+            X, Y, S = free_alphabet(seed, G, cells(G, blocks, tree, upright=False))
+            np.savez(OUT / "alphabet.npz", X=X, Y=Y, S=S)
             (OUT / "tables.json").write_text("{}", encoding="utf-8")
-            print("no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no tables"); return
+            print(f"no NO. column: no tables; alphabet from the font seed alone, {len(Y)} exemplars over {''.join(sorted(set(Y)))}"); return
         M = Matcher(np.array(X + list(seed.X[np.isin(seed.Y, list("NSEWRT"))])), np.array(Y + [y for y in seed.Y if y in "NSEWRT"]))
     print("NO. columns:", [(c["letter"], c["start"], len(c["cells"])) for c in cols])
 
@@ -247,10 +277,10 @@ def main():
     added = 0
     for c in cs:
         for i in c["ids"]:
-            b_ = bitmap(G[i], 0.0, c["b"]["glyph_h"])
+            b_ = bitmap(i, 0.0, c["b"]["glyph_h"])
             d = M.dist(b_[None, :])[0]; k = int(d.argmin())
             if d[k] < 1.5 and M.Y[k] in "0123456789LC":
-                X.append(b_); Y.append(M.Y[k]); S.append(len(G[i]["strokes"])); added += 1
+                X.append(b_); Y.append(M.Y[k]); S.append(len(i["strokes"])); added += 1
     X, Y, S = np.array(X), np.array(Y), np.array(S)
     _, keep = np.unique(X.round(2), axis=0, return_index=True)
     np.savez(OUT / "alphabet.npz", X=X[keep], Y=Y[keep], S=S[keep])

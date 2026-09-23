@@ -90,6 +90,8 @@ def assemble(blocks, singles):
     """Pass 2. The dilation pass drops one-stroke characters (they look like tick marks), which
     splits words and numbers. Put them back where they sit on a block's text line, then join
     blocks that continue each other along the reading axis. Multi-line blocks are left alone."""
+    if not blocks:
+        return blocks  # a sheet with no stroked text at all
     for b in blocks:
         b["pts"] = _corners(b)
     # per-block arrays, kept in step with the dicts (a refit changes cx, cy, w, h)

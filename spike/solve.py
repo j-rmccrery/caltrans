@@ -12,6 +12,7 @@ Usage: SHEET=<pdf> python spike/solve.py   ->  spike/out/<sheet>/georef.json (sa
 """
 import itertools
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -123,6 +124,69 @@ def hypotheses(points, lines):
     return hs
 
 
+def mode(vals, tol, period=None):
+    """Median of the densest cluster (values within tol of a member), or None with fewer than 3 in it."""
+    vals = np.array(vals, float)
+    if len(vals) < 3:
+        return None, 0
+    d = np.abs(vals[:, None] - vals[None, :])
+    if period:
+        d = np.minimum(d, period - d)
+    k = int((d < tol).sum(1).argmax())
+    inl = vals[d[k] < tol]
+    if len(inl) < 3:
+        return None, 0
+    if period:
+        inl = vals[k] + ((inl - vals[k] + period / 2) % period - period / 2)
+    return float(np.median(inl)), len(inl)
+
+
+def record_frame(page, blocks, points, scale=None):
+    """A sheet without a grid (most right-of-way maps): the printed bearings fix the rotation, each
+    against the drawn line it labels; the printed distances fix the scale the same way; one coordinate
+    callout, if there is one, fixes the offset. A label matched to the wrong line is an outlier to the
+    cluster, not a vote. Returns (params, votes) or None."""
+    from checks import BEAR, DIST, TOKEN, azimuth, nearest_line, seg_dist, sheet_lines, tag_leaders
+    chains, _, paths, _ = sheet_lines(page, blocks)
+    tips = tag_leaders(blocks, paths)
+    rots, scales = [], []
+    for bi, b in enumerate(blocks):
+        for part in [m.group(0) for t in b["text"].replace(" ", "").split("|") for m in TOKEN.finditer(t)]:
+            ln = None
+            if bi in tips:
+                near = min(((seg_dist(tips[bi][0], c["p0"], c["p1"]), c) for c in chains), key=lambda t: t[0], default=None)
+                ln = near[1] if near and near[0] < 4.0 else None
+            ln = ln or nearest_line(b, chains, 5.0 * b["glyph_h"])
+            if ln is None:
+                continue
+            if BEAR.match(part) and not BEAR.match(part)[6]:
+                rots.append((math.degrees(math.atan2(ln["dir"][0], -ln["dir"][1])) - azimuth(part)) % 180)
+            elif DIST.match(part) and not DIST.match(part)[2] and ln["len_pt"] > 5:
+                scales.append(math.log(float(DIST.match(part)[1]) / ln["len_pt"]))
+    rot, n_rot = mode(rots, 0.5, period=180)
+    ls, n_sc = mode(scales, 0.005)
+    print(f"record frame: rotation from {n_rot}/{len(rots)} bearings, scale from {n_sc}/{len(scales)} distances")
+    if rot is None or (ls is None and scale is None):
+        return None
+    scale = math.exp(ls) if ls is not None else scale  # a caller with a scale of its own only needs the rotation confirmed
+
+    def offsets(rot):  # (tx, ty) each callout implies under this rotation, from its first candidate point
+        a, b = scale * math.cos(math.radians(rot)), scale * math.sin(math.radians(rot))
+        return a, b, np.array([[pt["E"] - (a * sx - b * sy), pt["N"] - (b * sx + a * sy)] for pt in points for sx, sy in pt["cands"][:1]])
+
+    # a bearing allows two rotations 180 apart; two callouts that agree on the offset settle it, else north up (or nearest)
+    rot = (rot + 90) % 180 - 90
+    if len(points) >= 2:
+        rot = min((rot, rot + 180), key=lambda r: np.ptp(offsets(r)[2], axis=0).sum())
+    a, b, off = offsets(rot)
+    tx = ty = 0.0
+    offset = "none: local frame (no coordinate callout read)"
+    if len(off):
+        tx, ty = np.median(off, axis=0)
+        offset = f"{len(off)} callouts, spread {np.ptp(off, axis=0).round(1).tolist()}" if len(off) > 1 else "one callout, unverified"
+    return np.array([a, b, tx, ty]), {"bearings": [n_rot, len(rots)], "distances": [n_sc, len(scales)], "offset": offset}
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     blocks = json.loads((READS).read_text(encoding="utf-8"))
@@ -133,7 +197,19 @@ def main():
 
     hs = hypotheses(points, lines)
     if not hs:
-        raise SystemExit("solve: not enough control for even one hypothesis")
+        r = record_frame(page, blocks, points)
+        if r is None:
+            raise SystemExit("solve: not enough control for even one hypothesis, and too few bearings or distances for a record frame")
+        p, votes = r
+        a, b = p[:2]
+        scale, rot = float(np.hypot(a, b)), float(np.degrees(np.arctan2(b, a)))
+        print(f"record frame: scale {scale:.5f} units/pt | rotation {rot:.4f} deg | offset {votes['offset']}")
+        vs_caltrans_package(page, p)
+        (OUT / "georef.json").write_text(json.dumps({
+            "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; RECORD FRAME: rotation and scale from the printed bearings and distances, offset from one callout or none",
+            "params": [float(v) for v in p], "scale_ft_per_pt": scale, "rotation_deg": rot, "rms_ft": None, "credible": False, "weak": True, "frame": "record", "votes": votes,
+            "control": [], "grid_lines": []}, indent=1))
+        return
     best = None
     for h in hs:
         pr, lr = score(h, points, lines)
@@ -166,10 +242,22 @@ def main():
     else:
         print("NOT credible: too little agreeing control")
     weak = eqs >= 8 and feats >= 4 and not credible
+    verified = None
+    if not credible and not weak and len(used_pts) >= 2:
+        # two callouts fix a frame nothing else on the sheet confirms; the printed bearings can confirm its rotation
+        r = record_frame(page, blocks, points, scale)
+        if r is not None:
+            ra, rb = r[0][:2]
+            rrot, rscale = float(np.degrees(np.arctan2(rb, ra))), float(np.hypot(ra, rb))
+            drot = abs((rot - rrot + 90) % 180 - 90)
+            print(f"record frame says rotation {rrot:.4f} (off {drot:.4f} deg), scale {rscale:.5f} ({100 * (rscale / scale - 1):+.2f} %)")
+            if drot < 0.1:
+                weak, verified = True, f"rotation confirmed by {r[1]['bearings'][0]} bearings; scale rests on the callout pair" + (f", confirmed by {r[1]['distances'][0]} distances" if r[1]['distances'][0] else "")
+                print("WEAK:", verified)
     vs_caltrans_package(page, p)
     (OUT / "georef.json").write_text(json.dumps({
         "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; ground units and datum as printed on the sheet",
-        "params": [float(v) for v in p], "scale_ft_per_pt": scale, "rotation_deg": rot, "rms_ft": rms, "credible": bool(credible), "weak": bool(weak),
+        "params": [float(v) for v in p], "scale_ft_per_pt": scale, "rotation_deg": rot, "rms_ft": rms, "credible": bool(credible), "weak": bool(weak), "verified": verified,
         "control": [{"E": pt["E"], "N": pt["N"], "sx": float(pt["cands"][pr[i][1]][0]), "sy": float(pt["cands"][pr[i][1]][1]),
                      "residual_ft": pr[i][0], "used": i in used_pts} for i, pt in enumerate(points)],
         "grid_lines": [{"axis": lr[i][1], "value": ln["value"], "residual": lr[i][0], "used": i in used_lns} for i, ln in enumerate(lines)]}, indent=1))

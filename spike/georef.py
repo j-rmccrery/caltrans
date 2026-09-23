@@ -22,8 +22,9 @@ DEFAULT = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-0
 PDF = Path(os.environ.get("SHEET", DEFAULT))  # SHEET=<pdf> runs another sheet; its outputs go to out/<stem>/
 OUT = Path(__file__).parent / "out" / (PDF.stem if "SHEET" in os.environ else "")
 # the sheet's reads: by glyph on a stroked sheet (read_glyphs.py), by OCR otherwise
-_rg, _rr = OUT / "read_glyph.json", OUT / "read_rapid.json"
-READS = _rg if _rg.exists() and (_rg.stat().st_size > 2 or not _rr.exists()) else _rr
+_rg, _rr, _rt = OUT / "read_glyph.json", OUT / "read_rapid.json", OUT / "tables.json"
+_validated = _rt.exists() and _rt.stat().st_size > 20  # an alphabet the tables' NO. column validated; the font-seed-only one is not
+READS = _rg if _rg.exists() and _rg.stat().st_size > 2 and (_validated or not _rr.exists()) else _rr
 NUM = re.compile(r"^([NEXY])?[:.]?(\d[\d,]{2,9}\.\d{2,4})$")  # 4-8 integer digits: local grids, CCS27/83, ft or m
 
 
