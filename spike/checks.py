@@ -212,7 +212,7 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0):  #
     if want_ft is not None:
         close = [(p, ln) for p, ln in cands if abs(ln["len_pt"] * scale - want_ft) < 1.0]
         if close:
-            return min(close)[1]
+            return min(close, key=lambda t: t[0])[1]
     return min(cands, key=lambda t: t[0])[1]
 
 

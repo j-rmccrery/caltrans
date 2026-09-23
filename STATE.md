@@ -37,6 +37,12 @@ Association adapter (`checks.span_for`, `nearest_line` on-line rule): the breaks
 
 What it says: the alphabet and table reader carry to the same drafter's other sheets (clean rows 52 % and 42 %: more cell formats to add, e.g. `(R)` radials and stationing). Tag association on the siblings is 13 and 26 of 15 and 66. The real-text sheets skip the whole glyph path (`real_text_blocks` feeds the label checks; distances from real text are now checked). Wrong-line counts on every sheet, Presidio included, say the label → line association is the weakest link everywhere: that is the adapter work per drafter, and it is now measured.
 
+## The archive as it is: what is on disk and what reads
+
+65 sheets on disk (`Sample Data/`): **30 scans, 26 stroked-vector, 9 real-text**. The scans are hand-lettered originals; their filing dates (2017–2026) are scan dates. Only 6 sheets had been through the whole chain before; `spike/sheets.py --run --all` runs every vector sheet (36) — see `out/sheets.csv` / `out/sheets_all.log`.
+
+Scans, measured on R-65.2 (1969) against 32 boxes keyed by eye (`spike/gt_scan.py`; `spike/scan_readers.py`): digits exact — RapidOCR 20/32, local vision model (qwen2.5vl:7b, tight levelled crop, no example values) 20/32, either 25/32, both agree and right 15/32. Misses are dropped leading digits ("996.26" for N9996.26), a 4 read as 1, and box detection landing on the wrong line. `spike/scan_consensus.py` accepts a box only where the readers agree or structure repairs it (a dropped leading digit restored inside the grid range), queues the rest with both reads (`read_scan.json`). Two-reader agreement plus structure is the scan path; per-sheet raster templates are the next step if agreement stays under half.
+
 ## Numbers to quote (measured, from the run)
 
 - Georeferencing: 8 of 11 D4 vector sheets credible, 1 weak, 2 refused; Presidio 15 control points used on the fresh OCR (19 on the stale one), RMS 0.043 ft; vs Caltrans' own package ~0.6–1.1 ft (raster-limited).

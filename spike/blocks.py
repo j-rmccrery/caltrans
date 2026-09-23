@@ -265,6 +265,8 @@ def main():
     print(f"glyph paths {len(centers)} | blocks {len(blocks)} | rotated(>3deg) {(abs(ang) > 3).sum()}")
     print("glyphs/block percentiles 50/90/99/max:", np.percentile(g, [50, 90, 99, 100]))
     print("biggest blocks (likely merged tables):", sorted(g.tolist())[-8:])
+    if len(blocks) <= 100 and len(page.get_text("text")) > 500:
+        print("few stroked glyphs: this sheet carries real PDF text (real_text_blocks reads it)"); return
     assert len(blocks) > 100, "too few blocks: clustering is broken"
     assert g.sum() > 0.8 * len(centers), "most glyphs unassigned"
 

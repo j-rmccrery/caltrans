@@ -16,8 +16,19 @@ SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0}
 
 
 def sheets():
+    """Every vector sheet on disk (--all), else the ones with a credible fit already."""
+    import pymupdf
     pdfs = list((ROOT / "Sample Data" / "d4").glob("*.pdf")) + list((ROOT / "Sample Data" / "Right-of-Way Map Record").glob("r_10434_00[13]*.pdf"))
     for pdf in sorted(pdfs):
+        if "--all" in sys.argv:
+            try:
+                page = pymupdf.open(pdf)[0]
+            except Exception:
+                continue
+            if len(page.get_drawings()) < 200 and page.get_images():
+                continue  # a scan: not this chain
+            yield pdf
+            continue
         g = OUT / pdf.stem / "georef.json"
         if g.exists() and json.loads(g.read_text()).get("credible"):
             yield pdf
@@ -33,6 +44,8 @@ def run(pdf, step):
 def summarise(pdf):
     o = OUT / pdf.stem
     row = {"sheet": pdf.stem}
+    g = o / "georef.json"
+    row["georef"] = ("credible" if json.loads(g.read_text()).get("credible") else "refused") if g.exists() else "-"
     if (o / "alphabet.npz").exists():
         import numpy as np
         z = np.load(o / "alphabet.npz"); row["alphabet"] = len(z["Y"]); row["chars"] = "".join(sorted(set(z["Y"].tolist())))
@@ -62,14 +75,17 @@ def summarise(pdf):
 def main():
     rows = []
     for pdf in sheets():
-        if "--run" in sys.argv:
-            for step in ("frame.py", "alphabet.py", "read_glyphs.py", "solve.py", "tags.py", "tables.py", "checks.py"):
+        if "--run" in sys.argv and not ("--missing" in sys.argv and (OUT / pdf.stem / "checks.csv").exists()):
+            steps = ("frame.py", "alphabet.py", "read_glyphs.py", "solve.py", "tags.py", "tables.py", "checks.py")
+            if "--all" in sys.argv and not (OUT / pdf.stem / "blocks.json").exists():
+                steps = ("blocks.py",) + steps
+            for step in steps:
                 ok, last = run(pdf, step)
                 print(f"{pdf.stem[:26]:26} {step:12} {'ok' if ok else 'FAILED'}  {last}")
                 if not ok:
                     break
         rows.append(summarise(pdf))
-    keys = ["sheet", "alphabet", "chars", "table_rows", "rows_clean", "tags", "tags_partial", "tag_assoc", "tag_pass", "tag_fail", "distance", "bearing", "arc_length", "exceptions", "wrong_line"]
+    keys = ["sheet", "georef", "alphabet", "chars", "table_rows", "rows_clean", "tags", "tags_partial", "tag_assoc", "tag_pass", "tag_fail", "distance", "bearing", "arc_length", "exceptions", "wrong_line"]
     with open(OUT / "sheets.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=keys, extrasaction="ignore"); w.writeheader(); w.writerows(rows)
     for r in rows:
