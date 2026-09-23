@@ -3,30 +3,30 @@
   "sheet": "r_10434_002_2020-09-16",
   "credible": true,
   "control_points": null,
-  "rms_ft": 0.044,
+  "rms_ft": 0.042,
   "scale_ft_per_pt": 1.38886,
   "rotation_deg": 0.536
  },
  "checks": {
   "distance": {
-   "checked": 39,
-   "pass": 17
+   "checked": 37,
+   "pass": 18
   },
   "bearing": {
-   "checked": 32,
-   "pass": 17
+   "checked": 28,
+   "pass": 14
   },
   "arc length": {
-   "checked": 14,
-   "pass": 3
+   "checked": 12,
+   "pass": 1
   },
   "curve L=R*delta": {
-   "checked": 0,
-   "pass": 0
+   "checked": 12,
+   "pass": 12
   },
   "pass_residual_ft": {
    "median": 0.03,
-   "max": 0.1
+   "max": 0.15
   },
   "pass_residual_arcmin": {
    "median": 0.4,
@@ -34,41 +34,41 @@
   }
  },
  "exceptions": {
-  "total": 82,
-  "unmatched": 30,
-  "matchline": 4,
-  "disagree_small": 11,
-  "wrong_line": 37
+  "total": 96,
+  "unmatched": 47,
+  "matchline": 5,
+  "disagree_small": 15,
+  "wrong_line": 29
  },
  "tags": {
   "table_rows": 44,
-  "read": 37,
-  "distinct": 36,
-  "partial_queued": 10,
-  "associated": 18,
-  "by_leader": 18,
-  "queued": 36,
+  "read": 33,
+  "distinct": 32,
+  "partial_queued": 12,
+  "associated": 16,
+  "by_leader": 16,
+  "queued": 37,
   "distance": {
    "checked": 8,
    "pass": 8
   },
   "bearing": {
-   "checked": 9,
-   "pass": 9
+   "checked": 8,
+   "pass": 8
   },
   "radius": {
    "checked": 7,
    "pass": 5
   },
   "arc length": {
-   "checked": 5,
+   "checked": 6,
    "pass": 0
   }
  },
  "parcels": {
   "faces": 60,
-  "named": 4,
-  "with_table_area": 3,
+  "named": 5,
+  "with_table_area": 4,
   "within_1pct": 0
  },
  "lidar_features": {
@@ -89,8 +89,9 @@
  "encroachment": {
   "clusters": 91,
   "building_verdict": 15,
-  "in_named_parcels": 9,
+  "in_named_parcels": 10,
   "parcels": [
+   "61806-2",
    "61806-9|63269|61806",
    "61985-2",
    "61985-4"
@@ -105,7 +106,7 @@
   "61985-4": {
    "length_m": 595,
    "ground_min_m": 20.1,
-   "ground_max_m": 73.1
+   "ground_max_m": 71.7
   }
  },
  "htdp": {

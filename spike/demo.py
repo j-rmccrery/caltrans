@@ -6,6 +6,7 @@
 Order matters: blocks -> ocr -> solve -> overlay -> parcels -> checks -> tags -> tables -> extract -> encroach -> rasters -> objects.
 The LiDAR intensity cache (spike/lidar/cache) comes from spike/lidar/q2_terrain_check.py once.
 """
+import json
 import subprocess
 import sys
 import time
@@ -15,6 +16,7 @@ HERE = Path(__file__).parent
 PY = sys.executable
 STEPS = [
     ("text blocks", ["blocks.py"]),
+    ("read text (SHX annotations)", ["read_shx.py"]),
     ("sheet frame", ["frame.py"]),
     ("sheet alphabet + tables", ["alphabet.py"]),
     ("read text by glyph", ["read_glyphs.py"]),
@@ -37,12 +39,24 @@ STEPS = [
 QGIS_PY = Path(__import__("os").environ.get("LOCALAPPDATA", "")) / "Programs" / "OSGeo4W" / "bin" / "python-qgis-ltr.bat"
 
 
+def _has_shx_text():
+    rs = HERE / "out" / "read_shx.json"
+    if not (rs.exists() and rs.stat().st_size > 2):
+        return False
+    try:
+        return any(b.get("text") for b in json.loads(rs.read_text(encoding="utf-8")))
+    except (ValueError, OSError):
+        return False
+
+
 def main():
     fast = "--fast" in sys.argv
     if not (HERE / "lidar" / "cache" / "ortho_intensity_1m.npy").exists():
-        STEPS.insert(6, ("LiDAR intensity cache", ["lidar/q2_terrain_check.py"]))
+        STEPS.insert(7, ("LiDAR intensity cache", ["lidar/q2_terrain_check.py"]))  # after georeference, before overlay
     t_all = time.time()
     for name, args in STEPS:
+        if args[0] in ("read_glyphs.py", "ocr.py") and _has_shx_text():
+            print(f"{name:26} skipped (SHX annotation text covers this sheet)"); continue
         if args[0] == "ocr.py":
             rg = HERE / "out" / "read_glyph.json"
             if rg.exists() and rg.stat().st_size > 2:

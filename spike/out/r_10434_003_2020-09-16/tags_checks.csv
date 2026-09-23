@@ -25,25 +25,25 @@ L20,bearing,"N7°28'36""E","N79°24'10""E",4315.6',FAIL,leader
 L20,distance,53.79,98.52,+44.73,FAIL,leader
 L29,bearing,"N34°46'20""W","N34°43'43""W",2.6',pass,leader
 L29,distance,13.35,13.35,-0.00,pass,leader
-L34,bearing,"N72°53'52""W","N73°27'36""W",33.7',FAIL,beside
-L34,distance,50.46,62.32,+11.86,FAIL,beside
-L36,bearing,"N72°24'02""E","N72°14'05""E",9.9',FAIL,beside
-L36,distance,110.55,110.55,-0.00,pass,beside
-L37,bearing,"N72°19'10""E","N71°16'25""E",62.7',FAIL,leader
-L37,distance,134.15,104.71,-29.44,FAIL,leader
-L38,bearing,"N34°55'48""W","N34°50'46""W",5.0',FAIL,beside
-L38,distance,167.07,167.02,-0.05,pass,beside
-L39,bearing,"S79°16'27""W","S79°03'55""W",12.5',FAIL,beside
-L39,distance,373.80,100.00,-273.80,FAIL,beside
+C5,radius,46.74,46.73,-0.03%,pass,leader
+C5,arc length,29.82,86.33,+56.51,FAIL,leader
+C7,radius,508.00,2413.80,+375.16%,FAIL,beside
+C7,arc length,61.27,97.05,+35.78,FAIL,beside
 C11,radius,500.00,,,arc too flat to measure a radius (sagitta 0.29 pt); not checked,leader
 C11,arc length,31.84,39.84,+8.00,FAIL,leader
+C12,radius,50.31,,,arc too flat to measure a radius (sagitta 0.26 pt); not checked,leader
+C12,arc length,3.79,12.12,+8.33,FAIL,leader
 C19,radius,65.00,18.02,-72.28%,FAIL,beside
 C19,arc length,93.18,34.08,-59.10,FAIL,beside
 C22,radius,100.14,100.14,+0.00%,pass,beside
 C22,arc length,93.89,93.88,-0.01,pass,beside
+C25,radius,2040.00,2048.42,+0.41%,pass,beside
+C25,arc length,270.67,280.31,+9.64,FAIL,beside
 C26,radius,1312.00,1312.90,+0.07%,pass,beside
 C26,arc length,328.02,244.10,-83.92,FAIL,beside
 C29,radius,825.00,825.03,+0.00%,pass,beside
 C29,arc length,470.62,308.21,-162.41,FAIL,beside
+C33,radius,2884.00,,,arc too flat to measure a radius (sagitta 0.42 pt); not checked,leader
+C33,arc length,1049.90,115.39,-934.51,FAIL,leader
 C38,radius,15.00,1618.42,+10689.45%,FAIL,leader
 C38,arc length,6.39,117.65,+111.26,FAIL,leader

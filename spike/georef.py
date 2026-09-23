@@ -21,10 +21,22 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
 PDF = Path(os.environ.get("SHEET", DEFAULT))  # SHEET=<pdf> runs another sheet; its outputs go to out/<stem>/
 OUT = Path(__file__).parent / "out" / (PDF.stem if "SHEET" in os.environ else "")
-# the sheet's reads: by glyph on a stroked sheet (read_glyphs.py), by OCR otherwise
-_rg, _rr, _rt = OUT / "read_glyph.json", OUT / "read_rapid.json", OUT / "tables.json"
+# the sheet's reads: from AutoCAD SHX Text annotations (read_shx.py) where the sheet carries them,
+# else by glyph on a stroked sheet (read_glyphs.py), else by OCR
+_rs, _rg, _rr, _rt = OUT / "read_shx.json", OUT / "read_glyph.json", OUT / "read_rapid.json", OUT / "tables.json"
 _validated = _rt.exists() and _rt.stat().st_size > 20  # an alphabet the tables' NO. column validated; the font-seed-only one is not
-READS = _rg if _rg.exists() and _rg.stat().st_size > 2 and (_validated or not _rr.exists()) else _rr
+
+
+def _has_text(p):
+    if not p.exists() or p.stat().st_size < 2:
+        return False
+    try:
+        return any(b.get("text") for b in json.loads(p.read_text(encoding="utf-8")))
+    except (ValueError, OSError):
+        return False
+
+
+READS = _rs if _has_text(_rs) else (_rg if _rg.exists() and _rg.stat().st_size > 2 and (_validated or not _rr.exists()) else _rr)
 READS = Path(os.environ["READS"]) if "READS" in os.environ else READS  # experiment: any block file in the OCR format
 NUM = re.compile(r"^([NEXY])?[:.]?(\d[\d,]{2,9}\.\d{2,4})$")  # 4-8 integer digits: local grids, CCS27/83, ft or m
 

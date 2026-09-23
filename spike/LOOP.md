@@ -27,9 +27,11 @@ twice is skipped and logged; the diff is stashed as `loop-leg-N`.
 
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
-| 0 | running | 1 | | |
+| 0 | pass | 1 | 3 baseline rows, 17 columns | 8acedf0 |
+| 1 | pass on retry | 2 | tables 44/44, 25/25, 83/83 clean; keyed 111/111; georef 18/18 rms 0.04; but distance tokens skipped as curve-data 43/62/81 vs 0/10/24 glyph (annotations poured into merged glyph blocks), presidio bearing 14 < 16, .1 distance 18 < 20. Retry: one block per annotation, bearing+distance pairs only: distance 34/52, 27/35, 41/78; bearing 23/45, 18/29, 29/52; wrong-line 26/23/46; arc length 0 on all three (regression, to leg 2) | leg1 |
+| 2 | running | 1 | | |
 
-Dispatches used: 1 of 16. Started 2026-09-23 ~04:00 local.
+Dispatches used: 4 of 16. Started 2026-09-23 ~04:00 local.
 
 ## Consult notes
 

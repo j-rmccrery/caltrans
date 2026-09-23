@@ -1,10 +1,13 @@
 """Association bench: run checks.py on a sheet set, summarise pass / fail / wrong-line per kind.
-usage: [ASSOC=bearing,span,layers] python spike/bench.py <label> [--tags] [--parcels] [--traverse] [presidio r105 r17x r10434_1 r10434_3]
+usage: [ASSOC=bearing,span,layers] python spike/bench.py <label> [--tags] [--parcels] [--traverse] [--tables] [presidio r105 r17x r10434_1 r10434_3]
   -> one row per sheet appended to spike/out/bench.csv. wrong_line = fails beyond the exception page's
   SMALL thresholds (the reader measured a different line); no_line = labels with no candidate.
   --tags/--parcels/--traverse run tables.py/parcels.py/traverse.py per sheet and add their columns;
+  --tables runs read_shx.py then read_shx.py --tables (the annotation table rebuild) and adds
+  table_rows/rows_clean (sheets.py's clean definition: cells non-empty, no "?" in the first 3);
   a step that errors fills its columns with "err" and prints the last 20 lines of stderr, without
-  killing the bench.
+  killing the bench. Adding a column changes the CSV header, which rotates the old file to
+  bench_old.csv -- expected the first time --tables is used.
 """
 import csv
 import json
@@ -28,7 +31,8 @@ SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0}
 TAGS_COLS = ["tags_assoc", "tags_pass", "tags_fail", "tags_queued"]
 PARCELS_COLS = ["faces", "faces_named"]
 TRAVERSE_COLS = ["chains", "closed"]
-FIELDS = ["label", "sheet", "distance", "bearing", "arc length", "exceptions", "wrong_line", "no_line", "secs"] + TAGS_COLS + PARCELS_COLS + TRAVERSE_COLS
+TABLES_COLS = ["table_rows", "rows_clean"]
+FIELDS = ["label", "sheet", "distance", "bearing", "arc length", "exceptions", "wrong_line", "no_line", "secs"] + TAGS_COLS + PARCELS_COLS + TRAVERSE_COLS + TABLES_COLS
 
 
 def env_for(pdf):
@@ -44,10 +48,10 @@ def out_dir(pdf):
     return OUT / (pdf.stem if pdf else "")
 
 
-def run_step(script, pdf):
+def run_step(script, pdf, args=()):
     """Run a spike/<script>.py for this sheet; return (ok, stderr_tail)."""
     env = env_for(pdf)
-    r = subprocess.run([str(PY), str(ROOT / "spike" / script)], capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, cwd=ROOT)
+    r = subprocess.run([str(PY), str(ROOT / "spike" / script), *args], capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, cwd=ROOT)
     if r.returncode:
         return False, "\n".join(r.stderr.splitlines()[-20:])
     return True, ""
@@ -86,6 +90,22 @@ def parcels_cols(pdf):
     except Exception as e:
         print(f"parcels read failed: {type(e).__name__} {e}")
         return {k: "err" for k in PARCELS_COLS}
+
+
+def tables_cols(pdf):
+    ok, err = run_step("read_shx.py", pdf)
+    if ok:
+        ok, err = run_step("read_shx.py", pdf, args=["--tables"])
+    if not ok:
+        print(f"read_shx.py failed: {err}")
+        return {k: "err" for k in TABLES_COLS}
+    o = out_dir(pdf)
+    try:
+        t = {k: v for k, v in json.loads((o / "tables.json").read_text(encoding="utf-8")).items() if not k.startswith("_")}
+        return {"table_rows": len(t), "rows_clean": sum(1 for r in t.values() if r["cells"] and not any("?" in c for c in r["cells"][:3]))}
+    except Exception as e:
+        print(f"tables read failed: {type(e).__name__} {e}")
+        return {k: "err" for k in TABLES_COLS}
 
 
 def traverse_cols(pdf):
@@ -132,6 +152,8 @@ def run(key, steps):
         res.update(parcels_cols(pdf))
     if "traverse" in steps:
         res.update(traverse_cols(pdf))
+    if "tables" in steps:
+        res.update(tables_cols(pdf))
     res["secs"] = round(time.time() - t)  # includes any optional steps
     return res
 

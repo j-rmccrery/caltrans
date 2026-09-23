@@ -1,4 +1,7 @@
-label,sheet,distance,bearing,arc length,exceptions,wrong_line,no_line,secs,tags_assoc,tags_pass,tags_fail,tags_queued,faces,faces_named,chains,closed
-baseline,presidio,17/39,16/31,3/14,78,37,26,24,18,22,7,36,60,4,59,0
-baseline,r10434_1,20/51,10/19,4/19,76,47,19,25,13,20,6,10,55,2,52,0
-baseline,r10434_3,26/95,15/43,7/30,158,93,36,37,24,19,28,108,97,4,104,2
+label,sheet,distance,bearing,arc length,exceptions,wrong_line,no_line,secs,tags_assoc,tags_pass,tags_fail,tags_queued,faces,faces_named,chains,closed,table_rows,rows_clean
+leg1b,presidio,34/52,23/45,0/7,74,26,21,30,18,22,10,37,60,5,58,1,44,44
+leg1b,r10434_1,27/35,18/29,0/15,53,23,16,27,14,22,6,9,55,1,39,0,25,25
+leg1b,r10434_3,41/78,29/52,0/9,110,46,36,50,24,19,26,106,97,5,88,0,83,83
+leg1-verify,presidio,34/52,23/45,0/7,74,26,21,30,18,22,10,37,60,5,58,1,44,44
+leg1-verify,r10434_1,27/35,18/29,0/15,53,23,16,27,14,22,6,9,55,1,39,0,25,25
+leg1-verify,r10434_3,41/78,29/52,0/9,110,46,36,49,24,19,26,106,97,5,88,0,83,83

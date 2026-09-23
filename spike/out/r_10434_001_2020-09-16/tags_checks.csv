@@ -1,4 +1,6 @@
 tag,check,printed,drawn,difference,result,association
+L1,bearing,"N90°00'00""E","S89°58'28""E",1.5',pass,leader
+L1,distance,12.43,12.42,-0.01,pass,leader
 L2,bearing,"S75°44'54""E","S75°34'34""E",10.3',pass,leader
 L2,distance,9.31,9.31,-0.00,pass,leader
 L3,bearing,"S0°03'34""W","S0°06'58""W",3.4',pass,leader
