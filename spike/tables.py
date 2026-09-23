@@ -104,12 +104,25 @@ def main():
     chains = [c for c in lines_on_sheet(segs, circles) if c["len_pt"] >= 1 and not (c["width"] < BOUNDARY and c["len_pt"] < 9)]  # thin stubs are stationing ticks
     chains = split_chains(chains, circles)  # pieces between breaks; a tag's span is chosen among them by the table's distance
     junction_lines = [c for c in chains if c["len_pt"] >= 20]  # boundary lines of any weight; ticks are handled apart
-    # short thin perpendicular strokes: radial ticks on the thin alignment curves mark where an arc ends
-    ticks = np.array([(s0 + s1) / 2 for s0, s1, w, _ in linework_segments(page, max_gray=0.2) if w < BOUNDARY and 5 < np.hypot(*(s1 - s0)) < 9]).reshape(-1, 2)
+    # short thin perpendicular strokes: radial ticks on the thin alignment curves mark where an arc ends;
+    # kept with direction so split_at can reject a dash of a line running alongside the curve (loop2 leg
+    # C). Built from `segs` (leaders already excluded above), not a fresh linework_segments() call -- a
+    # leader's own curly path has 5-9 pt straight sub-segments right at its tip, exactly where a tag's
+    # leader-tip search looks for a cut
+    ticks = [((s0 + s1) / 2, (s1 - s0) / np.hypot(*(s1 - s0))) for s0, s1, w, _ in segs if w < BOUNDARY and 5 < np.hypot(*(s1 - s0)) < 9]
+    # a bezier path is one drawn object, same compound-curve problem as checks.py (loop2 leg C): it used
+    # to go in whole while the polyline branch below was already split at the same marks. But a short
+    # chain's end lands near a curve by coincidence more often than a real boundary line meets one, and a
+    # curve that was never compound needs no cut at all -- keep the whole path as a candidate too, and add
+    # its split pieces alongside it, so whichever one matches the table row wins per curve, not per sheet
     arcs = []
     for arc in arcs_on_sheet(page):
         if max(arc.get("color", (0,))) < 0.2 and np.hypot(*(arc["pts"][0] - arc["pts"][-1])) > 2:  # not a point-symbol circle
             arcs.append({"pts": arc["pts"], "len_pt": arc["len_pt"], "width": arc["width"]})
+            pieces = split_at(arc["pts"], circles, junction_lines, ticks=ticks if arc["width"] < BOUNDARY else ())
+            if len(pieces) > 1:
+                for P in pieces:
+                    arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "width": arc["width"]})
     for c in lines_on_sheet(segs, circles, max_turn_deg=20.0):  # R=60 ft curves turn 7 deg per facet
         if c["n"] >= 3 and c["len_pt"] > 12:
             for P in split_at(c["pts"], circles, junction_lines, ticks=ticks if c["width"] < BOUNDARY else ()):
@@ -147,8 +160,11 @@ def main():
         how, cands = "beside", []
         tip = tips.get(ti)
         if tip is not None:
-            tip, arrow = tip
-            cands = candidates(kind, tip, 4.0)  # ponytail: no arrow-direction test; a tag at a line's end gets its arrow along the line
+            tip, arrow, hsize = tip
+            # a bigger drawn arrowhead can leave a bigger real gap to a curve's tangent (loop2 leg C);
+            # a line's tip test stays a fixed 4 pt
+            reach = 4.0 if kind == "line" else max(4.0, 0.6 * hsize)
+            cands = candidates(kind, tip, reach)  # ponytail: no arrow-direction test; a tag at a line's end gets its arrow along the line
             how = "leader"
             if not cands:
                 queue.append({"tag": t["tag"], "issue": f"leader points at no {kind}", "region": region}); continue
@@ -166,6 +182,21 @@ def main():
                     fit = fit2 or fit
             else:
                 fit = [(d, s) for d, s in cands if len(s["pts"]) >= 3 and abs(fit_radius(s["pts"]) * scale - row["R"]) < 0.02 * row["R"]]
+                if len(fit) > 1 and row.get("L") and not row["total"]:
+                    # a compound bezier curve's whole path and its own split piece(s) (loop2 leg C
+                    # attempt 2) sit at the identical distance from the tag and fit the identical circle
+                    # (a piece is a subset of the same physical arc) -- radius alone can never tell them
+                    # apart. Length does: the printed row length picks the one piece (or the whole, if it
+                    # was never actually compound) that is the tag's own arc, the same way a line's own
+                    # printed distance already picks among its candidates above
+                    fit = [min(fit, key=lambda t: abs(t[1]["len_pt"] * scale - row["L"]))]
+                elif not fit:
+                    # neither candidate's fitted radius is even close to the row (or one is too short to
+                    # fit a radius at all): not a real tie between two good matches -- the wider reach for
+                    # a big arrowhead (loop2 leg C) just admitted an extra unrelated piece next to a short
+                    # target arc. Nearest wins, the same fallback checks.py's own at_tip already uses when
+                    # no candidate's length matches a leader tip's printed value
+                    fit = [cands[0]]
             if len(fit) == 1 or (len(fit) > 1 and fit[1][0] >= CLEAR * fit[0][0]):
                 cands = fit
         if len(cands) > 1 and cands[1][0] < CLEAR * cands[0][0]:

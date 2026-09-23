@@ -375,10 +375,10 @@
   ]
  },
  {
-  "kind": "arc length",
+  "kind": "distance",
   "text": "149.83'",
-  "drawn_ft": 18.4,
-  "off_ft": -131.43,
+  "drawn_ft": 18.37,
+  "off_ft": -131.46,
   "region": [
    1038,
    594,
@@ -391,15 +391,7 @@
     597.1
    ],
    [
-    1089.3,
-    596.6
-   ],
-   [
-    1088.3,
-    596.3
-   ],
-   [
-    1078.2,
+    1078.3,
     593.6
    ]
   ]
@@ -583,6 +575,17 @@
   ]
  },
  {
+  "kind": "arc length",
+  "text": "L=573.93'(T)",
+  "issue": "no arc within 5 glyph heights matches the printed length",
+  "region": [
+   1556,
+   609,
+   1618,
+   625
+  ]
+ },
+ {
   "kind": "bearing",
   "text": "N16°09'26\"E",
   "issue": "leader points at no line",
@@ -748,17 +751,6 @@
   ]
  },
  {
-  "kind": "arc length",
-  "text": "L=42.14'",
-  "issue": "no arc within 5 glyph heights matches the printed length",
-  "region": [
-   1561,
-   834,
-   1601,
-   848
-  ]
- },
- {
   "kind": "bearing",
   "text": "N21°05'32\"W",
   "drawn": "N21°10'25\"W",
@@ -822,6 +814,17 @@
    707,
    1851,
    732
+  ]
+ },
+ {
+  "kind": "arc length",
+  "text": "L=184.70'(T)",
+  "issue": "no arc within 5 glyph heights matches the printed length",
+  "region": [
+   1779,
+   807,
+   1839,
+   821
   ]
  },
  {
@@ -954,6 +957,17 @@
    594,
    1939,
    609
+  ]
+ },
+ {
+  "kind": "arc length",
+  "text": "L=232.07'(T)",
+  "issue": "no arc within 5 glyph heights matches the printed length",
+  "region": [
+   1731,
+   649,
+   1790,
+   664
   ]
  },
  {
@@ -1244,17 +1258,6 @@
    558,
    1032,
    573
-  ]
- },
- {
-  "kind": "arc length",
-  "text": "L=269.94'",
-  "issue": "no arc within 5 glyph heights matches the printed length",
-  "region": [
-   943,
-   666,
-   989,
-   680
   ]
  },
  {

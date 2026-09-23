@@ -25,12 +25,12 @@ L17,bearing,"S4°41'30""E","S4°39'02""E",2.5',pass,leader
 L17,distance,70.80(T),17.45,,total over several segments; not checked,leader
 C1,radius,50.22,,,arc too flat to measure a radius (sagitta 0.22 pt); not checked,beside
 C1,arc length,11.18,11.17,-0.01,pass,beside
-C4,radius,232.04,232.04,-0.00%,pass,beside
-C4,arc length,136.53,413.92,+277.39,FAIL,beside
+C4,radius,232.04,232.02,-0.01%,pass,beside
+C4,arc length,136.53,137.73,+1.20,FAIL,beside
 C8,radius,399.82,,,arc too flat to measure a radius (sagitta 0.02 pt); not checked,leader
 C8,arc length,10.28,10.27,-0.01,pass,leader
-C11,radius,179.38,179.37,-0.01%,pass,leader
-C11,arc length,9.98,123.10,+113.12,FAIL,leader
+C11,radius,179.38,179.09,-0.16%,pass,leader
+C11,arc length,9.98,81.16,+71.18,FAIL,leader
 C13,radius,60.00,60.04,+0.07%,pass,leader
 C13,arc length,26.52,48.12 = 26.52 + 21.58,+0.02,pass as a run of 2: the boundary between these arcs is not drawn,leader
 C14,radius,60.00,60.04,+0.07%,pass,leader
@@ -41,7 +41,9 @@ C16,radius,1470.00,1469.66,-0.02%,pass,leader
 C16,arc length,521.76,501.10,-20.66,FAIL,leader
 C19,radius,1520.00,1573.12,+3.49%,FAIL,leader
 C19,arc length,60.41,495.14,+434.73,FAIL,leader
-C21,radius,1380.00,1373.40,-0.48%,pass,leader
-C21,arc length,876.88,109.27,-767.61,FAIL,leader
+C21,radius,1380.00,1404.35,+1.76%,FAIL,leader
+C21,arc length,876.88,118.77,-758.11,FAIL,leader
 C22,radius,3600.00,4385.33,+21.81%,FAIL,leader
 C22,arc length,434.47,816.07,+381.60,FAIL,leader
+C23,radius,15.00,,,arc too flat to measure a radius (sagitta 0.19 pt); not checked,leader
+C23,arc length,5.62,5.61,-0.01,pass,leader

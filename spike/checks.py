@@ -158,6 +158,11 @@ def arcs_on_sheet(page):
     from overlay import bezier
     out = []
     for d in page.get_drawings():
+        r = d["rect"]
+        if max(r.width, r.height) <= 12 and len(d["items"]) > 1:
+            continue  # a small multi-stroke path is a character (same rule as linework_segments): a
+            # curved digit/letter draws bezier items too, and was being read as a tiny false "arc" that a
+            # leader tip near its own label text could land on (loop2 leg C)
         c = d.get("color")
         if c is None or max(c) > 0.6:
             continue
@@ -263,16 +268,18 @@ def leaders(page, circles=()):
     """Leaders: thin stroked paths (this drafter's are curly, 15-30 pt, the same 1.02 weight as the
     lettering) that end at a filled arrowhead triangle, or at a point-symbol circle (coordinate
     callouts). (start, tip, arrow direction) and the path ids."""
-    heads, paths = [], []
+    heads, sizes, paths = [], [], []
     for cx, cy in circles:  # a circle as a "head": its centre is the tip, 3 corners at the centre
-        heads.append(np.array([[cx, cy]] * 3))
+        heads.append(np.array([[cx, cy]] * 3)); sizes.append(0.0)  # a circle callout is exact, no widening
     for pid, d in enumerate(page.get_drawings()):
         c, w = d.get("color"), round(d.get("width") or 0, 2)
         if c is None or max(c) > 0.6:
             continue
         r = d["rect"]
         if d["type"] in ("f", "fs") and len(d["items"]) == 3 and max(r.width, r.height) < 12:
-            heads.append(np.array([[it[1].x, it[1].y] for it in d["items"]]))  # the triangle's corners
+            corners = np.array([[it[1].x, it[1].y] for it in d["items"]])  # the triangle's corners
+            heads.append(corners)
+            sizes.append(float(max(np.hypot(*(corners[i] - corners[j])) for i in range(3) for j in range(i + 1, 3))))
         elif d["type"] == "s" and 0 < w < 1.1:
             items = [it for it in d["items"] if it[0] in ("l", "c")]
             if items:
@@ -290,7 +297,7 @@ def leaders(page, circles=()):
             if dist < 7:  # the leader stops at the triangle's base; the tip is the corner farthest from it
                 tip = heads[j][int(np.hypot(*(heads[j] - end).T).argmax())]
                 v = tip - heads[j].mean(0)
-                out.append((start, tip, v / max(np.hypot(*v), 1e-9))); pids.add(pid)
+                out.append((start, tip, v / max(np.hypot(*v), 1e-9), sizes[j])); pids.add(pid)
     return out, pids
 
 
@@ -307,7 +314,8 @@ def label_box(t):
 
 def tag_leaders(labels, paths):
     """Each leader to the one label whose box its start is nearest (stacked tags L4/L5/L7 share a
-    neighbourhood; a leader is claimed once). {label index: (arrowhead tip, arrow direction)}."""
+    neighbourhood; a leader is claimed once). {label index: (arrowhead tip, arrow direction, arrowhead
+    size)}."""
     pairs = []
     for k, t in enumerate(labels):
         c, u, n, hw, hh, gh = label_box(t)
@@ -315,7 +323,7 @@ def tag_leaders(labels, paths):
         def outside(p):  # distance from the label's box, 0 inside
             d = p - c
             return float(np.hypot(max(abs(d @ u) - hw, 0), max(abs(d @ n) - hh, 0)))
-        for j, (start, head, _) in enumerate(paths):
+        for j, (start, head, _, _) in enumerate(paths):
             dn = outside(start)
             if dn < 1.5 * gh and outside(head) > dn:
                 pairs.append((dn, k, j))
@@ -370,8 +378,30 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
     Cuts are the exact meeting points, not the nearest facet vertex."""
     A = np.array([c["p0"] for c in chains]); B = np.array([c["p1"] for c in chains])
     D = np.array([c["dir"] for c in chains]); LN = np.hypot(*(B - A).T)
-    T = np.asarray(ticks).reshape(-1, 2)
+    T, TD = (np.array([m for m, _ in ticks]), np.array([d for _, d in ticks])) if len(ticks) else (np.zeros((0, 2)), np.zeros((0, 2)))
     ctree = cKDTree(circles) if len(circles) else None
+    # a curve's sampled points can sit within tol of one circle for several consecutive samples (a small
+    # curve right next to a vertex, or dense sampling on a tight fillet); cut once there, at the sample
+    # nearest the circle, not at every sample in the run -- else a short curve near one circle came out
+    # as a spray of near-zero slivers instead of the one real cut at that vertex. But a long compound
+    # curve can have a circle at EVERY record-arc boundary with no plain facet between two of them (loop2
+    # leg C attempt 2: presidio's R=1470 curve has 6 distinct vertex circles back to back) -- group by
+    # which circle is nearest, not merely by "near some circle", so consecutive samples nearest to
+    # different circles still cut once each instead of collapsing into a single run
+    circle_near = np.zeros(len(P), dtype=bool)
+    if ctree is not None:
+        cd, ci = ctree.query(P)
+        near = cd < 2 * tol
+        i = 0
+        while i < len(P):
+            if near[i]:
+                j = i
+                while j < len(P) and near[j] and ci[j] == ci[i]:
+                    j += 1
+                circle_near[i + int(np.argmin(cd[i:j]))] = True
+                i = j
+            else:
+                i += 1
     sin30 = math.sin(math.radians(30))
     pts, cut = [P[0]], [True]
     for i in range(len(P) - 1):
@@ -390,11 +420,14 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
         if len(T):
             d = T - p
             al, pe = d @ t, d @ n
-            cuts += al[(np.abs(pe) < tol) & (al > 0.3) & (al < L - 0.3)].tolist()
+            across = np.abs(TD @ t) < 0.5  # a real radial tick runs across the curve (near its normal); a
+            # dash from a line running alongside it (a dashed easement, a parallel property line close
+            # to a curve for a few dashes) shares the tangent instead and is not a boundary mark
+            cuts += al[(np.abs(pe) < tol) & (al > 0.3) & (al < L - 0.3) & across].tolist()
         for sk in sorted(set(round(x, 2) for x in cuts)):
             pts.append(p + sk * t); cut.append(True)
         pts.append(q)
-        cut.append(bool(ctree is not None and ctree.query(q)[0] < 2 * tol))
+        cut.append(bool(circle_near[i + 1]))
     cut[-1] = True
     pieces, start = [], 0
     for i in range(1, len(pts)):
@@ -491,10 +524,31 @@ def main():
     # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers; a drawn curve runs
     # through several record arcs, so it is cut where lines meet it and at vertex circles
     junction_lines = [c for c in chains if c["len_pt"] >= 9]
-    arcs = [x for x in arcs_on_sheet(page) if max(x["color"]) < 0.2 and np.hypot(*(x["pts"][0] - x["pts"][-1])) > 2]
+    # radial ticks mark a record-arc boundary on the thin alignment curves same as tables.py (loop2 leg C:
+    # neither branch below used to pass ticks to split_at, so a curve with no line/circle at the boundary
+    # -- most of them -- was never cut there at all); kept with their own direction so split_at can tell
+    # a real tick (crosses the curve) from a dash of a line merely running alongside it. Built from `segs`
+    # (leaders already excluded), not a fresh linework_segments() call -- a leader's own curly path has
+    # 5-9 pt straight sub-segments right at its tip, which is exactly where a check looks for a cut
+    ticks = [((s0 + s1) / 2, (s1 - s0) / np.hypot(*(s1 - s0))) for s0, s1, w, _ in segs if w < 0.8 and 5 < np.hypot(*(s1 - s0)) < 9]
+    # a bezier path is one drawn object and can be a compound curve spanning several record arcs (the
+    # long R/W curves): it used to be kept whole here while the polyline branch below was already split,
+    # so a leader tip landed dead-on but the "arc" was the whole compound run. But a short chain's end
+    # lands near a curve by coincidence far more often than a real boundary line meets one, and a curve
+    # that was never compound in the first place needs no cut at all -- so the whole path is always kept
+    # as a candidate too, and its split pieces are added alongside it, not in place of it: whichever one
+    # actually matches the printed length wins, on a curve-by-curve basis instead of one sheet-wide rule
+    arcs = []
+    for x in arcs_on_sheet(page):
+        if max(x["color"]) < 0.2 and np.hypot(*(x["pts"][0] - x["pts"][-1])) > 2:
+            arcs.append({"pts": x["pts"], "len_pt": x["len_pt"], "radius_pt": x["radius_pt"], "width": x["width"]})
+            pieces = split_at(x["pts"], circles, junction_lines, ticks=ticks if x["width"] < 0.8 else ())
+            if len(pieces) > 1:
+                for P in pieces:
+                    arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": x["radius_pt"], "width": x["width"]})
     for c in lines_on_sheet(segs, circles, max_turn_deg=20.0):
         if c["n"] >= 3 and c["len_pt"] > 12:
-            for P in split_at(c["pts"], circles, junction_lines):
+            for P in split_at(c["pts"], circles, junction_lines, ticks=ticks if c["width"] < 0.8 else ()):
                 arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
     # the dashed easement line (leg B): each dash is its own path, so nothing above sees it; chained
     # into trains (dashes.py) and split at the same circles/junctions as the solid curves, so a train
@@ -524,11 +578,15 @@ def main():
         leader, or the leader belongs to another value in the same block: fall back to 'beside'."""
         if bi not in tips:
             return False, None
-        tip = tips[bi][0]
+        tip, _, hsize = tips[bi]
+        # a line's tip test stays a fixed 4 pt; an arc's tangent curves away under the arrowhead, so a
+        # bigger drawn arrowhead can leave a bigger real gap between the tip corner and the curve -- still
+        # a tip rule (scaled to what's actually drawn there), not a nearest-arc-by-distance guess
+        reach = 4.0 if kind == "line" else max(4.0, 0.6 * hsize)
         if kind == "line":
-            cands = [(seg_dist(tip, c["p0"], c["p1"]), c) for c in chains if seg_dist(tip, c["p0"], c["p1"]) < 4.0]
+            cands = [(seg_dist(tip, c["p0"], c["p1"]), c) for c in chains if seg_dist(tip, c["p0"], c["p1"]) < reach]
         else:
-            cands = [(poly_dist(tip, x["pts"]), x) for x in arcs if poly_dist(tip, x["pts"]) < 4.0]
+            cands = [(poly_dist(tip, x["pts"]), x) for x in arcs if poly_dist(tip, x["pts"]) < reach]
         if not cands:
             return True, None
         if want is not None:
@@ -560,27 +618,29 @@ def main():
             # among arcs within 5 glyph heights (never the nearest arc by distance alone).
             m = LEN.match(lines[0])
             want = float(m[1])
-            if not m[2]:  # (T): a run total over several tags, not a single arc; not checked here
-                led, arc = at_tip(bi, "arc", want)
-                if arc is None and not led:
-                    near = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 5.0 * b["glyph_h"]]
-                    close = [x for x in near if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
-                    if not close:  # some curve-data callouts (the tunnel-easement corridor, a busy curve
-                        # elsewhere) are drafted well clear of their curve for room, past 5 glyph heights;
-                        # widen the search but keep the same tight length match, so a coincidence this far
-                        # out would need to land within DIST_TOL by pure chance
-                        far = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 160.0]
-                        close = [x for x in far if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
-                    arc = min(close, key=lambda x: abs(x["len_pt"] * scale - want)) if close else None
-                if arc is None:
-                    exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc within 5 glyph heights matches the printed length", "region": region(b)})
-                else:
-                    drawn = arc["len_pt"] * scale
-                    ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
-                    rows.append(["arc length", lines[0], f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
-                    labels.append({"kind": "arc", "printed": lines[0], "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
-                    if not ok:
-                        exceptions.append({"kind": "arc length", "text": lines[0], "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
+            # (T) used to be skipped here ("a run total over several tags, not a single arc"), but a
+            # standalone (T) is just this one annotation's own drawn run between its vertex circles --
+            # STATE.md measured that run against the printed (T) to 0.02 ft -- so it checks the same way
+            led, arc = at_tip(bi, "arc", want)
+            if arc is None and not led:
+                near = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 5.0 * b["glyph_h"]]
+                close = [x for x in near if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
+                if not close:  # some curve-data callouts (the tunnel-easement corridor, a busy curve
+                    # elsewhere) are drafted well clear of their curve for room, past 5 glyph heights;
+                    # widen the search but keep the same tight length match, so a coincidence this far
+                    # out would need to land within DIST_TOL by pure chance
+                    far = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 160.0]
+                    close = [x for x in far if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
+                arc = min(close, key=lambda x: abs(x["len_pt"] * scale - want)) if close else None
+            if arc is None:
+                exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc within 5 glyph heights matches the printed length", "region": region(b)})
+            else:
+                drawn = arc["len_pt"] * scale
+                ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                rows.append(["arc length", lines[0], f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
+                labels.append({"kind": "arc", "printed": lines[0], "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
+                if not ok:
+                    exceptions.append({"kind": "arc length", "text": lines[0], "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
             continue
         # a bearing and its distance often come back as one OCR line: take the tokens inside each line
         parts = [m.group(0) for t in lines for m in TOKEN.finditer(t)] or lines
