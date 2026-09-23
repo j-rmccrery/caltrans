@@ -3,7 +3,7 @@
     python spike/demo.py            # everything
     python spike/demo.py --fast     # skip the OCR pass (reuses spike/out/read_rapid.json)
 
-Order matters: blocks -> ocr -> solve -> overlay -> parcels -> checks -> tags -> tables -> extract -> encroach -> rasters -> objects.
+Order matters: blocks -> ocr -> solve -> overlay -> parcels -> checks -> tags -> tables -> traverse -> extract -> encroach -> rasters -> objects.
 The LiDAR intensity cache (spike/lidar/cache) comes from spike/lidar/q2_terrain_check.py once.
 """
 import json
@@ -27,6 +27,7 @@ STEPS = [
     ("checks + exception queue", ["checks.py"]),
     ("segment tags", ["tags.py"]),
     ("table checks via tags", ["tables.py"]),
+    ("record twin (traverse)", ["traverse.py"]),
     ("LiDAR features", ["lidar/extract.py"]),
     ("encroachment", ["encroach.py"]),
     ("rasters for QGIS", ["export_rasters.py"]),

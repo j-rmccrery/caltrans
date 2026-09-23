@@ -93,7 +93,10 @@ def main():
     with open(OUT / "tunnel_profile.csv", "w", newline="") as f:
         w = csv.writer(f); w.writerow(["parcel", "station_m", "x", "y", "ground_m"])
         for pi, poly in enumerate(polys):
-            if names[pi] not in TUNNEL:
+            # a face's name can be several labels joined by "|" (parcels.py containment union,
+            # leg 4/5): match any TUNNEL member, not the whole joined string.
+            hit = [n for n in names[pi].split("|") if n in TUNNEL]
+            if not hit:
                 continue
             mr = poly.minimum_rotated_rectangle
             c = np.array(mr.exterior.coords)[:4]
@@ -105,8 +108,9 @@ def main():
             for s in np.arange(0, L, 5.0):
                 p = mid + u * (s - L / 2)
                 z = float(ground(np.array([p[0]]), np.array([p[1]]))[0]); zs.append(z)
-                w.writerow([names[pi], round(s, 1), round(p[0], 2), round(p[1], 2), round(z, 2)])
-            print(f"tunnel easement {names[pi]}: length {L:.0f} m, ground over it {np.nanmin(zs):.1f}-{np.nanmax(zs):.1f} m")
+                for n in hit:
+                    w.writerow([n, round(s, 1), round(p[0], 2), round(p[1], 2), round(z, 2)])
+            print(f"tunnel easement {'+'.join(hit)}: length {L:.0f} m, ground over it {np.nanmin(zs):.1f}-{np.nanmax(zs):.1f} m")
 
 
 if __name__ == "__main__":

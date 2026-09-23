@@ -6,6 +6,7 @@ usage: python spike/slide_numbers.py   (after demo.py)
 """
 import csv
 import json
+import re
 import sys
 from collections import Counter
 from pathlib import Path
@@ -14,6 +15,33 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
 from georef import OUT, PDF  # noqa: E402
+
+BENCH_SHEETS = {"presidio": "R-10434.2 Presidio", "r10434_1": "R-10434.1", "r10434_3": "R-10434.3"}
+
+
+def record_twin_block():
+    """The 2026-09-23 loop's closing snapshot: leg5-verify's bench numbers on the three Presidio
+    sheets, this sheet's own closed traverse chain, and the 61985 blocker, all read from files."""
+    bench = list(csv.DictReader(open(OUT / "bench.csv", encoding="utf-8")))
+    verify = {r["sheet"]: r for r in bench if r["label"] == "leg5-verify"}
+    lines = ["## Record twin, 2026-09-23 loop", "",
+             "Pass counts from `spike/out/bench.csv` (rows labelled `leg5-verify`):", "",
+             "| sheet | distance | bearing | arc length | tags associated | faces named |", "|---|---|---|---|---|---|"]
+    for key, label in BENCH_SHEETS.items():
+        r = verify.get(key)
+        if r:
+            lines.append(f"| {label} | {r['distance']} | {r['bearing']} | {r['arc length']} | {r['tags_assoc']} | {r['faces_named']} |")
+    trav = json.loads((OUT / "traverse.json").read_text(encoding="utf-8"))
+    closed = [c for c in trav if c["closed"]]
+    if closed:
+        c = closed[0]
+        lines += ["", f"Closed chain on {PDF.stem}: {c['n_edges']} edges ({c['full_record']} with a full record), "
+                       f"end misfit {c['misfit_end_ft']} ft, record area {c['record_area_sqft']:,.1f} sq ft."]
+    loop_md = (Path(__file__).parent / "LOOP.md").read_text(encoding="utf-8")
+    m = re.search(r"61985-1\.\.4:.*?labels\.", loop_md)
+    if m:
+        lines += ["", f"Blocker: {m.group(0)}"]
+    return "\n".join(lines) + "\n"
 
 SQFT_PER_ACRE = 43560.0
 
@@ -119,6 +147,7 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 - Tunnel easements, ground over them: """ + "; ".join(f"{k} {v['length_m']} m, {v['ground_min_m']}–{v['ground_max_m']} m" for k, v in sorted(N['tunnel'].items())) + """ (`tunnel_profile.png`).
 - Caveat: the easement faces come from the polygonised linework, not a closed traverse; where a face's area is far from the parcel table (""" + ", ".join(f"{f['properties']['parcel']} {f['properties']['diff_pct']:+.0f} %" for f in parc if "diff_pct" in f["properties"] and abs(f["properties"]["diff_pct"]) > 5) + """) the profile runs along the wrong figure. Say so on the slide.
 """
+    md += "\n" + record_twin_block()
     (OUT / "numbers.md").write_text(md, encoding="utf-8")
     print(md)
 

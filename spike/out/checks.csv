@@ -127,6 +127,7 @@ bearing (R),"S11°37'35""E(R)",,,radial: not checked
 bearing,"S3°55'39""E","S3°58'18""E",2.7',pass
 distance,44.49',44.45,-0.04,pass
 distance,1991.35,552.90,-1438.45,FAIL
+distance,50.22',42.17,-8.05,FAIL
 bearing,"S21°34'50""E","N68°25'19""E",5399.9',FAIL
 bearing,"N70°50'05""E","N70°44'17""E",5.8',FAIL
 curve L=R*delta,R=305.0 Δ=20.5381° L=109.33,109.33,-0.00,pass

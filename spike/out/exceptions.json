@@ -1346,6 +1346,39 @@
   ]
  },
  {
+  "kind": "distance",
+  "text": "50.22'",
+  "drawn_ft": 42.17,
+  "off_ft": -8.05,
+  "region": [
+   1712,
+   1009,
+   1752,
+   1031
+  ],
+  "line": [
+   [
+    1682.3,
+    1026.8
+   ],
+   [
+    1712.7,
+    1026.8
+   ]
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "11.18'",
+  "issue": "no line found beside label",
+  "region": [
+   1804,
+   1011,
+   1840,
+   1027
+  ]
+ },
+ {
   "kind": "bearing",
   "text": "S21°34'50\"E",
   "drawn": "N68°25'19\"E",

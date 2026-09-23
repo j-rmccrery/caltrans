@@ -3,73 +3,73 @@
   "sheet": "r_10434_002_2020-09-16",
   "credible": true,
   "control_points": null,
-  "rms_ft": 0.042,
-  "scale_ft_per_pt": 1.38886,
+  "rms_ft": 0.041,
+  "scale_ft_per_pt": 1.38885,
   "rotation_deg": 0.536
  },
  "checks": {
   "distance": {
-   "checked": 37,
-   "pass": 18
+   "checked": 47,
+   "pass": 39
   },
   "bearing": {
-   "checked": 28,
-   "pass": 14
+   "checked": 49,
+   "pass": 30
   },
   "arc length": {
-   "checked": 12,
-   "pass": 1
+   "checked": 11,
+   "pass": 4
   },
   "curve L=R*delta": {
-   "checked": 12,
-   "pass": 12
+   "checked": 10,
+   "pass": 10
   },
   "pass_residual_ft": {
    "median": 0.03,
-   "max": 0.15
+   "max": 0.24
   },
   "pass_residual_arcmin": {
-   "median": 0.4,
-   "max": 2.5
+   "median": 0.55,
+   "max": 2.7
   }
  },
  "exceptions": {
-  "total": 96,
-  "unmatched": 47,
+  "total": 66,
+  "unmatched": 27,
   "matchline": 5,
-  "disagree_small": 15,
-  "wrong_line": 29
+  "disagree_small": 18,
+  "wrong_line": 16
  },
  "tags": {
   "table_rows": 44,
   "read": 33,
   "distinct": 32,
   "partial_queued": 12,
-  "associated": 16,
-  "by_leader": 16,
-  "queued": 37,
+  "associated": 21,
+  "by_leader": 18,
+  "queued": 33,
   "distance": {
-   "checked": 8,
-   "pass": 8
+   "checked": 10,
+   "pass": 10
   },
   "bearing": {
-   "checked": 8,
-   "pass": 8
+   "checked": 11,
+   "pass": 11
   },
   "radius": {
-   "checked": 7,
-   "pass": 5
+   "checked": 8,
+   "pass": 6
   },
   "arc length": {
-   "checked": 6,
-   "pass": 0
+   "checked": 8,
+   "pass": 1
   }
  },
  "parcels": {
   "faces": 60,
-  "named": 5,
+  "named": 8,
   "with_table_area": 4,
-  "within_1pct": 0
+  "within_1pct": 1
  },
  "lidar_features": {
   "pavement": {
@@ -92,16 +92,26 @@
   "in_named_parcels": 10,
   "parcels": [
    "61806-2",
-   "61806-9|63269|61806",
-   "61985-2",
-   "61985-4"
+   "61806-4|61985-2",
+   "61806|61806-4|61806-5|61806-9|63269",
+   "61806|61985|61985-1|61985-2|61985-3|61985-4"
   ]
  },
  "tunnel": {
   "61985-2": {
-   "length_m": 310,
+   "length_m": 595,
    "ground_min_m": 16.3,
-   "ground_max_m": 35.4
+   "ground_max_m": 71.7
+  },
+  "61985-1": {
+   "length_m": 595,
+   "ground_min_m": 20.1,
+   "ground_max_m": 71.7
+  },
+  "61985-3": {
+   "length_m": 595,
+   "ground_min_m": 20.1,
+   "ground_max_m": 71.7
   },
   "61985-4": {
    "length_m": 595,
