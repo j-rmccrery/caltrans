@@ -20,7 +20,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from georef import (DEFAULT, OUT, PDF, apply, callouts, frame, monument_symbols, real_text_blocks,  # noqa: E402
+from georef import (DEFAULT, OUT, READS, PDF, apply, callouts, frame, monument_symbols, real_text_blocks,  # noqa: E402
                     segments, similarity, trace_leader, vs_caltrans_package)
 from georef_ticks import fit as tick_fit, stub, tick_labels  # noqa: E402
 
@@ -125,7 +125,7 @@ def hypotheses(points, lines):
 
 def main():
     page = pymupdf.open(PDF)[0]
-    blocks = json.loads((OUT / "read_rapid.json").read_text(encoding="utf-8"))
+    blocks = json.loads((READS).read_text(encoding="utf-8"))
     real = real_text_blocks(page)
     blocks = [b for b in blocks if not any(abs(b["cx"] - r["cx"]) < 8 and abs(b["cy"] - r["cy"]) < 8 for r in real)] + real
     points, lines = gather(page, blocks)

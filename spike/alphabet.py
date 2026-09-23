@@ -156,7 +156,9 @@ def label_row_cell(gs, gh, kind_hint, M):
     r = lambda g: reads[id(g)]
     suffix, suffix_lab = "", []
     if len(big) >= 6 and big[-3]["h"] > 1.25 * gh and big[-1]["h"] > 1.25 * gh and big[-2]["h"] < 1.25 * gh:  # (T): two tall parens round a capital
-        suffix, suffix_lab = "(T)", list(zip(big[-3:], "(T)"))
+        d = M.dist(bitmap(big[-2], 0.0, gh)[None, :])[0]; ok = np.isin(M.Y, list("RT"))
+        letter = str(M.Y[ok][int(d[ok].argmin())]) if ok.any() else "T"
+        suffix, suffix_lab = f"({letter})", list(zip(big[-3:], f"({letter})"))
         big = big[:-3]
     nb, ns = len(big), len(small)
 
@@ -195,7 +197,7 @@ def main():
     from checks import linework_segments
     rules = [(float(a[0]), float(min(a[1], b_[1])), float(max(a[1], b_[1]))) for a, b_, w, _ in linework_segments(page, 0.7) if abs(a[0] - b_[0]) < 0.5 and abs(a[1] - b_[1]) > 8]
 
-    X, Y, taken, cols = [], [], set(), []
+    X, Y, S, taken, cols = [], [], [], set(), []
     M = seed
     for junk in (SEED_JUNK, EXACT_JUNK):  # pass 1 with the font, pass 2 with the sheet's own digits
         new = no_columns(M, G, cs, junk, taken)
@@ -206,13 +208,13 @@ def main():
                 t = t + "(T)" if len(c["ids"]) == len(t) + 3 else t
                 if len(c["ids"]) == len(t):
                     for gi, ch in zip(c["ids"], t):
-                        X.append(bitmap(G[gi], 0.0, c["b"]["glyph_h"])); Y.append(ch)
+                        X.append(bitmap(G[gi], 0.0, c["b"]["glyph_h"])); Y.append(ch); S.append(len(G[gi]["strokes"]))
         cols += new
         if not X:
             np.savez(OUT / "alphabet.npz", X=np.zeros((0, 576), np.float32), Y=np.array([], dtype="<U1"))
             (OUT / "tables.json").write_text("{}", encoding="utf-8")
             print("no NO. column of stroked glyphs found (real-text sheet, or another lettering): no alphabet, no tables"); return
-        M = Matcher(np.array(X + list(seed.X[np.isin(seed.Y, list("NSEW"))])), np.array(Y + [y for y in seed.Y if y in "NSEW"]))
+        M = Matcher(np.array(X + list(seed.X[np.isin(seed.Y, list("NSEWRT"))])), np.array(Y + [y for y in seed.Y if y in "NSEWRT"]))
     print("NO. columns:", [(c["letter"], c["start"], len(c["cells"])) for c in cols])
 
     # rows: cells to the right of each NO. cell, labelled by structure; their glyphs join the alphabet
@@ -238,7 +240,7 @@ def main():
                     lab_all += [(g, ch, b["glyph_h"]) for g, ch in r[1]]
             rows[tag] = {"kind": kind, "cells": vals}
     for g, ch, gh in lab_all:
-        X.append(bitmap(g, 0.0, gh)); Y.append(ch)
+        X.append(bitmap(g, 0.0, gh)); Y.append(ch); S.append(len(g["strokes"]))
     # widen: every upright glyph on the sheet that matches the alphabet almost exactly joins it, so
     # the drawing's slightly different renderings of a character (size, spacing) are covered too
     M = Matcher(np.array(X), np.array(Y))
@@ -248,10 +250,10 @@ def main():
             b_ = bitmap(G[i], 0.0, c["b"]["glyph_h"])
             d = M.dist(b_[None, :])[0]; k = int(d.argmin())
             if d[k] < 1.5 and M.Y[k] in "0123456789LC":
-                X.append(b_); Y.append(M.Y[k]); added += 1
-    X, Y = np.array(X), np.array(Y)
+                X.append(b_); Y.append(M.Y[k]); S.append(len(G[i]["strokes"])); added += 1
+    X, Y, S = np.array(X), np.array(Y), np.array(S)
     _, keep = np.unique(X.round(2), axis=0, return_index=True)
-    np.savez(OUT / "alphabet.npz", X=X[keep], Y=Y[keep])
+    np.savez(OUT / "alphabet.npz", X=X[keep], Y=Y[keep], S=S[keep])
     # where the tables sit (so the drawing's tag reader leaves them alone): each NO. column with its rows
     regions = []
     for col in cols:

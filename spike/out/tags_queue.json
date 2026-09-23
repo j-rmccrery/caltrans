@@ -40,16 +40,6 @@
   ]
  },
  {
-  "tag": "?L??11",
-  "issue": "tag partly unread",
-  "region": [
-   1784,
-   980,
-   1813,
-   994
-  ]
- },
- {
   "tag": "?L21",
   "issue": "tag partly unread",
   "region": [
@@ -60,13 +50,13 @@
   ]
  },
  {
-  "tag": "C0??",
+  "tag": "C00?",
   "issue": "tag partly unread",
   "region": [
-   1702,
-   980,
-   1731,
-   994
+   2077,
+   202,
+   2108,
+   217
   ]
  },
  {
@@ -77,16 +67,6 @@
    627,
    993,
    641
-  ]
- },
- {
-  "tag": "C1",
-  "issue": "no such table row",
-  "region": [
-   1682,
-   1012,
-   1711,
-   1026
   ]
  },
  {
@@ -193,9 +173,9 @@
   "tag": "L1",
   "issue": "no such table row",
   "region": [
-   1083,
+   1082,
    554,
-   1110,
+   1111,
    568
   ]
  },
@@ -649,7 +629,7 @@
  },
  {
   "tag": "C22",
-  "issue": "fitted radius 4385.4 ft vs table 3600.00 ft",
+  "issue": "fitted radius 4385.3 ft vs table 3600.00 ft",
   "region": [
    262,
    299,

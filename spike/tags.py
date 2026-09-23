@@ -25,6 +25,7 @@ from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
 from blocks import OUT, PDF, glyph_paths, single_strokes  # noqa: E402
+from georef import READS  # noqa: E402
 from gt import TABLES  # noqa: E402
 from ocr import norm  # noqa: E402
 from overlay import FURNITURE, MAP_AREA, bezier  # noqa: E402
@@ -121,8 +122,9 @@ def exemplars(G, blocks):
 
 
 class Matcher:
-    def __init__(self, X, Y):
+    def __init__(self, X, Y, S=None):
         self.X, self.Y, self.n2 = X, Y, (X ** 2).sum(1)
+        self.S = S  # strokes per exemplar: a resolution-free feature of a stroke font (a 6 is 22, a 0 is 16, an 8 is 28)
 
     def dist(self, B):
         """Squared distances, rows of B against every exemplar."""
@@ -241,7 +243,7 @@ def read_cluster(G, members, singles_tree, singles, angle, gh, M, paths_tree=Non
 
 def main():
     page = pymupdf.open(PDF)[0]
-    blocks = json.loads((OUT / "read_rapid.json").read_text(encoding="utf-8"))
+    blocks = json.loads((READS).read_text(encoding="utf-8"))
     G = glyphs(page)
     if (OUT / "alphabet.npz").exists():  # the sheet's own alphabet, bootstrapped from its tables (alphabet.py)
         z = np.load(OUT / "alphabet.npz"); X, Y = z["X"], z["Y"]

@@ -3,22 +3,22 @@
   "sheet": "r_10434_002_2020-09-16",
   "credible": true,
   "control_points": null,
-  "rms_ft": 0.043,
+  "rms_ft": 0.044,
   "scale_ft_per_pt": 1.38886,
   "rotation_deg": 0.536
  },
  "checks": {
   "distance": {
-   "checked": 41,
-   "pass": 15
+   "checked": 39,
+   "pass": 13
   },
   "bearing": {
-   "checked": 17,
-   "pass": 9
+   "checked": 32,
+   "pass": 17
   },
   "arc length": {
-   "checked": 16,
-   "pass": 2
+   "checked": 14,
+   "pass": 3
   },
   "curve L=R*delta": {
    "checked": 0,
@@ -26,28 +26,28 @@
   },
   "pass_residual_ft": {
    "median": 0.03,
-   "max": 0.07
+   "max": 0.1
   },
   "pass_residual_arcmin": {
-   "median": 0.9,
+   "median": 0.4,
    "max": 2.5
   }
  },
  "exceptions": {
-  "total": 80,
-  "unmatched": 27,
-  "matchline": 5,
-  "disagree_small": 12,
-  "wrong_line": 36
+  "total": 86,
+  "unmatched": 30,
+  "matchline": 4,
+  "disagree_small": 11,
+  "wrong_line": 41
  },
  "tags": {
   "table_rows": 44,
-  "read": 37,
+  "read": 36,
   "distinct": 36,
-  "partial_queued": 9,
+  "partial_queued": 8,
   "associated": 18,
   "by_leader": 18,
-  "queued": 34,
+  "queued": 32,
   "distance": {
    "checked": 8,
    "pass": 8
@@ -66,15 +66,15 @@
   }
  },
  "parcels": {
-  "faces": 60,
-  "named": 5,
-  "with_table_area": 4,
+  "faces": 52,
+  "named": 4,
+  "with_table_area": 3,
   "within_1pct": 0
  },
  "lidar_features": {
   "pavement": {
-   "polygons": 35,
-   "area_m2": 132757
+   "polygons": 33,
+   "area_m2": 131754
   },
   "viaduct deck": {
    "polygons": 11,
@@ -87,11 +87,10 @@
   "buildings_roof_test": 175
  },
  "encroachment": {
-  "clusters": 91,
+  "clusters": 90,
   "building_verdict": 15,
-  "in_named_parcels": 10,
+  "in_named_parcels": 9,
   "parcels": [
-   "61806-2",
    "61806-9|63269|61806",
    "61985-2",
    "61985-4"
@@ -104,9 +103,9 @@
    "ground_max_m": 35.4
   },
   "61985-4": {
-   "length_m": 595,
-   "ground_min_m": 20.1,
-   "ground_max_m": 73.1
+   "length_m": 535,
+   "ground_min_m": 17.8,
+   "ground_max_m": 34.9
   }
  },
  "htdp": {

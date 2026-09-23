@@ -15,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 import checks as C  # noqa: E402
 import tags as T  # noqa: E402
 from exceptions_page import crop  # noqa: E402
-from georef import OUT, PDF  # noqa: E402
+from georef import OUT, READS, PDF  # noqa: E402
 
 IMG = Path(__file__).resolve().parent.parent / "docs" / "img"
 IMG.mkdir(parents=True, exist_ok=True)

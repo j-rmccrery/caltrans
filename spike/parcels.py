@@ -19,7 +19,7 @@ from shapely.geometry import LineString, Point, mapping
 from shapely.ops import polygonize, unary_union
 
 sys.path.insert(0, str(Path(__file__).parent))
-from georef import OUT, PDF, real_text_blocks  # noqa: E402
+from georef import OUT, READS, PDF, real_text_blocks  # noqa: E402
 from overlay import MAP_AREA, bezier  # noqa: E402
 
 PARCEL = re.compile(r"^(DK-)?(\d{5})(-\d)?$")
@@ -99,7 +99,7 @@ def main():
     faces = [f for f in faces if f.bounds[3] - f.bounds[1] > 26 or f.bounds[2] - f.bounds[0] > 130]  # not a parcel-number box (78 x 20 pt)
     print(f"heavy polylines {len(lines)} | faces {len(faces)}")
 
-    blocks = json.loads((OUT / "read_rapid.json").read_text(encoding="utf-8")) + real_text_blocks(page)
+    blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
     labels = [(m.group(0), Point(bl["cx"], bl["cy"])) for bl in blocks for m in [PARCEL.match(bl["text"].replace(" ", ""))] if m and not bl.get("real")]
     to_ll = Transformer.from_crs("EPSG:2227", "EPSG:6318", always_xy=True)
 

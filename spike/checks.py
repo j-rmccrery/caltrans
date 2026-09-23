@@ -21,7 +21,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from georef import OUT, PDF, frame, real_text_blocks, segments  # noqa: E402
+from georef import OUT, READS, PDF, frame, real_text_blocks, segments  # noqa: E402
 
 BEAR = re.compile(r"^([NS])(\d{1,2})°(\d{2})'(\d{2})\"([EW])(\(R\))?$")
 DIST = re.compile(r"^(\d{1,4}\.\d{2})'?(\(T\))?$")
@@ -377,7 +377,7 @@ def main():
     a, bb = g["params"][:2]
     scale = float(np.hypot(a, bb))
     rot = np.degrees(np.arctan2(bb, a))
-    blocks = json.loads((OUT / "read_rapid.json").read_text(encoding="utf-8")) + real_text_blocks(page)
+    blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
     # what a label can describe: black linework, minus leaders (their curly paths, then their stubs and
     # the callout underlines, which end inside a label's box), minus thin 7-pt stationing ticks
     _, circles = segments(page)

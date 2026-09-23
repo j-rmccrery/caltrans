@@ -21,6 +21,8 @@ ROOT = Path(__file__).resolve().parent.parent
 DEFAULT = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
 PDF = Path(os.environ.get("SHEET", DEFAULT))  # SHEET=<pdf> runs another sheet; its outputs go to out/<stem>/
 OUT = Path(__file__).parent / "out" / (PDF.stem if "SHEET" in os.environ else "")
+# the sheet's reads: by glyph on a stroked sheet (read_glyphs.py), by OCR otherwise
+READS = OUT / ("read_glyph.json" if (OUT / "read_glyph.json").exists() and (OUT / "read_glyph.json").stat().st_size > 2 else "read_rapid.json")
 NUM = re.compile(r"^([NEXY])?[:.]?(\d[\d,]{2,9}\.\d{2,4})$")  # 4-8 integer digits: local grids, CCS27/83, ft or m
 
 
@@ -222,7 +224,7 @@ def main():
     sys.path.insert(0, str(Path(__file__).parent))
     from gt import TABLES
     page = pymupdf.open(PDF)[0]
-    blocks = json.loads((OUT / "read_rapid.json").read_text(encoding="utf-8"))
+    blocks = json.loads((READS).read_text(encoding="utf-8"))
     real = real_text_blocks(page)
     blocks = [b for b in blocks if not any(abs(b["cx"] - r["cx"]) < 8 and abs(b["cy"] - r["cy"]) < 8 for r in real)] + real
     cos = callouts(blocks, [t[0] for t in TABLES.values()] if PDF == DEFAULT else [])

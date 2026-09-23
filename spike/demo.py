@@ -16,12 +16,13 @@ PY = sys.executable
 STEPS = [
     ("text blocks", ["blocks.py"]),
     ("sheet frame", ["frame.py"]),
-    ("read text", ["ocr.py", "rapid"]),
+    ("sheet alphabet + tables", ["alphabet.py"]),
+    ("read text by glyph", ["read_glyphs.py"]),
+    ("read text (OCR)", ["ocr.py", "rapid"]),
     ("georeference", ["solve.py"]),
     ("linework on LiDAR", ["overlay.py"]),
     ("parcels", ["parcels.py"]),
     ("checks + exception queue", ["checks.py"]),
-    ("sheet alphabet + tables", ["alphabet.py"]),
     ("segment tags", ["tags.py"]),
     ("table checks via tags", ["tables.py"]),
     ("LiDAR features", ["lidar/extract.py"]),
@@ -42,8 +43,12 @@ def main():
         STEPS.insert(6, ("LiDAR intensity cache", ["lidar/q2_terrain_check.py"]))
     t_all = time.time()
     for name, args in STEPS:
-        if fast and args[0] == "ocr.py" and (HERE / "out" / "read_rapid.json").exists():
-            print(f"{name:26} skipped (--fast)"); continue
+        if args[0] == "ocr.py":
+            rg = HERE / "out" / "read_glyph.json"
+            if rg.exists() and rg.stat().st_size > 2:
+                print(f"{name:26} skipped (stroked sheet: read by glyph)"); continue
+            if fast and (HERE / "out" / "read_rapid.json").exists():
+                print(f"{name:26} skipped (--fast)"); continue
         t = time.time()
         if args[0] in ("qgis_project.py", "figures.py") and not QGIS_PY.exists():
             print(f"{name:26} skipped (QGIS not installed)"); continue

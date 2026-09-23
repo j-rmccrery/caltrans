@@ -63,7 +63,7 @@ def main():
     rows = []
     for pdf in sheets():
         if "--run" in sys.argv:
-            for step in ("frame.py", "alphabet.py", "tags.py", "tables.py", "checks.py"):
+            for step in ("frame.py", "alphabet.py", "read_glyphs.py", "solve.py", "tags.py", "tables.py", "checks.py"):
                 ok, last = run(pdf, step)
                 print(f"{pdf.stem[:26]:26} {step:12} {'ok' if ok else 'FAILED'}  {last}")
                 if not ok:
