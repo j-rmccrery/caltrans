@@ -20,12 +20,12 @@ BENCH_SHEETS = {"presidio": "R-10434.2 Presidio", "r10434_1": "R-10434.1", "r104
 
 
 def record_twin_block():
-    """The 2026-09-23 loop's closing snapshot: leg5-verify's bench numbers on the three Presidio
-    sheets, this sheet's own closed traverse chain, and the 61985 blocker, all read from files."""
+    """The latest loop's closing snapshot: the last `loop2-final` bench row per Presidio sheet, this
+    sheet's own closed traverse chain, and the 61985 blocker, all read from files."""
     bench = list(csv.DictReader(open(OUT / "bench.csv", encoding="utf-8")))
-    verify = {r["sheet"]: r for r in bench if r["label"] == "leg5-verify"}
-    lines = ["## Record twin, 2026-09-23 loop", "",
-             "Pass counts from `spike/out/bench.csv` (rows labelled `leg5-verify`):", "",
+    verify = {r["sheet"]: r for r in bench if r["label"] == BENCH_LABEL}  # last row per sheet wins
+    lines = ["## Record twin, 2026-09-23 loop 2", "",
+             f"Pass counts from `spike/out/bench.csv` (rows labelled `{BENCH_LABEL}`):", "",
              "| sheet | distance | bearing | arc length | tags associated | faces named |", "|---|---|---|---|---|---|"]
     for key, label in BENCH_SHEETS.items():
         r = verify.get(key)
@@ -38,12 +38,17 @@ def record_twin_block():
         lines += ["", f"Closed chain on {PDF.stem}: {c['n_edges']} edges ({c['full_record']} with a full record), "
                        f"end misfit {c['misfit_end_ft']} ft, record area {c['record_area_sqft']:,.1f} sq ft."]
     loop_md = (Path(__file__).parent / "LOOP.md").read_text(encoding="utf-8")
-    m = re.search(r"61985-1\.\.4:.*?labels\.", loop_md)
-    if m:
-        lines += ["", f"Blocker: {m.group(0)}"]
+    strip = json.loads((OUT / "leg5_61985.json").read_text(encoding="utf-8")) if (OUT / "leg5_61985.json").exists() else []
+    env = next((r.get("strip_combined") for r in strip if r.get("strip_combined")), None)
+    if env:
+        lines += ["", f"Blocker: 61985-1..4 do not close as separate figures. The drawing carries them as one strip "
+                      f"(dashed easement layer under the R/W line and parallel to it), {env['area_sqft']:,.0f} sq ft against "
+                      f"a table sum of {env['table_area_sqft']:,.0f} ({env['diff_pct']:+.1f} %); no drawn stroke divides the four, "
+                      "and their printed curve data sits on the R/W line. The four stay queued; the envelope is what is measured."]
     return "\n".join(lines) + "\n"
 
 SQFT_PER_ACRE = 43560.0
+BENCH_LABEL = "loop2-final"
 
 
 def load(name):

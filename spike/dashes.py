@@ -95,7 +95,13 @@ def dash_trains(dashes):
                 # chain on its own curve instead of hopping to the neighbour
                 if not cands:
                     break
-                _, k, far, dl = max(cands, key=lambda t: t[0])
+                # cands is built from tree.query_ball_point(), whose return order scipy documents as
+                # unspecified (not sorted by index or distance) -- so a tie in `turn` (two dashes exactly
+                # as collinear, common on a straight run) used to pick whichever query_ball_point happened
+                # to list first, an accident of its internal tree traversal, not of the geometry. Tie-break
+                # on k, the dash's own index in collect_dashes()'s draw order: deterministic and always
+                # available, unlike relying on the candidate list's incidental order (leg E)
+                _, k, far, dl = max(cands, key=lambda t: (t[0], -t[1]))
                 used.add(k); pts.append(far); cur, cur_dir = far, dl
             sides[direction] = pts
         pts = list(reversed(sides[-1])) + [a0, b0] + sides[1]

@@ -17,8 +17,8 @@
    "pass": 30
   },
   "arc length": {
-   "checked": 11,
-   "pass": 4
+   "checked": 19,
+   "pass": 13
   },
   "curve L=R*delta": {
    "checked": 10,
@@ -34,19 +34,19 @@
   }
  },
  "exceptions": {
-  "total": 66,
-  "unmatched": 27,
+  "total": 60,
+  "unmatched": 22,
   "matchline": 5,
   "disagree_small": 18,
-  "wrong_line": 16
+  "wrong_line": 15
  },
  "tags": {
   "table_rows": 44,
   "read": 33,
   "distinct": 32,
   "partial_queued": 12,
-  "associated": 21,
-  "by_leader": 18,
+  "associated": 22,
+  "by_leader": 19,
   "queued": 33,
   "distance": {
    "checked": 10,
@@ -58,17 +58,17 @@
   },
   "radius": {
    "checked": 8,
-   "pass": 6
+   "pass": 5
   },
   "arc length": {
-   "checked": 8,
-   "pass": 1
+   "checked": 9,
+   "pass": 2
   }
  },
  "parcels": {
-  "faces": 60,
-  "named": 8,
-  "with_table_area": 4,
+  "faces": 61,
+  "named": 9,
+  "with_table_area": 5,
   "within_1pct": 1
  },
  "lidar_features": {
@@ -87,7 +87,7 @@
   "buildings_roof_test": 175
  },
  "encroachment": {
-  "clusters": 91,
+  "clusters": 94,
   "building_verdict": 15,
   "in_named_parcels": 10,
   "parcels": [

@@ -91,7 +91,17 @@
  },
  {
   "tag": "C1",
-  "issue": "no leader, no curve beside the tag",
+  "issue": "no such table row",
+  "region": [
+   964,
+   627,
+   993,
+   641
+  ]
+ },
+ {
+  "tag": "C1",
+  "issue": "no such table row",
   "region": [
    1682,
    1012,
@@ -101,7 +111,7 @@
  },
  {
   "tag": "C2",
-  "issue": "no leader, no curve beside the tag",
+  "issue": "no such table row",
   "region": [
    981,
    596,
@@ -151,47 +161,17 @@
  },
  {
   "tag": "L1",
-  "issue": "drawn 40.16 ft vs table 1.86 ft",
+  "issue": "no such table row",
   "region": [
    1082,
    554,
    1111,
    568
-  ],
-  "line": [
-   [
-    1121.0,
-    545.7
-   ],
-   [
-    1093.2,
-    537.7
-   ]
-  ]
- },
- {
-  "tag": "L1",
-  "issue": "drawn bearing off by 5237.7 arcmin",
-  "region": [
-   1082,
-   554,
-   1111,
-   568
-  ],
-  "line": [
-   [
-    1121.0,
-    545.7
-   ],
-   [
-    1093.2,
-    537.7
-   ]
   ]
  },
  {
   "tag": "L2",
-  "issue": "leader points at no line",
+  "issue": "no such table row",
   "region": [
    1125,
    598,

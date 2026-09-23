@@ -3,24 +3,36 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-23 09:00 after the overnight loop; report in `spike/out/loop_report.md`)
+## Next (logged 2026-09-23 14:00 after loop 2; loop 1 report in `spike/out/loop_report.md`, loop 2 in `spike/LOOP.md`)
 
-Presidio now: distance checks 39/47, 25/30, 41/71 on R-10434.2/.1/.3 (were 17/39, 20/51, 26/95), wrong-line
-16/28/40 (were 37/47/93), tables from annotations 100 % clean, one closed traverse chain (5 edges, misfit
-0.14 ft, 6,970.6 sq ft), faces named 8/5/13, the four 1969 R-65 sheets on the tile through Caltrans' packages.
-Loop legs and gates: `spike/LOOP.md`. Do this, in order:
+Presidio now (bench `loop2-final`): distance 39/47, 25/32, 41/70 on R-10434.2/.1/.3; bearing 30/49, 19/30, 31/50;
+arc length 13/19, 13/34, 21/33 (were 4/11, 4/26, 7/18); wrong-line 15/29/40; tags associated 24/14/28; the bench is
+deterministic (twin annotations folded, leg A). `demo.py --fast` 130 s, 21 steps ok.
 
-1. **Tunnel easements 61985-1..4.** Their bubbles' leaders point to detached R/Δ/L data blocks; the arcs are
-   the dashed strip (`spike/out/leg5_61985_*.png`). Place each curve from its radial bearing `(R)` and radius,
-   then walk the strip. That is the demo's closure figure.
-2. **Arc lengths** 4/11, 4/26, 7/18: leader tips beyond 4 pt, and the run-sum logic on the long R/W curves.
-3. **De-duplicate annotations** sharing a rect within a glyph height (`50.22'` twins): removes the ±1 jitter.
-4. **Other Civil 3D 2016+ sheets** (R-71.70, R-71.71, R-10258) through `read_shx.py`; then the 2012-era
-   sheets need the real SHX fonts as the glyph seed, not Hershey (see the CAD-structure section).
-5. Scans: unchanged (gap 1). Classify the 48 by lettering first; measure Leroy and CAD-plot classes.
+**Tunnel easements 61985-1..4 (loop 2 leg B, measured twice): they do not close as separate figures on this sheet.**
+The easement layer `rw_EASE_EXIST_align` draws one strip: a dashed line under the R/W line (train 0) and one
+parallel to it ~17-25 pt south (trains 2+6+1+5), closed at the west end near ⑤/C3 and at C11 (`spike/dashes.py`,
+`spike/out/legB_61985.png`). No stroke on the sheet divides the strip into four; the ovals' leaders go to R/W
+vertex circles (61985-1 -> C7) and the R=/Δ=/L= blocks' arcs sit on the R/W line itself. Envelope 48,410 sq ft vs
+the table's 70,690 (-31.5 %): the TCEs (61985-2/-3) overlap the tunnel easements rather than tile the strip.
+The demo says so: the envelope is measured, the four stay queued, and the deed documents carry their outlines.
+Do not spend more time on drawn geometry for these; a record walk needs their legal descriptions.
 
-Not next: layer taxonomy as an association filter (measured: no gain once reads are exact; stash
-`loop-leg-2`); walkthrough, run of show, QA until the last week.
+Do this, in order:
+
+1. **Arc lengths, what is left** (`spike/out/legC_misses.md`): compound curves with no drawn mark at the record
+   boundary (C15/C16 class, `L=171.66'`, C19/C21/C22) need a run-sum against an adjacent tag; standalone `L=`
+   blocks have none. Four `(T)` totals on Presidio now reach the check and fail for the same reason.
+2. **R-10434.1 traverse** lost its one closed chain in leg C (chains 44 -> 43, closed 1 -> 0). Trace which edge
+   moved; the arc split changed an edge's endpoints.
+3. **R-10434.1 wrong-line +1**: `31.80'` measures 308 ft under the wider bezier pool; `14.91'` drifted to +7.35 ft.
+4. **Other Civil 3D 2016+ sheets** (R-71.70, R-71.71, R-10258) through `read_shx.py`; then the 2012-era sheets
+   need the real SHX fonts as the glyph seed, not Hershey.
+5. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze.
+6. Scans: unchanged (gap 1). Classify the 48 by lettering first; measure Leroy and CAD-plot classes.
+
+Not next: layer taxonomy as an association filter (measured: no gain; stash `loop-leg-2`); more drawn-geometry
+work on 61985-1..4 (above).
 
 ## 2026-09-23: CAD structure in the PDFs, and the association bench
 

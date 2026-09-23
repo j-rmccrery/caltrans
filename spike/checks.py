@@ -631,7 +631,11 @@ def main():
                     # out would need to land within DIST_TOL by pure chance
                     far = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 160.0]
                     close = [x for x in far if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
-                arc = min(close, key=lambda x: abs(x["len_pt"] * scale - want)) if close else None
+                # same tie-break as tables.py's whole-vs-piece pick (leg E): a length-match tie used to
+                # fall to close's own order (arcs' get_drawings()/split_at build order, not the geometry).
+                # Tie-break on point count (prefer the specific piece over the whole path) then the
+                # candidate's own start coordinate, both properties of the candidate, not of list position
+                arc = min(close, key=lambda x: (abs(x["len_pt"] * scale - want), len(x["pts"]), float(x["pts"][0][0]), float(x["pts"][0][1]))) if close else None
             if arc is None:
                 exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc within 5 glyph heights matches the printed length", "region": region(b)})
             else:

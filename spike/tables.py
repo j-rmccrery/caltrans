@@ -189,7 +189,13 @@ def main():
                     # apart. Length does: the printed row length picks the one piece (or the whole, if it
                     # was never actually compound) that is the tag's own arc, the same way a line's own
                     # printed distance already picks among its candidates above
-                    fit = [min(fit, key=lambda t: abs(t[1]["len_pt"] * scale - row["L"]))]
+                    # a tie in the length match (the whole path and a piece land on the identical length,
+                    # or two pieces do) used to fall to fit's own order -- itself cands' order, itself
+                    # arcs' build order (page.get_drawings() then split_at's pieces): an accident of paint
+                    # order, not of the geometry. Tie-break on the candidate's own point count (fewer
+                    # points: prefer the specific piece over the whole compound path) then its own start
+                    # coordinate -- both properties of the candidate itself, not of list position (leg E)
+                    fit = [min(fit, key=lambda t: (abs(t[1]["len_pt"] * scale - row["L"]), len(t[1]["pts"]), float(t[1]["pts"][0][0]), float(t[1]["pts"][0][1])))]
                 elif not fit:
                     # neither candidate's fitted radius is even close to the row (or one is too short to
                     # fit a radius at all): not a real tie between two good matches -- the wider reach for
