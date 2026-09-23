@@ -62,9 +62,13 @@ def glyphs(page):
                     "arrow": d["type"] != "s" and len(d["items"]) <= 4})  # leader arrowhead: a small filled triangle
     for x, y, ln, p0, p1 in single_strokes(page):  # '1', '-', apostrophes: dropped by glyph_paths as tick-like
         out.append({"strokes": [[p0, p1]], "c": np.array([x, y]), "h": ln, "single": True, "arrow": False})
-    # a character is one path touching nothing; the pieces of a leader touch each other end to end
+    # a character touches no linework; the pieces of a leader touch each other end to end. Touching another
+    # glyph-sized path does not count: some fonts draw one letter as several paths that meet
     ends, owner = [], []
+    linework = set()
     for pid, d in enumerate(page.get_drawings()):
+        if max(d["rect"].width, d["rect"].height) > 20:
+            linework.add(pid)
         for it in d["items"]:
             if it[0] in ("l", "c"):
                 ends += [(it[1].x, it[1].y), (it[-1].x, it[-1].y)]; owner += [pid, pid]
@@ -73,7 +77,7 @@ def glyphs(page):
     for g in out:
         own = etree.query_ball_point(g["strokes"][0][0], 0.05)
         me = {owner[j] for j in own}
-        g["connected"] = any(owner[j] not in me for s in g["strokes"] for p in (s[0], s[-1]) for j in etree.query_ball_point(p, 0.3))
+        g["connected"] = any(owner[j] not in me and owner[j] in linework for s in g["strokes"] for p in (s[0], s[-1]) for j in etree.query_ball_point(p, 0.3))
     return out
 
 

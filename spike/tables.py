@@ -133,7 +133,7 @@ def main():
         return found
 
     tips = tag_leaders(tags, paths)
-    out, queue, curve_hits = [], [], []
+    out, queue, curve_hits, placed = [], [], [], []  # placed: every tag's table values with the line they sit on, for the traverse
     for ti, t in enumerate(tags):
         region = [round(t["cx"] - 2 * t["gh"]), round(t["cy"] - t["gh"]), round(t["cx"] + 2 * t["gh"]), round(t["cy"] + t["gh"])]
         if "?" in t["tag"]:
@@ -160,6 +160,7 @@ def main():
         seg = cands[0][1]
         if kind == "line" and not row["total"]:
             seg = span_for(seg, row["dist"], scale, chains)
+        placed.append({"tag": t["tag"], "kind": kind, **{k: row[k] for k in ("az", "dist", "total", "R", "L", "delta") if k in row}, "line": shape(seg), "how": how})
         if kind == "line":
             drawn = seg["len_pt"] * scale
             dx, dy = seg["dir"][0], -seg["dir"][1]
@@ -221,6 +222,7 @@ def main():
     with open(OUT / "tags_checks.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["tag", "check", "printed", "drawn", "difference", "result", "association"]); w.writerows(out)
     (OUT / "tags_queue.json").write_text(json.dumps(queue, indent=1, ensure_ascii=False), encoding="utf-8")
+    (OUT / "tag_labels.json").write_text(json.dumps(placed, ensure_ascii=False), encoding="utf-8")
 
     complete = [t for t in tags if "?" not in t["tag"]]
     assoc = {r[0] for r in out}

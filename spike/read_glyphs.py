@@ -11,6 +11,7 @@ Output: spike/out[/<sheet>]/read_glyph.json, the same block records ocr.py write
 usage: [SHEET=<pdf>] python spike/read_glyphs.py   (after blocks.py and alphabet.py)
 """
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -32,11 +33,12 @@ def eff_h(g, n):
 
 
 def read_row(row, u, n, gh, M):
-    """row: glyph dicts sorted along u. Returns text; '?' where a glyph does not read."""
+    """row: glyph dicts sorted along u. Returns (text, labels): '?' where a glyph does not read; labels =
+    [(glyph, char, cap height used)] for the capitals, so a row that parses can teach the alphabet."""
     big = [g for g in row if eff_h(g, n) > SMALL * gh]
     small = [g for g in row if eff_h(g, n) <= SMALL * gh]
     if not big:
-        return "?" * len(row)
+        return "?" * len(row), []
     hs = sorted(g["h"] for g in big)
     gh = float(np.median(hs[: max(1, int(0.8 * len(hs)))]))  # the cap height of this row (parens are taller, (T) rows smaller)
     c0 = np.median([g["c"] for g in big], axis=0)  # the line itself, not pulled up by the symbols
@@ -50,7 +52,10 @@ def read_row(row, u, n, gh, M):
         if not ok.any():
             return "?"
         k = int(np.where(ok)[0][d[ok].argmin()])
-        if d[k] < (COARSE if among else JUNK):  # a slot's letters come from the seed font: looser
+        if among:  # a slot names its few candidates (N|S, E|W, R|T): the nearer wins if it wins clearly, however far the seed font sits
+            others = d[ok & (M.Y != M.Y[k])]
+            return str(M.Y[k]) if d[k] < COARSE or (len(others) and others.min() > 1.3 * d[k]) else "?"
+        if d[k] < JUNK:
             return str(M.Y[k])
         if M.S is not None and not among:  # a bolder variant of the same character: same stroke count, looser bitmap
             same = ok & (M.S == len(g["strokes"]))
@@ -62,9 +67,10 @@ def read_row(row, u, n, gh, M):
 
     tall = lambda g: g["h"] > 1.2 * gh
     # (R) / (T): two tall parens round one capital, at the end
-    suffix = ""
+    suffix, suffix_lab = "", []
     if len(big) >= 3 and tall(big[-3]) and tall(big[-1]) and not tall(big[-2]):
         suffix = "(" + read(big[-2], "RT") + ")"
+        suffix_lab = [(big[-2], suffix[1], gh)]
         big = big[:-3]
     chars = {id(g): read(g) for g in big}
     letters = [g for g in big if not chars[id(g)].isdigit()]
@@ -107,7 +113,7 @@ def read_row(row, u, n, gh, M):
             if (g["c"] - big[1]["c"]) @ u < 0:
                 sym[id(g)] = ""
     out = "".join(chars.get(id(g), sym.get(id(g), "?")) for g in sorted(big + small, key=lambda g: (g["c"] - c0) @ u))
-    return out + suffix
+    return out + suffix, [(g, chars[id(g)], gh) for g in big] + suffix_lab
 
 
 def merge_pieces(row, c, u, n, gh):
@@ -142,8 +148,76 @@ def main():
     G = glyphs(page)
     tree = cKDTree(np.array([g["c"] for g in G]))
     votes = characters(G, M, 0, 0, W, H)  # coarse best angle per multi-stroke glyph
+    validated = (OUT / "tables.json").exists() and len(json.loads((OUT / "tables.json").read_text(encoding="utf-8"))) > 1
+    X, Y, S = list(z["X"]), list(z["Y"]), list(z["S"]) if "S" in z else [0] * len(z["Y"])
+    if not validated:  # the slot letters the seed-only alphabet lacks, from the font: a slot read is relative, so a poor fit still decides
+        from alphabet import seed_exemplars
+        sx, sy = seed_exemplars("NSEWRT")
+        for x, y in zip(sx, sy):
+            if y not in Y:
+                X.append(x); Y.append(y); S.append(0)
+        seed = Matcher(sx, sy)
+        M = Matcher(np.array(X), np.array(Y), np.array(S))
+    for round_ in range(1 if validated else 4):
+        out, unread, learned, slots = read_all(page, blocks, G, tree, votes, M, X, Y, S)
+        if not validated:
+            learned += resolve_slots(slots, seed, X, Y, S)
+        if validated or not learned:
+            break
+        # a row that parses as a whole token is right with the odds of a chance parse: its glyphs are exact exemplars
+        print(f"  round {round_ + 1}: {sum(1 for b in out if b['conf'] == 1.0)} blocks read, {learned} glyphs learned from rows that parse")
+        M = Matcher(np.array(X), np.array(Y), np.array(S))
+    (OUT / "read_glyph.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+    full = sum(1 for b in out if b["conf"] == 1.0)
+    print(f"read {len(out)} blocks by glyph: {full} fully read, {unread} unread glyphs")
+
+
+VALID = re.compile(r"^(?:[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|\d{1,4}\.\d{2}'?(?:\(T\))?|[NE]?\d{1,3}(?:,\d{3})+\.\d{2,3}|[RL]=\d{1,5}\.\d{2}'?|Δ=\d{1,3}°\d{2}'\d{2}\"|\d{1,4}\+\d{2}(?:\.\d{2})?)$")
+
+
+SHAPE = re.compile(r"^([NS?])\d{1,2}°\d{2}'\d{2}\"([EW?])(?:\(R\))?$")  # a bearing whose letter slots may be unread
+
+
+def resolve_slots(slots, seed, X, Y, S):
+    """The first glyph of a bearing is an N or an S, the last an E or a W. Pool the unread slot glyphs of
+    every bearing-shaped row, cluster them by bitmap (two shapes at most), and let the seed font say
+    which cluster is which: a relative call it can make even where its absolute distances are poor."""
+    added = 0
+    for pair, pool in slots.items():
+        if len(pool) < 3:
+            continue
+        B = np.array([b for b, _, _ in pool])
+        D = np.sqrt(np.maximum((B ** 2).sum(1)[:, None] + (B ** 2).sum(1)[None, :] - 2 * B @ B.T, 0))
+        left, clusters = set(range(len(B))), []
+        while left:
+            k = max(left, key=lambda i: (D[i, list(left)] < 3.0).sum())
+            members = [i for i in left if D[k, i] < 3.0]
+            clusters.append(members); left -= set(members)
+        clusters = [c for c in sorted(clusters, key=len, reverse=True)[:2] if len(c) >= 2]
+        if not clusters:
+            continue
+        a, b = pair
+        sa, sb = seed.X[seed.Y == a], seed.X[seed.Y == b]
+        lean = [float(np.median(seed.dist(B[c])[:, seed.Y == a].min(1)) - np.median(seed.dist(B[c])[:, seed.Y == b].min(1))) for c in clusters]
+        labels = [a if l < 0 else b for l in lean]
+        if len(clusters) == 2 and labels[0] == labels[1]:  # both lean one way: the one leaning more is it, the other is the other letter
+            labels = [a, b] if lean[0] < lean[1] else [b, a]
+        for c, lab in zip(clusters, labels):
+            for i in c:
+                X.append(B[i]); Y.append(lab); S.append(pool[i][2]); added += 1
+        print(f"  slot {pair}: {len(pool)} glyphs, clusters {[len(c) for c in clusters]} -> {labels}")
+    return added
+
+
+def read_all(page, blocks, G, tree, votes, M, X, Y, S):
+    """Every block read with M. Rows whose text matches VALID add their capitals to X/Y/S (exemplars at
+    the row's angle and cap height); the unread letter slots of bearing-shaped rows are pooled for
+    resolve_slots. Returns (blocks read, unread glyph count, exemplars added, slot pools)."""
     out = []
     unread = 0
+    learned = 0
+    slots = {"NS": [], "EW": []}
+    seen = {tuple(np.round(x, 2)) for x in X}
     for b in blocks:
         u0, n0 = axes(b["angle"])
         c = np.array([b["cx"], b["cy"]])
@@ -188,13 +262,25 @@ def main():
         for row in rows:
             merged = merge_pieces(row, c, u, n, gh)
             if merged:
-                texts.append(read_row(merged, u, n, gh, M))
+                t, lab = read_row(merged, u, n, gh, M)
+                texts.append(t)
+                if VALID.match(t):
+                    for g, ch, ghr in lab:
+                        if ch and ch != "?":
+                            x = bitmap(g, angle, ghr)
+                            if tuple(np.round(x, 2)) not in seen:
+                                seen.add(tuple(np.round(x, 2))); X.append(x); Y.append(ch); S.append(len(g["strokes"])); learned += 1
+                elif SHAPE.match(t) and lab:
+                    m = SHAPE.match(t)
+                    if m[1] == "?":
+                        slots["NS"].append((bitmap(lab[0][0], angle, lab[0][2]), lab[0][0], len(lab[0][0]["strokes"])))
+                    if m[2] == "?":
+                        k = -2 if t.endswith("(R)") else -1
+                        slots["EW"].append((bitmap(lab[k][0], angle, lab[k][2]), lab[k][0], len(lab[k][0]["strokes"])))
         text = "|".join(t for t in texts if t)
         unread += text.count("?")
         out.append({**b, "angle": round(angle, 2), "text": text, "conf": 1.0 if "?" not in text and text else 0.0})
-    (OUT / "read_glyph.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
-    full = sum(1 for b in out if b["conf"] == 1.0)
-    print(f"read {len(out)} blocks by glyph: {full} fully read, {unread} unread glyphs")
+    return out, unread, learned, slots
 
 
 if __name__ == "__main__":

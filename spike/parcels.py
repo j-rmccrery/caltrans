@@ -84,10 +84,8 @@ def close_gaps(lines, gap):
     return lines + extra
 
 
-def main():
-    page = pymupdf.open(PDF)[0]
-    g = json.loads((OUT / "georef.json").read_text())
-    a, b, tx, ty = g["params"]
+def faces_on_sheet(page):
+    """Candidate parcels: the heavy linework plus the border, noded and polygonised."""
     lines = heavy_lines(page)
     x0, y0, x1, y1 = MAP_AREA
     border = LineString([(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)])
@@ -98,17 +96,13 @@ def main():
     faces = [f for f in polygonize(noded) if f.area > 400]  # ignore slivers (< ~800 sq ft)
     faces = [f for f in faces if f.bounds[3] - f.bounds[1] > 26 or f.bounds[2] - f.bounds[0] > 130]  # not a parcel-number box (78 x 20 pt)
     print(f"heavy polylines {len(lines)} | faces {len(faces)}")
+    return faces
 
-    blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
+
+def face_names(page, faces, blocks):
+    """{face index: [parcel numbers]}: a label with a leader names the face the leader points into
+    (tunnel easements, small strips), else the face the label sits in."""
     labels = [(m.group(0), Point(bl["cx"], bl["cy"])) for bl in blocks for m in [PARCEL.match(bl["text"].replace(" ", ""))] if m and not bl.get("real")]
-    to_ll = Transformer.from_crs("EPSG:2227", "EPSG:6318", always_xy=True)
-
-    def ground(xy):
-        sx, sy = np.asarray(xy)[:, 0], -np.asarray(xy)[:, 1]
-        E, N = a * sx - b * sy + tx, b * sx + a * sy + ty
-        return E, N
-
-    # a label with a leader names the face the leader points into (tunnel easements, small strips)
     from scipy.spatial import cKDTree
     from georef import segments, trace_leader
     segs, _ = segments(page)
@@ -126,11 +120,27 @@ def main():
             if hit:
                 by_leader.setdefault(min(hit, key=lambda i: faces[i].area), []).append(PARCEL.match(bl["text"].replace(" ", "")).group(0))
                 break
-    print(f"labels naming a face through a leader: {sum(len(v) for v in by_leader.values())}")
+    print(f"labels naming a face through a leader: {sum(len(v) for v in by_leader.values())}; labels placed {len(labels)}")
+    return {fi: by_leader.get(fi, []) or [n for n, p in labels if f.contains(p)] for fi, f in enumerate(faces)}
+
+
+def main():
+    page = pymupdf.open(PDF)[0]
+    g = json.loads((OUT / "georef.json").read_text())
+    a, b, tx, ty = g["params"]
+    faces = faces_on_sheet(page)
+    blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
+    names_of = face_names(page, faces, blocks)
+    to_ll = Transformer.from_crs("EPSG:2227", "EPSG:6318", always_xy=True)
+
+    def ground(xy):
+        sx, sy = np.asarray(xy)[:, 0], -np.asarray(xy)[:, 1]
+        E, N = a * sx - b * sy + tx, b * sx + a * sy + ty
+        return E, N
 
     feats, rows = [], []
     for fi, f in enumerate(faces):
-        names = by_leader.get(fi, []) or [n for n, p in labels if f.contains(p)]
+        names = names_of[fi]
         E, N = ground(np.array(f.exterior.coords))
         area_sf = 0.5 * abs(np.dot(E[:-1], N[1:]) - np.dot(N[:-1], E[1:]))
         lon, lat = to_ll.transform(E, N)
@@ -145,7 +155,7 @@ def main():
                       "geometry": {"type": "Polygon", "coordinates": [[[round(x, 8), round(y, 8)] for x, y in zip(lon, lat)]]}})
     (OUT / "parcels.geojson").write_text(json.dumps({"type": "FeatureCollection", "features": feats}))
     named = [f for f in feats if f["properties"]["parcel"]]
-    print(f"named faces {len(named)} of {len(feats)}; labels placed {len(labels)}")
+    print(f"named faces {len(named)} of {len(feats)}")
     print(f"{'parcel':10} {'drawn sq ft':>12} {'table sq ft':>12} {'diff':>8}")
     for name, got, want in sorted(rows):
         print(f"{name:10} {got:12,.0f} {want:12,.0f} {(got - want) / want * 100:+7.2f}%")
