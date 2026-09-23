@@ -22,7 +22,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from checks import BEAR_TOL, DIST_TOL, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, seg_dist, span_for, split_at, split_chains, tag_leaders  # noqa: E402
+from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, seg_dist, span_for, split_at, split_chains, tag_leaders  # noqa: E402
 from georef import OUT, PDF, segments  # noqa: E402
 from gt import TABLES  # noqa: E402
 
@@ -133,6 +133,7 @@ def main():
         return found
 
     tips = tag_leaders(tags, paths)
+    ambig = []  # diagnostic: ambiguous tags, for the table-order adjacency headroom
     out, queue, curve_hits, placed = [], [], [], []  # placed: every tag's table values with the line they sit on, for the traverse
     for ti, t in enumerate(tags):
         region = [round(t["cx"] - 2 * t["gh"]), round(t["cy"] - t["gh"]), round(t["cx"] + 2 * t["gh"]), round(t["cy"] + t["gh"])]
@@ -155,7 +156,20 @@ def main():
             cands = candidates(kind, np.array([t["cx"], t["cy"]]), BESIDE * gh, BOUNDARY)
         if not cands:
             queue.append({"tag": t["tag"], "issue": f"no leader, no {kind} beside the tag", "region": region}); continue
+        if len(cands) > 1 and cands[1][0] < CLEAR * cands[0][0] and "tagrow" in ASSOC:
+            # ASSOC=tagrow: the table row's own values pick among the candidates (bearing and length for a
+            # line, radius for a curve); one survivor, or a clear nearest among survivors, is the association
+            if kind == "line":
+                fit = [(d, s) for d, s in cands if az_diff(math.degrees(math.atan2(a * s["dir"][0] + bb * s["dir"][1], bb * s["dir"][0] - a * s["dir"][1])) % 360, row["az"]) < AZ_FILTER]
+                if row.get("dist") and not row["total"]:
+                    fit2 = [(d, s) for d, s in fit if abs(span_for(s, row["dist"], scale, chains)["len_pt"] * scale - row["dist"]) < 1.0]
+                    fit = fit2 or fit
+            else:
+                fit = [(d, s) for d, s in cands if len(s["pts"]) >= 3 and abs(fit_radius(s["pts"]) * scale - row["R"]) < 0.02 * row["R"]]
+            if len(fit) == 1 or (len(fit) > 1 and fit[1][0] >= CLEAR * fit[0][0]):
+                cands = fit
         if len(cands) > 1 and cands[1][0] < CLEAR * cands[0][0]:
+            ambig.append((t["tag"], kind, cands))
             queue.append({"tag": t["tag"], "issue": f"{len(cands)} {kind}s beside the tag", "region": region}); continue
         seg = cands[0][1]
         if kind == "line" and not row["total"]:
@@ -221,6 +235,20 @@ def main():
 
     with open(OUT / "tags_checks.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["tag", "check", "printed", "drawn", "difference", "result", "association"]); w.writerows(out)
+    if "orderdiag" in ASSOC:  # how many ambiguous tags would table-order adjacency (tag n-1 / n+1 shares an endpoint) settle?
+        ends = {}
+        for pl in placed:
+            P = pl["line"]; ends[pl["tag"].replace("(T)", "")] = (np.array(P[0], float), np.array(P[-1], float))
+        for tag, kind, cands in ambig:
+            m = re.match(r"([LC])(\d+)", tag)
+            if not m:
+                continue
+            nb = [ends[k] for k in (f"{m[1]}{int(m[2]) - 1}", f"{m[1]}{int(m[2]) + 1}") if k in ends]
+            def touch(s):
+                P = s["pts"] if "pts" in s else np.array([s["p0"], s["p1"]])
+                return any(np.hypot(*(P[i] - e)) < 3.0 for e0, e1 in nb for e in (e0, e1) for i in (0, -1))
+            hit = [s for d, s in cands if touch(s)]
+            print(f"   order: {tag} {len(cands)} candidates, neighbours placed {len(nb)}, touching a neighbour's end: {len(hit)}")
     (OUT / "tags_queue.json").write_text(json.dumps(queue, indent=1, ensure_ascii=False), encoding="utf-8")
     (OUT / "tag_labels.json").write_text(json.dumps(placed, ensure_ascii=False), encoding="utf-8")
 

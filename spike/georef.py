@@ -25,6 +25,7 @@ OUT = Path(__file__).parent / "out" / (PDF.stem if "SHEET" in os.environ else ""
 _rg, _rr, _rt = OUT / "read_glyph.json", OUT / "read_rapid.json", OUT / "tables.json"
 _validated = _rt.exists() and _rt.stat().st_size > 20  # an alphabet the tables' NO. column validated; the font-seed-only one is not
 READS = _rg if _rg.exists() and _rg.stat().st_size > 2 and (_validated or not _rr.exists()) else _rr
+READS = Path(os.environ["READS"]) if "READS" in os.environ else READS  # experiment: any block file in the OCR format
 NUM = re.compile(r"^([NEXY])?[:.]?(\d[\d,]{2,9}\.\d{2,4})$")  # 4-8 integer digits: local grids, CCS27/83, ft or m
 
 

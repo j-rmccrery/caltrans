@@ -13,6 +13,42 @@ Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run every
 
 Not next: scans (gap 1) until the vector path closes a figure; walkthrough, run of show, QA until the last week.
 
+## 2026-09-23: CAD structure in the PDFs, and the association bench
+
+**The PDFs carry CAD structure the pipeline never read.** 13 of 17 vector sheets have optional content
+groups = CAD layers, and every path carries its layer (`page.get_drawings()[i]["layer"]`). Civil 3D
+sheets (11): `RW-PARCEL-SEG-*`, `RW-ALGN-LNWK-*`, `rw_EASE_*` are the lines labels describe (Presidio:
+~750 of 15,832 paths); `RW-ALGN-LBL-*` labels; `*-LBL-*-Line` leaders; `SU-FIG-PNT-MARK` point marks;
+`RW-TBL` / `RW-SHEET-TBL` tables; `110_Sheet_Format`, `border*`, `SHEET*` furniture; `_Wipeout_Areas`
+text masks (Presidio lines run through 69 of the 90 wipeouts they touch: not broken for text).
+MicroStation sheets (4): named levels on R-102.1aa (`31 RW (exist)`), V8 numbered levels on R-105.14
+(`Level 31`), R-17x.1 flattened. Caltrans CADD Users Manual Appendix A10 gives the named-level grammar
+(152 `rw_*` names). Six Civil 3D 2016+ sheets (R-10434.1/.2/.3, R-71.70, R-71.71, R-10258) carry every
+stroked label's text as `AutoCAD SHX Text` annotations (`page.annots()`, content + rect; `%%D` = degree):
+Presidio 878, all 227 keyed table values verbatim. `spike/annot_reads.py` builds a block file from them;
+with `READS=<file>` (new env override in `georef.py`) Presidio georeferences 18/19, RMS 0.04 ft, checks
+equal the glyph read. On refused R-71.70 the annotations read 13 bearings where the glyph reader read 4.
+
+**Association bench** (`spike/bench.py`, rows in `spike/out/bench.csv`; toggles `ASSOC=bearing,span,layers`
+in `checks.py`, `ASSOC=tagrow` in `tables.py`, all off by default). Four ideas measured on Presidio,
+R-10434.3, R-105.14, R-17x.1: (1) printed bearing filters candidates: bearings +1..2, distances 0;
+(2) uniqueness headroom 1-2 labels per sheet, not built; span on any candidate +0/+1/+3/+2 distances;
+(3) table-order adjacency settles 0 of 5 ambiguous tags, but the row's own bearing/length/radius settles
+4 of 9 (tags associated 18 -> 22, all pass); (4) closure feedback: 0 figures close, no headroom. Ceiling of
+all four: +2..6 passes per sheet. Attribution of the unmatched distance labels: 27-29 per clean sheet (84 on
+R-10434.3) have no drawn chain of the printed length near the label at all (runs cut by ticks, solid line
+continuing as dashes, lines broken for on-line text on MicroStation, stationing/`R=` tokens read as
+distances). Layer-restricted candidates (`ASSOC=layers`) on Presidio: wrong-line 37 -> 17, pass precision
+44 % -> 76 %, one pass lost (a border matchline).
+
+**Scans, by eye** (one ink-dense crop each): ~22 hand-lettered originals (the measured hard class),
+~10 Leroy/mechanical lettering, ~11 CAD plots printed then scanned, ~5 not judged. 33 of 48 were
+re-plotted through Civil 3D; 11 carry a hidden OCR layer; 72-478 dpi. Only R-65.2 is measured.
+**LiDAR:** the one tile (2.1 x 0.9 km, Presidio) covers 7 sheets: R-10434.1/.2/.3 and the 1969 scans
+R-65.1-.4; the other 58 have none on disk (USGS 3DEP would cover D4).
+
+Plan from this: Presidio first, overnight loop in `spike/LOOP.md`.
+
 ## Where the roadmap stands (as of the last commit)
 
 | Roadmap item | State |

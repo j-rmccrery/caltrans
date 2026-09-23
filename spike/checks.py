@@ -12,6 +12,7 @@ usage: [SHEET=<pdf>] python spike/checks.py   ->  spike/out[/<sheet>]/checks.csv
 import csv
 import json
 import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -30,6 +31,9 @@ RAD = re.compile(r"^R=(\d{1,5}\.\d{2})'?$")
 LEN = re.compile(r"^L=(\d{1,5}\.\d{2})'?(\(T\))?$")
 TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2,3}'?(?:\(T\))?(?![\d])")
 DIST_TOL = 0.30   # ft, plus 0.05 %
+ASSOC = set(filter(None, os.environ.get("ASSOC", "").split(",")))  # association experiments: bearing, unique, order, closure
+NOT_LINEWORK = re.compile(r"LBL|anno|ANNO|TBL|SHEET|Sheet|Wipeout|PNT|border|TEXT|TXT|Format|Seal", re.I)  # ASSOC=layers: CAD layer names that are not linework
+AZ_FILTER = 0.5   # deg: a candidate line must run within this of the printed bearing (grid), where one is printed
 
 
 def set_decimals(blocks):
@@ -134,6 +138,8 @@ def linework_segments(page, max_gray=0.6):
         c = d.get("color")
         if c is None or max(c) > max_gray:
             continue  # white masks and light grey hatch are not lines a label describes
+        if "layers" in ASSOC and NOT_LINEWORK.search(d.get("layer") or ""):
+            continue  # CAD layer says annotation, table, sheet furniture, wipeout, point mark: not a line a label describes
         for it in d["items"]:
             if it[0] == "l":
                 a, b = np.array([it[1].x, it[1].y]), np.array([it[2].x, it[2].y])
@@ -201,14 +207,23 @@ def poly_dist(p, P):
     return float(np.hypot(*(p - (A + t[:, None] * AB)).T).min())
 
 
-def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0):  # a rotated label box carries 1-3 deg of angle error
+def az_diff(a, b):
+    """Angle between two undirected lines, degrees, from their azimuths."""
+    return abs((a - b + 90) % 180 - 90)
+
+
+def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, want_az=None, az_of=None):  # a rotated label box carries 1-3 deg of angle error
     """The line a label describes: parallel, overlapping it along the reading direction, close beside it.
     A label often sits between two parallel lines; when a printed distance is known, a neighbour whose
-    drawn length matches it within 1 ft is preferred (the bearing check stays independent)."""
+    drawn length matches it within 1 ft is preferred (the bearing check stays independent).
+    ASSOC=bearing: where a bearing is printed with the label, only lines running within AZ_FILTER of it
+    (through the georeferencing rotation) are candidates; none = no line, not a guess."""
     c, u, n = frame(b)
     cands = []
     for ln in chains:
         if abs(ln["dir"] @ n) > math.sin(math.radians(tol_deg)):
+            continue
+        if "bearing" in ASSOC and want_az is not None and az_diff(az_of(ln), want_az) > AZ_FILTER:
             continue
         lo, hi = sorted(((ln["p0"] - c) @ u, (ln["p1"] - c) @ u))
         if hi < -b["w"] / 2 - 2 * b["glyph_h"] or lo > b["w"] / 2 + 2 * b["glyph_h"]:
@@ -225,6 +240,10 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0):  #
         close = [(p, ln) for p, ln in cands if abs(ln["len_pt"] * scale - want_ft) < 1.0]
         if close:
             return min(close, key=lambda t: t[0])[1]
+        if "span" in ASSOC:  # no piece is the right length: a span of pieces on some candidate's run may be
+            spanned = [(p, s) for p, ln in cands for s in [span_for(ln, want_ft, scale, chains)] if s is not ln]
+            if spanned:
+                return min(spanned, key=lambda t: t[0])[1]
     return min(cands, key=lambda t: t[0])[1]
 
 
@@ -446,6 +465,11 @@ def main():
                 arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
+
+    def az_of(ln):
+        """Grid azimuth of a drawn line (deg, clockwise from grid north), through the fit's rotation."""
+        dx, dy = ln["dir"][0], -ln["dir"][1]
+        return math.degrees(math.atan2(a * dx - bb * dy, bb * dx + a * dy)) % 360
     rows, exceptions, labels = [], [], []  # labels: every checked value with the line it was measured on (sheet pt), for the traverse
 
     def at_tip(bi, kind, want=None):
@@ -492,7 +516,7 @@ def main():
                 mate = next((float(DIST.match(t)[1]) for t in parts if DIST.match(t)), None)
                 led, ln = at_tip(bi, "line", mate)
                 if not led:
-                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale)
+                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale, want_az=azimuth(part), az_of=az_of)
                 if ln is not None:
                     ln = span_for(ln, mate, scale, chains)
                 if ln is None:
@@ -512,9 +536,10 @@ def main():
                 if m[2] or curve_data:  # (T) totals and curve data (R=, Δ, L=) are not line lengths
                     continue
                 want = float(m[1])
+                baz = next((azimuth(t) for t in parts if BEAR.match(t) and not BEAR.match(t)[6]), None)  # the bearing printed with it
                 led, ln = at_tip(bi, "line", want)
                 if not led:
-                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale)
+                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale, want_az=baz, az_of=az_of)
                 if ln is not None:
                     ln = span_for(ln, want, scale, chains)
                 if ln is None or abs(ln["len_pt"] * scale - want) > 1.0:
