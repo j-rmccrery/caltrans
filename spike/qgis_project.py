@@ -93,6 +93,8 @@ def main():
     app = QgsApplication([], False)
     app.initQgis()
     P, L, F, M = QgsWkbTypes.PointGeometry, QgsWkbTypes.LineGeometry, QgsWkbTypes.PolygonGeometry, QgsWkbTypes.PointGeometry
+    R65 = [("R-65.1", "r_00065_001_1969-09-01_sn-02047"), ("R-65.2", "r_00065_002_1969-09-01_sn-02048"),
+           ("R-65.3", "r_00065_003_1969-09-01_sn-02049"), ("R-65.4", "r_00065_004_1969-09-01_sn-02050")]
     layers = [  # top of the legend first
         vector("Object record: control points", "objects.geojson|geometrytype=Point",
                categorized("status", [(k, lab, symbol(P, c, size=2.6, outline="white", width=0.4)) for k, (lab, c) in STATUS.items()]), maptip(OBJ_FIELDS)),
@@ -113,9 +115,13 @@ def main():
                maptip(["parcel", "area_sqft", "table_area_sqft", "diff_pct", "labels_inside"]), labels("parcel", "#143ca0")),
         vector("Sheet linework R-10434.2", "sheet_linework.geojson",
                categorized("weight", [("heavy", "heavy (R/W, parcel lines)", symbol(L, "black", width=0.7)), ("light", "light", symbol(L, col("#5a5a5a", 160), width=0.2))])),
+    ]
+    r65_layers = [raster(f"1969 record: {label}", f"r65/{stem}_on_tile.tif", 0.85) for label, stem in R65]
+    bottom_layers = [
         raster("LiDAR intensity", "lidar_intensity.tif", 0.55),
         raster("LiDAR hillshade", "lidar_hillshade.tif", 1.0),
     ]
+    all_layers = layers + r65_layers + bottom_layers
     p = QgsProject.instance()
     p.clear()
     p.setTitle("SWYFT Record Twin: Presidio sheet R-10434.2 on 2025 LiDAR")
@@ -127,14 +133,21 @@ def main():
     for l in layers:
         p.addMapLayer(l, False)
         root.addLayer(l)
-    extent = layers[-1].extent()
+    grp = root.addGroup("1969 record")  # below the sheet linework, above the hillshade
+    for l in r65_layers:
+        p.addMapLayer(l, False)
+        grp.addLayer(l)
+    for l in bottom_layers:
+        p.addMapLayer(l, False)
+        root.addLayer(l)
+    extent = all_layers[-1].extent()
     assert p.write(), "project write failed"
 
     # proof: re-read and render the opening view
     p.clear()
     assert p.read(str(OUT / "demo.qgz")), "project re-read failed"
     tree = [n.layer() for n in p.layerTreeRoot().findLayers()]
-    assert all(l is not None and l.isValid() for l in tree) and len(tree) == len(layers), "a layer did not survive the round trip"
+    assert all(l is not None and l.isValid() for l in tree) and len(tree) == len(all_layers), "a layer did not survive the round trip"
     ms = QgsMapSettings()
     ms.setLayers(tree); ms.setDestinationCrs(p.crs()); ms.setBackgroundColor(QColor("white"))
     ms.setOutputSize(QSize(2000, 900)); ms.setExtent(extent)
