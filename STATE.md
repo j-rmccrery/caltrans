@@ -3,6 +3,16 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
+## Next (recommended, logged 2026-09-23; JR: "log your recommendation as the next thing to do")
+
+**Association is the one dependency behind gaps 2, 3 and 4.** Reading now reaches bearings on the table-less sheets; the record frame gets its rotation; the traverse walks full edges to 0.10 ft. What stops every one of them is which line a distance describes. Do this, in order:
+
+1. **Scale without the distances.** Give `solve.record_frame` two more scale sources so a frame stands on rotation + one of them: (a) a callout pair (two coordinate callouts fix scale directly; R-10462 has 4), (b) the graphic scale bar — drawn, not lettered: a row of equal boxes or ticks with round-number labels near the title block; its pitch in pt against its printed step is the scale, and it is on every sheet. Then the 10 refused vector sheets get frames the checks can run under.
+2. **Association per drafter, measured on the real-text sheets first.** R-105.14 (37/62 distances pass) and R-17x.1 (40/73) have clean text and a credible frame: run `traverse.py` there, look at the exception page's "reader measured a different line" crops, fix the biggest cause, repeat — the loop that took Presidio's wrong-line count 103 → 31. Targets: a figure that closes on one of them; distance pass above 60 %.
+3. **Rerun `sheets.py --run --all`** and put the table in "The archive as it is". Frames from step 1 make the same association loop possible on the stroked sheets.
+
+Not next: scans (gap 1) until the vector path closes a figure; walkthrough, run of show, QA until the last week.
+
 ## Where the roadmap stands (as of the last commit)
 
 | Roadmap item | State |
