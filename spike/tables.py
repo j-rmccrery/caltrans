@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, seg_dist, span_for, split_at, split_chains, tag_leaders  # noqa: E402
 from georef import OUT, PDF, segments  # noqa: E402
 from gt import TABLES  # noqa: E402
+from layers import has_layers, page_classes  # noqa: E402
 
 RADIUS_TOL = 0.01  # fraction: a polyline arc's fitted radius vs the printed one
 BESIDE = 2.5       # glyph heights: how far from the tag a segment may sit to be "beside" it
@@ -85,6 +86,8 @@ def shape(seg):
 
 def main():
     page = pymupdf.open(PDF)[0]
+    use_layers = has_layers(page)
+    classes = page_classes(page) if use_layers else None
     g = json.loads((OUT / "georef.json").read_text())
     a, bb = g["params"][:2]
     scale = float(np.hypot(a, bb))
@@ -113,7 +116,7 @@ def main():
     for c in lines_on_sheet(segs, circles, max_turn_deg=20.0):  # R=60 ft curves turn 7 deg per facet
         if c["n"] >= 3 and c["len_pt"] > 12:
             for P in split_at(c["pts"], circles, junction_lines, ticks=ticks if c["width"] < BOUNDARY else ()):
-                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "width": c["width"]})
+                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "width": c["width"], "pid": c.get("pid")})
 
     def along(seg, pt):
         """Unit direction of a chain, or of the arc facet nearest pt."""
@@ -124,10 +127,21 @@ def main():
         v = P[min(k + 1, len(P) - 1)] - P[max(k - 1, 0)]
         return v / max(np.hypot(*v), 1e-9)
 
+    def sub_of(s):
+        pid = s.get("pid")
+        return classes[pid][1] if classes is not None and pid is not None and pid < len(classes) else None
+
     def candidates(kind, pt, radius, min_width=0.0, arrow=None):
         pool = [ln for ln in chains if ln["width"] >= min_width] if kind == "line" else [arc for arc in arcs if arc["width"] >= min_width]
         dist = (lambda s: seg_dist(pt, s["p0"], s["p1"])) if kind == "line" else (lambda s: poly_dist(pt, s["pts"]))
-        found = sorted(((dist(s), s) for s in pool if dist(s) < radius), key=lambda t: t[0])
+        scored = [(dist(s), s) for s in pool if dist(s) < radius]
+        if use_layers and scored:
+            # the line/curve tables describe the R/W line: among candidates within CLEAR of the nearest,
+            # a parcel-sub one (RW-PARCEL-SEG*, EASE) is preferred over an alignment-sub neighbour
+            dmin = min(d for d, s in scored)
+            found = sorted(scored, key=lambda t: (0 if t[0] <= CLEAR * dmin and sub_of(t[1]) == "parcel" else 1, t[0]))
+        else:
+            found = sorted(scored, key=lambda t: t[0])
         if arrow is not None:  # an arrow points across the line it means, not along it: a stationing tick lies along the arrow
             found = [(d, s) for d, s in found if abs(along(s, pt) @ arrow) < math.cos(math.radians(30))]
         return found

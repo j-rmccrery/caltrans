@@ -120,12 +120,17 @@ def callouts(blocks, skip):
 
 
 def segments(page):
+    from layers import classify, has_layers  # noqa: E402 (deferred: georef.py loads first, see layers.py)
+    use_layers = has_layers(page)
     segs = []
     circles = []
     for pid, d in enumerate(page.get_drawings()):
         r = d["rect"]
         kinds = {i[0] for i in d["items"]}
-        if "c" in kinds and 2 < r.width < 9 and abs(r.width - r.height) < 1:
+        is_circle_shape = "c" in kinds and abs(r.width - r.height) < 1 and r.width > 0
+        by_size = is_circle_shape and 2 < r.width < 9
+        by_layer = use_layers and is_circle_shape and classify(d.get("layer"))[0] == "point"
+        if by_size or by_layer:
             circles.append(((r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2))
         for it in d["items"]:
             if it[0] == "l":

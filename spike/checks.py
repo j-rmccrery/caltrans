@@ -23,6 +23,7 @@ from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
 from georef import OUT, READS, PDF, frame, real_text_blocks, segments  # noqa: E402
+from layers import classify, has_layers, page_classes  # noqa: E402
 
 BEAR = re.compile(r"^([NS])(\d{1,2})°(\d{2})'(\d{2})\"([EW])(\(R\))?$")
 DIST = re.compile(r"^(\d{1,4}\.\d{2,3})'?(\(T\))?$")  # 2 decimals in feet, 3 on the metric sheets
@@ -31,8 +32,7 @@ RAD = re.compile(r"^R=(\d{1,5}\.\d{2})'?$")
 LEN = re.compile(r"^L=(\d{1,5}\.\d{2})'?(\(T\))?$")
 TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2,3}'?(?:\(T\))?(?![\d])")
 DIST_TOL = 0.30   # ft, plus 0.05 %
-ASSOC = set(filter(None, os.environ.get("ASSOC", "").split(",")))  # association experiments: bearing, unique, order, closure
-NOT_LINEWORK = re.compile(r"LBL|anno|ANNO|TBL|SHEET|Sheet|Wipeout|PNT|border|TEXT|TXT|Format|Seal", re.I)  # ASSOC=layers: CAD layer names that are not linework
+ASSOC = set(filter(None, os.environ.get("ASSOC", "").split(",")))  # association experiments: bearing, span
 AZ_FILTER = 0.5   # deg: a candidate line must run within this of the printed bearing (grid), where one is printed
 
 
@@ -110,7 +110,7 @@ def lines_on_sheet(segs, circles, max_turn_deg=0.6):
             order = np.argsort((pts - a0) @ d0)
             P = pts[order]
             chains.append({"pts": P, "len_pt": float(sum(np.hypot(*(segs[k][1] - segs[k][0])) for k in chain)), "n": len(chain),
-                           "radius_pt": float("nan"), "width": w0})
+                           "radius_pt": float("nan"), "width": w0, "pid": segs[k0][3]})
             continue
         al = (pts - a0) @ d0
         p0, p1 = a0 + d0 * al.min(), a0 + d0 * al.max()
@@ -124,12 +124,16 @@ def lines_on_sheet(segs, circles, max_turn_deg=0.6):
                     else:
                         p0 = a0 + d0 * ((circles[j] - a0) @ d0)
             al = np.array([(p0 - a0) @ d0, (p1 - a0) @ d0])
-        chains.append({"p0": p0, "p1": p1, "dir": d0, "len_pt": float(al.max() - al.min()), "width": w0, "n": len(chain)})
+        chains.append({"p0": p0, "p1": p1, "dir": d0, "len_pt": float(al.max() - al.min()), "width": w0, "n": len(chain), "pid": segs[k0][3]})
     return chains
 
 
 def linework_segments(page, max_gray=0.6):
-    """Like georef.segments, but without glyph strokes: a character is a small multi-stroke path."""
+    """Like georef.segments, but without glyph strokes: a character is a small multi-stroke path.
+    Leg-1 pool exactly: colour/size rules only, no class exclusion (measured: excluding non-linework
+    classes here dropped Presidio's checked distance labels 52 -> 35 and passes 34 -> 27, because a
+    label's line is sometimes only reachable through a chain that bridges via a non-linework-class path).
+    Candidates are ranked by class in nearest_line / at_tip instead; classes only ever reorder or add."""
     segs = []
     for pid, d in enumerate(page.get_drawings()):
         r = d["rect"]
@@ -138,8 +142,6 @@ def linework_segments(page, max_gray=0.6):
         c = d.get("color")
         if c is None or max(c) > max_gray:
             continue  # white masks and light grey hatch are not lines a label describes
-        if "layers" in ASSOC and NOT_LINEWORK.search(d.get("layer") or ""):
-            continue  # CAD layer says annotation, table, sheet furniture, wipeout, point mark: not a line a label describes
         for it in d["items"]:
             if it[0] == "l":
                 a, b = np.array([it[1].x, it[1].y]), np.array([it[2].x, it[2].y])
@@ -212,10 +214,33 @@ def az_diff(a, b):
     return abs((a - b + 90) % 180 - 90)
 
 
-def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, want_az=None, az_of=None):  # a rotated label box carries 1-3 deg of angle error
+_CLASS_RANK = {("linework", "parcel"): 0, ("linework", "alignment"): 1, ("linework", "other"): 2}
+
+
+def class_rank(pid, classes):
+    """Sort key only: linework/parcel < linework/alignment < linework/other < unknown < everything
+    else (label, leader, point, table, furniture, mask -- and no class info at all). Never excludes a
+    candidate; a lower-ranked one is still picked when nothing closer/higher-ranked is within tolerance."""
+    if classes is None or pid is None or pid >= len(classes):
+        return 4
+    cls, sub = classes[pid]
+    if cls == "linework":
+        return _CLASS_RANK.get((cls, sub), 2)
+    return 3 if cls == "unknown" else 4
+
+
+def cand_key(classes):
+    """(class_rank, perpendicular/tip distance) sort key for a (dist, candidate) pair whose candidate
+    dict carries a "pid" (lines_on_sheet tags every chain with its source path's get_drawings() index)."""
+    return lambda t: (class_rank(t[1].get("pid"), classes), t[0])
+
+
+def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, want_az=None, az_of=None, classes=None):  # a rotated label box carries 1-3 deg of angle error
     """The line a label describes: parallel, overlapping it along the reading direction, close beside it.
     A label often sits between two parallel lines; when a printed distance is known, a neighbour whose
-    drawn length matches it within 1 ft is preferred (the bearing check stays independent).
+    drawn length matches it within 1 ft is preferred (the bearing check stays independent). Where CAD
+    layers classify the candidates, they are ranked (class_rank) among those already within tolerance --
+    a sort key over the same candidate pool, never a filter.
     ASSOC=bearing: where a bearing is printed with the label, only lines running within AZ_FILTER of it
     (through the georeferencing rotation) are candidates; none = no line, not a guess."""
     c, u, n = frame(b)
@@ -236,21 +261,25 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, wan
     on = [(p, ln) for p, ln in cands if p < 0.35 * b["glyph_h"]]  # the label is written on the line itself (some drafters)
     if on:
         cands = on
+    key = cand_key(classes)
     if want_ft is not None:
         close = [(p, ln) for p, ln in cands if abs(ln["len_pt"] * scale - want_ft) < 1.0]
         if close:
-            return min(close, key=lambda t: t[0])[1]
+            return min(close, key=key)[1]
         if "span" in ASSOC:  # no piece is the right length: a span of pieces on some candidate's run may be
             spanned = [(p, s) for p, ln in cands for s in [span_for(ln, want_ft, scale, chains)] if s is not ln]
             if spanned:
-                return min(spanned, key=lambda t: t[0])[1]
-    return min(cands, key=lambda t: t[0])[1]
+                return min(spanned, key=key)[1]
+    return min(cands, key=key)[1]
 
 
 def leaders(page, circles=()):
     """Leaders: thin stroked paths (this drafter's are curly, 15-30 pt, the same 1.02 weight as the
     lettering) that end at a filled arrowhead triangle, or at a point-symbol circle (coordinate
-    callouts). (start, tip, arrow direction) and the path ids."""
+    callouts); where the sheet carries CAD layers, a path on a leader-class layer is also a leader
+    candidate (in addition to the shape-found ones), matched against the same heads. (start, tip,
+    arrow direction) and the path ids."""
+    use_layers = has_layers(page)
     heads, paths = [], []
     for cx, cy in circles:  # a circle as a "head": its centre is the tip, 3 corners at the centre
         heads.append(np.array([[cx, cy]] * 3))
@@ -261,7 +290,7 @@ def leaders(page, circles=()):
         r = d["rect"]
         if d["type"] in ("f", "fs") and len(d["items"]) == 3 and max(r.width, r.height) < 12:
             heads.append(np.array([[it[1].x, it[1].y] for it in d["items"]]))  # the triangle's corners
-        elif d["type"] == "s" and 0 < w < 1.1:
+        elif d["type"] == "s" and (0 < w < 1.1 or (use_layers and classify(d.get("layer"))[0] == "leader")):
             items = [it for it in d["items"] if it[0] in ("l", "c")]
             if items:
                 pts = [np.array([it[1].x, it[1].y]) for it in items] + [np.array([items[-1][-1].x, items[-1][-1].y])]
@@ -448,6 +477,7 @@ def sheet_lines(page, blocks):
 
 def main():
     page = pymupdf.open(PDF)[0]
+    classes = page_classes(page) if has_layers(page) else None
     g = json.loads((OUT / "georef.json").read_text())
     a, bb = g["params"][:2]
     scale = float(np.hypot(a, bb))
@@ -462,7 +492,7 @@ def main():
     for c in lines_on_sheet(segs, circles, max_turn_deg=20.0):
         if c["n"] >= 3 and c["len_pt"] > 12:
             for P in split_at(c["pts"], circles, junction_lines):
-                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
+                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"], "pid": c.get("pid")})
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
 
@@ -486,13 +516,14 @@ def main():
             cands = [(poly_dist(tip, x["pts"]), x) for x in arcs if poly_dist(tip, x["pts"]) < 4.0]
         if not cands:
             return True, None
+        key = cand_key(classes)
         if want is not None:
             close = [t for t in cands if abs(t[1]["len_pt"] * scale - want) < 1.0]
             if close:
-                return True, min(close, key=lambda t: t[0])[1]
+                return True, min(close, key=key)[1]
             if sum(1 for t in blocks[bi]["text"].replace(" ", "").split("|") if DIST.match(t)) > 1:
                 return False, None  # two dimensions in one block, the leader is the other one's
-        return True, min(cands, key=lambda t: t[0])[1]
+        return True, min(cands, key=key)[1]
 
     def region(b):
         return [round(b["cx"] - b["w"] / 2 - 4), round(b["cy"] - b["h"] / 2 - 4), round(b["cx"] + b["w"] / 2 + 4), round(b["cy"] + b["h"] / 2 + 4)]
@@ -507,6 +538,27 @@ def main():
             continue  # table cells and title block: the record, not labels on the drawing
         lines = b["text"].replace(" ", "").split("|")
         curve_data = any(ANG.match(t) or RAD.match(t) or LEN.match(t) or re.match(r"^[RL][=\-:]", t) for t in lines)
+        if len(lines) == 1 and LEN.match(lines[0]):
+            # a standalone "L=573.93'" annotation (one block per annotation, since leg 1): TOKEN strips
+            # the "L=" prefix off any digit token it finds, so this never reaches the DIST branch below
+            # (curve_data is always true for it there) -- check it against a drawn arc directly.
+            m = LEN.match(lines[0])
+            want = float(m[1])
+            if not m[2]:  # (T): a run total over several tags, not a single arc; not checked here
+                led, arc = at_tip(bi, "arc", want)
+                # measured: nearest_arc's "beside" fallback is unreliable for a lone L= label (busy
+                # alignment curve areas, many candidate arcs) -- 12 of 14 new wrong-line hits on Presidio
+                # were "beside" arc-length guesses; only the leader-tip match is trusted here.
+                if arc is None:
+                    exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc found beside label", "region": region(b)})
+                else:
+                    drawn = arc["len_pt"] * scale
+                    ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                    rows.append(["arc length", lines[0], f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
+                    labels.append({"kind": "arc", "printed": lines[0], "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside"})
+                    if not ok:
+                        exceptions.append({"kind": "arc length", "text": lines[0], "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
+            continue
         # a bearing and its distance often come back as one OCR line: take the tokens inside each line
         parts = [m.group(0) for t in lines for m in TOKEN.finditer(t)] or lines
         for part in parts:
@@ -516,7 +568,7 @@ def main():
                 mate = next((float(DIST.match(t)[1]) for t in parts if DIST.match(t)), None)
                 led, ln = at_tip(bi, "line", mate)
                 if not led:
-                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale, want_az=azimuth(part), az_of=az_of)
+                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale, want_az=azimuth(part), az_of=az_of, classes=classes)
                 if ln is not None:
                     ln = span_for(ln, mate, scale, chains)
                 if ln is None:
@@ -539,7 +591,7 @@ def main():
                 baz = next((azimuth(t) for t in parts if BEAR.match(t) and not BEAR.match(t)[6]), None)  # the bearing printed with it
                 led, ln = at_tip(bi, "line", want)
                 if not led:
-                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale, want_az=baz, az_of=az_of)
+                    ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale, want_az=baz, az_of=az_of, classes=classes)
                 if ln is not None:
                     ln = span_for(ln, want, scale, chains)
                 if ln is None or abs(ln["len_pt"] * scale - want) > 1.0:

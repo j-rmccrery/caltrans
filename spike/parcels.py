@@ -20,6 +20,7 @@ from shapely.ops import polygonize, unary_union
 
 sys.path.insert(0, str(Path(__file__).parent))
 from georef import OUT, READS, PDF, real_text_blocks  # noqa: E402
+from layers import classify, has_layers  # noqa: E402
 from overlay import MAP_AREA, bezier  # noqa: E402
 
 PARCEL = re.compile(r"^(DK-)?(\d{5})(-\d)?$")
@@ -29,8 +30,12 @@ TABLE_AREA = {"61806-2": ("AC", 7.21), "61806-4": ("AC", 3.34), "61806-5": ("AC"
               "61985-1": ("SF", 2518), "61985-2": ("SF", 15372), "61985-3": ("SF", 49552), "61985-4": ("SF", 3248), "63269": ("AC", 11.45)}
 
 
-def heavy_lines(page):
+def heavy_lines(page, admit_layer_misses=True):
+    """Boundary lines to polygonise: the leg-1 width filter exactly, plus (additive only) parcel-sub
+    linework paths the width filter missed. admit_layer_misses=False reproduces leg-1 exactly, for the
+    before/after measurement main() prints."""
     x0, y0, x1, y1 = MAP_AREA
+    use_layers = has_layers(page) and admit_layer_misses
     out = []
     for d in page.get_drawings():
         r, c = d["rect"], d.get("color")
@@ -43,12 +48,13 @@ def heavy_lines(page):
         # R/W lines are 1.98; parcel and easement boundaries share the 0.84 weight with leaders and
         # text, so only long 0.84 paths count. Centreline and hatch edges (0.72) are not boundaries.
         total = sum(np.hypot(it[2].x - it[1].x, it[2].y - it[1].y) for it in d["items"] if it[0] == "l") +             sum(np.hypot(it[4].x - it[1].x, it[4].y - it[1].y) for it in d["items"] if it[0] == "c")
-        if w == 0 or total < 12 or (w < 0.8 and total < 40) or max(r.width, r.height) <= 12:
+        by_width = not (w == 0 or total < 12 or (w < 0.8 and total < 40) or max(r.width, r.height) <= 12)
+        is_number_box = d["closePath"] and r.width < 90 and r.height < 24  # the rounded box round a parcel number: never a boundary, whichever test admitted it
+        by_layer = use_layers and classify(d.get("layer")) == ("linework", "parcel")
+        if is_number_box or not (by_width or by_layer):
             continue  # fills, characters, short thin leaders. ponytail: admitting the dashed easement strips
             # (single short strokes) also admits stationing ticks and hatch edges and shatters the corridor
             # into 70 faces; easement strips want a traverse from the line table instead
-        if d["closePath"] and r.width < 90 and r.height < 24:
-            continue  # the rounded box drawn around a parcel number is not a boundary
         pts = []
         for it in d["items"]:
             if it[0] == "l":
