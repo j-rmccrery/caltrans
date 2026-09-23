@@ -52,3 +52,29 @@ bridging as the primary fix (contradicted by measurement on Civil 3D: lines run 
 dash merging does apply, R-105.14 498.58 case); (e) stationing regex (= leg 3); (f) MicroStation level
 dictionary by inspection (out of scope tonight). Blunt verdict from both: this is CAD data interpretation,
 not computer vision. Point (a) goes into the leg 2 and leg 4 briefs.
+
+---
+
+# Loop 2: the three next steps (started 2026-09-23 12:00 PDT, JR: "work on next steps 1-3 in a loop")
+
+Same rules as loop 1: commit each passed leg on `caltrans-spike`, no push; implementers on sonnet;
+gates re-measured by the orchestrator with `python spike/bench.py <label> --tables --tags --parcels --traverse presidio r10434_1 r10434_3`;
+a leg that fails its gate twice is skipped and stashed as `loop2-leg-N`; `demo.py --fast` must run at the end.
+Order changed from the report: de-duplication first, so the gates for the other two legs are measured
+without the ±1 jitter.
+
+Baseline `loop2-base` (12:00): presidio 39/46, 30/49, 4/11, wrong-line 15, faces 8, closed 1;
+r10434_1 25/30, 19/30, 4/26, wrong-line 28; r10434_3 see bench.csv.
+
+| # | Leg | Gate |
+|---|---|---|
+| A | Twin annotations sharing a rect within a glyph height become one block (`read_shx.py`) | two consecutive full runs of checks.py on presidio give identical distance/bearing/arc counts; no pass lost on any of the three sheets vs `loop2-base` (presidio distance 39/46 or 39/47 -> one stable value) |
+| B | Tunnel easements 61985-1..4: the dashed strip as drawn geometry the checks and parcels can use, then each easement closed and its area checked against the parcel table | 4 of 4 close with record area within 1 % of the table (2,518 / 15,372 / 49,552 / 3,248 sq ft), or the blocker re-named with a crop of the new cause; no distance/bearing pass lost; wrong-line not up |
+| C | Arc lengths: leader tips beyond 4 pt, run-sums on the long R/W curves | arc pass +3 or more on each sheet vs the post-B row (4/11, 4/26, 7/18 baseline); wrong-line not up; 6 random passing arc crops, all on the right arc (orchestrator views) |
+| D | `demo.py --fast`, numbers.md, exceptions page, STATE.md, this table | under 180 s; numbers regenerated; report row `loop2-final` |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
+| A | pass | 1 | 1 twin on presidio (`50.22'` x2, 14.0 pt = one glyph_h apart), 0 on .1/.3; dedupe scoped to the bearing/distance pool (same text repeats legitimately at 14-pt pitch in the parcel table); two bench runs identical: 39/46 30/49 4/11 · 25/30 19/30 4/26 · 41/71 31/50 7/18, equal to loop2-base | legA |

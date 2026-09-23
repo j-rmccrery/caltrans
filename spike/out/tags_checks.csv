@@ -1,4 +1,6 @@
 tag,check,printed,drawn,difference,result,association
+L1,bearing,"N18°06'50""E","S74°35'27""E",5237.7',FAIL,leader
+L1,distance,1.86,40.16,+38.30,FAIL,leader
 L3,bearing,"S75°11'28""E","S75°10'36""E",0.9',pass,beside
 L3,distance,96.27,96.27,-0.00,pass,beside
 L4,bearing,"S75°12'02""E","S75°12'43""E",0.7',pass,leader
@@ -21,6 +23,8 @@ L16,bearing,"S88°01'40""E","S88°18'18""E",16.6',pass,leader
 L16,distance,6.44,6.42,-0.02,pass,leader
 L17,bearing,"S4°41'30""E","S4°39'02""E",2.5',pass,leader
 L17,distance,70.80(T),17.45,,total over several segments; not checked,leader
+C1,radius,50.22,,,arc too flat to measure a radius (sagitta 0.22 pt); not checked,beside
+C1,arc length,11.18,11.17,-0.01,pass,beside
 C4,radius,232.04,232.04,-0.00%,pass,beside
 C4,arc length,136.53,413.92,+277.39,FAIL,beside
 C8,radius,399.82,,,arc too flat to measure a radius (sagitta 0.02 pt); not checked,leader

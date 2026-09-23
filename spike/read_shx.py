@@ -150,6 +150,31 @@ def near(A, B):
     return abs(d @ n) <= 1.6 * A["h"] and abs(d @ u) <= 0.6 * A["w"]
 
 
+def dedupe_twins(ann, boxes, pool):
+    """Same-text annotations in `pool` (indices into ann/boxes) whose centres sit within one glyph
+    height of each other on both axes get folded into one -- a CAD annotation drawn twice on top
+    of itself (the "50.22'" bug: two identical distance annotations ~14pt apart, i.e. one glyph_h,
+    with near-identical rects). Two real labels of the same value farther apart than that stay
+    separate (e.g. a bearing shared by two nearby, genuinely distinct courses).
+
+    Restricted to the bearing/distance pool (not every annotation on the sheet): elsewhere the same
+    text legitimately repeats at the very same ~14pt line pitch across real, distinct rows (a legal-
+    description table with several parcels sharing one owner name, TCE flag, or execution date) --
+    geometry alone can't tell a real duplicate from a real repeat there, so this only touches the
+    pool that actually feeds checks.py's distance/bearing counts. Returns {dup index: kept index}."""
+    seen, dup_of = {}, {}
+    for i in sorted(pool):
+        t, b = ann[i][0], boxes[i]
+        keep = next((k for k in seen.get(t, []) if abs(b["cx"] - boxes[k]["cx"]) <= boxes[k]["h"]
+                     and abs(b["cy"] - boxes[k]["cy"]) <= boxes[k]["h"]), None)
+        if keep is None:
+            seen.setdefault(t, []).append(i)
+        else:
+            dup_of[i] = keep
+            boxes[keep] = union_box(boxes[keep]["angle"], [boxes[keep], b])
+    return dup_of
+
+
 def build_blocks(glyph_blocks, ann, glyph_paths_idx=None):
     """One block per annotation -- not blocks.py's dilated clusters. Those merge unrelated labels
     (a distance next to an unrelated R=/L=/delta curve callout, three stacked NO. cells) into one
@@ -157,10 +182,14 @@ def build_blocks(glyph_blocks, ann, glyph_paths_idx=None):
     it: that merge was silently dropping real distances, not just misreading them. Geometry per
     annotation comes from ann_box(). The one deliberate join: a bearing next to its own distance
     (read together everywhere else downstream) becomes one "bearing|distance" block; nothing else
-    merges -- not curve data with a distance, not a tag with its neighbour."""
+    merges -- not curve data with a distance, not a tag with its neighbour. Twin annotations (see
+    dedupe_twins) are folded away first so a duplicated distance or bearing isn't counted twice."""
     boxes = [ann_box(t, r, containing_block(glyph_blocks, r), glyph_paths_idx) for t, r in ann]
     bearings = [i for i, (t, r) in enumerate(ann) if BEAR_PAIR.match(t.replace(" ", ""))]
     dists = {i for i, (t, r) in enumerate(ann) if DIST_PAIR.match(t.replace(" ", ""))}
+    twins = dedupe_twins(ann, boxes, set(bearings) | dists)
+    bearings = [i for i in bearings if i not in twins]
+    dists = {i for i in dists if i not in twins}
     used, pairs = set(), {}
     for i in bearings:
         cands = [j for j in dists if j not in used and abs(boxes[i]["angle"] - boxes[j]["angle"]) <= 5 and near(boxes[i], boxes[j])]
@@ -170,6 +199,8 @@ def build_blocks(glyph_blocks, ann, glyph_paths_idx=None):
             used |= {i, j}
     out = []
     for i, (t, r) in enumerate(ann):
+        if i in twins:
+            continue  # duplicate annotation: folded into its twin's (unioned) box above
         if i in used and i not in pairs:
             continue  # the distance half of a pair: folded into its bearing's block below
         if i in pairs:
