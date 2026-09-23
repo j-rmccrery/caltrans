@@ -90,6 +90,15 @@ def read_row(row, u, n, gh, M):
         sym[id(g)] = s
     for g in bases:
         sym[id(g)] = "." if g["h"] < 1.0 else ("-" if g["single"] else ",")
+    # by structure: the low mark with exactly two capitals after it (and none after those) is the decimal
+    # point, whatever its size in this font; one with three after it before the next mark is a thousands comma
+    low = sorted([g for g in bases if not g["single"]], key=lambda g: (g["c"] - c0) @ u)
+    for j, g in enumerate(low):
+        after = [h for h in big if (h["c"] - g["c"]) @ u > 0 and (j + 1 >= len(low) or (h["c"] - low[j + 1]["c"]) @ u < 0)]
+        if j + 1 == len(low) and (len(after) == 2 or (len(after) == 3 and len(low) == 1)):  # 48.55 or a metric 48.620
+            sym[id(g)] = "."
+        elif len(after) == 3:
+            sym[id(g)] = ","
     mids.sort(key=lambda g: (g["c"] - c0) @ u)
     k = 0
     while k < len(mids):
@@ -158,6 +167,11 @@ def main():
                 X.append(x); Y.append(y); S.append(0)
         seed = Matcher(sx, sy)
         M = Matcher(np.array(X), np.array(Y), np.array(S))
+        sX, sY, sS, slots0 = structure_seed(blocks, G, tree, votes, M, Matcher(*seed_exemplars("0123456789")))
+        if sX:
+            X, Y, S = X + sX, Y + sY, S + sS
+            resolve_slots(slots0, seed, X, Y, S)
+            M = Matcher(np.array(X), np.array(Y), np.array(S))
     for round_ in range(1 if validated else 4):
         out, unread, learned, slots = read_all(page, blocks, G, tree, votes, M, X, Y, S)
         if not validated:
@@ -172,7 +186,7 @@ def main():
     print(f"read {len(out)} blocks by glyph: {full} fully read, {unread} unread glyphs")
 
 
-VALID = re.compile(r"^(?:[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|\d{1,4}\.\d{2}'?(?:\(T\))?|[NE]?\d{1,3}(?:,\d{3})+\.\d{2,3}|[RL]=\d{1,5}\.\d{2}'?|Δ=\d{1,3}°\d{2}'\d{2}\"|\d{1,4}\+\d{2}(?:\.\d{2})?)$")
+VALID = re.compile(r"^(?:[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|\d{1,4}\.\d{2,3}'?(?:\(T\))?|[NE]?\d{1,3}(?:,\d{3})+\.\d{2,3}|[RL]=\d{1,5}\.\d{2}'?|Δ=\d{1,3}°\d{2}'\d{2}\"|\d{1,4}\+\d{2}(?:\.\d{2})?)$")
 
 
 SHAPE = re.compile(r"^([NS?])\d{1,2}°\d{2}'\d{2}\"([EW?])(?:\(R\))?$")  # a bearing whose letter slots may be unread
@@ -209,6 +223,112 @@ def resolve_slots(slots, seed, X, Y, S):
     return added
 
 
+def block_rows(b, G, tree, votes, M):
+    """A block's glyphs at its refined reading angle, as rows of merged glyphs sorted along the line.
+    Returns (angle, u, n, centre, glyph height, rows) or None when the block holds no glyph."""
+    u0, n0 = axes(b["angle"])
+    c = np.array([b["cx"], b["cy"]])
+    ids = [i for i in tree.query_ball_point(c, b["w"] / 2 + b["h"] + b["glyph_h"])
+           if abs((G[i]["c"] - c) @ u0) < b["w"] / 2 + 0.6 * b["glyph_h"] and abs((G[i]["c"] - c) @ n0) < b["h"] / 2 + 0.4 * b["glyph_h"]
+           and not G[i].get("arrow") and not (G[i].get("connected") and not G[i]["single"]) and 0.3 < G[i]["h"] < 2.0 * b["glyph_h"]]  # a box's corner arcs touch its lines; characters touch nothing
+    if not ids:
+        return None
+    gh = b["glyph_h"]
+    # reading angle: the members' votes (mod 180), refined by total match cost, both senses
+    va = [votes[i][1] for i in ids if i in votes]
+    base = float(np.degrees(np.arctan2(np.sin(np.radians(2 * np.array(va))).mean(), np.cos(np.radians(2 * np.array(va))).mean())) / 2) if va else b["angle"]
+    bigs = [i for i in ids if not G[i]["single"] and G[i]["h"] > SMALL * gh]
+    best = None
+    for sense in (base, base + 180):
+        for a in np.arange(sense - 2 * STEP, sense + 2 * STEP + 1, 2.0):
+            cost = sum(M.dist(bitmap(G[i], a, gh)[None, :])[0].min() for i in bigs[:12]) if bigs else 0
+            if best is None or cost < best[0]:
+                best = (cost, float((a + 180) % 360 - 180))
+    angle = best[1]
+    u, n = axes(angle)
+    gs = [dict(G[i]) for i in ids]
+    for g in gs:
+        g["al"], g["pe"] = (g["c"] - c) @ u, (g["c"] - c) @ n
+    # rows by height, then within a row merge a small path inside a capital (an E's bars)
+    caps = sorted([g for g in gs if eff_h(g, n) > SMALL * gh], key=lambda g: g["pe"])
+    syms = [g for g in gs if eff_h(g, n) <= SMALL * gh]
+    if not caps:
+        return angle, u, n, c, gh, []
+    rows, cur = [], [caps[0]]
+    for g in caps[1:]:
+        if g["pe"] - cur[-1]["pe"] > 0.6 * gh:
+            rows.append(cur); cur = []
+        cur.append(g)
+    rows.append(cur)
+    centres = [float(np.median([g["pe"] for g in r_])) for r_ in rows]
+    for g in syms:  # a symbol belongs to the line it sits on; one with no capitals near it is a stray
+        k = int(np.argmin([abs(g["pe"] - cpe) for cpe in centres]))
+        if abs(g["pe"] - centres[k]) < 0.8 * gh:
+            rows[k].append(g)
+    return angle, u, n, c, gh, [m for m in (merge_pieces(row, c, u, n, gh) for row in rows) if m]
+
+
+def structure_seed(blocks, G, tree, votes, M, seed):
+    """An alphabet's digits with no font to trust: the rows shaped like a bearing (eight capitals round
+    three raised marks) or a distance (capitals, one low mark, two capitals after it) say which glyphs
+    are digits. Those glyphs are clustered by bitmap; the ten biggest clusters are matched one-to-one
+    to the seed font's digits (an assignment, not ten absolute calls), and the members become
+    exemplars. The letter slots of the bearing rows go to resolve_slots. Returns (X, Y, S, slots)."""
+    pool, slots = [], {"NS": [], "EW": []}
+    for b in blocks:
+        br = block_rows(b, G, tree, votes, M)
+        if br is None:
+            continue
+        angle, u, n, c, gh, rows = br
+        for row in rows:
+            big = [g for g in row if eff_h(g, n) > SMALL * gh]
+            small = [g for g in row if eff_h(g, n) <= SMALL * gh]
+            if len(big) < 3:
+                continue
+            hs = sorted(g["h"] for g in big)
+            ghr = float(np.median(hs[: max(1, int(0.8 * len(hs)))]))
+            c0 = np.median([g["c"] for g in big], axis=0)
+            tops = [g for g in small if (g["c"] - c0) @ n < -0.35 * ghr]
+            bases = [g for g in small if (g["c"] - c0) @ n > 0.35 * ghr]
+            tall = lambda g: g["h"] > 1.2 * ghr
+            if len(big) >= 3 and tall(big[-3]) and tall(big[-1]) and not tall(big[-2]):
+                big = big[:-3]  # (R)
+            digits = []
+            if len(big) == 8 and 3 <= len(tops) <= 4 and not bases:  # N dd ° dd ' dd " E
+                digits = big[1:7]
+                slots["NS"].append((bitmap(big[0], angle, ghr), big[0], len(big[0]["strokes"])))
+                slots["EW"].append((bitmap(big[7], angle, ghr), big[7], len(big[7]["strokes"])))
+            elif len(bases) == 1 and len(tops) <= 1 and 3 <= len(big) <= 6 and sum(1 for g in big if (g["c"] - bases[0]["c"]) @ u > 0) == 2:  # ddd.dd'
+                digits = big
+            for g in digits:
+                pool.append((bitmap(g, angle, ghr), len(g["strokes"])))
+    if len(pool) < 10:
+        return [], [], [], slots
+    B = np.array([x for x, _ in pool]); ST = np.array([k for _, k in pool])
+    D = np.maximum((B ** 2).sum(1)[:, None] + (B ** 2).sum(1)[None, :] - 2 * B @ B.T, 0)
+    left, clusters = set(range(len(B))), []
+    while left:
+        k = max(left, key=lambda i: (D[i, list(left)] < 2.0).sum())
+        members = [i for i in left if D[k, i] < 2.0]
+        clusters.append(members); left -= set(members)
+    clusters = [cl for cl in sorted(clusters, key=len, reverse=True) if len(cl) >= 2][:12]
+    dig = [ch for ch in "0123456789" if ch in seed.Y]
+    cost = np.array([[float(np.median(seed.dist(B[cl])[:, seed.Y == ch].min(1))) for ch in dig] for cl in clusters])
+    # each cluster takes its nearest digit, but only if it is that digit's best cluster or nearly (a digit at two
+    # sizes makes two clusters; a wrong cluster claiming a digit costs far more than the true one)
+    X, Y, S = [], [], []
+    named = []
+    for r, cl in enumerate(clusters):
+        k = int(cost[r].argmin())
+        if cost[r, k] > 1.3 * cost[:, k].min():
+            continue
+        for i in cl:
+            X.append(B[i]); Y.append(dig[k]); S.append(int(ST[i]))
+        named.append((dig[k], len(cl), round(float(cost[r, k]), 1)))
+    print(f"  structure seed: {len(pool)} digit-slot glyphs in {len(clusters)} clusters -> {sorted(named)}")
+    return X, Y, S, slots
+
+
 def read_all(page, blocks, G, tree, votes, M, X, Y, S):
     """Every block read with M. Rows whose text matches VALID add their capitals to X/Y/S (exemplars at
     the row's angle and cap height); the unread letter slots of bearing-shaped rows are pooled for
@@ -219,48 +339,14 @@ def read_all(page, blocks, G, tree, votes, M, X, Y, S):
     slots = {"NS": [], "EW": []}
     seen = {tuple(np.round(x, 2)) for x in X}
     for b in blocks:
-        u0, n0 = axes(b["angle"])
-        c = np.array([b["cx"], b["cy"]])
-        ids = [i for i in tree.query_ball_point(c, b["w"] / 2 + b["h"] + b["glyph_h"])
-               if abs((G[i]["c"] - c) @ u0) < b["w"] / 2 + 0.6 * b["glyph_h"] and abs((G[i]["c"] - c) @ n0) < b["h"] / 2 + 0.4 * b["glyph_h"]
-               and not G[i].get("arrow") and not (G[i].get("connected") and not G[i]["single"]) and 0.3 < G[i]["h"] < 2.0 * b["glyph_h"]]  # a box's corner arcs touch its lines; characters touch nothing
-        if not ids:
+        br = block_rows(b, G, tree, votes, M)
+        if br is None:
             out.append({**b, "text": "", "conf": 0.0}); continue
-        gh = b["glyph_h"]
-        # reading angle: the members' votes (mod 180), refined by total match cost, both senses
-        va = [votes[i][1] for i in ids if i in votes]
-        base = float(np.degrees(np.arctan2(np.sin(np.radians(2 * np.array(va))).mean(), np.cos(np.radians(2 * np.array(va))).mean())) / 2) if va else b["angle"]
-        bigs = [i for i in ids if not G[i]["single"] and G[i]["h"] > SMALL * gh]
-        best = None
-        for sense in (base, base + 180):
-            for a in np.arange(sense - 2 * STEP, sense + 2 * STEP + 1, 2.0):
-                cost = sum(M.dist(bitmap(G[i], a, gh)[None, :])[0].min() for i in bigs[:12]) if bigs else 0
-                if best is None or cost < best[0]:
-                    best = (cost, float((a + 180) % 360 - 180))
-        angle = best[1]
-        u, n = axes(angle)
-        gs = [dict(G[i]) for i in ids]
-        for g in gs:
-            g["al"], g["pe"] = (g["c"] - c) @ u, (g["c"] - c) @ n
-        # rows by height, then within a row merge a small path inside a capital (an E's bars)
-        caps = sorted([g for g in gs if eff_h(g, n) > SMALL * gh], key=lambda g: g["pe"])
-        syms = [g for g in gs if eff_h(g, n) <= SMALL * gh]
-        if not caps:
+        angle, u, n, c, gh, rows = br
+        if not rows:
             out.append({**b, "angle": round(angle, 2), "text": "", "conf": 0.0}); continue
-        rows, cur = [], [caps[0]]
-        for g in caps[1:]:
-            if g["pe"] - cur[-1]["pe"] > 0.6 * gh:
-                rows.append(cur); cur = []
-            cur.append(g)
-        rows.append(cur)
-        centres = [float(np.median([g["pe"] for g in r_])) for r_ in rows]
-        for g in syms:  # a symbol belongs to the line it sits on; one with no capitals near it is a stray
-            k = int(np.argmin([abs(g["pe"] - cpe) for cpe in centres]))
-            if abs(g["pe"] - centres[k]) < 0.8 * gh:
-                rows[k].append(g)
         texts = []
-        for row in rows:
-            merged = merge_pieces(row, c, u, n, gh)
+        for merged in rows:
             if merged:
                 t, lab = read_row(merged, u, n, gh, M)
                 texts.append(t)

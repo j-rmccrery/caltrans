@@ -24,12 +24,24 @@ sys.path.insert(0, str(Path(__file__).parent))
 from georef import OUT, READS, PDF, frame, real_text_blocks, segments  # noqa: E402
 
 BEAR = re.compile(r"^([NS])(\d{1,2})°(\d{2})'(\d{2})\"([EW])(\(R\))?$")
-DIST = re.compile(r"^(\d{1,4}\.\d{2})'?(\(T\))?$")
+DIST = re.compile(r"^(\d{1,4}\.\d{2,3})'?(\(T\))?$")  # 2 decimals in feet, 3 on the metric sheets
 ANG = re.compile(r"^[Δ△]?=?(\d{1,3})°(\d{2})'(\d{2})\"(\(T\))?$")
 RAD = re.compile(r"^R=(\d{1,5}\.\d{2})'?$")
 LEN = re.compile(r"^L=(\d{1,5}\.\d{2})'?(\(T\))?$")
-TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2}'?(?:\(T\))?(?![\d])")
+TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2,3}'?(?:\(T\))?(?![\d])")
 DIST_TOL = 0.30   # ft, plus 0.05 %
+
+
+def set_decimals(blocks):
+    """A sheet prints its distances with two decimals (feet) or three (the metric sheets): take the
+    majority and make DIST and TOKEN demand it, so the other form is not read as a distance."""
+    global DIST, TOKEN
+    two = sum(len(re.findall(r"(?<![\d.,])\d{1,4}\.\d{2}(?!\d)", b["text"])) for b in blocks)
+    three = sum(len(re.findall(r"(?<![\d.,])\d{1,4}\.\d{3}(?!\d)", b["text"])) for b in blocks)
+    n = "3" if three > two else "2"
+    DIST = re.compile(r"^(\d{1,4}\.\d{" + n + r"})'?(\(T\))?$")
+    TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{" + n + r"}'?(?:\(T\))?(?![\d])")
+    return n
 BEAR_TOL = 0.05   # degrees (3 arc-minutes)
 
 
@@ -422,6 +434,7 @@ def main():
     scale = float(np.hypot(a, bb))
     rot = np.degrees(np.arctan2(bb, a))
     blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
+    set_decimals(blocks)
     chains, circles, paths, segs = sheet_lines(page, blocks)
     # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers; a drawn curve runs
     # through several record arcs, so it is cut where lines meet it and at vertex circles

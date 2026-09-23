@@ -146,7 +146,10 @@ def record_frame(page, blocks, points, scale=None):
     against the drawn line it labels; the printed distances fix the scale the same way; one coordinate
     callout, if there is one, fixes the offset. A label matched to the wrong line is an outlier to the
     cluster, not a vote. Returns (params, votes) or None."""
-    from checks import BEAR, DIST, TOKEN, azimuth, nearest_line, seg_dist, sheet_lines, tag_leaders
+    import checks
+    from checks import BEAR, azimuth, nearest_line, seg_dist, sheet_lines, tag_leaders
+    checks.set_decimals(blocks)
+    DIST, TOKEN = checks.DIST, checks.TOKEN
     chains, _, paths, _ = sheet_lines(page, blocks)
     tips = tag_leaders(blocks, paths)
     rots, scales = [], []
