@@ -156,9 +156,9 @@ def main():
             cands = candidates(kind, np.array([t["cx"], t["cy"]]), BESIDE * gh, BOUNDARY)
         if not cands:
             queue.append({"tag": t["tag"], "issue": f"no leader, no {kind} beside the tag", "region": region}); continue
-        if len(cands) > 1 and cands[1][0] < CLEAR * cands[0][0] and "tagrow" in ASSOC:
-            # ASSOC=tagrow: the table row's own values pick among the candidates (bearing and length for a
-            # line, radius for a curve); one survivor, or a clear nearest among survivors, is the association
+        if len(cands) > 1 and cands[1][0] < CLEAR * cands[0][0]:
+            # the table row's own values pick among the candidates (bearing and length for a line, radius
+            # for a curve); one survivor, or a clear nearest among survivors, is the association
             if kind == "line":
                 fit = [(d, s) for d, s in cands if az_diff(math.degrees(math.atan2(a * s["dir"][0] + bb * s["dir"][1], bb * s["dir"][0] - a * s["dir"][1])) % 360, row["az"]) < AZ_FILTER]
                 if row.get("dist") and not row["total"]:

@@ -13,6 +13,8 @@ L9,bearing,"S4°07'18""W","S80°20'47""W",4573.5',FAIL,beside
 L9,distance,10.37,36.84,+26.47,FAIL,beside
 L10,bearing,"S80°19'49""W","S80°20'47""W",1.0',pass,beside
 L10,distance,36.84,36.84,-0.00,pass,beside
+L11,bearing,"N5°22'41""E","N5°19'19""E",3.4',pass,beside
+L11,distance,13.88,13.86,-0.02,pass,beside
 L13,bearing,"S81°06'21""W","S81°05'08""W",1.2',pass,beside
 L13,distance,48.92,48.94,+0.02,pass,beside
 L15,bearing,"S81°06'31""W","S81°04'18""W",2.2',pass,leader
@@ -23,6 +25,8 @@ L17,bearing,"N78°51'43""W","N8°57'37""W",4194.1',FAIL,leader
 L17,distance,35.10,9.39,-25.71,FAIL,leader
 L20,bearing,"N7°28'36""E","N79°24'10""E",4315.6',FAIL,leader
 L20,distance,53.79,98.52,+44.73,FAIL,leader
+L25,bearing,"N47°53'12""E","N47°53'18""E",0.1',pass,beside
+L25,distance,27.57,27.57,-0.00,pass,beside
 L29,bearing,"N34°46'20""W","N34°43'43""W",2.6',pass,leader
 L29,distance,13.35,13.35,-0.00,pass,leader
 C5,radius,46.74,46.73,-0.03%,pass,leader

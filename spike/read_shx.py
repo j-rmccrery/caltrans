@@ -25,8 +25,12 @@ import re
 import sys
 from pathlib import Path
 
+import cv2
 import numpy as np
 import pymupdf
+
+sys.path.insert(0, str(Path(__file__).parent))
+from blocks import glyph_paths  # noqa: E402 -- the same glyph-sized-stroke filter blocks.py fits labels with
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT = ROOT / "Sample Data" / "Right-of-Way Map Record" / "r_10434_002_2020-09-16.pdf"
@@ -68,21 +72,53 @@ DIST_PAIR = re.compile(r"^\d{1,4}\.\d{2,3}'?(\(T\))?$")
 
 
 def containing_block(glyph_blocks, r):
-    """The glyph block (blocks.py, unmerged with any annotation) whose box holds this rect's centre."""
+    """The glyph block (blocks.py, unmerged with any annotation) whose box holds this rect's centre,
+    else the nearest one within the rect's own size (a "bearing  distance" annotation with two words
+    and no join pipe has its rect centre in the whitespace between two glyph clusters, inside neither --
+    the nearest cluster still carries the label's true angle, which the annotation's own PDF rect never
+    does: an Annot.rect is always axis-aligned, so a rotated label with no containing or nearby cluster
+    fell back to a 0/90 guess and failed every downstream parallel-to-the-line test by 5-10 deg)."""
     cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
     for gb in glyph_blocks:
         if inside(gb, cx, cy):
             return gb
-    return None
+    near = [gb for gb in glyph_blocks if math.hypot(gb["cx"] - cx, gb["cy"] - cy) < max(r.width, r.height, 10)]
+    return min(near, key=lambda gb: math.hypot(gb["cx"] - cx, gb["cy"] - cy)) if near else None
 
 
-def ann_box(t, r, containing):
+def ink_box(glyph_paths_idx, r):
+    """Last resort, for an annotation with no containing or nearby blocks.json cluster: its own reading
+    angle and box, fit the way blocks.py fits a whole label -- cv2.minAreaRect over the points of the
+    glyph-sized strokes (page.get_drawings(), blocks.glyph_paths' own character filter) whose bbox lies
+    inside the annotation's rect padded by 1 pt. An Annot.rect is always axis-aligned even when the text
+    is rotated, so this is the only place left to measure the true angle from. None (falls back to the
+    old 0/90 guess) when fewer than 2 glyph paths lie in the rect -- not enough ink to fit a direction."""
+    x0, y0, x1, y1 = r.x0 - 1, r.y0 - 1, r.x1 + 1, r.y1 + 1
+    found = [d for d in glyph_paths_idx if x0 <= d["rect"].x0 and d["rect"].x1 <= x1 and y0 <= d["rect"].y0 and d["rect"].y1 <= y1]
+    if len(found) < 2:
+        return None
+    pts = [(p.x, p.y) for d in found for it in d["items"] for p in (it[1:3] if it[0] == "l" else it[1:5] if it[0] == "c" else ())]
+    if len(pts) < 4:
+        return None
+    (cx, cy), (w, h), ang = cv2.minAreaRect(np.array(pts, dtype=np.float32))
+    if w < h:  # long side = reading axis, as in blocks.py
+        w, h, ang = h, w, ang + 90
+    ang = (ang + 90) % 180 - 90
+    return {"w": float(w), "h": float(max(h, 1.0)), "angle": float(ang), "glyph_h": float(max(h, 1.0))}
+
+
+def ann_box(t, r, containing, glyph_paths_idx=None):
     """One annotation's own box. angle: the containing glyph block's (blocks.py fits a single
-    label's rotation well) else level/vertical from the rect's own aspect. w, h: a level or vertical
-    angle trusts the rect's own sides; any other angle means the rect is only an axis-aligned bound
-    on a rotated label, so the box is rebuilt from the text length along that angle instead, capped
-    at the rect diagonal so a long line never overruns its own box."""
+    label's rotation well), else fit directly from its own ink (ink_box), else level/vertical from
+    the rect's own aspect. w, h: a level or vertical angle trusts the rect's own sides; any other
+    angle from a containing block means the rect is only an axis-aligned bound on a rotated label, so
+    the box is rebuilt from the text length along that angle instead, capped at the rect diagonal so a
+    long line never overruns its own box; an ink-fit box already has its own w/h and needs neither."""
     cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
+    if containing is None:
+        ink = ink_box(glyph_paths_idx, r) if glyph_paths_idx is not None else None
+        if ink is not None:
+            return {"cx": cx, "cy": cy, **ink}
     angle = containing["angle"] if containing is not None else (0.0 if r.width >= r.height else 90.0)
     if angle in (0.0, 90.0):
         w, h = (r.width, r.height) if angle == 0.0 else (r.height, r.width)
@@ -114,7 +150,7 @@ def near(A, B):
     return abs(d @ n) <= 1.6 * A["h"] and abs(d @ u) <= 0.6 * A["w"]
 
 
-def build_blocks(glyph_blocks, ann):
+def build_blocks(glyph_blocks, ann, glyph_paths_idx=None):
     """One block per annotation -- not blocks.py's dilated clusters. Those merge unrelated labels
     (a distance next to an unrelated R=/L=/delta curve callout, three stacked NO. cells) into one
     block, and checks.py skips every distance in a block that also carries curve data anywhere in
@@ -122,7 +158,7 @@ def build_blocks(glyph_blocks, ann):
     annotation comes from ann_box(). The one deliberate join: a bearing next to its own distance
     (read together everywhere else downstream) becomes one "bearing|distance" block; nothing else
     merges -- not curve data with a distance, not a tag with its neighbour."""
-    boxes = [ann_box(t, r, containing_block(glyph_blocks, r)) for t, r in ann]
+    boxes = [ann_box(t, r, containing_block(glyph_blocks, r), glyph_paths_idx) for t, r in ann]
     bearings = [i for i, (t, r) in enumerate(ann) if BEAR_PAIR.match(t.replace(" ", ""))]
     dists = {i for i, (t, r) in enumerate(ann) if DIST_PAIR.match(t.replace(" ", ""))}
     used, pairs = set(), {}
@@ -254,7 +290,8 @@ def main():
     page = pymupdf.open(PDF)[0]
     glyph_blocks = json.loads((OUT / "blocks.json").read_text(encoding="utf-8"))
     ann = read_annotations(page)
-    blocks = build_blocks(glyph_blocks, ann)
+    glyph_paths_idx = list(glyph_paths(page))
+    blocks = build_blocks(glyph_blocks, ann, glyph_paths_idx)
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "read_shx.json").write_text(json.dumps(blocks, ensure_ascii=False), encoding="utf-8")
     paired = sum(1 for b in blocks if "|" in b["text"])

@@ -32,9 +32,11 @@ LEN = re.compile(r"^L=(\d{1,5}\.\d{2})'?(\(T\))?$")
 TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2,3}'?(?:\(T\))?(?![\d])")
 STATION = re.compile(r"\d\+\d|\bSTA\b", re.I)  # a block naming a station: the number after + is never a distance,
 # even when it and its +prefix land in separate annotations (checked on the whole block, not the token)
-AREA_CTX = re.compile(r"SQ\.?\s?FT|ACRES?|±", re.I)  # a parcel-area figure, in a bubble or a legend: not a distance
+AREA_CTX = re.compile(r"SQ\.?\s?FT|ACRES?\b|\bAC\.|±", re.I)  # a parcel-area figure, in a bubble, an acreage
+# table ("*28.31 AC.") or a legend: not a distance; "AC." (the abbreviation) is as common on this sheet as
+# the spelled-out word and was not being caught -- an acreage table read as four false distance labels
 DIST_TOL = 0.30   # ft, plus 0.05 %
-ASSOC = set(filter(None, os.environ.get("ASSOC", "").split(",")))  # association experiments: bearing, unique, order, closure
+ASSOC = set(filter(None, os.environ.get("ASSOC", "").split(",")))  # remaining diagnostics: layers, orderdiag (tables.py)
 NOT_LINEWORK = re.compile(r"LBL|anno|ANNO|TBL|SHEET|Sheet|Wipeout|PNT|border|TEXT|TXT|Format|Seal", re.I)  # ASSOC=layers: CAD layer names that are not linework
 AZ_FILTER = 0.5   # deg: a candidate line must run within this of the printed bearing (grid), where one is printed
 
@@ -219,21 +221,29 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, wan
     """The line a label describes: parallel, overlapping it along the reading direction, close beside it.
     A label often sits between two parallel lines; when a printed distance is known, a neighbour whose
     drawn length matches it within 1 ft is preferred (the bearing check stays independent).
-    ASSOC=bearing: where a bearing is printed with the label, only lines running within AZ_FILTER of it
-    (through the georeferencing rotation) are candidates; none = no line, not a guess."""
+    Where a bearing is printed with the label, only lines running within AZ_FILTER of it (through the
+    georeferencing rotation) are candidates; none = no line, not a guess.
+    Civil 3D anchors a bearing/distance label at the segment's midpoint: a chain whose midpoint sits within
+    2.5 glyph heights of the label centre (perpendicular) and 0.6 label widths along the reading direction
+    is also a candidate even where the overlap test below rejects it, scored on that midpoint distance
+    (a bearing+distance pair is one already-joined block, so its centre is the pair's own centre)."""
     c, u, n = frame(b)
-    cands = []
+    cands, anchored = [], []
     for ln in chains:
         if abs(ln["dir"] @ n) > math.sin(math.radians(tol_deg)):
             continue
-        if "bearing" in ASSOC and want_az is not None and az_diff(az_of(ln), want_az) > AZ_FILTER:
+        if want_az is not None and az_diff(az_of(ln), want_az) > max(AZ_FILTER, math.degrees(math.atan2(0.3, ln["len_pt"] * scale))):  # a short line drawn 0.3 ft off at one end is not a different bearing
             continue
         lo, hi = sorted(((ln["p0"] - c) @ u, (ln["p1"] - c) @ u))
-        if hi < -b["w"] / 2 - 2 * b["glyph_h"] or lo > b["w"] / 2 + 2 * b["glyph_h"]:
-            continue  # no overlap along the reading direction
         perp = abs((ln["p0"] - c) @ n)
-        if perp < tol_perp:
+        if not (hi < -b["w"] / 2 - 2 * b["glyph_h"] or lo > b["w"] / 2 + 2 * b["glyph_h"]) and perp < tol_perp:
             cands.append((perp, ln))
+            continue
+        mid = (ln["p0"] + ln["p1"]) / 2
+        mperp, malong = abs((mid - c) @ n), abs((mid - c) @ u)
+        if mperp < 2.5 * b["glyph_h"] and malong < 0.6 * b["w"]:
+            anchored.append((mperp, ln))
+    cands += anchored
     if not cands:
         return None
     on = [(p, ln) for p, ln in cands if p < 0.35 * b["glyph_h"]]  # the label is written on the line itself (some drafters)
@@ -243,10 +253,9 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, wan
         close = [(p, ln) for p, ln in cands if abs(ln["len_pt"] * scale - want_ft) < 1.0]
         if close:
             return min(close, key=lambda t: t[0])[1]
-        if "span" in ASSOC:  # no piece is the right length: a span of pieces on some candidate's run may be
-            spanned = [(p, s) for p, ln in cands for s in [span_for(ln, want_ft, scale, chains)] if s is not ln]
-            if spanned:
-                return min(spanned, key=lambda t: t[0])[1]
+        spanned = [(p, s) for p, ln in cands for s in [span_for(ln, want_ft, scale, chains)] if s is not ln]  # no piece is the right length: try the span on every candidate's run
+        if spanned:
+            return min(spanned, key=lambda t: t[0])[1]
     return min(cands, key=lambda t: t[0])[1]
 
 
@@ -553,7 +562,7 @@ def main():
                 diff = min(abs((az - want + 180) % 360 - 180), abs((az + 180 - want + 180) % 360 - 180))
                 ok = diff <= BEAR_TOL
                 rows.append(["bearing", part, fmt_bearing(az if abs((az - want + 180) % 360 - 180) < 90 else az + 180), f"{diff * 60:.1f}'", "pass" if ok else "FAIL"])
-                labels.append({"kind": "bearing", "printed": part, "az": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside"})
+                labels.append({"kind": "bearing", "printed": part, "az": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
                 if not ok:
                     exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b), "line": shape(ln)})
             elif DIST.match(part):
@@ -573,7 +582,7 @@ def main():
                         drawn = arc["len_pt"] * scale
                         ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
                         rows.append(["arc length", part, f"{drawn:.2f} (R={arc['radius_pt'] * scale:.1f})", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
-                        labels.append({"kind": "arc", "printed": part, "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside"})
+                        labels.append({"kind": "arc", "printed": part, "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
                         if not ok:
                             exceptions.append({"kind": "arc length", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
                         continue
@@ -586,7 +595,7 @@ def main():
                 want = float(m[1])
                 ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
                 rows.append(["distance", part, f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
-                labels.append({"kind": "distance", "printed": part, "ft": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside"})
+                labels.append({"kind": "distance", "printed": part, "ft": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
                 if not ok:
                     exceptions.append({"kind": "distance", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(ln)})
 

@@ -1,5 +1,5 @@
 """Association bench: run checks.py on a sheet set, summarise pass / fail / wrong-line per kind.
-usage: [ASSOC=bearing,span,layers] python spike/bench.py <label> [--tags] [--parcels] [--traverse] [--tables] [presidio r105 r17x r10434_1 r10434_3]
+usage: [ASSOC=layers] python spike/bench.py <label> [--tags] [--parcels] [--traverse] [--tables] [presidio r105 r17x r10434_1 r10434_3]
   -> one row per sheet appended to spike/out/bench.csv. wrong_line = fails beyond the exception page's
   SMALL thresholds (the reader measured a different line); no_line = labels with no candidate.
   --tags/--parcels/--traverse run tables.py/parcels.py/traverse.py per sheet and add their columns;
