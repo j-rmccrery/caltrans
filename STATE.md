@@ -34,6 +34,26 @@ Do this, in order:
 Not next: layer taxonomy as an association filter (measured: no gain; stash `loop-leg-2`); more drawn-geometry
 work on 61985-1..4 (above).
 
+## 2026-09-23 16:00: new data on disk (North tile, R-10741.1..3)
+
+`Sample Data/LiDAR-Point-cloud/north/` (points.laz 28.8 M pts, output.tin.tif; EPSG:6339; 545206-545842 E,
+4186988-4188074 N; Marin approach of the Golden Gate Bridge). The "South" download was the existing Presidio tile
+(identical). `Sample Data/d4/r_10741_00[123]_2017-02-10.pdf` (Route 101 MRN, Sausalito Rancho / Fort Baker,
+drafter CHaldenwang) with their Caltrans packages in `d4/pkg/` (CCS83 zone 3), plus the R-10434.1 package.
+The D4 index puts R-10741.1..3 and the 1950s scans R-71.11/.20/.28, R-92.8/.9 on the North tile.
+
+Run as-is (`spike/out/r_10741_00*/`, log `spike/out/r10741_run.log`): Civil 3D 2012-style export, no SHX
+annotations, no tables to validate an alphabet; glyph reader reads about half (R-10741.2: 20 bearings, 15
+distances, 6 of 8 coordinate tokens, 195 blocks with `?`). Record frame: scale 1.3888 ft/pt, rotation from 19/19
+bearings, .2 and .3 agree to 0.001 deg. **Refused: 0 coordinate callouts paired** -- the two-row N/E callouts read
+as separate blocks and the leader trace does not fire for this drafter. No offset, no placement.
+
+Next for this set (one leg): pair the two-row N/E callouts and trace their leaders on this drafter's sheets (4 on
+.2) for the offset; check against the package; parametrise the LiDAR scripts by tile (`LAZ`/`DEM` hard-coded to
+the Presidio paths in `lidar/extract.py`, `q1..q5`, `export_rasters.py`, `encroach.py`); run extract, overlay and
+the QGIS project for the north set. Status report page: `docs/record-twin-status-2026-09-23.html`
+(published at https://claude.ai/artifact/7rH9qavBuXxYtB3HUGb1Cz).
+
 ## 2026-09-23: CAD structure in the PDFs, and the association bench
 
 **The PDFs carry CAD structure the pipeline never read.** 13 of 17 vector sheets have optional content

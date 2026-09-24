@@ -1,0 +1,28 @@
+{
+ "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; RECORD FRAME: rotation and scale from the printed bearings and distances, offset from one callout or none",
+ "params": [
+  0.296380807991854,
+  -1.3566873495272231,
+  0.0,
+  0.0
+ ],
+ "scale_ft_per_pt": 1.3886836024498546,
+ "rotation_deg": -77.67681543332583,
+ "rms_ft": null,
+ "credible": false,
+ "weak": true,
+ "frame": "record",
+ "votes": {
+  "bearings": [
+   12,
+   12
+  ],
+  "distances": [
+   12,
+   19
+  ],
+  "offset": "none: local frame (no coordinate callout read)"
+ },
+ "control": [],
+ "grid_lines": []
+}

@@ -1,0 +1,24 @@
+=== r_10741_001_2017-02-10
+blocks.py: biggest blocks (likely merged tables): [22, 23, 23, 39, 39, 41, 63, 92]
+read_shx.py: reads_disagree: 0
+frame.py: map area [274, 121, 2226, 1503] of 2448x1584; furniture: 0 dense text blocks
+alphabet.py: no NO. column: no tables; alphabet from the font seed alone, 369 exemplars over ()0123456789CELNRSTW
+read_glyphs.py: read 311 blocks by glyph: 137 fully read, 356 unread glyphs
+ocr.py rapid: ALL TABLES    227    0    0.0%
+solve.py: vs Caltrans georeferenced package at 9 sheet points: median 6358475.07, max 6358475.15 (sheet units)
+=== r_10741_002_2017-02-10
+blocks.py: biggest blocks (likely merged tables): [21, 22, 22, 23, 39, 41, 63, 92]
+read_shx.py: reads_disagree: 0
+frame.py: map area [448, 114, 2342, 1502] of 2448x1584; furniture: 0 dense text blocks
+alphabet.py: no NO. column: no tables; alphabet from the font seed alone, 428 exemplars over ()0123456789CELNRSTW
+read_glyphs.py: read 382 blocks by glyph: 181 fully read, 391 unread glyphs
+ocr.py rapid: ALL TABLES    227    0    0.0%
+solve.py: vs Caltrans georeferenced package at 9 sheet points: median 6357268.85, max 6357269.00 (sheet units)
+=== r_10741_003_2017-02-10
+blocks.py: biggest blocks (likely merged tables): [21, 22, 22, 23, 26, 41, 63, 92]
+read_shx.py: reads_disagree: 0
+frame.py: map area [224, 273, 1905, 1503] of 2448x1584; furniture: 0 dense text blocks
+alphabet.py: no NO. column: no tables; alphabet from the font seed alone, 431 exemplars over ()0123456789CELNRSTW
+read_glyphs.py: read 349 blocks by glyph: 156 fully read, 384 unread glyphs
+ocr.py rapid: ALL TABLES    227    0    0.0%
+solve.py: vs Caltrans georeferenced package at 9 sheet points: median 6357765.83, max 6357765.87 (sheet units)

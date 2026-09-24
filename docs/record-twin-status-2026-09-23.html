@@ -1,0 +1,517 @@
+<title>Record Twin Status</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#FBFAF6; --panel:#F1EFE7; --rule:#D7D3C6; --ink:#1B1E24; --ink2:#4A4F58; --ink3:#7C818A;
+  --blue:#1F5FBF; --blue-soft:#E3ECFA; --red:#C8321E; --red-soft:#F9E3DF; --green:#2E7D4F; --green-soft:#E1F1E7;
+  --amber:#9A6A10; --amber-soft:#F7ECD2; --ochre:#B0743A; --ochre-soft:#F3E4D3;
+  --s1:#B0743A; --s2:#1F5FBF;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --disp:"Archivo Narrow","Arial Narrow",Arial,sans-serif;
+  --body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --paper:#15171B; --panel:#1E2127; --rule:#353A43; --ink:#ECEAE2; --ink2:#B9BCC3; --ink3:#858A94;
+    --blue:#5E90E0; --blue-soft:#1C2A44; --red:#E86A55; --red-soft:#3B1F1A; --green:#5FBF87; --green-soft:#1B3325;
+    --amber:#D9A94A; --amber-soft:#3A2F14; --ochre:#BF7F42; --ochre-soft:#3A2A18;
+    --s1:#BF7F42; --s2:#5E90E0;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --paper:#15171B; --panel:#1E2127; --rule:#353A43; --ink:#ECEAE2; --ink2:#B9BCC3; --ink3:#858A94;
+  --blue:#5E90E0; --blue-soft:#1C2A44; --red:#E86A55; --red-soft:#3B1F1A; --green:#5FBF87; --green-soft:#1B3325;
+  --amber:#D9A94A; --amber-soft:#3A2F14; --ochre:#BF7F42; --ochre-soft:#3A2A18;
+  --s1:#BF7F42; --s2:#5E90E0;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-block:0 64px;padding-inline:16px}
+.wrap{max-width:1080px;margin:0 auto}
+h1,h2,h3{font-family:var(--disp);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(34px,5vw,54px);font-weight:700;letter-spacing:-.01em}
+h2{font-size:26px;font-weight:600;margin-top:64px;padding-top:18px;border-top:2px solid var(--ink)}
+h3{font-size:19px;font-weight:600;margin-top:28px}
+p{margin:12px 0;max-width:72ch}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+.lede{font-size:19px;color:var(--ink2);max-width:66ch}
+code,pre{font-family:var(--mono)}
+code{font-size:.9em;background:var(--panel);padding:1px 5px;border-radius:3px}
+pre{background:var(--panel);border:1px solid var(--rule);padding:12px 14px;font-size:12.5px;line-height:1.45;overflow-x:auto;margin:10px 0;border-radius:4px}
+pre code{background:none;padding:0}
+/* title block */
+.titleblock{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;border-bottom:3px double var(--ink);padding:36px 0 22px;margin-bottom:28px}
+.tb-meta{display:grid;grid-template-columns:auto auto;gap:4px 18px;font-family:var(--mono);font-size:12.5px;color:var(--ink2);border:1px solid var(--rule);padding:10px 14px;background:var(--panel)}
+.tb-meta b{color:var(--ink3);font-weight:500;letter-spacing:.08em;text-transform:uppercase;font-size:11px}
+/* stat row */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin:26px 0}
+.stat{background:var(--paper);padding:14px 16px}
+.stat .n{font-family:var(--disp);font-size:32px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.stat .l{font-size:13px;color:var(--ink2);margin-top:6px}
+.stat .d{font-family:var(--mono);font-size:11.5px;color:var(--ink3);margin-top:3px}
+/* status pills */
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:2px;white-space:nowrap}
+.done{background:var(--green-soft);color:var(--green)}
+.wip{background:var(--blue-soft);color:var(--blue)}
+.open{background:var(--amber-soft);color:var(--amber)}
+.blocked{background:var(--red-soft);color:var(--red)}
+.notyet{background:var(--panel);color:var(--ink3)}
+/* tables */
+table{border-collapse:collapse;width:100%;font-size:14.5px;margin:14px 0}
+.tw{overflow-x:auto}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);font-weight:500}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:13.5px}
+td.k{font-family:var(--mono);font-size:13px;white-space:nowrap}
+tr.group td{background:var(--panel);font-family:var(--disp);font-size:15px;font-weight:600;padding-top:10px}
+/* figures */
+figure{margin:18px 0}
+figure img{display:block;max-width:100%;height:auto;border:1px solid var(--rule);background:#fff}
+figcaption{font-size:13.5px;color:var(--ink2);margin-top:8px;max-width:80ch}
+figcaption b{color:var(--ink)}
+svg{max-width:100%;height:auto;display:block}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+@media (max-width:760px){.two,.three{grid-template-columns:1fr}.titleblock{grid-template-columns:1fr}}
+/* io example */
+.io{display:grid;grid-template-columns:1fr 44px 1fr;gap:12px;align-items:start;margin:16px 0}
+.io .arrow{font-family:var(--mono);color:var(--ink3);text-align:center;padding-top:60px;font-size:20px}
+@media (max-width:760px){.io{grid-template-columns:1fr}.io .arrow{padding:0;transform:rotate(90deg)}}
+.tag{font-family:var(--mono);font-size:11.5px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+/* timeline */
+.tl{display:grid;grid-template-columns:repeat(7,1fr);gap:0;margin:20px 0;border-top:1px solid var(--rule)}
+.tl div{padding:12px 10px 0 0;border-top:4px solid var(--rule);margin-top:-1px;font-size:13.5px}
+.tl div.past{border-top-color:var(--green)}
+.tl div.now{border-top-color:var(--blue)}
+.tl div.next{border-top-color:var(--amber)}
+.tl .d{font-family:var(--mono);font-size:11.5px;color:var(--ink3)}
+.tl .t{font-family:var(--disp);font-weight:600;font-size:16px;margin:2px 0}
+@media (max-width:760px){.tl{grid-template-columns:1fr 1fr}}
+/* next steps */
+ol.steps{padding-left:0;list-style:none;counter-reset:s;margin:14px 0}
+ol.steps li{counter-increment:s;display:grid;grid-template-columns:44px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--rule)}
+ol.steps li::before{content:counter(s,decimal-leading-zero);font-family:var(--disp);font-size:26px;font-weight:700;color:var(--ink3);line-height:1}
+ol.steps li b{font-family:var(--disp);font-size:17px;font-weight:600}
+ol.steps li p{margin:4px 0 0;font-size:14.5px;color:var(--ink2)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin:6px 0 0}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:6px}
+.callout{border-left:4px solid var(--blue);background:var(--panel);padding:12px 16px;margin:18px 0;max-width:80ch}
+.callout.warn{border-left-color:var(--red)}
+</style>
+
+<div class="wrap">
+
+<header class="titleblock">
+  <div>
+    <div class="eyebrow">Caltrans Pitch Day · AI Problem Statement #6 · Automated Data Extraction and Digital Twin</div>
+    <h1>SWYFT Record Twin, status at day 13 of 26</h1>
+    <p class="lede">A right-of-way record map goes in. A checked, georeferenced object record comes out, on the LiDAR, with a queue of what could not be proven. This page says where that stands on 2026-09-23, twelve days before the demo.</p>
+  </div>
+  <div class="tb-meta">
+    <b>Date</b><span>2026-09-23</span>
+    <b>Demo</b><span>2026-10-05, 25 min live</span>
+    <b>Branch</b><span>caltrans-spike, loop 2 (2026-09-23 14:30)</span>
+    <b>Demo sheet</b><span>R-10434.2, Presidio, SF-101</span>
+    <b>Test set</b><span>R-10434.1/.2/.3 + 1969 R-65.1..4</span>
+    <b>Run</b><span>python spike/demo.py --fast · 130 s</span>
+  </div>
+</header>
+
+<div class="stats">
+  <div class="stat"><div class="n">83%</div><div class="l">printed distances that match the drawn line</div><div class="d">39/47 on R-10434.2 · was 44%</div></div>
+  <div class="stat"><div class="n">0.04 ft</div><div class="l">georeferencing RMS, 18 of 19 control points</div><div class="d">no hand-typed coordinates</div></div>
+  <div class="stat"><div class="n">44/44</div><div class="l">table rows read clean from the CAD text</div><div class="d">111/111 keyed cells match</div></div>
+  <div class="stat"><div class="n">1</div><div class="l">figure closed by traverse from the printed record</div><div class="d">5 edges · misfit 0.14 ft · area +0.06%</div></div>
+  <div class="stat"><div class="n">59</div><div class="l">items on the exception queue</div><div class="d">15 wrong line · 15 no line · the rest genuine or matchline</div></div>
+  <div class="stat"><div class="n">13 / 19</div><div class="l">arc lengths matching the drawn curve</div><div class="d">was 4/11 · loop 2 · compound curves now split</div></div>
+  <div class="stat"><div class="n">1 strip</div><div class="l">tunnel easements 61985-1..4 as drawn</div><div class="d">one envelope, not four figures · settled, not blocked</div></div>
+</div>
+
+<!-- ============================================================ -->
+<h2>Where we are</h2>
+<p>Two weeks of spikes proved the pieces. The plan reset on 09-22 named the wall: not reading, but <b>association</b>, which drawn line a printed number describes. The 09-23 overnight loop attacked that on the Presidio set with the CAD structure hidden in the PDFs (layers and AutoCAD SHX text annotations) and roughly doubled the pass rates. A second loop the same afternoon made the bench deterministic, tripled the arc-length passes by splitting the long R/W curves where the drawing marks a boundary, and settled the tunnel-easement question: the sheet draws them as one strip, so the four are queued by design, not by failure. What remains before 10-05 is polish and the run of show.</p>
+
+<div class="tl">
+  <div class="past"><div class="d">09-09 to 09-21</div><div class="t">Spikes</div>Text from strokes, OCR, georef from callouts and grid ticks, LiDAR Q1–Q5, scan census. 8 of 11 CAD sheets georeference.</div>
+  <div class="past"><div class="d">09-22</div><div class="t">Plan reset</div>Association is the wall. Product = the numbers walked as a traverse. Scans = QA story, not input. 13-day roadmap.</div>
+  <div class="past"><div class="d">09-22</div><div class="t">demo.py, objects, QGIS</div>One command, offline. Object record with provenance. Exception page. Figures and numbers from the run.</div>
+  <div class="past"><div class="d">09-23 04:00–09:00</div><div class="t">Overnight loop</div>SHX annotation reads, association filters as defaults, traverse edges paired, 1969 scans on the tile. 7 commits, every gate re-measured.</div>
+  <div class="past"><div class="d">09-23 12:00–14:30</div><div class="t">Loop 2</div>Twin annotations folded. Dash trains on the easement layer. Compound curves split. Arcs 4/11 to 13/19. Easement strip measured as one envelope.</div>
+  <div class="now"><div class="d">09-23 now</div><div class="t">Day 13</div>Slides, Q&amp;A sheet, recording not started. Remaining arc misses need a run-sum against a neighbour tag.</div>
+  <div class="next"><div class="d">to 10-05</div><div class="t">Freeze, rehearse</div>Fallback recording. Two rehearsals. Freeze by 10-03.</div>
+</div>
+
+<h3>Roadmap items</h3>
+<div class="tw"><table>
+<tr><th>Days</th><th>Deliverable</th><th>State</th><th>Proof</th></tr>
+<tr><td class="k">1–2</td><td>One command, offline, under 3 min. Object record with provenance. QGIS project.</td><td><span class="pill done">done</span></td><td>122 s, 21 steps ok; 3,872 objects each with sheet, rule, residual, status; 13 QGIS layers valid, render PNG as proof</td></tr>
+<tr><td class="k">3–6</td><td>Table traverse: tags on the drawing tied to table rows, figures walked and closed</td><td><span class="pill done">done as far as the sheet allows</span></td><td>tags associated 24 of 44 rows, line checks pass; 2 chains close on the demo sheet; the easements are one drawn strip, measured and queued as such (below)</td></tr>
+<tr><td class="k">7–8</td><td>Exception page a surveyor can work</td><td><span class="pill done">done</span></td><td>one offline HTML, 66 items in cause groups, crop + citation + resolution field per item; scan's queue on the same page</td></tr>
+<tr><td class="k">9–10</td><td>LiDAR numbers and figures refreshed from the run</td><td><span class="pill done">done</span></td><td>numbers.md and four figures regenerate at the end of every run; tunnel profile caveated until easements close</td></tr>
+<tr><td class="k">11</td><td>Slides for the non-demo minutes, Q&amp;A sheet, recorded fallback</td><td><span class="pill notyet">not started</span></td><td>Q&amp;A answers drafted in ROADMAP.md; no recording yet</td></tr>
+<tr><td class="k">12–13</td><td>Two rehearsals, freeze</td><td><span class="pill notyet">not started</span></td><td>—</td></tr>
+</table></div>
+
+<!-- ============================================================ -->
+<h2>The demo workflow</h2>
+<p>Everything below runs from <code>python spike/demo.py --fast</code> with no network. Twenty-one scripts in fixed order, each reading the files the previous ones wrote under <code>spike/out/</code>. Read once, then every downstream number is computed from geometry, never re-read.</p>
+
+<figure>
+<svg viewBox="0 0 1080 560" role="img" aria-label="Pipeline: sheet PDF and LiDAR tile in; read text, georeference, check labels against lines, walk the record as a traverse, extract LiDAR features, then object record, exception page, QGIS project and slide numbers out." font-family="Source Sans 3, system-ui, sans-serif" font-size="12.5" fill="currentColor" color="var(--ink)">
+<defs>
+  <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+</defs>
+<!-- lanes -->
+<g font-family="IBM Plex Mono, monospace" font-size="10.5" fill="var(--ink3)" letter-spacing="1.5">
+  <text x="0" y="14">INPUTS</text>
+  <text x="0" y="118">READ</text>
+  <text x="0" y="232">PLACE</text>
+  <text x="0" y="346">CHECK &amp; RECONSTRUCT</text>
+  <text x="0" y="470">PUBLISH</text>
+</g>
+<g stroke="var(--rule)" stroke-dasharray="2 4"><line x1="0" y1="96" x2="1080" y2="96"/><line x1="0" y1="210" x2="1080" y2="210"/><line x1="0" y1="324" x2="1080" y2="324"/><line x1="0" y1="448" x2="1080" y2="448"/></g>
+
+<!-- inputs -->
+<g stroke="currentColor" fill="var(--panel)" stroke-width="1.2">
+  <rect x="120" y="24" width="200" height="56" rx="2"/>
+  <rect x="560" y="24" width="200" height="56" rx="2"/>
+  <rect x="800" y="24" width="220" height="56" rx="2"/>
+</g>
+<g font-weight="600"><text x="220" y="46" text-anchor="middle">Record map PDF</text><text x="660" y="46" text-anchor="middle">Airborne LiDAR tile</text><text x="910" y="46" text-anchor="middle">Caltrans georef package</text></g>
+<g fill="var(--ink2)" font-size="11.5"><text x="220" y="66" text-anchor="middle">vector, Civil 3D, 15,832 paths + 878 annotations</text><text x="660" y="66" text-anchor="middle">points.laz · 2025-09-27 · 15 pts/m²</text><text x="910" y="66" text-anchor="middle">from the D4 index · independent check</text></g>
+
+<!-- read -->
+<g stroke="currentColor" fill="var(--paper)" stroke-width="1.2">
+  <rect x="120" y="128" width="130" height="56" rx="2"/>
+  <rect x="270" y="128" width="130" height="56" rx="2"/>
+  <rect x="420" y="128" width="130" height="56" rx="2"/>
+</g>
+<g font-weight="600" text-anchor="middle"><text x="185" y="150">blocks.py</text><text x="335" y="150">read_shx.py</text><text x="485" y="150">alphabet.py</text></g>
+<g fill="var(--ink2)" font-size="11.5" text-anchor="middle"><text x="185" y="168">text boxes + angle</text><text x="335" y="168">text from SHX annotations</text><text x="485" y="168">tables via NO. column</text></g>
+<text x="590" y="158" fill="var(--ink3)" font-size="11.5">fallbacks: read_glyphs.py (2012-era), ocr.py (scans)</text>
+
+<!-- place -->
+<g stroke="currentColor" fill="var(--paper)" stroke-width="1.2">
+  <rect x="120" y="242" width="130" height="56" rx="2"/>
+  <rect x="270" y="242" width="130" height="56" rx="2"/>
+  <rect x="420" y="242" width="130" height="56" rx="2"/>
+  <rect x="640" y="242" width="140" height="56" rx="2"/>
+</g>
+<g font-weight="600" text-anchor="middle"><text x="185" y="264">frame.py</text><text x="335" y="264">solve.py</text><text x="485" y="264">overlay.py</text><text x="710" y="264">lidar/extract.py</text></g>
+<g fill="var(--ink2)" font-size="11.5" text-anchor="middle"><text x="185" y="282">map area vs furniture</text><text x="335" y="282">fit to CCS83 z3, 0.04 ft</text><text x="485" y="282">HTDP shift, on the tile</text><text x="710" y="282">pavement · deck · buildings</text></g>
+
+<!-- check -->
+<g stroke="currentColor" fill="var(--paper)" stroke-width="1.2">
+  <rect x="120" y="356" width="130" height="56" rx="2"/>
+  <rect x="270" y="356" width="130" height="56" rx="2"/>
+  <rect x="420" y="356" width="130" height="56" rx="2"/>
+  <rect x="570" y="356" width="130" height="56" rx="2"/>
+  <rect x="720" y="356" width="130" height="56" rx="2"/>
+</g>
+<g stroke="var(--blue)" fill="none" stroke-width="2"><rect x="570" y="356" width="130" height="56" rx="2"/></g>
+<g font-weight="600" text-anchor="middle"><text x="185" y="378">checks.py</text><text x="335" y="378">tags.py + tables.py</text><text x="485" y="378">parcels.py</text><text x="635" y="378">traverse.py</text><text x="785" y="378">encroach.py</text></g>
+<g fill="var(--ink2)" font-size="11.5" text-anchor="middle"><text x="185" y="396">label vs drawn line</text><text x="335" y="396">L8, C16 → table row</text><text x="485" y="396">faces from heavy lines</text><text x="635" y="396">walk the record, close</text><text x="785" y="396">buildings in faces, tunnel</text></g>
+
+<!-- publish -->
+<g stroke="currentColor" fill="var(--panel)" stroke-width="1.2">
+  <rect x="120" y="480" width="180" height="56" rx="2"/>
+  <rect x="320" y="480" width="180" height="56" rx="2"/>
+  <rect x="520" y="480" width="180" height="56" rx="2"/>
+  <rect x="720" y="480" width="180" height="56" rx="2"/>
+</g>
+<g font-weight="600" text-anchor="middle"><text x="210" y="502">objects.geojson</text><text x="410" y="502">exceptions.html</text><text x="610" y="502">demo.qgz</text><text x="810" y="502">numbers.md + figures</text></g>
+<g fill="var(--ink2)" font-size="11.5" text-anchor="middle"><text x="210" y="520">3,872 objects with provenance</text><text x="410" y="520">66 items, crop + citation</text><text x="610" y="520">13 layers, the screen</text><text x="810" y="520">every slide number, from the run</text></g>
+
+<!-- arrows -->
+<g stroke="currentColor" stroke-width="1.2" fill="none" marker-end="url(#ar)">
+  <path d="M220 80 V128"/>
+  <path d="M250 156 H270"/><path d="M400 156 H420"/>
+  <path d="M335 184 V242"/>
+  <path d="M250 270 H270"/><path d="M400 270 H420"/>
+  <path d="M660 80 V242"/>
+  <path d="M550 270 H640"/>
+  <path d="M335 298 V356"/>
+  <path d="M185 298 V356"/>
+  <path d="M400 384 H420"/><path d="M550 384 H570"/><path d="M700 384 H720"/>
+  <path d="M710 298 V356"/>
+  <path d="M185 412 V480"/>
+  <path d="M785 412 V480"/>
+  <path d="M485 412 V480"/>
+</g>
+<g font-size="11" fill="var(--ink3)">
+  <text x="226" y="108">paths + annots</text>
+  <text x="341" y="218">bearings, distances, N/E callouts</text>
+  <text x="666" y="160">points, intensity, hillshade</text>
+  <text x="556" y="262">sheet frame</text>
+  <text x="191" y="440">labels.json</text>
+  <text x="491" y="440">parcels.geojson</text>
+  <text x="791" y="440">encroachments</text>
+  <text x="900" y="270" fill="var(--ink3)">package →</text>
+  <text x="900" y="284" fill="var(--ink3)">vs fit, ~1 ft</text>
+</g>
+<path d="M910 80 V240 H780" stroke="currentColor" stroke-width="1.2" fill="none" stroke-dasharray="4 3" marker-end="url(#ar)"/>
+</svg>
+<figcaption><b>The pipeline as it runs.</b> Text is read once from the CAD annotations, then every check, closure and area is computed from geometry. The traverse step is the demo's thesis: the printed record walked and closed with no label-to-line heuristic. Caltrans' own package enters only as an independent check on the fit.</figcaption>
+</figure>
+
+<h3>The five demo segments</h3>
+<div class="tw"><table>
+<tr><th>#</th><th>Segment</th><th>What the room sees</th><th>State</th></tr>
+<tr><td class="k">1</td><td>Sheet in, objects out</td><td>Tables and callouts read; fit residuals; linework on the LiDAR intensity image</td><td><span class="pill done">live</span></td></tr>
+<tr><td class="k">2</td><td>The record checks itself</td><td>Tables walked as a traverse; closure per figure; printed vs drawn; exception queue with crops</td><td><span class="pill done">live</span></td></tr>
+<tr><td class="k">3</td><td>Record against ground</td><td>Parcels on LiDAR; pavement, deck, building extraction; what lies outside the R/W; HTDP before/after</td><td><span class="pill done">live</span></td></tr>
+<tr><td class="k">4</td><td>QA that catches its own mistakes</td><td>Two chance scan fits refused on the grid-label scale check; flightline QA</td><td><span class="pill done">page exists</span></td></tr>
+<tr><td class="k">5</td><td>The scan, honestly</td><td>1969 sheets on the tile via Caltrans' package; 273 boxes, half readable, queue a surveyor would work</td><td><span class="pill done">slide</span></td></tr>
+</table></div>
+
+<!-- ============================================================ -->
+<h2>What the workflow does, on one tag</h2>
+<p>Follow segment tag <code>L8</code> from the drawing to a verdict. This is the core loop for every table row, every inline label and every traverse edge.</p>
+
+<figure>
+<img src="img/sheet.png" alt="Full R-10434.2 record map: highway corridor with parcels, line and curve tables, coordinate callouts">
+<figcaption><b>Input: R-10434.2.</b> A Civil 3D right-of-way record map, 15,832 vector paths. Numbers live in three places: the line and curve tables (right), coordinate callouts and inline bearing/distance labels (on the drawing), and the parcel table (bottom). Nothing is keyed by hand.</figcaption>
+</figure>
+
+<div class="three">
+<figure><img src="img/tag_L8.jpg" alt="Crop of the drawing: tag L8 in a red box, the segment its leader points to drawn in blue"><figcaption><b>1. Find the tag on the drawing.</b> Tag text from the SHX annotation. The leader's arrowhead picks the segment (blue): a whole piece between vertex circles.</figcaption></figure>
+<figure><img src="img/table_L8.png" alt="Line data table crop with row L8 highlighted: bearing S75°11'28&quot;E, distance 139.90 feet"><figcaption><b>2. Read the row.</b> The NO. column is a known sequence, so the table validates itself. L8 says S75°11'28"E, 139.90 ft.</figcaption></figure>
+<figure><img src="img/queue_L3.jpg" alt="Crop of the drawing: tag L3 beside a line with several candidate segments"><figcaption><b>3. Or queue it.</b> L3 has no leader and two candidates. Ambiguity goes to the queue, never a guess.</figcaption></figure>
+</div>
+
+<div class="io">
+<div><div class="tag">read_shx.json · one block per annotation</div>
+<pre><code>{"cx": 1837.5, "cy": 757.0, "w": 36.0, "h": 7.26,
+ "angle": -12.76, "text": "TIE BACK",
+ "conf": 1.0, "src": "shx", "id": 2}</code></pre>
+<div class="tag">tables.json · L8 after alphabet.py</div>
+<pre><code>L8   S75°11'28"E   139.90'</code></pre>
+</div>
+<div class="arrow">→</div>
+<div><div class="tag">tags_checks.csv · verdict per row</div>
+<pre><code>tag,check,   printed,     drawn,       diff,  result,assoc
+L3, bearing, S75°11'28"E, S75°10'36"E, 0.9',  pass,  beside
+L3, distance,96.27,       96.27,       -0.00, pass,  beside
+L4, bearing, S75°12'02"E, S75°12'43"E, 0.7',  pass,  leader
+L4, distance,48.55,       48.56,       +0.01, pass,  leader</code></pre>
+<div class="tag">georef.json · the fit every check lives in</div>
+<pre><code>"crs": "EPSG:2227", "scale_ft_per_pt": 1.38885,
+"rotation_deg": 0.536, "rms_ft": 0.041,
+"control": [{"N": 2119812.80, "E": 5993809.52,
+             "residual_ft": 0.053, "used": true}, …]</code></pre>
+</div>
+</div>
+
+<figure>
+<img src="img/leg4_crops.png" alt="Twelve random passing distance labels, each with the label in a red box and the measured line in blue">
+<figcaption><b>Output: twelve random passing distance labels</b>, label region in red, the line the reader measured in blue. This is the gate evidence the overnight loop used: a pass only counts if a human sees it on the right line. All twelve are.</figcaption>
+</figure>
+
+<h3>Then the record walks itself</h3>
+<div class="io">
+<div><div class="tag">traverse.json · one chain, closed</div>
+<pre><code>{"closed": true, "n_edges": 5, "full_record": 5,
+ "misfit_end_ft": 0.14,
+ "edges": [
+  {"edge": "N67°07'01\"W + 138.21'", "misfit_ft": 0.07},
+  {"edge": "L12",                    "misfit_ft": 0.11},
+  {"edge": "L11",                    "misfit_ft": 0.07},
+  {"edge": "N70°37'16\"W + 168.12'", "misfit_ft": 0.10},
+  {"edge": "L13", …}]}
+record area 6,970.6 sq ft · drawn face 6,974 · +0.06 %</code></pre></div>
+<div class="arrow">→</div>
+<div><div class="tag">objects.geojson · one of 3,872 published objects</div>
+<pre><code>{"kind": "control point", "sheet": "r_10434_002_2020-09-16",
+ "printed":  {"E": 5993809.52, "N": 2119812.80},
+ "measured": {"sheet_pt": [797.8, 1026.4]},
+ "residual": 0.053, "units": "ft", "status": "verified",
+ "rule": "printed N/E callout, leader traced to point,
+          similarity fit by consensus; residual vs fit",
+ "adjudicated_by": "", "adjudicated_on": ""}
+geometry: Point [-122.46557, 37.80025]</code></pre></div>
+</div>
+<p>Every published object carries the sheet, the printed value, the measured value, the residual, the rule that produced it, and an empty adjudication slot. In QGIS a click shows all of it. That is the "reviewer reaches provenance in seconds" promise.</p>
+
+<div class="two">
+<figure><img src="img/exceptions_shot.png" alt="Exception queue page: a crop of the sheet with the label region and measured line, the reason, printed and drawn values, and a resolution field"><figcaption><b>Output: exceptions.html.</b> One offline file. Each item: crop, cause group, printed vs drawn, citation in PDF points, a resolution a surveyor fills in and exports.</figcaption></figure>
+<figure><img src="img/fig_htdp.png" alt="Sheet linework on the LiDAR intensity image, before and after the 0.668 m epoch shift, shown as red and black lines"><figcaption><b>Output: linework on the LiDAR, before and after HTDP.</b> Sheet epoch 1991.35 to LiDAR 2010.0: 0.668 m toward N33°W, applied and shown, never silent.</figcaption></figure>
+</div>
+
+<figure><img src="img/demo_render.png" alt="QGIS project render: hillshade and intensity rasters under sheet linework, parcels, LiDAR features and encroachments"><figcaption><b>Output: demo.qgz, the screen.</b> Thirteen layers built by PyQGIS in legend order. The script re-reads the written project, asserts every layer survives, and renders this PNG as proof.</figcaption></figure>
+
+<!-- ============================================================ -->
+<h2>Accuracy on the test set</h2>
+<p>Three Presidio vector sheets by the same drafter. Every number re-measured by <code>spike/bench.py loop2-final</code> on 09-23 at 15:00, not from memory; three consecutive runs give identical rows. "Pass" means the printed value agrees with the drawn geometry under the fit: distances to a few hundredths of a foot, bearings to under a minute.</p>
+
+<figure>
+<svg viewBox="0 0 1080 300" role="img" aria-label="Grouped bars: distance and bearing pass rates per sheet, baseline versus after the overnight loop. Distances rose from 44, 39 and 27 percent to 83, 83 and 58 percent; bearings from 52, 53 and 35 percent to 61, 63 and 62 percent." font-family="Source Sans 3, system-ui, sans-serif" font-size="12.5" fill="currentColor" color="var(--ink)">
+<g font-family="Archivo Narrow, Arial Narrow, sans-serif" font-size="15" font-weight="600"><text x="40" y="22">Distance labels: pass rate</text><text x="580" y="22">Bearing labels: pass rate</text></g>
+<!-- gridlines -->
+<g stroke="var(--rule)" stroke-width="1">
+  <line x1="40" y1="250" x2="500" y2="250"/><line x1="40" y1="190" x2="500" y2="190" stroke-dasharray="2 3"/><line x1="40" y1="130" x2="500" y2="130" stroke-dasharray="2 3"/><line x1="40" y1="70" x2="500" y2="70" stroke-dasharray="2 3"/>
+  <line x1="580" y1="250" x2="1040" y2="250"/><line x1="580" y1="190" x2="1040" y2="190" stroke-dasharray="2 3"/><line x1="580" y1="130" x2="1040" y2="130" stroke-dasharray="2 3"/><line x1="580" y1="70" x2="1040" y2="70" stroke-dasharray="2 3"/>
+</g>
+<g font-size="11" fill="var(--ink3)" text-anchor="end"><text x="34" y="254">0</text><text x="34" y="194">25</text><text x="34" y="134">50</text><text x="34" y="74">75 %</text><text x="574" y="254">0</text><text x="574" y="194">25</text><text x="574" y="134">50</text><text x="574" y="74">75 %</text></g>
+<!-- distance bars: scale 2.4 px per %; base y=250 -->
+<g>
+  <rect x="80"  y="144.4" width="40" height="105.6" fill="var(--s1)" rx="3"/><rect x="80" y="246" width="40" height="4" fill="var(--s1)"/>
+  <rect x="124" y="50.8"  width="40" height="199.2" fill="var(--s2)" rx="3"/><rect x="124" y="246" width="40" height="4" fill="var(--s2)"/>
+  <rect x="230" y="156.4" width="40" height="93.6"  fill="var(--s1)" rx="3"/><rect x="230" y="246" width="40" height="4" fill="var(--s1)"/>
+  <rect x="274" y="50.8"  width="40" height="199.2" fill="var(--s2)" rx="3"/><rect x="274" y="246" width="40" height="4" fill="var(--s2)"/>
+  <rect x="380" y="185.2" width="40" height="64.8"  fill="var(--s1)" rx="3"/><rect x="380" y="246" width="40" height="4" fill="var(--s1)"/>
+  <rect x="424" y="110.8" width="40" height="139.2" fill="var(--s2)" rx="3"/><rect x="424" y="246" width="40" height="4" fill="var(--s2)"/>
+</g>
+<g font-family="IBM Plex Mono, monospace" font-size="11.5" text-anchor="middle" fill="var(--ink2)">
+  <text x="100" y="138">44</text><text x="144" y="44">83</text>
+  <text x="250" y="150">39</text><text x="294" y="44">83</text>
+  <text x="400" y="179">27</text><text x="444" y="104">58</text>
+</g>
+<g font-size="12.5" text-anchor="middle"><text x="122" y="272">R-10434.2</text><text x="272" y="272">R-10434.1</text><text x="422" y="272">R-10434.3</text></g>
+<g font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="var(--ink3)"><text x="122" y="288">17/39 → 39/47</text><text x="272" y="288">20/51 → 25/30</text><text x="422" y="288">26/95 → 41/71</text></g>
+<!-- bearing bars -->
+<g>
+  <rect x="620" y="125.2" width="40" height="124.8" fill="var(--s1)" rx="3"/><rect x="620" y="246" width="40" height="4" fill="var(--s1)"/>
+  <rect x="664" y="103.6" width="40" height="146.4" fill="var(--s2)" rx="3"/><rect x="664" y="246" width="40" height="4" fill="var(--s2)"/>
+  <rect x="770" y="122.8" width="40" height="127.2" fill="var(--s1)" rx="3"/><rect x="770" y="246" width="40" height="4" fill="var(--s1)"/>
+  <rect x="814" y="98.8"  width="40" height="151.2" fill="var(--s2)" rx="3"/><rect x="814" y="246" width="40" height="4" fill="var(--s2)"/>
+  <rect x="920" y="166"   width="40" height="84"    fill="var(--s1)" rx="3"/><rect x="920" y="246" width="40" height="4" fill="var(--s1)"/>
+  <rect x="964" y="101.2" width="40" height="148.8" fill="var(--s2)" rx="3"/><rect x="964" y="246" width="40" height="4" fill="var(--s2)"/>
+</g>
+<g font-family="IBM Plex Mono, monospace" font-size="11.5" text-anchor="middle" fill="var(--ink2)">
+  <text x="640" y="119">52</text><text x="684" y="97">61</text>
+  <text x="790" y="117">53</text><text x="834" y="92">63</text>
+  <text x="940" y="160">35</text><text x="984" y="95">62</text>
+</g>
+<g font-size="12.5" text-anchor="middle"><text x="662" y="272">R-10434.2</text><text x="812" y="272">R-10434.1</text><text x="962" y="272">R-10434.3</text></g>
+<g font-family="IBM Plex Mono, monospace" font-size="10.5" text-anchor="middle" fill="var(--ink3)"><text x="662" y="288">16/31 → 30/49</text><text x="812" y="288">10/19 → 19/30</text><text x="962" y="288">15/43 → 31/50</text></g>
+</svg>
+<div class="legend"><span><i style="background:var(--s1)"></i>baseline, 09-23 04:00</span><span><i style="background:var(--s2)"></i>after the overnight loop, 09-23 08:50</span></div>
+<figcaption><b>Distances roughly doubled, bearings up 10 to 27 points.</b> Denominators changed because reads changed: annotations find more labels, and stationing, table cells and acreages no longer count as labels. Fractions under each pair.</figcaption>
+</figure>
+
+<figure>
+<svg viewBox="0 0 1080 150" role="img" aria-label="Wrong-line exceptions per sheet, baseline versus final: R-10434.2 37 to 16, R-10434.1 47 to 28, R-10434.3 93 to 40." font-family="Source Sans 3, system-ui, sans-serif" font-size="12.5" fill="currentColor" color="var(--ink)">
+<text x="40" y="22" font-family="Archivo Narrow, Arial Narrow, sans-serif" font-size="15" font-weight="600">Wrong-line exceptions: the reader measured a different line than the label describes (lower is better)</text>
+<g font-size="12.5" text-anchor="end"><text x="130" y="56">R-10434.2</text><text x="130" y="90">R-10434.1</text><text x="130" y="124">R-10434.3</text></g>
+<!-- scale 8 px per item, x0=140 -->
+<g>
+  <rect x="140" y="42" width="296" height="10" fill="var(--s1)" rx="3"/><rect x="140" y="54" width="128" height="10" fill="var(--s2)" rx="3"/>
+  <rect x="140" y="76" width="376" height="10" fill="var(--s1)" rx="3"/><rect x="140" y="88" width="224" height="10" fill="var(--s2)" rx="3"/>
+  <rect x="140" y="110" width="744" height="10" fill="var(--s1)" rx="3"/><rect x="140" y="122" width="320" height="10" fill="var(--s2)" rx="3"/>
+</g>
+<g font-family="IBM Plex Mono, monospace" font-size="11.5" fill="var(--ink2)">
+  <text x="442" y="51">37</text><text x="274" y="63">16</text>
+  <text x="522" y="85">47</text><text x="370" y="97">28</text>
+  <text x="890" y="119">93</text><text x="466" y="131">40</text>
+</g>
+</svg>
+<figcaption><b>Wrong-line, the weakest link, more than halved.</b> On the demo sheet it went 103 (first exception page) to 16. Fixes: leaders by arrowhead, stubs and underlines excluded, runs split at circles and junctions, printed bearing and span as filters.</figcaption>
+</figure>
+
+<h3>Full scorecard, R-10434.2 (demo sheet)</h3>
+<div class="tw"><table>
+<tr><th>Measure</th><th class="num">Result</th><th>Note</th></tr>
+<tr class="group"><td colspan="3">Reading</td></tr>
+<tr><td>Table rows read clean from SHX annotations</td><td class="num">44 / 44</td><td>R-10434.1 25/25, R-10434.3 83/83. Hand-keyed cells 111/111 match</td></tr>
+<tr><td>Text blocks with exact text</td><td class="num">832</td><td>annotation text, confidence 1.0; no OCR on this sheet class</td></tr>
+<tr class="group"><td colspan="3">Georeferencing</td></tr>
+<tr><td>Control points used, RMS</td><td class="num">18 / 19 · 0.04 ft</td><td>derived scale 1.38885 ft/pt vs plot scale 1.38889</td></tr>
+<tr><td>Agreement with Caltrans' own package</td><td class="num">~0.6–1.1 ft</td><td>raster-limited; the independent check</td></tr>
+<tr class="group"><td colspan="3">Printed vs drawn (labels on the drawing)</td></tr>
+<tr><td>Distance</td><td class="num">39 / 47</td><td>passes agree to 0.03 ft median, 0.24 max</td></tr>
+<tr><td>Bearing</td><td class="num">30 / 49</td><td>passes agree to 0.55′ median</td></tr>
+<tr><td>Arc length</td><td class="num">13 / 19</td><td>was 4/11. Long R/W curves now split at circles, meeting lines and radial ticks; (T) totals checked. Misses left: boundaries the drawing does not mark</td></tr>
+<tr><td>Curve L = R·Δ (internal consistency)</td><td class="num">10 / 10</td><td></td></tr>
+<tr class="group"><td colspan="3">Table rows through their drawing tags</td></tr>
+<tr><td>Rows found on the drawing / associated</td><td class="num">33 of 44 / 24</td><td>18 by leader arrowhead; 12 partial reads and 33 ambiguities queued, none guessed</td></tr>
+<tr><td>Row checks pass · fail</td><td class="num">29 · 12</td><td>where associated, lines are exact; the arc fails are runs whose sub-arc boundary is not drawn</td></tr>
+<tr class="group"><td colspan="3">Reconstruction</td></tr>
+<tr><td>Traverse edges placed / with full record</td><td class="num">87 / 49</td><td>was 81 / 22 before the loop</td></tr>
+<tr><td>Closed chains</td><td class="num">2</td><td>5 edges, misfit 0.14 ft, area 6,970.6 vs drawn 6,974 sq ft; a second 4-edge loop closes to 0.18 ft</td></tr>
+<tr><td>Parcel faces named / within 1 % of the parcel table</td><td class="num">8 of 60 / 1</td><td>figures leave at matchlines; easement strips do not close</td></tr>
+<tr><td>Tunnel easements 61985-1..4</td><td class="num">1 strip · 48,410 sq ft</td><td>drawn as one envelope; table sum 70,690 sq ft, the TCEs overlap the tunnel easements. <span class="pill open">queued by design</span></td></tr>
+<tr class="group"><td colspan="3">LiDAR</td></tr>
+<tr><td>Features extracted</td><td class="num">35 · 11 · 281</td><td>pavement, viaduct deck, building polygons (175 pass the roof test)</td></tr>
+<tr><td>Highway pavement inside drawn R/W faces</td><td class="num">81 %</td><td>9,014 m² outside within 15 m flagged for review</td></tr>
+<tr><td>Epoch shift 1991.35 → 2010.0</td><td class="num">0.668 m N33°W</td><td>NGS HTDP v3.6.0, real call</td></tr>
+<tr class="group"><td colspan="3">Beyond the demo set</td></tr>
+<tr><td>Arc lengths on the sibling sheets R-10434.1 / .3</td><td class="num">13/34 · 21/33</td><td>were 4/26 and 7/18</td></tr>
+<tr><td>Vector sheets georeferenced (all D4 vector sheets on disk)</td><td class="num">7 / 17</td><td>the 10 refused all fail on reads: other drafters' fonts, no tables to validate an alphabet</td></tr>
+<tr><td>Scan R-65.2 (1969, hand-lettered), 32 keyed boxes</td><td class="num">16 right · 1 wrong · 15 queued</td><td>two readers; not georeferenced by its own text. 48 of 65 sheets in the archive are scans</td></tr>
+</table></div>
+
+<div class="callout warn"><b>What the numbers do not claim.</b> The 0.04 ft residual is against numbers read off the same sheet. Independent check is Caltrans' package at about a foot, raster-limited. We claim records-research grade, not a survey tolerance, until a pilot sets one.</div>
+
+<!-- ============================================================ -->
+<h2>The easements, settled</h2>
+<div class="two">
+<div>
+<p><b>Tunnel easements 61985-1..4 are one drawn strip, not four figures.</b> Loop 2 chained the 345 single-dash strokes on the <code>rw_EASE_EXIST_align</code> layer into eight trains. The strip has a north edge drawn under the R/W line, a south edge parallel to it, and closures at both ends. No stroke on the sheet divides it into four. The parcel bubbles' leaders go to R/W vertex circles, and the printed curve data sits on the R/W line itself.</p>
+<p><b>Measured:</b> the envelope is 48,410 sq ft against a table sum of 70,690. The two temporary construction easements overlap the two tunnel easements rather than tiling the strip. Their individual outlines live in the deeds, not on this sheet.</p>
+<p><b>For the demo:</b> segment 2 shows the two chains that close, the strip envelope with its area, and the four easements queued with this reason. That is the story: the system measures what the sheet draws and says what it cannot prove.</p>
+</div>
+<figure><img src="img/legB_61985.png" alt="Strip region of the sheet with the dashed easement trains coloured, the envelope filled, and the four parcel ovals labelled with their table areas"><figcaption><b>The strip as drawn.</b> Dash trains from the easement layer, the north edge in blue under the R/W line, the envelope filled, the four ovals with their table areas.</figcaption></figure>
+</div>
+
+<!-- ============================================================ -->
+<h2>Next steps</h2>
+<p>In order. Loop 2 closed the first three items of the previous list (twin annotations, easements, arc lengths). Items 1 to 3 below are code and gate against <code>bench.py</code>. Items 4 and 5 are the demo itself.</p>
+<ol class="steps">
+<li><div><b>Arc lengths, what is left</b><p>Compound curves with no drawn mark at the record boundary (the C15/C16 class, L=171.66', C19/C21/C22) need a run-sum against an adjacent tag; standalone L= blocks have none. Four (T) totals on the demo sheet now reach the check and fail for the same reason. Attribution in <code>spike/out/legC_misses.md</code>.</p></div></li>
+<li><div><b>R-10434.1 traverse and wrong-line</b><p>The sibling sheet lost its one closed chain when the arc split moved an edge endpoint, and two labels (31.80', 14.91') now measure visibly wrong where they were silently unmatched. Trace both.</p></div></li>
+<li><div><b>Other Civil 3D 2016+ sheets through the annotation reader</b><p>R-71.70, R-71.71, R-10258 carry the same SHX text. Cheap generalisation evidence for Q&amp;A. The 2012-era sheets need the real SHX fonts as glyph seed, after the demo.</p></div></li>
+<li><div><b>Slides, Q&amp;A sheet, recorded fallback</b><span class="pill notyet" style="margin-left:8px">day 11</span><p>Non-demo minutes and the scan segment as slides; every number from numbers.md. Record one full run in case the live one fails. Q&amp;A answers are drafted in ROADMAP.md.</p></div></li>
+<li><div><b>Two rehearsals, then freeze</b><span class="pill notyet" style="margin-left:8px">days 12–13</span><p>Second rehearsal inside 25 minutes with Q&amp;A. No code after the freeze.</p></div></li>
+<li><div><b>Parked until after 10-05</b><p>Scan reading by per-sheet template alphabet (gap 1, the archive's biggest cost). NGS PID control that did not come off the sheet. Per-object uncertainty. More drawn-geometry work on 61985-1..4: their outlines are in the deeds.</p></div></li>
+</ol>
+
+<!-- ============================================================ -->
+<h2>What has been built</h2>
+<p>Forty-four Python scripts, about 8,000 lines, all under <code>spike/</code>. Throwaway by design: they answer "does this work" and feed the demo. Grouped by role; pipeline scripts in the order <code>demo.py</code> runs them.</p>
+
+<div class="tw"><table>
+<tr><th>File</th><th>What it does</th><th>Writes</th></tr>
+<tr class="group"><td colspan="3">Pipeline, in run order</td></tr>
+<tr><td class="k">demo.py</td><td>Runs the 21 steps in order, timed, offline. Skips OCR and glyph reading when annotation text covers the sheet. Routes QGIS steps to QGIS's own Python.</td><td class="k">—</td></tr>
+<tr><td class="k">blocks.py</td><td>Text blocks from vector glyph strokes: box and angle for every piece of lettering, no OCR.</td><td class="k">blocks.json</td></tr>
+<tr><td class="k">read_shx.py</td><td>Text from AutoCAD SHX annotations, one block per annotation. The reader for Civil 3D 2016+ sheets. Confidence 1.0 by construction.</td><td class="k">read_shx.json</td></tr>
+<tr><td class="k">frame.py</td><td>Where the map is on the sheet: map area vs furniture (tables, title block, legends), from the sheet itself.</td><td class="k">frame.json</td></tr>
+<tr><td class="k">alphabet.py</td><td>A sheet's own alphabet from its tables: the NO. column is a known sequence, so its glyphs become exemplars. Reads the line, curve and radial tables.</td><td class="k">alphabet.npz, tables.json</td></tr>
+<tr><td class="k">read_glyphs.py</td><td>Fallback reader for stroked sheets without annotations: every block matched against the sheet alphabet. A glyph matches or is <code>?</code>.</td><td class="k">read_glyph.json</td></tr>
+<tr><td class="k">ocr.py</td><td>Fallback reader for scans: level each crop, RapidOCR, parse survey notation.</td><td class="k">read_rapid.json</td></tr>
+<tr><td class="k">solve.py + georef.py</td><td>One solver over every printed control type: N/E callouts with leaders traced to their point, monument notes, grid ticks. Consensus fit to CCS83 zone 3, per-axis redundancy, refuses weak fits.</td><td class="k">georef.json</td></tr>
+<tr><td class="k">overlay.py</td><td>Linework to NAD83(2011) with the HTDP epoch shift, drawn on the LiDAR intensity image.</td><td class="k">sheet_linework.geojson</td></tr>
+<tr><td class="k">parcels.py</td><td>Faces from the heavy linework, named by parcel labels and their leaders, checked against the parcel table areas.</td><td class="k">parcels.geojson</td></tr>
+<tr><td class="k">checks.py</td><td>Does what the sheet says match what it draws? Each bearing, distance and arc label against its line under the fit; the exception queue.</td><td class="k">checks.csv, labels.json, exceptions.json</td></tr>
+<tr><td class="k">tags.py + tables.py</td><td>Segment tags (L8, C16) on the drawing tied to table rows by leader arrowhead, else the one heavy line beside; two candidates go to the queue. Per-row checks.</td><td class="k">tags.json, tags_checks.csv, tags_queue.json</td></tr>
+<tr><td class="k">dashes.py</td><td>Chains the single-dash strokes of the easement layer into trains (dash to dash by heading, deduplicated by coverage) so the checks and parcels see the dashed lines as geometry.</td><td class="k">dash_trains.png</td></tr>
+<tr><td class="k">traverse.py</td><td>The record twin: placed record edges chained by shared ends, walked by bearing and distance, closure and area where a chain closes.</td><td class="k">traverse.json, traverse_figures.json</td></tr>
+<tr><td class="k">lidar/extract.py</td><td>Pavement, viaduct deck and building polygons from airborne returns, deterministically, in the sheet's frame.</td><td class="k">extracted_features.geojson</td></tr>
+<tr><td class="k">encroach.py</td><td>Building-class returns inside the sheet's own R/W and easement faces; terrain profile over the tunnel easements.</td><td class="k">encroachments.geojson, tunnel_profile.png</td></tr>
+<tr><td class="k">export_rasters.py</td><td>Intensity ortho and hillshade as GeoTIFFs for QGIS.</td><td class="k">lidar_*.tif</td></tr>
+<tr><td class="k">objects.py</td><td>The object record: every published thing with sheet, printed and measured values, residual, rule, status, adjudication slot.</td><td class="k">objects.geojson</td></tr>
+<tr><td class="k">exceptions_page.py</td><td>One offline HTML page: every queued item with crop, reason, printed vs drawn, citation, resolution field. Scan's queue on the same page.</td><td class="k">exceptions.html</td></tr>
+<tr><td class="k">qgis_project.py</td><td>The screen: PyQGIS builds the project with every layer styled and ordered, re-reads it, renders the opening view as proof.</td><td class="k">demo.qgz, demo_render.png</td></tr>
+<tr><td class="k">figures.py + slide_numbers.py</td><td>One figure per demo segment rendered from the project; every number the slides quote, from the run's files.</td><td class="k">fig_*.png, numbers.md, numbers.json</td></tr>
+<tr class="group"><td colspan="3">Measurement and gates</td></tr>
+<tr><td class="k">bench.py</td><td>The gate instrument: runs the chain on a sheet set and summarises pass, fail, wrong-line, tags, faces, traverse, tables per sheet. Every loop leg was accepted or rejected on its rows.</td><td class="k">bench.csv</td></tr>
+<tr><td class="k">gt.py, gt_scan.py</td><td>Hand-keyed truth: 227 table values on R-10434.2, self-checked with L = R·Δ; 34 boxes on the 1969 scan.</td><td class="k">—</td></tr>
+<tr><td class="k">sheets.py, batch.py</td><td>Generalisation runs: the same chain over every vector sheet on disk and over unrelated D4 record maps from the public index.</td><td class="k">sheets.csv, batch.csv</td></tr>
+<tr><td class="k">leg4_crops.py, legB_arcs.py, leg5_61985.py, checks_debug.py</td><td>Gate evidence and diagnostics: random passing distance labels and every passing arc rendered on their lines; the four easements walked as chains and the strip envelope measured; the chosen line per label drawn.</td><td class="k">leg4_crops.png, legB_arcs.png, legB_61985.png</td></tr>
+<tr class="group"><td colspan="3">Scans (most of the archive)</td></tr>
+<tr><td class="k">scan_read.py, scan_readers.py, scan_vlm.py</td><td>Detect text boxes on a 300 dpi render; RapidOCR and a local vision model (qwen2.5vl:7b) scored against keyed truth. No example values in any prompt.</td><td class="k">read_scan.json</td></tr>
+<tr><td class="k">scan_consensus.py, scan_georef.py</td><td>Accept a read only where two readers agree or structure repairs it; fit callouts through the same solver, refused unless scale matches the grid labels.</td><td class="k">—</td></tr>
+<tr><td class="k">scan_on_tile.py</td><td>The four 1969 R-65 scans georeferenced by Caltrans' own packages, HTDP-shifted, on the LiDAR tile as the "1969 record" QGIS group.</td><td class="k">r65/*.tif, coverage GeoJSON</td></tr>
+<tr class="group"><td colspan="3">LiDAR questions answered once</td></tr>
+<tr><td class="k">lidar/q1..q5</td><td>Flight date from GPS time (2025-09-27); record on terrain; HTDP epoch offset by real NGS call; rough encroachment; flightline overlap QA (RMSE 0.02–0.04 m off-slope).</td><td class="k">lidar/out_q*.txt</td></tr>
+<tr class="group"><td colspan="3">Documents</td></tr>
+<tr><td class="k">STATE.md, ROADMAP.md, spike/LOOP.md</td><td>Resume point with next steps and every known trap; the 13-day plan and the Q&amp;A sheet; the overnight loop's legs, gates and outcomes.</td><td class="k">—</td></tr>
+<tr><td class="k">spike/out/loop_report.md, legC_misses.md, numbers.md, exceptions.html</td><td>The overnight report; the arc-miss attribution; the slide numbers; the queue.</td><td class="k">—</td></tr>
+</table></div>
+
+<div class="callout"><b>Findings worth carrying forward.</b> Annotation text is the reader for Civil 3D 2016+ sheets; the glyph alphabet stays for 2012-era sheets. CAD layers did not help association once reads were exact; they still separate furniture from map. The exception page's wrong-line group is the fastest diagnostic there is: render the measured line, look at twelve crops, fix the biggest cause, repeat. Two generic readers agreeing on hand lettering is a floor, not a method.</div>
+
+<p class="eyebrow" style="margin-top:48px">Sources: STATE.md, ROADMAP.md, spike/LOOP.md, spike/out/loop_report.md, spike/out/legC_misses.md, spike/out/numbers.md, spike/out/bench.csv (rows "loop2-final") · every number re-measurable with <code>python spike/bench.py final --tables --tags --parcels --traverse presidio r10434_1 r10434_3</code></p>
+
+</div>
