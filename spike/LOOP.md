@@ -84,3 +84,34 @@ r10434_1 25/30, 19/30, 4/26, wrong-line 28; r10434_3 see bench.csv.
 | D | done | 0 | `demo.py --fast` 129 s, 21 steps ok; numbers.md carries the `loop2-final` rows and the strip finding; exceptions page 59 items, 15 wrong-line; STATE.md Next rewritten; status artifact republished | legDE |
 
 Dispatches used: 6 of 16. Started 12:00, ended 15:05 PDT. Every number above re-measured at the time of its row.
+
+---
+
+# Loop 3: six zones as the baseline (started 2026-09-23 18:00 PDT, JR: "map the three areas north and the three south of the Golden Gate Bridge; use the six as the baseline to improve the models")
+
+Same rules as loops 1 and 2: commit each passed leg on `caltrans-spike`, no push; implementers on sonnet; every gate
+re-measured by the orchestrator; a leg that fails its gate twice is skipped and stashed as `loop3-leg-N`; budget 16
+dispatches or 7 h; `Sample Data/` read-only; `demo.py --fast` on Presidio must still run at the end and its bench row
+must not move. The six: south R-10434.1/.2/.3 (Presidio tile, `Sample Data/LiDAR-Point-cloud/`), north R-10741.1/.2/.3
+(Marin tile, `Sample Data/LiDAR-Point-cloud/north/`; packages `Sample Data/d4/pkg/r_10741_00*` in NAD83(HARN) CCS83
+zone 3 ftUS).
+
+Where the six stand at the start: .2 through the whole chain; .1/.3 georeferenced and checked but never through the
+LiDAR/QGIS tail (`overlay`, `lidar/extract`, `encroach`, `export_rasters`, `objects`, `qgis_project` write to `spike/out/`
+root and read the Presidio tile by constant); R-10741.1..3 read at about half, record frame gives scale 1.3888 ft/pt and
+rotation, 0 callouts paired so no offset (`spike/out/r10741_run.log`).
+
+| # | Leg | Gate |
+|---|---|---|
+| 0 | Bench over six: `bench.py` knows r10741_1/2/3; `checks.py` runs on a record-frame (weak) georef; new columns `frame` (grid / record / record+package, rms) and read rate (blocks fully read, bearings parsed, distances parsed); row `six-base` | six rows, every column filled or explained (north has no tables: tags/tables columns 0, not err); south rows equal `loop2-final` |
+| 1 | Tile plumbing: `spike/tiles.py` maps a sheet to its tile (LAZ, DEM, cache dir `spike/lidar/cache/<tile>/`); `lidar/extract.py`, `encroach.py`, `export_rasters.py`, `overlay.py`, the intensity-cache builder take the tile from the sheet; the tail steps write to the sheet's `OUT` under `SHEET=`; north caches and `lidar_intensity.tif` / `lidar_hillshade.tif` built for the Marin tile; R-10434.1/.3 through the tail | Presidio `demo.py --fast` 21 steps ok and `spike/out/` root outputs unchanged (bench row equal); `out/r_10434_00[13]/` each have sheet_linework.geojson, overlay png, encroachments, objects; north intensity + hillshade GeoTIFFs with bounds equal to the north DEM, orchestrator views them |
+| 2 | North placement by package: in `solve.py`'s record-frame branch, when no callout gives an offset and a package exists, the offset comes from the package at the sheet centre (scale and rotation stay sheet-derived); `georef.json` says `frame: record+package`, `placed_by: caltrans package`, credible false; the package's own scale/rotation (from the tfw) reported against ours; then overlay, parcels, checks, objects for R-10741.1..3 on the north tile | three north sheet_linework.geojson on the Marin tile; sheet vs package rotation within 0.1 deg and scale within 0.1 % on .2 and .3 (.1's rotation -77.7 vs the siblings' -49.1 explained: sheet rotated, or bearings voted wrong); three overlay PNGs viewed by the orchestrator, R/W lines on the road; south bench unchanged |
+| 3 | Six-sheet QGIS project: `qgis_project.py` builds two groups (south: three sheets + 1969 record + rasters; north: three sheets + rasters), one layer set per sheet, renders one PNG per tile; `demo.py` keeps the Presidio path, a `--six` flag adds the other five sheets' tails and the six-sheet project | project re-reads with every layer valid; two renders viewed; `demo.py --fast` under 180 s, `--six` under 15 min |
+| 4 | Model: coordinate callouts on CHaldenwang's sheets: two-row N/E callouts paired (`georef.callouts`), leaders traced; the sheet-derived offset replaces the package and the package becomes the check (existing `vs_caltrans_package`) | >= 2 callouts paired on R-10741.2; sheet-derived placement within 3 ft of the package at 9 points on at least one north sheet; south bench unchanged. Fallback clause: blocker re-named with a crop |
+| 5 | Model: north label association: from 12 crops of failing distance/bearing labels on R-10741.2 name the biggest cause and fix it in `checks.py` | distance passes +3 on .2 and no loss on any of the other five; wrong-line not up; 8 new passing crops viewed |
+| 6 | `demo.py --fast`, `--six`, numbers.md with six rows, `spike/out/loop3_report.md`, STATE.md, status artifact, memory | every number re-measured at report time or marked unverified |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
