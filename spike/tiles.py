@@ -1,10 +1,13 @@
 """Sheet -> LiDAR tile mapping and per-tile cache building.
 
-Two tiles on disk (loop 3): south/Presidio (`Sample Data/LiDAR-Point-cloud/`, cache in the
-pre-existing `spike/lidar/cache/`) and north/Marin (`Sample Data/LiDAR-Point-cloud/north/`,
-cache in `spike/lidar/cache/north/`). A sheet is routed to a tile by its PDF stem; the LiDAR
-tail scripts (extract, encroach, export_rasters, overlay) key everything off the tile dict,
-not the sheet, once they have it.
+Three tiles on disk: south/Presidio (`Sample Data/LiDAR-Point-cloud/`, cache in the
+pre-existing `spike/lidar/cache/`), north/Marin (`Sample Data/LiDAR-Point-cloud/north/`,
+cache in `spike/lidar/cache/north/`), and gap (loop 4 leg A; `Sample Data/LiDAR-Point-cloud/gap/`,
+cache in `spike/lidar/cache/gap/`) -- USGS 3DEP NoCAL_3DEP_Supp_Funding_2018_D18, covering
+R-10434.3 and R-10741.1, both of which sit mostly or entirely off the south/north tiles
+(loop 3 leg 1/2 findings). A sheet is routed to a tile by its PDF stem; the LiDAR tail scripts
+(extract, encroach, export_rasters, overlay) key everything off the tile dict, not the sheet,
+once they have it.
 """
 from pathlib import Path
 
@@ -15,11 +18,16 @@ LIDAR = Path(__file__).resolve().parent / "lidar"
 
 # north/Marin stems; r_00071_*/r_00092_* are the 1950s scans (D4 index), placed in a later leg
 NORTH_STEMS = {"r_00071_011", "r_00071_020", "r_00071_028", "r_00092_008", "r_00092_009"}
+# gap-tile stems (loop 4 leg A): R-10434.3 and R-10741.1, the two sheets between the south and north tiles
+GAP_STEMS = {"r_10434_003", "r_10741_001"}
 
 
 def tile_for(pdf_path):
-    """south (Presidio) or north (Marin) tile: {name, laz, dem, cache}."""
+    """south (Presidio), north (Marin) or gap tile: {name, laz, dem, cache}."""
     stem = Path(pdf_path).stem
+    if any(stem.startswith(s) for s in GAP_STEMS):
+        base = ROOT / "Sample Data" / "LiDAR-Point-cloud" / "gap"
+        return dict(name="gap", laz=base / "points.laz", dem=base / "output.tin.tif", cache=LIDAR / "cache" / "gap")
     north = stem.startswith("r_10741_") or stem in NORTH_STEMS
     base = ROOT / "Sample Data" / "LiDAR-Point-cloud" / ("north" if north else "")
     # south cache is the pre-existing spike/lidar/cache/ (170 MB) -- keep reading it, never rebuild it
@@ -81,12 +89,15 @@ def _build_class67(tile):
 
 
 if __name__ == "__main__":
-    # smoke check: routing + both tiles' files present
+    # smoke check: routing + all three tiles' files present
     south = tile_for("r_10434_002_2020-09-16.pdf")
     north = tile_for("r_10741_002_2017-02-10.pdf")
+    gap3 = tile_for("r_10434_003_2020-09-16.pdf")
+    gap1 = tile_for("r_10741_001_2017-02-10.pdf")
     assert south["name"] == "south" and north["name"] == "north"
+    assert gap3["name"] == "gap" and gap1["name"] == "gap"
     assert tile_for("r_00071_011.pdf")["name"] == "north"
-    for t in (south, north):
+    for t in (south, north, gap3):
         assert t["laz"].exists(), t["laz"]
         assert t["dem"].exists(), t["dem"]
-    print("tiles.py: south ->", south["laz"], "| north ->", north["laz"], "OK")
+    print("tiles.py: south ->", south["laz"], "| north ->", north["laz"], "| gap ->", gap3["laz"], "OK")
