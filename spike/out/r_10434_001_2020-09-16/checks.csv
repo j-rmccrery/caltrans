@@ -133,7 +133,6 @@ curve L=R*delta,R=398.0 Δ=5.3986° L=37.5,37.50,+0.00,pass
 curve L=R*delta,R=385.0 Δ=18.3950° L=123.61,123.61,-0.00,pass
 curve L=R*delta,R=245.0 Δ=67.6425° L=289.24,289.24,+0.00,pass
 curve L=R*delta,R=1424.97 Δ=4.8917° L=121.66,121.66,-0.00,pass
-curve L=R*delta,R=15.0 Δ=27.0992° L=7.09,7.09,+0.00,pass
 curve L=R*delta,R=436.3 Δ=27.6653° L=210.67,210.67,-0.00,pass
 curve L=R*delta,R=436.3 Δ=2.2256° L=170.24,16.95,-153.29,FAIL
 curve L=R*delta,R=3670.0 Δ=13.5689° L=869.14,869.14,-0.00,pass
@@ -143,4 +142,3 @@ curve L=R*delta,R=15.0 Δ=25.1983° L=6.6,6.60,-0.00,pass
 curve L=R*delta,R=15.0 Δ=23.2092° L=6.08,6.08,-0.00,pass
 curve L=R*delta,R=15.0 Δ=24.3581° L=6.38,6.38,-0.00,pass
 curve L=R*delta,R=15.0 Δ=21.2689° L=5.57,5.57,-0.00,pass
-curve L=R*delta,R=3670.0 Δ=13.5689° L=869.14,869.14,-0.00,pass

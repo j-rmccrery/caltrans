@@ -26,10 +26,25 @@ from georef import OUT, READS, PDF, frame, real_text_blocks, segments  # noqa: E
 
 BEAR = re.compile(r"^([NS])(\d{1,2})°(\d{2})'(\d{2})\"([EW])(\(R\))?$")
 DIST = re.compile(r"^(\d{1,4}\.\d{2,3})'?(\(T\))?$")  # 2 decimals in feet, 3 on the metric sheets
-ANG = re.compile(r"^[Δ△]?=?(\d{1,3})°(\d{2})'(\d{2})\"(\(T\))?$")
+ANG = re.compile(r"^(?:[Δ△]|A)?=?(\d{1,3})°(\d{2})'(\d{2})\"(\(T\))?$")  # delta's prefix is a symbol
+# (Δ/△) on some sheets, the letter "A=" on this drafter's (CHaldenwang, north set): every curve-data
+# block on R-10741.1/.2/.3 uses "A=", never Δ/△, and none of the south sheets use "A=" (checked), so
+# accepting both generalises to the drafter rather than guessing a single sheet's convention
 RAD = re.compile(r"^R=(\d{1,5}\.\d{2})'?$")
 LEN = re.compile(r"^L=(\d{1,5}\.\d{2})'?(\(T\))?$")
 TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2,3}'?(?:\(T\))?(?![\d])")
+# token (searchable, not whole-line) forms of RAD/ANG/LEN: this drafter sometimes joins an angle and a
+# length into one OCR line with no "|" split ("A=32°20'00" L=660.20'"), which the whole-line RAD/ANG/LEN
+# above never match -- same fix as TOKEN already is for BEAR/DIST. RAD_TOK allows a comma-grouped radius
+# ("R=1,920.00'"), which plain RAD does not. The negative lookbehind keeps R=/A= from matching mid-word
+# ("TOTAL=22.366" has an "L=" inside it) or right after a radial bearing's "(R)" ("...E(R) R=8.72'" is a
+# curve's radius beside its radial bearing, not a joined curve-data block, on the south sheets).
+_NOT_MIDWORD = r"(?<![A-Za-z0-9)])"
+RAD_TOK = re.compile(_NOT_MIDWORD + r"R=([\d,]{1,7}\.\d{2})'?")
+# "=" stays mandatory (a bearing never carries one) so this can't match inside "S16°20'26"E"; the
+# Δ/△/A marker in front of it stays optional, matching a bare "=2°13'32"" seen on r10434_1
+ANG_TOK = re.compile(_NOT_MIDWORD + r"(?:[Δ△]|A)?=(\d{1,3})°(\d{2})'(\d{2})\"")
+LEN_TOK = re.compile(_NOT_MIDWORD + r"L=(\d{1,5}\.\d{2})'?(\(T\))?")
 STATION = re.compile(r"\d\+\d|\bSTA\b", re.I)  # a block naming a station: the number after + is never a distance,
 # even when it and its +prefix land in separate annotations (checked on the whole block, not the token)
 AREA_CTX = re.compile(r"SQ\.?\s?FT|ACRES?\b|\bAC\.|±", re.I)  # a parcel-area figure, in a bubble, an acreage
@@ -550,17 +565,35 @@ def main():
         if c["n"] >= 3 and c["len_pt"] > 12:
             for P in split_at(c["pts"], circles, junction_lines, ticks=ticks if c["width"] < 0.8 else ()):
                 arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
-    # the dashed easement line (leg B): each dash is its own path, so nothing above sees it; chained
-    # into trains (dashes.py) and split at the same circles/junctions as the solid curves, so a train
-    # spanning several record segments (compound curve) becomes one arc per segment
+    # the dashed easement/parcel line (leg B, widened leg 5b): each dash is its own path, so nothing
+    # above sees it; chained into trains (dashes.py) and split at the same circles/junctions as the
+    # solid curves, so a train spanning several record segments (compound curve) becomes one arc per
+    # segment. Most of this drafter's dashed runs are a curve (an easement alongside a R/W arc), but
+    # some are straight (a dashed lot/parcel line): those go into the straight-line `chains` pool too,
+    # tagged "dashed", so a bearing/distance label beside one is checkable there, not only as an arc.
+    # A short fragment (dash-chaining noise, or a genuinely short dash run) must not become an arc
+    # candidate either way -- it can win "nearest" over the real, longer curve/line by sheer proximity
+    # (loop3 leg5 attempt 1: a stray 12 ft dash piece beat the correct 573 ft arc for an unrelated
+    # label) -- so every piece is held to the same 5-glyph-height floor the standalone-L arc search uses.
     from dashes import collect_dashes, dash_trains
+    glyph_h_med = float(np.median([b["glyph_h"] for b in blocks])) if blocks else 6.0
+    dash_floor = 5.0 * glyph_h_med
     for t in dash_trains(collect_dashes(page)):
         if len(t["pts"]) < 3:
             continue
         for P in split_at(t["pts"], circles, junction_lines):
             L = float(np.sum(np.hypot(*np.diff(P, axis=0).T)))
-            if L > 3:
-                arcs.append({"pts": P, "len_pt": L, "radius_pt": t["radius_pt"], "width": 0.84})
+            if L <= dash_floor:
+                continue
+            arcs.append({"pts": P, "len_pt": L, "radius_pt": t["radius_pt"], "width": 0.84})
+            seg = np.diff(P, axis=0)
+            headings = np.degrees(np.arctan2(seg[:, 1], seg[:, 0]))
+            ref = headings[0]
+            if np.all(np.abs((headings - ref + 180) % 360 - 180) < 2.0):  # every dash within 2 deg of one heading
+                d = P[-1] - P[0]
+                chord = float(np.hypot(*d))
+                if chord > 3:
+                    chains.append({"p0": P[0], "p1": P[-1], "dir": d / chord, "len_pt": chord, "width": 0.84, "n": len(P), "dashed": True})
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
     FURNITURE = list(FURNITURE) + alignment_table_regions(blocks)  # tables.json's _regions plus this table it doesn't cover
@@ -609,7 +642,7 @@ def main():
         if any(x0 <= b["cx"] <= x1 and y0 <= b["cy"] <= y1 for x0, y0, x1, y1 in FURNITURE):
             continue  # table cells and title block: the record, not labels on the drawing
         lines = b["text"].replace(" ", "").split("|")
-        curve_data = any(ANG.match(t) or RAD.match(t) or LEN.match(t) or re.match(r"^[RL][=\-:]", t) for t in lines)
+        curve_data = any(ANG_TOK.search(t) or RAD_TOK.search(t) or LEN_TOK.search(t) or re.match(r"^[RL][=\-:]", t) for t in lines)
         if len(lines) == 1 and LEN.match(lines[0]):
             # a standalone "L=573.93'" annotation (one block per annotation, since leg 1): TOKEN strips
             # the "L=" prefix off its digit token, so this would otherwise fall into the DIST branch
@@ -704,18 +737,38 @@ def main():
                 if not ok:
                     exceptions.append({"kind": "distance", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(ln)})
 
-    # curves: R, delta and L printed together (same block or stacked)
-    curve_blocks = [b for b in blocks if any(RAD.match(t) or ANG.match(t) or LEN.match(t) for t in b["text"].replace(" ", "").split("|"))]
+    # curves: R, delta and L printed together (same block or stacked, or joined into one OCR line
+    # with no "|" split -- RAD_TOK/ANG_TOK/LEN_TOK find those the same way TOKEN finds BEAR/DIST)
+    curve_blocks = [b for b in blocks if any(RAD_TOK.search(t) or ANG_TOK.search(t) or LEN_TOK.search(t) for t in b["text"].replace(" ", "").split("|"))]
+
+    def n_curve_toks(text):
+        return sum(1 for pat in (RAD_TOK, ANG_TOK, LEN_TOK) for _ in pat.finditer(text))
+    seen = set()
     for b in curve_blocks:
         parts = b["text"].replace(" ", "").split("|")
         c, u, n = frame(b)
+        b_joined = n_curve_toks(b["text"]) > 1
         for o in curve_blocks:
-            if o is not b and abs((np.array([o["cx"], o["cy"]]) - c) @ u) < 0.7 * max(b["w"], o["w"]) and 0 < (np.array([o["cx"], o["cy"]]) - c) @ n < 3.2 * b["glyph_h"]:
+            if o is b:
+                continue
+            op = np.array([o["cx"], o["cy"]]) - c
+            if b_joined or n_curve_toks(o["text"]) > 1:
+                # one side is a joined block ("A=32°20'00" L=660.20'"): compare near edges, not centres --
+                # its own half-width already covers ground toward its neighbour, so a centre-to-centre
+                # measure over-counts the true gap; same 3.2-glyph_h slop the line-below check uses
+                along_ok = abs(op @ u) - 0.5 * (b["w"] + o["w"]) < 3.2 * b["glyph_h"]
+            else:
+                # neither block is joined (two ordinary single-value R=/A=/L= labels): keep the original,
+                # tighter width-based reach -- a curve-dense area (a curb of many similar-radius fillets)
+                # can put an unrelated curve's R= within the wider edge-gap reach of this one's Δ/L
+                along_ok = abs(op @ u) < 0.7 * max(b["w"], o["w"])
+            if along_ok and 0 < op @ n < 3.2 * b["glyph_h"]:
                 parts += o["text"].replace(" ", "").split("|")
-        R = next((float(RAD.match(t)[1]) for t in parts if RAD.match(t)), None)
-        D = next((dms(*ANG.match(t).groups()[:3]) for t in parts if ANG.match(t)), None)
-        L = next((float(LEN.match(t)[1]) for t in parts if LEN.match(t)), None)
-        if R and D and L:
+        R = next((float(m[1].replace(",", "")) for t in parts for m in [RAD_TOK.search(t)] if m), None)
+        D = next((dms(*m.groups()[:3]) for t in parts for m in [ANG_TOK.search(t)] if m), None)
+        L = next((float(m[1]) for t in parts for m in [LEN_TOK.search(t)] if m), None)
+        if R and D and L and (R, D, L) not in seen:  # a joined block and its paired neighbour(s) can
+            seen.add((R, D, L))                       # each independently gather the same full triple
             calc = R * math.radians(D)
             ok = abs(calc - L) <= 0.02 + 0.0005 * L
             rows.append(["curve L=R*delta", f"R={R} Δ={D:.4f}° L={L}", f"{calc:.2f}", f"{calc - L:+.2f}", "pass" if ok else "FAIL"])

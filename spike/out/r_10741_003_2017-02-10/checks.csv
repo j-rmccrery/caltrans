@@ -32,5 +32,4 @@ distance,177.36',177.31,-0.05,pass
 bearing,"S52°40'37""E","S52°40'54""E",0.3',pass
 distance,517.07',517.18,+0.11,pass
 distance,411.67',411.53,-0.14,pass
-arc length,581.40,993.00 (R=nan),+411.60,FAIL
 distance,598.06',598.00,-0.06,pass
