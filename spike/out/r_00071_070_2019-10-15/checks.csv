@@ -12,4 +12,5 @@ arc length,202.57',5679.85 (R=nan),+5477.28,FAIL
 arc length,173.16',2316.01 (R=nan),+2142.85,FAIL
 distance,250.00',7674.22,+7424.22,FAIL
 arc length,139.67',2577.11 (R=nan),+2437.44,FAIL
+distance,"31,708.72'",1138.20,-30570.52,FAIL
 distance,71.70,495.18,+423.48,FAIL

@@ -109,7 +109,6 @@ bearing (R),"N77°30'24""W(R)",,,radial: not checked
 bearing (R),"N77°17'41""E(R)",,,radial: not checked
 arc length,L=6.38',6.45,+0.07,pass
 bearing (R),"S64°01'03""W(R)",,,radial: not checked
-arc length,23.47',13.83 (R=48.1),-9.64,FAIL
 arc length,176.33',24.58 (R=nan),-151.75,FAIL
 arc length,131.94',60.75 (R=150.0),-71.19,FAIL
 arc length,299.22',13.92 (R=28.2),-285.30,FAIL

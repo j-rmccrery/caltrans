@@ -25,14 +25,21 @@ sys.path.insert(0, str(Path(__file__).parent))
 from georef import OUT, READS, PDF, frame, real_text_blocks, segments  # noqa: E402
 
 BEAR = re.compile(r"^([NS])(\d{1,2})°(\d{2})'(\d{2})\"([EW])(\(R\))?$")
-DIST = re.compile(r"^(\d{1,4}\.\d{2,3})'?(\(T\))?$")  # 2 decimals in feet, 3 on the metric sheets
+DIST = re.compile(r"^(\d{1,4}\.\d{2,3})'?(\(T\))?$|^(\d{1,3}(?:,\d{3})+\.\d{2,3})'(\(T\))?$")  # 2 decimals in
+# feet, 3 on the metric sheets; second branch is the comma-grouped form (long R/W distances on some
+# sheets, "18,966.64'"), gated on the trailing ' -- a coordinate is never quote-suffixed, so this can't
+# eat a coordinate's trailing group the way a bare digit match would. Use dist_num(m) to read either branch.
 ANG = re.compile(r"^(?:[Δ△]|A)?=?(\d{1,3})°(\d{2})'(\d{2})\"(\(T\))?$")  # delta's prefix is a symbol
 # (Δ/△) on some sheets, the letter "A=" on this drafter's (CHaldenwang, north set): every curve-data
 # block on R-10741.1/.2/.3 uses "A=", never Δ/△, and none of the south sheets use "A=" (checked), so
 # accepting both generalises to the drafter rather than guessing a single sheet's convention
 RAD = re.compile(r"^R=(\d{1,5}\.\d{2})'?$")
 LEN = re.compile(r"^L=(\d{1,5}\.\d{2})'?(\(T\))?$")
-TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{2,3}'?(?:\(T\))?(?![\d])")
+TOKEN = re.compile(
+    r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?"
+    r"|(?<![\d.,+])\d{1,4}\.\d{2,3}'?(?:\(T\))?(?![\d])"
+    r"|(?<![\d,])\d{1,3}(?:,\d{3})+\.\d{2,3}'(?:\(T\))?(?![\d])"  # comma-grouped distance, trailing ' mandatory
+)
 # token (searchable, not whole-line) forms of RAD/ANG/LEN: this drafter sometimes joins an angle and a
 # length into one OCR line with no "|" split ("A=32°20'00" L=660.20'"), which the whole-line RAD/ANG/LEN
 # above never match -- same fix as TOKEN already is for BEAR/DIST. RAD_TOK allows a comma-grouped radius
@@ -62,6 +69,12 @@ NOT_LINEWORK = re.compile(r"LBL|anno|ANNO|TBL|SHEET|Sheet|Wipeout|PNT|border|TEX
 AZ_FILTER = 0.5   # deg: a candidate line must run within this of the printed bearing (grid), where one is printed
 
 
+def dist_num(m):
+    """(number string, is-total) from a DIST match, whichever branch (plain or comma-grouped) fired.
+    Commas stripped, so callers can always just float() the first element."""
+    return (m[1] or m[3]).replace(",", ""), bool(m[2] or m[4])
+
+
 def set_decimals(blocks):
     """A sheet prints its distances with two decimals (feet) or three (the metric sheets): take the
     majority and make DIST and TOKEN demand it, so the other form is not read as a distance."""
@@ -69,8 +82,12 @@ def set_decimals(blocks):
     two = sum(len(re.findall(r"(?<![\d.,])\d{1,4}\.\d{2}(?!\d)", b["text"])) for b in blocks)
     three = sum(len(re.findall(r"(?<![\d.,])\d{1,4}\.\d{3}(?!\d)", b["text"])) for b in blocks)
     n = "3" if three > two else "2"
-    DIST = re.compile(r"^(\d{1,4}\.\d{" + n + r"})'?(\(T\))?$")
-    TOKEN = re.compile(r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?|(?<![\d.,+])\d{1,4}\.\d{" + n + r"}'?(?:\(T\))?(?![\d])")
+    DIST = re.compile(r"^(\d{1,4}\.\d{" + n + r"})'?(\(T\))?$|^(\d{1,3}(?:,\d{3})+\.\d{" + n + r"})'(\(T\))?$")
+    TOKEN = re.compile(
+        r"[NS]\d{1,2}°\d{2}'\d{2}\"[EW](?:\(R\))?"
+        r"|(?<![\d.,+])\d{1,4}\.\d{" + n + r"}'?(?:\(T\))?(?![\d])"
+        r"|(?<![\d,])\d{1,3}(?:,\d{3})+\.\d{" + n + r"}'(?:\(T\))?(?![\d])"
+    )
     return n
 BEAR_TOL = 0.05   # degrees (3 arc-minutes)
 
@@ -497,6 +514,53 @@ def touches_label(chain, labels_tree, labels):
     return False
 
 
+NO_TAG_RE = re.compile(r"^([LC])(\d+)(\(T\))?$")
+
+
+def line_curve_table_regions(blocks, reach=250):
+    """Bounding box of each L#/C# course table (read_shx.build_tables' own NO.-column reader), re-derived
+    independently per table. That reader caps a row's rightward reach at the next same-lettered NO. column
+    found ANYWHERE on the sheet, with no check that the two are the same table -- on this sheet three
+    separate curve tables (C1-5, C6-12, C13-29) all start their NO. column near x 718-721, one of them
+    700+ pt below the L34-45 line table, so L34-45's row cap lands at x 707, short of its own distance
+    column at x 724: tables.json's _regions for that row is then too narrow and the distance cell is
+    never masked -- it gets read as a second, spurious distance label. Chain consecutive L#/C# tags at one
+    x and one pitch (same rule read_shx.py uses, so a scattered look-alike still can't fake it) and widen
+    each row to its own furthest cell within `reach`: never another column's x, so a same-lettered column
+    elsewhere on the sheet can't cap this one."""
+    tagged = [(b, m[1], int(m[2])) for b in blocks for m in [NO_TAG_RE.match(b["text"].strip())] if m]
+    used, regions = set(), []
+    for i, (b0, letter0, num0) in enumerate(tagged):
+        if i in used:
+            continue
+        col = [(i, b0, num0)]
+        pitch = None
+        while True:
+            by = col[-1][1]["cy"]
+            nxt = [(j, bj, nj) for j, (bj, lj, nj) in enumerate(tagged)
+                   if j not in used and j not in {c[0] for c in col} and lj == letter0 and nj == num0 + len(col)
+                   and abs(bj["cx"] - b0["cx"]) < 8 and 6 < bj["cy"] - by < 30 and (pitch is None or abs(bj["cy"] - by - pitch) < 4)]
+            if not nxt:
+                break
+            j, bj, nj = nxt[0]
+            pitch = pitch or (bj["cy"] - by)
+            col.append((j, bj, nj))
+        if len(col) < 4:
+            continue
+        used.update(c[0] for c in col)
+        band = max(6.0, 0.6 * (pitch or 14))
+        xs = [c[1]["cx"] for c in col]
+        ys = [c[1]["cy"] for c in col]
+        x1 = max(xs)
+        for _, brow, _ in col:
+            row = [ob for ob in blocks if ob is not brow and not NO_TAG_RE.match(ob["text"].strip())
+                   and 0 < ob["cx"] - brow["cx"] < reach and abs(ob["cy"] - brow["cy"]) < band]
+            if row:
+                x1 = max(x1, max(ob["cx"] + ob.get("w", 40) / 2 for ob in row))
+        regions.append([round(min(xs) - 20), round(min(ys) - 16), round(x1 + 20), round(max(ys) + 16)])
+    return regions
+
+
 def alignment_table_regions(blocks, gap=30):
     """Bounding box of each 'ALIGNMENT DATA' (or coordinates) table keyed by its STATION/NORTHING/EASTING
     header row: alphabet.py's tables.json only reads the L#/C# line and curve tables, so this one's station
@@ -663,7 +727,7 @@ def main():
                     chains.append({"p0": P[0], "p1": P[-1], "dir": d / chord, "len_pt": chord, "width": 0.84, "n": len(P), "dashed": True})
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
-    FURNITURE = list(FURNITURE) + alignment_table_regions(blocks)  # tables.json's _regions plus this table it doesn't cover
+    FURNITURE = list(FURNITURE) + alignment_table_regions(blocks) + line_curve_table_regions(blocks)  # tables.json's _regions plus tables it doesn't cover
     NTS = nts_regions(blocks, page)
 
     def az_of(ln):
@@ -757,7 +821,7 @@ def main():
             if BEAR.match(part) and BEAR.match(part)[6]:
                 rows.append(["bearing (R)", part, "", "", "radial: not checked"]); continue
             if BEAR.match(part):
-                mate = next((float(DIST.match(t)[1]) for t in parts if DIST.match(t)), None)
+                mate = next((float(dist_num(DIST.match(t))[0]) for t in parts if DIST.match(t)), None)
                 led, ln = at_tip(bi, "line", mate)
                 if not led:
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale, want_az=azimuth(part), az_of=az_of)
@@ -777,9 +841,10 @@ def main():
                     exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b), "line": shape(ln)})
             elif DIST.match(part):
                 m = DIST.match(part)
-                if m[2] or curve_data or STATION.search(b["text"]) or AREA_CTX.search(b["text"]):
+                num_str, is_total = dist_num(m)
+                if is_total or curve_data or STATION.search(b["text"]) or AREA_CTX.search(b["text"]):
                     continue  # (T) totals, curve data (R=, Δ, L=), a station number, or a parcel-area figure: not a line length
-                want = float(m[1])
+                want = float(num_str)
                 baz = next((azimuth(t) for t in parts if BEAR.match(t) and not BEAR.match(t)[6]), None)  # the bearing printed with it
                 led, ln = at_tip(bi, "line", want)
                 if not led:
@@ -802,7 +867,6 @@ def main():
                 if min(ln["p0"][0], ln["p1"][0]) < 262 or max(ln["p0"][0], ln["p1"][0]) > W - 50:
                     exceptions.append({"kind": "distance", "text": part, "issue": "line runs to the sheet edge (matchline); not checkable on this sheet", "region": region(b)}); continue
                 drawn = ln["len_pt"] * scale
-                want = float(m[1])
                 ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
                 rows.append(["distance", part, f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
                 labels.append({"kind": "distance", "printed": part, "ft": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})

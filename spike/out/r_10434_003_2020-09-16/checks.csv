@@ -193,7 +193,6 @@ bearing (R),"N28°35'08""W(R)",,,radial: not checked
 bearing (R),"N31°07'38""W(R)",,,radial: not checked
 bearing (R),"N45°21'40""E(R)",,,radial: not checked
 bearing (R),"N12°26'18""E(R)",,,radial: not checked
-distance,50.46',88.92,+38.46,FAIL
 bearing (R),"N52°30'03""W(R)",,,radial: not checked
 bearing (R),"N18°08'17""E(R)",,,radial: not checked
 distance,803.00',48.00,-755.00,FAIL
@@ -202,17 +201,6 @@ distance,1843.17',48.00,-1795.17,FAIL
 bearing (R),"N32°23'25""W(R)",,,radial: not checked
 bearing (R),"S50°55'26""E(R)",,,radial: not checked
 bearing (R),"N29°27'31""E(R)",,,radial: not checked
-distance,107.38',88.92,-18.46,FAIL
-distance,110.55',88.92,-21.63,FAIL
-distance,134.15',88.92,-45.23,FAIL
-distance,167.07',88.92,-78.15,FAIL
-distance,373.80',88.92,-284.88,FAIL
-distance,449.69',88.92,-360.77,FAIL
-distance,335.97',88.92,-247.05,FAIL
-distance,211.76',88.92,-122.84,FAIL
-distance,110.85',88.92,-21.93,FAIL
-distance,418.49',88.92,-329.57,FAIL
-distance,296.56',88.92,-207.64,FAIL
 curve L=R*delta,R=945.0 Δ=8.8261° L=145.57,145.57,+0.00,pass
 curve L=R*delta,R=725.0 Δ=10.4647° L=132.42,132.42,-0.00,pass
 curve L=R*delta,R=200.0 Δ=46.3794° L=161.89,161.89,+0.00,pass

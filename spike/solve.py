@@ -146,7 +146,7 @@ def record_frame(page, blocks, points, scale=None):
     callout, if there is one, fixes the offset. A label matched to the wrong line is an outlier to the
     cluster, not a vote. Returns (params, votes) or None."""
     import checks
-    from checks import BEAR, azimuth, nearest_line, seg_dist, sheet_lines, tag_leaders
+    from checks import BEAR, azimuth, dist_num, nearest_line, seg_dist, sheet_lines, tag_leaders
     checks.set_decimals(blocks)
     DIST, TOKEN = checks.DIST, checks.TOKEN
     chains, _, paths, _ = sheet_lines(page, blocks)
@@ -163,8 +163,10 @@ def record_frame(page, blocks, points, scale=None):
                 continue
             if BEAR.match(part) and not BEAR.match(part)[6]:
                 rots.append((math.degrees(math.atan2(ln["dir"][0], -ln["dir"][1])) - azimuth(part)) % 180)
-            elif DIST.match(part) and not DIST.match(part)[2] and ln["len_pt"] > 5:
-                scales.append(math.log(float(DIST.match(part)[1]) / ln["len_pt"]))
+            elif DIST.match(part):
+                num_str, is_total = dist_num(DIST.match(part))
+                if not is_total and ln["len_pt"] > 5:
+                    scales.append(math.log(float(num_str) / ln["len_pt"]))
     rot, n_rot = mode(rots, 0.5, period=180)
     ls, n_sc = mode(scales, 0.005)
     print(f"record frame: rotation from {n_rot}/{len(rots)} bearings, scale from {n_sc}/{len(scales)} distances")
