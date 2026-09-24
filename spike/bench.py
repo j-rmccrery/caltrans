@@ -8,7 +8,7 @@ usage: [ASSOC=layers] python spike/bench.py <label> [--tags] [--parcels] [--trav
   a step that errors fills its columns with "err" and prints the last 20 lines of stderr, without
   killing the bench. Adding a column changes the CSV header, which rotates the old file to
   bench_old.csv -- expected the first time --tables is used.
-  Always-on columns (every row, no flag): frame = "grid"/"record"/"record+package" (georef.json's
+  Always-on columns (every row, no flag): frame = "callouts"/"grid"/"record"/"record+package" (georef.json's
   credible/frame) plus " rms <ft>" when rms_ft is set; blocks_read = glyphs with no "?" over total
   blocks in the sheet's read file (georef's READS choice, mirrored here); bearings_parsed/
   distances_parsed = blocks whose text matches checks.BEAR/checks.DIST after the same line-split +
@@ -160,7 +160,13 @@ def read_cols(pdf):
     o = out_dir(pdf)
     try:
         g = json.loads((o / "georef.json").read_text(encoding="utf-8"))
-        base = "grid" if g.get("credible") else (g.get("frame") or "?")
+        if g.get("credible") or g.get("weak"):
+            # the point-fit path (georef.json has "control"/"grid_lines", no "frame" key of its own) is
+            # "record" when >= 2 traced callouts carried the fit, "grid" when it rested on tick lines instead
+            used_pts = sum(1 for c in g.get("control", []) if c.get("used"))
+            base = "callouts" if used_pts >= 2 else "grid"
+        else:
+            base = g.get("frame") or "?"
         rms = g.get("rms_ft")
         frame = f"{base} rms {rms:.2f}" if rms is not None else base
         rp = reads_path(o)

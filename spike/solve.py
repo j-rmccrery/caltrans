@@ -22,7 +22,7 @@ from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
 from georef import (DEFAULT, OUT, READS, PDF, apply, callouts, frame, monument_symbols, package_affine,  # noqa: E402
-                    package_xy, real_text_blocks, segments, similarity, trace_leader, vs_caltrans_package)
+                    package_xy, real_text_blocks, segments, similarity, snap_circle, trace_leader, vs_caltrans_package)
 from georef_ticks import fit as tick_fit, stub, tick_labels  # noqa: E402
 
 TOL = 1.0  # sheet ground units (ft or m): an observation the hypothesis explains
@@ -49,8 +49,7 @@ def gather(page, blocks):
                         far = seg[1] if idx[k][1] == 0 else seg[0]
                         cands.append((far[0], -far[1]))
         for tip in trace_leader(co, segs, tree, idx) or []:
-            d, j = ctree.query(tip)
-            pt = circles[j] if d < 5 else tip
+            pt, _ = snap_circle(tip, circles, ctree)
             cands.append((pt[0], -pt[1]))
         if cands:
             points.append({"E": co["E"], "N": co["N"], "cands": np.array(cands, float), "note": bool(co.get("note"))})

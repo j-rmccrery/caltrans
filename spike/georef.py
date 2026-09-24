@@ -150,6 +150,29 @@ def segments(page):
     return segs, np.array(circles)
 
 
+THIN_W = 1.0  # lettering / underline / leader-stub family; R/W and alignment lines are 1.44+ (never walk onto those)
+CIRCLE_SNAP = 5  # a leader tip within this of a circle is "on" it
+# a filled arrowhead (drawn as an unstroked fill, not a line segments() picks up) sits between the traced
+# tip and the circle it points to; on CHaldenwang's sheets that gap is a stable ~10.7-10.9 pt (measured on
+# the four R-10741.2 callouts). Trust a snap out that far only when it is unambiguous -- no other circle is
+# anywhere near that far out either -- so Presidio's coordinate-table ticks (circles 2 pt apart) never
+# pick up a neighbour by mistake.
+CIRCLE_SNAP_WIDE = 12
+
+
+def snap_circle(tip, circles, ctree):
+    """(point, snapped?) for a leader tip: the circle it's on, widened for the arrowhead-fill gap when
+    that's unambiguous, else the raw tip."""
+    if len(circles) == 0:
+        return tip, False
+    d, j = ctree.query(tip)
+    if d < CIRCLE_SNAP:
+        return circles[j], True
+    if d < CIRCLE_SNAP_WIDE and (len(circles) < 2 or np.partition(np.hypot(*(circles - tip).T), 1)[1] > 2 * CIRCLE_SNAP_WIDE):
+        return circles[j], True
+    return tip, False
+
+
 def trace_leader(co, segs, ends_tree, ends_idx):
     """Separator line between the N and E rows, then follow connected same-weight segments away from the label."""
     nb, eb = co["nb"], co["eb"]
@@ -186,7 +209,12 @@ def trace_leader(co, segs, ends_tree, ends_idx):
         cur, used, path = start, {sep}, [prev, start]
         for _ in range(4):
             hits = [ends_idx[j] for j in ends_tree.query_ball_point(cur, 0.8)]
-            nxt = [(k, e) for k, e in hits if k not in used and abs(segs[k][2] - w) < 0.05]
+            # CHaldenwang's sheets: a 0.84-pt underline/fraction-bar under the N row meets a 0.36-pt leader
+            # stub at a shared vertex; same-weight-only chaining stopped there. Cross weight classes as long
+            # as both stay in the thin family (below R/W-line weight) -- a junction with >1 such candidate
+            # still breaks below, so this only follows unambiguous continuations.
+            nxt = [(k, e) for k, e in hits if k not in used and
+                   (abs(segs[k][2] - w) < 0.05 or (w < THIN_W and segs[k][2] < THIN_W))]
             if len(nxt) != 1:  # dead end (the labelled point) or a junction with linework
                 break
             k, e = nxt[0]
@@ -296,15 +324,13 @@ def main():
                     far = seg[1] if ends_idx[k][1] == 0 else seg[0]
                     cands.append((float(far[0]), float(-far[1]), False))
             for tip in trace_leader(co, segs, tree, ends_idx) or []:  # some notes have a plain leader too
-                d, j = ctree.query(tip)
-                pt = circles[j] if d < 5 else tip
-                cands.append((float(pt[0]), float(-pt[1]), bool(d < 5)))
+                pt, snapped = snap_circle(tip, circles, ctree)
+                cands.append((float(pt[0]), float(-pt[1]), snapped))
         else:
             tips = trace_leader(co, segs, tree, ends_idx)
             for tip in tips or []:
-                d, j = ctree.query(tip)
-                pt = circles[j] if d < 5 else tip
-                cands.append((float(pt[0]), float(-pt[1]), bool(d < 5)))
+                pt, snapped = snap_circle(tip, circles, ctree)
+                cands.append((float(pt[0]), float(-pt[1]), snapped))
         if cands:
             ctrl.append({"N": co["N"], "E": co["E"], "cands": cands})
     print(f"callouts paired {len(cos)} ({sum(1 for c in cos if c.get('note'))} in monument notes) | with a candidate point {len(ctrl)}")

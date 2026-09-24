@@ -1,35 +1,50 @@
 {
- "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; RECORD FRAME: rotation and scale from the printed bearings and distances, offset from one callout, the Caltrans package at the sheet centre, or none",
+ "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; ground units and datum as printed on the sheet",
  "params": [
-  0.9098369625568132,
-  -1.0492316754294075,
-  5988036.9233391145,
-  2135013.1115185474
+  0.9098737068029383,
+  -1.0493053876074512,
+  5988036.698284511,
+  2135013.2357779886
  ],
- "scale_ft_per_pt": 1.3887729861856508,
- "rotation_deg": -49.0699396099016,
- "rms_ft": null,
- "credible": false,
- "weak": true,
- "frame": "record+package",
- "placed_by": "caltrans package (offset only)",
- "votes": {
-  "bearings": [
-   19,
-   19
-  ],
-  "distances": [
-   20,
-   22
-  ],
-  "offset": "none: local frame (no coordinate callout read)"
- },
- "package": {
-  "scale_ft_per_pt": 1.388896991595635,
-  "rotation_deg": -49.064857571881745,
-  "dscale_pct": 0.008929134654667159,
-  "drot_deg": 0.005082038019850188
- },
- "control": [],
+ "scale_ft_per_pt": 1.3888527491398586,
+ "rotation_deg": -49.070786594678246,
+ "rms_ft": 0.04595651941819836,
+ "credible": true,
+ "weak": false,
+ "verified": null,
+ "control": [
+  {
+   "E": 5988367.59,
+   "N": 2134372.98,
+   "sx": 504.3799743652344,
+   "sy": -122.02001953125,
+   "residual_ft": 0.016729808083036205,
+   "used": true
+  },
+  {
+   "E": 5989154.28,
+   "N": 2132349.39,
+   "sx": 1976.2999267578125,
+   "sy": -648.5800170898438,
+   "residual_ft": 0.048537679582824615,
+   "used": true
+  },
+  {
+   "E": 5988019.46,
+   "N": 2133240.15,
+   "sx": 956.4199829101562,
+   "sy": -845.739990234375,
+   "residual_ft": 0.021481907731172853,
+   "used": true
+  },
+  {
+   "E": 5988423.12,
+   "N": 2132670.62,
+   "sx": 1456.5799560546875,
+   "sy": -894.8200073242188,
+   "residual_ft": 0.07314876301476446,
+   "used": true
+  }
+ ],
  "grid_lines": []
 }
