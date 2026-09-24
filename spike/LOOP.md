@@ -115,3 +115,4 @@ rotation, 0 callouts paired so no offset (`spike/out/r10741_run.log`).
 
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
+| 1 | pass | 1 | `tiles.py` (tile_for, ensure_cache); tail steps SHEET-aware; Presidio demo 147 s, 21 ok, five root outputs md5-identical (orchestrator re-hashed); .1/.3 tails: linework 4914/4993, features 336/292, encroachments 8/0, objects 5529/5721; north intensity 637x1087 and hillshade 638x1087 on the DEM grid, quick-look viewed. Finding: R-10434.3 linework 0 % inside the south tile (N 4184705-4185241 m vs tile edge 4184700): the south tile covers .1 and .2 only, STATE's '7 sheets' claim wrong for .3 | leg1 |
