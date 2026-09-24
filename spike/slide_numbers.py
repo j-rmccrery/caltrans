@@ -16,11 +16,11 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parent))
 from georef import OUT, PDF  # noqa: E402
 
-BENCH_SHEETS = {"presidio": "R-10434.2 Presidio", "r10434_1": "R-10434.1", "r10434_3": "R-10434.3"}
+BENCH_SHEETS = {"presidio": "R-10434.2 Presidio", "r10434_1": "R-10434.1", "r10434_3": "R-10434.3", "r10741_1": "R-10741.1", "r10741_2": "R-10741.2", "r10741_3": "R-10741.3"}
 
 
 def record_twin_block():
-    """The latest loop's closing snapshot: the last `loop2-final` bench row per Presidio sheet, this
+    """The latest loop's closing snapshot: the last `loop3-final` bench row per baseline sheet, this
     sheet's own closed traverse chain, and the 61985 blocker, all read from files."""
     bench = list(csv.DictReader(open(OUT / "bench.csv", encoding="utf-8")))
     verify = {r["sheet"]: r for r in bench if r["label"] == BENCH_LABEL}  # last row per sheet wins
@@ -48,7 +48,7 @@ def record_twin_block():
     return "\n".join(lines) + "\n"
 
 SQFT_PER_ACRE = 43560.0
-BENCH_LABEL = "loop2-final"
+BENCH_LABEL = "loop3-final"
 
 
 def load(name):

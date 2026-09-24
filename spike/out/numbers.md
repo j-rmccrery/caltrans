@@ -37,10 +37,16 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 
 ## Record twin, 2026-09-23 loop 2
 
-Pass counts from `spike/out/bench.csv` (rows labelled `loop2-final`):
+Pass counts from `spike/out/bench.csv` (rows labelled `loop3-final`):
 
 | sheet | distance | bearing | arc length | tags associated | faces named |
 |---|---|---|---|---|---|
+| R-10434.2 Presidio | 39/47 | 30/49 | 13/19 | 24 | 9 |
+| R-10434.1 | 26/37 | 18/31 | 14/33 | 14 | 5 |
+| R-10434.3 | 42/70 | 32/51 | 23/39 | 28 | 12 |
+| R-10741.1 | 13/16 | 12/12 | 1/4 | 0 | 0 |
+| R-10741.2 | 20/22 | 19/19 | 0/3 | 0 | 2 |
+| R-10741.3 | 17/17 | 12/13 | 0/2 | 0 | 1 |
 
 Closed chain on r_10434_002_2020-09-16: 5 edges (5 with a full record), end misfit 0.14 ft, record area 6,970.6 sq ft.
 

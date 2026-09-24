@@ -3,7 +3,47 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-23 14:00 after loop 2; loop 1 report in `spike/out/loop_report.md`, loop 2 in `spike/LOOP.md`)
+## Next (logged 2026-09-23 20:05 after loop 3; loop 3 plan and status in `spike/LOOP.md`)
+
+**The six-sheet baseline exists and reproduces.** South R-10434.1/.2/.3 (Presidio tile) and north R-10741.1/.2/.3
+(Marin tile, 2017, drafter CHaldenwang, no SHX annotations, no tables, read by OCR) all georeference from their
+own callouts and sit on their tiles; Caltrans' packages check all six (max 0.4 ft on the north set) and place none.
+`python spike/demo.py --fast --six` (640 s) runs the other five after Presidio and writes `spike/out/six.qgz`
+(two tile groups, 27 + 21 layers, renders `six_render_south.png` / `six_render_north.png`). Bench over six:
+`python spike/bench.py <label> --tables --tags --parcels --traverse presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3`;
+row `loop3-final` (equal to `six`, measured twice): presidio 39/47 30/49 13/19 wl 15 tags 24; .1 26/37 18/31 14/33
+wl 30; .3 42/70 32/51 23/39 wl 45; R-10741.1 13/16 12/12 1/4 wl 6; .2 20/22 19/19 0/3 wl 5; .3 17/17 12/13 0/2 wl 2.
+The .1/.3 rows moved from loop 2's (25/32, 41/70): those were measured on stale sibling state. Every future leg is
+gated on this row; a leg that moves a north row must say whether reads or association moved it.
+
+**Two state bugs that made earlier baselines drift, fixed in loop 3 leg 3:** (1) `tables.json` was written last by
+`alphabet.py` (glyph) in the demo but by `read_shx.py --tables` (annotations) in the bench, and checks mask table
+cells by it, so table cells leaked into the distance pool (R-10434.3 41/70 vs 42/121). The demo now runs the
+annotation rebuild after `alphabet.py` and the bench runs it before checks. (2) `georef.READS` took any
+`tables.json` over 20 bytes as a validated alphabet (`{"_regions": []}` is 22), so sheets without tables read by
+glyph or by OCR depending on the last writer; now validated = at least one table row (north = OCR, per the rule).
+Presidio's tag count 22 vs 24 was the same thing: 24 is the annotation-tables state.
+
+**LiDAR lies under four of the six.** South tile: R-10434.1/.2 (the "7 sheets" claim below was wrong for .3, whose
+northing starts 5 m past the tile edge). North tile: R-10741.3 99 %, .2 60 %, .1 0.3 %. The bridge and the strait
+between the tiles need USGS 3DEP.
+
+Do this, in order:
+
+1. **North label association** (loop 3 leg 5, not run): 12 crops of failing distance/bearing labels on R-10741.2,
+   name the biggest cause, fix it in `checks.py`; gate +3 distance passes on .2, no loss on the other five.
+2. **Arc lengths, what is left** (`spike/out/legC_misses.md`): run-sums against a neighbour tag.
+3. **R-10434.1 traverse** closed 1 -> 0 in loop 2 leg C; trace the moved edge.
+4. **1950s scans on the north tile** (D4 index: R-71.11/.20/.28, R-92.8/.9) through their packages like R-65.
+5. **Other Civil 3D 2016+ sheets** (R-71.70, R-71.71, R-10258) through `read_shx.py`; the 2012-era sheets need the
+   real SHX fonts as the glyph seed, not Hershey (R-10741 reads about half by glyph, and OCR is what the rule picks).
+6. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze.
+
+Not next: layer taxonomy as an association filter (measured: no gain); more drawn-geometry work on 61985-1..4.
+
+## Next as of loop 2 (2026-09-23 14:00), kept for the record
+
+### Next (logged 2026-09-23 14:00 after loop 2; loop 1 report in `spike/out/loop_report.md`, loop 2 in `spike/LOOP.md`)
 
 Presidio now (bench `loop2-final`): distance 39/47, 25/32, 41/70 on R-10434.2/.1/.3; bearing 30/49, 19/30, 31/50;
 arc length 13/19, 13/34, 21/33 (were 4/11, 4/26, 7/18); wrong-line 15/29/40; tags associated 24/14/28; the bench is
@@ -85,8 +125,9 @@ distances). Layer-restricted candidates (`ASSOC=layers`) on Presidio: wrong-line
 **Scans, by eye** (one ink-dense crop each): ~22 hand-lettered originals (the measured hard class),
 ~10 Leroy/mechanical lettering, ~11 CAD plots printed then scanned, ~5 not judged. 33 of 48 were
 re-plotted through Civil 3D; 11 carry a hidden OCR layer; 72-478 dpi. Only R-65.2 is measured.
-**LiDAR:** the one tile (2.1 x 0.9 km, Presidio) covers 7 sheets: R-10434.1/.2/.3 and the 1969 scans
-R-65.1-.4; the other 58 have none on disk (USGS 3DEP would cover D4).
+**LiDAR:** the one tile (2.1 x 0.9 km, Presidio) covers 6 sheets: R-10434.1/.2 and the 1969 scans R-65.1-.4
+(R-10434.3 lies 5 m north of the tile edge, measured 2026-09-23 loop 3); the Marin tile added 2026-09-23 covers
+R-10741.2/.3; the other sheets have none on disk (USGS 3DEP would cover D4).
 
 Plan from this: Presidio first, overnight loop in `spike/LOOP.md`.
 
