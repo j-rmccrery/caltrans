@@ -21,7 +21,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from georef import (DEFAULT, OUT, READS, PDF, apply, callouts, frame, monument_symbols, package_affine,  # noqa: E402
+from georef import (DEFAULT, OUT, READS, PDF, apply, callouts, frame, monument_symbols, ngs_points, package_affine,  # noqa: E402
                     package_xy, real_text_blocks, segments, similarity, snap_circle, trace_leader, vs_caltrans_package)
 from georef_ticks import fit as tick_fit, stub, tick_labels  # noqa: E402
 
@@ -37,7 +37,7 @@ def gather(page, blocks):
 
     points = []
     from gt import TABLES
-    for co in callouts(blocks, [t[0] for t in TABLES.values()] if PDF == DEFAULT else []):
+    for co in callouts(blocks, [t[0] for t in TABLES.values()] if PDF == DEFAULT else []) + ngs_points(blocks):
         cands = []
         if co.get("note"):
             b = co["nb"]

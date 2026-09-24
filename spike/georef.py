@@ -91,6 +91,44 @@ def real_text_blocks(page):
     return out
 
 
+NGS_CACHE = ROOT / "spike" / "lidar" / "ngs_pids.json"
+PID_RE = re.compile(r"^PID:\s*([A-Z]{2}\d{4,5})$")
+
+
+def ngs_points(blocks):
+    """NGS control marks a sheet cites by PID ("PID: AE9850"): published SPC position, cached in
+    spike/lidar/ngs_pids.json (built once from the NGS datasheet API/text so the demo never needs the
+    network again). This drafter prints the same mark's own N/E value stacked right under its "PID:"
+    line -- not a callouts()-shaped pair (its row pitch, ~0.8 glyph_h, is tighter than callouts()'s
+    "next line" floor of 1.0 glyph_h, tuned for the two-row monument-note callouts elsewhere) -- so
+    find that pair here by the same number() rule and hand it to gather() exactly like any other
+    coordinate callout: nb/eb carry the geometry for trace_leader, NGS's cached value is the control
+    (a small typo/rounding away from the sheet's own transcription, and authoritative either way).
+    A PID with no N/E pair beside it falls back to a monument-note-style symbol search (nb == eb)."""
+    if not NGS_CACHE.exists():
+        return []
+    cache = json.loads(NGS_CACHE.read_text(encoding="utf-8"))
+    out = []
+    for b in blocks:
+        m = PID_RE.match(b["text"].strip())
+        if not m or m[1] not in cache:
+            continue
+        pt = cache[m[1]]
+        near = [(nb, number(nb["text"])) for nb in blocks
+                if abs(nb["cx"] - b["cx"]) < b["w"] + 20 and 0 < nb["cy"] - b["cy"] < 6 * b["h"] and number(nb["text"])]
+        ns = sorted((nb for nb, v in near if v[0] == "N"), key=lambda x: x["cy"])
+        es = sorted((nb for nb, v in near if v[0] == "E"), key=lambda x: x["cy"])
+        # two independent tries at the same mark, both fed to gather(): a monument-symbol search
+        # anchored at the "PID:" line itself (note: True, nb == eb, as any other monument note), and
+        # -- when the stacked N/E pair is there -- trace_leader across its own separator/underline.
+        # Duplicating the physical point costs nothing (solve.py's scoring keeps whichever candidate
+        # set actually explains the sheet; feats/eqs just count each surviving entry once).
+        out.append({"N": pt["N"], "E": pt["E"], "nb": b, "eb": b, "note": True})
+        if ns and es:
+            out.append({"N": pt["N"], "E": pt["E"], "nb": ns[0], "eb": es[0]})
+    return out
+
+
 def callouts(blocks, skip):
     """Stacked coordinate pairs outside the tables: a value with a second value on the next text line.
     Which one is the northing comes from the N/E letter, else from the rule that in every California

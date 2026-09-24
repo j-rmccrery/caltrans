@@ -79,10 +79,17 @@ def containing_block(glyph_blocks, r):
     does: an Annot.rect is always axis-aligned, so a rotated label with no containing or nearby cluster
     fell back to a 0/90 guess and failed every downstream parallel-to-the-line test by 5-10 deg)."""
     cx, cy = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
-    for gb in glyph_blocks:
+    # a near-90deg sliver fragment (a stray tick/leader mark, or a mis-fit minAreaRect over cramped
+    # multi-line text, blocks.py clustered with a near-zero glyph_h) can pass inside()'s rotated +2pt
+    # pad from several pt away in plain x/y -- its tiny h axis is nearly horizontal at that angle, so
+    # the pad alone "contains" an unrelated rect (R-71.70's "PID: AE9850" label, 58x14pt, snapped a
+    # 2x2.5pt fragment this way, both as an "inside" hit and, unfiltered, as the "near" fallback too).
+    # Real lettering on these sheets is never under ~4pt; trust only a block at least that tall.
+    trustworthy = [gb for gb in glyph_blocks if gb["glyphs"] >= 3 and gb["glyph_h"] >= 4]
+    for gb in trustworthy:
         if inside(gb, cx, cy):
             return gb
-    near = [gb for gb in glyph_blocks if math.hypot(gb["cx"] - cx, gb["cy"] - cy) < max(r.width, r.height, 10)]
+    near = [gb for gb in trustworthy if math.hypot(gb["cx"] - cx, gb["cy"] - cy) < max(r.width, r.height, 10)]
     return min(near, key=lambda gb: math.hypot(gb["cx"] - cx, gb["cy"] - cy)) if near else None
 
 

@@ -36,6 +36,9 @@ SHEETS = {
     "r10741_1": ROOT / "Sample Data" / "d4" / "r_10741_001_2017-02-10.pdf",
     "r10741_2": ROOT / "Sample Data" / "d4" / "r_10741_002_2017-02-10.pdf",
     "r10741_3": ROOT / "Sample Data" / "d4" / "r_10741_003_2017-02-10.pdf",
+    "r71_70": ROOT / "Sample Data" / "d4" / "r_00071_070_2019-10-15.pdf",
+    "r71_71": ROOT / "Sample Data" / "d4" / "r_00071_071_2024-07-16.pdf",
+    "r10258": ROOT / "Sample Data" / "d4" / "r_10258_001_2020-04-17.pdf",
 }
 SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0}
 TAGS_COLS = ["tags_assoc", "tags_pass", "tags_fail", "tags_queued"]

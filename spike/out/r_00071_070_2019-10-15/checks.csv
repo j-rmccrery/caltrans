@@ -1,0 +1,15 @@
+check,printed,drawn,difference,result
+arc length,71.57,1961.46 (R=nan),+1889.89,FAIL
+bearing,"N69°38'14""E","S79°47'00""E",1834.8',FAIL
+distance,95.98',5550.42,+5454.44,FAIL
+distance,77.36',3629.22,+3551.86,FAIL
+arc length,274.48',8006.90 (R=nan),+7732.42,FAIL
+arc length,54.33',3140.84 (R=nan),+3086.51,FAIL
+arc length,13.81',798.96 (R=nan),+785.15,FAIL
+bearing,"N87°54'00""E","N20°38'35""E",4035.4',FAIL
+distance,37.89',3437.13,+3399.24,FAIL
+arc length,202.57',5679.85 (R=nan),+5477.28,FAIL
+arc length,173.16',2316.01 (R=nan),+2142.85,FAIL
+distance,250.00',7674.22,+7424.22,FAIL
+arc length,139.67',2577.11 (R=nan),+2437.44,FAIL
+distance,71.70,495.18,+423.48,FAIL

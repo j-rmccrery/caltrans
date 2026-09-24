@@ -1,107 +1,114 @@
 {
  "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; ground units and datum as printed on the sheet",
  "params": [
-  -1.0563276578933638e-06,
-  0.2836535942182705,
-  5897904.727590721,
-  2217994.5902180695
+  -4.0182368168582134e-07,
+  0.2836528042272275,
+  5897894.285178964,
+  2217994.5915743313
  ],
- "scale_ft_per_pt": 0.28365359422023745,
- "rotation_deg": 90.00021336982084,
- "rms_ft": 0.004371911693178985,
+ "scale_ft_per_pt": 0.2836528042275121,
+ "rotation_deg": 90.00008116542733,
+ "rms_ft": 0.0038276719791236593,
  "credible": true,
  "weak": false,
+ "verified": null,
  "control": [],
  "grid_lines": [
   {
    "axis": "N",
-   "value": 2218500.0,
-   "residual": 0.001170974224805832,
-   "used": true
-  },
-  {
-   "axis": "N",
-   "value": 2218300.0,
-   "residual": 0.0060811592265963554,
-   "used": true
-  },
-  {
-   "axis": "N",
-   "value": 2218600.0,
-   "residual": 0.0037594656459987164,
-   "used": true
-  },
-  {
-   "axis": "N",
-   "value": 2218400.0,
-   "residual": 0.006064146291464567,
-   "used": true
-  },
-  {
-   "axis": "N",
-   "value": 2218200.0,
-   "residual": 0.0011706738732755184,
-   "used": true
-  },
-  {
-   "axis": "N",
    "value": 2218100.0,
-   "residual": 0.0037684221751987934,
-   "used": true
-  },
-  {
-   "axis": "E",
-   "value": 5898000.0,
-   "residual": 0.0007873708382248878,
-   "used": true
-  },
-  {
-   "axis": "E",
-   "value": 5898100.0,
-   "residual": 0.0056978557258844376,
+   "residual": 0.00263070035725832,
    "used": true
   },
   {
    "axis": "E",
    "value": 5898200.0,
-   "residual": 0.006464698351919651,
+   "residual": 0.0003558257594704628,
    "used": true
   },
   {
-   "axis": "N",
-   "value": 2218100.0,
-   "residual": 0.003023647703230381,
+   "axis": "E",
+   "value": 5898200.0,
+   "residual": 0.00035586021840572357,
    "used": true
   },
   {
    "axis": "N",
    "value": 2218200.0,
-   "residual": 0.0019154483452439308,
+   "residual": 0.0020067854784429073,
    "used": true
   },
   {
    "axis": "N",
    "value": 2218300.0,
-   "residual": 0.0068259332329034805,
+   "residual": 0.006638751365244389,
    "used": true
   },
   {
    "axis": "N",
    "value": 2218400.0,
-   "residual": 0.005319371819496155,
+   "residual": 0.005761934909969568,
    "used": true
   },
   {
    "axis": "N",
    "value": 2218500.0,
-   "residual": 0.0004261997528374195,
+   "residual": 0.0011472818441689014,
    "used": true
   },
   {
    "axis": "N",
    "value": 2218600.0,
-   "residual": 3.83396206330508,
+   "residual": 3.101068348158151,
    "used": false
+  },
+  {
+   "axis": "E",
+   "value": 5898000.0,
+   "residual": 17.283375630155206,
+   "used": false
+  },
+  {
+   "axis": "E",
+   "value": 5898100.0,
+   "residual": 23.984262452460825,
+   "used": false
+  },
+  {
+   "axis": "N",
+   "value": 2218100.0,
+   "residual": 0.0029140100814402103,
+   "used": true
+  },
+  {
+   "axis": "N",
+   "value": 2218200.0,
+   "residual": 0.0017234757542610168,
+   "used": true
+  },
+  {
+   "axis": "N",
+   "value": 2218300.0,
+   "residual": 0.006355441175401211,
+   "used": true
+  },
+  {
+   "axis": "N",
+   "value": 2218400.0,
+   "residual": 0.006045244634151459,
+   "used": true
+  },
+  {
+   "axis": "N",
+   "value": 2218500.0,
+   "residual": 0.0014305920340120792,
+   "used": true
+  },
+  {
+   "axis": "N",
+   "value": 2218600.0,
+   "residual": 0.0031982376240193844,
+   "used": true
   }
  ]
 }

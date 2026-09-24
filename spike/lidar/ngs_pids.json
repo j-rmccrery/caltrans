@@ -1,0 +1,21 @@
+{
+ "source": "NGS datasheet API, https://geodesy.noaa.gov/cgi-bin/ds_mark.prl?PidBox=<pid>",
+ "retrieved": "2026-09-24",
+ "note": "SPC N/E are NAD 83(2011) State Plane CA Zone 2, US survey feet (sFT row of the datasheet's SPC block), matching r_00071_070's own printed grid (\"COORDINATE SYSTEM OF 1983, ZONE 2\").",
+ "AE9850": {
+  "designation": "RYER",
+  "lat": "38 20 40.70388 N",
+  "lon": "121 37 45.16511 W",
+  "spc_zone": "CA 2",
+  "N": 1887548.98,
+  "E": 6668011.60
+ },
+ "AE9865": {
+  "designation": "STAR RESET",
+  "lat": "38 16 57.51446 N",
+  "lon": "121 33 05.83679 W",
+  "spc_zone": "CA 2",
+  "N": 1865071.34,
+  "E": 6690376.64
+ }
+}
