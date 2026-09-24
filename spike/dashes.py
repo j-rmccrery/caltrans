@@ -31,7 +31,11 @@ def _strokes(d):
         if it[0] == "l":
             a, b = np.array([it[1].x, it[1].y]), np.array([it[2].x, it[2].y])
             L = float(np.hypot(*(b - a)))
-            if 0 < L < 8:
+            if 0 < L < 10:  # Presidio's rw_EASE dashes top out at 6.11 pt; this drafter's
+                # RW-PARCEL-SEG dashes run 8.6-8.9 pt, just over the old 8 pt cutoff, which dropped
+                # them all and left dash_trains() chaining only the layer's short V-shaped tick marks
+                # instead (a different feature, wrong shape entirely) -- widened, checked against
+                # Presidio (0 strokes fall in 8-10 pt there, so its trains are untouched)
                 yield a, b
 
 
@@ -106,30 +110,54 @@ def circle_fit(P):
     return r if 0 < r < 1e5 and resid < 0.02 * r + 0.3 else float("nan")
 
 
-def dash_trains(dashes):
+BRIDGE_TURN_DEG = 2.0  # deg: much stricter than TURN_DEG -- a bridge crosses a gap wide enough that a
+# genuinely different nearby line could sit inside it, so only a near-perfectly collinear dash on the
+# far side earns the jump
+
+
+def dash_trains(dashes, bridge=None):
     """Chain dashes end to end into polylines: from each dash's free end, the next dash's near end
     must lie within this sheet's estimated reach straight ahead (sideways offset < SIDE_TOL, never
     behind), and its own heading must turn less than TURN_DEG from the current one. Returns
-    [{"pts": Nx2 array, "len_pt": float, "radius_pt": float}], lone unmatched dashes dropped."""
+    [{"pts": Nx2 array, "len_pt": float, "radius_pt": float}], lone unmatched dashes dropped.
+    bridge: when the normal reach finds nothing, also try a dash out to `bridge` pt (a wipeout under a
+    text label can blank the run for more than the dashes' own pitch) if it lies within BRIDGE_TURN_DEG
+    of the current heading and SIDE_TOL of the line -- the normal reach's looser TURN_DEG is not applied
+    that far out, since a different nearby line could otherwise sit inside the gap."""
     if not dashes:  # sheets with no marked dash layer (r10434_1/.3): no trains, not an error
         return []
     REACH = estimate_reach(dashes)
     ends = np.array([q for a, b in dashes for q in (a, b)])
     tree = cKDTree(ends)
     idx = [(k, e) for k in range(len(dashes)) for e in (0, 1)]
-    used, trains = set(), []
-    for k0 in range(len(dashes)):
-        if k0 in used:
-            continue
-        a0, b0 = dashes[k0]
-        d0 = (b0 - a0) / max(np.hypot(*(b0 - a0)), 1e-9)
-        used.add(k0)
-        sides = {}
-        for start, direction in ((a0, -1), (b0, 1)):
-            cur, cur_dir, pts = start, d0 * direction, []
-            while True:
-                cands = []
-                for j in tree.query_ball_point(cur, REACH):
+
+    def grow(cur, cur_dir, used):
+        """One direction's worth of chain growth from `cur` heading `cur_dir`: normal REACH first, then
+        `bridge` pt (tighter BRIDGE_TURN_DEG) if the normal search finds nothing. Marks claimed dashes
+        in `used`. Returns the list of extension points."""
+        pts = []
+        while True:
+            cands = []
+            for j in tree.query_ball_point(cur, REACH):
+                k, e = idx[j]
+                if k in used:
+                    continue
+                a, b = dashes[k]
+                near, far = (a, b) if e == 0 else (b, a)
+                v = near - cur
+                along, side = v @ cur_dir, abs(v @ np.array([-cur_dir[1], cur_dir[0]]))
+                if along < -0.5 or side > SIDE_TOL:
+                    continue
+                dl = (far - near) / max(np.hypot(*(far - near)), 1e-9)
+                turn = dl @ cur_dir
+                if turn < math.cos(math.radians(TURN_DEG)):
+                    continue
+                cands.append((turn, k, far, dl))  # most collinear continuation wins, not merely nearest --
+            # two nearly-parallel dashed curves pass within REACH of each other near the record's
+            # vertex circles; picking the straightest continuation (not the closest dash) keeps the
+            # chain on its own curve instead of hopping to the neighbour
+            if not cands and bridge:
+                for j in tree.query_ball_point(cur, bridge):
                     k, e = idx[j]
                     if k in used:
                         continue
@@ -137,27 +165,33 @@ def dash_trains(dashes):
                     near, far = (a, b) if e == 0 else (b, a)
                     v = near - cur
                     along, side = v @ cur_dir, abs(v @ np.array([-cur_dir[1], cur_dir[0]]))
-                    if along < -0.5 or side > SIDE_TOL:
+                    if along <= 0.1 or side > SIDE_TOL:
                         continue
                     dl = (far - near) / max(np.hypot(*(far - near)), 1e-9)
                     turn = dl @ cur_dir
-                    if turn < math.cos(math.radians(TURN_DEG)):
+                    if turn < math.cos(math.radians(BRIDGE_TURN_DEG)):
                         continue
-                    cands.append((turn, k, far, dl))  # most collinear continuation wins, not merely nearest --
-                # two nearly-parallel dashed curves pass within REACH of each other near the record's
-                # vertex circles; picking the straightest continuation (not the closest dash) keeps the
-                # chain on its own curve instead of hopping to the neighbour
-                if not cands:
-                    break
-                # cands is built from tree.query_ball_point(), whose return order scipy documents as
-                # unspecified (not sorted by index or distance) -- so a tie in `turn` (two dashes exactly
-                # as collinear, common on a straight run) used to pick whichever query_ball_point happened
-                # to list first, an accident of its internal tree traversal, not of the geometry. Tie-break
-                # on k, the dash's own index in collect_dashes()'s draw order: deterministic and always
-                # available, unlike relying on the candidate list's incidental order (leg E)
-                _, k, far, dl = max(cands, key=lambda t: (t[0], -t[1]))
-                used.add(k); pts.append(far); cur, cur_dir = far, dl
-            sides[direction] = pts
+                    cands.append((turn, k, far, dl))
+            if not cands:
+                break
+            # cands is built from tree.query_ball_point(), whose return order scipy documents as
+            # unspecified (not sorted by index or distance) -- so a tie in `turn` (two dashes exactly
+            # as collinear, common on a straight run) used to pick whichever query_ball_point happened
+            # to list first, an accident of its internal tree traversal, not of the geometry. Tie-break
+            # on k, the dash's own index in collect_dashes()'s draw order: deterministic and always
+            # available, unlike relying on the candidate list's incidental order (leg E)
+            _, k, far, dl = max(cands, key=lambda t: (t[0], -t[1]))
+            used.add(k); pts.append(far); cur, cur_dir = far, dl
+        return pts
+
+    used, trains = set(), []
+    for k0 in range(len(dashes)):
+        if k0 in used:
+            continue
+        a0, b0 = dashes[k0]
+        d0 = (b0 - a0) / max(np.hypot(*(b0 - a0)), 1e-9)
+        used.add(k0)
+        sides = {direction: grow((a0 if direction < 0 else b0), d0 * direction, used) for direction in (-1, 1)}
         pts = list(reversed(sides[-1])) + [a0, b0] + sides[1]
         P = np.array(pts)
         L = float(np.sum(np.hypot(*np.diff(P, axis=0).T)))

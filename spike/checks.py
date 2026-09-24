@@ -50,6 +50,12 @@ STATION = re.compile(r"\d\+\d|\bSTA\b", re.I)  # a block naming a station: the n
 AREA_CTX = re.compile(r"SQ\.?\s?FT|ACRES?\b|\bAC\.|±", re.I)  # a parcel-area figure, in a bubble, an acreage
 # table ("*28.31 AC.") or a legend: not a distance; "AC." (the abbreviation) is as common on this sheet as
 # the spelled-out word and was not being caught -- an acreage table read as four false distance labels
+DETAIL_RE = re.compile(r"\bDETAIL\b", re.I)
+_NTS_TOKEN = r"(?<![A-Za-z])N\.?T\.?S\.?(?![A-Za-z])"  # "N.T.S." as its own token: a bare substring match
+# (no letter boundary) would also fire inside ordinary words that happen to contain "nts" -- agents,
+# easements, monuments, instruments, all common on a survey sheet's boilerplate and legend
+NTS_RE = re.compile(_NTS_TOKEN, re.I)
+SCALE_NTS_RE = re.compile(r"SCALE.*?" + _NTS_TOKEN, re.I)
 DIST_TOL = 0.30   # ft, plus 0.05 %
 ASSOC = set(filter(None, os.environ.get("ASSOC", "").split(",")))  # remaining diagnostics: layers, orderdiag (tables.py)
 NOT_LINEWORK = re.compile(r"LBL|anno|ANNO|TBL|SHEET|Sheet|Wipeout|PNT|border|TEXT|TXT|Format|Seal", re.I)  # ASSOC=layers: CAD layer names that are not linework
@@ -527,6 +533,56 @@ def sheet_lines(page, blocks):
     return split_chains(chains, circles), circles, paths, segs
 
 
+
+def nts_circle(page, cx, cy, reach):
+    """The dashed circle drawn around a detail caption, if the sheet's vector data separately carries
+    one: stroked, dash-attributed paths within reach whose combined extent is roughly circular. None ->
+    the caller falls back to a plain box.
+    ponytail: a bounding-box union of dash-attributed strokes, not a real circle fit -- upgrade if a
+    sheet draws its inset ring some other way (e.g. as many short plain-stroke facets) and this misses it."""
+    box = None
+    for d in page.get_drawings():
+        if d["type"] != "s" or d.get("dashes") in (None, "[] 0", ""):
+            continue
+        r = d["rect"]
+        mx, my = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
+        if math.hypot(mx - cx, my - cy) > reach:
+            continue
+        box = (r.x0, r.y0, r.x1, r.y1) if box is None else (min(box[0], r.x0), min(box[1], r.y0), max(box[2], r.x1), max(box[3], r.y1))
+    if box is None:
+        return None
+    w, h = box[2] - box[0], box[3] - box[1]
+    return box if w > 20 and abs(w - h) < 0.3 * max(w, h) else None
+
+
+def nts_regions(blocks, page):
+    """Not-to-scale detail insets: a caption 'DETAIL "X"' / 'Scale: = N.T.S.' (an N.T.S. block within 3
+    glyph heights of a DETAIL block, or one block that reads both at once) marks a region -- the dashed
+    circle drawn around it if there is one, else a box 12 glyph heights around the caption. Labels inside
+    are not-to-scale citations, checked against nothing."""
+    details = [b for b in blocks if DETAIL_RE.search(b["text"])]
+    caps, cap_ids = [], set()
+    for b in blocks:
+        if SCALE_NTS_RE.search(b["text"]):
+            caps.append(b); cap_ids.add(id(b))
+    for b in blocks:
+        if id(b) in cap_ids or not NTS_RE.search(b["text"]):
+            continue
+        c, u, n = frame(b)
+        gh = b["glyph_h"]
+        if any(abs((np.array([d["cx"], d["cy"]]) - c) @ n) < 3 * gh and abs((np.array([d["cx"], d["cy"]]) - c) @ u) < 0.6 * max(b["w"], d["w"]) + 3 * gh for d in details):
+            caps.append(b); cap_ids.add(id(b))
+    regions = []
+    for cap in caps:
+        gh = cap["glyph_h"]
+        near = [d for d in details if math.hypot(d["cx"] - cap["cx"], d["cy"] - cap["cy"]) < 20 * gh] + [cap]
+        cx = sum(g["cx"] for g in near) / len(near)
+        cy = sum(g["cy"] for g in near) / len(near)
+        box = 12 * gh
+        regions.append(nts_circle(page, cx, cy, box) or (cx - box, cy - box, cx + box, cy + box))
+    return regions
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
@@ -578,7 +634,12 @@ def main():
     from dashes import collect_dashes, dash_trains
     glyph_h_med = float(np.median([b["glyph_h"] for b in blocks])) if blocks else 6.0
     dash_floor = 5.0 * glyph_h_med
-    for t in dash_trains(collect_dashes(page)):
+    RESID_TOL = 2.0  # pt: a fitted line's max perpendicular residual, for a bridged train whose raw
+    # heading spread reads >2 deg even though it is straight -- the spread test measures dash-to-dash
+    # turn one step at a time and a few tenths of a degree of chaining noise compounds over many dashes,
+    # while the fit sees the whole run at once; still twice SIDE_TOL (the per-step lateral tolerance
+    # chaining itself already enforces), so a run that is genuinely curved (not noisy-straight) still fails
+    for t in dash_trains(collect_dashes(page), bridge=6.0 * glyph_h_med):
         if len(t["pts"]) < 3:
             continue
         for P in split_at(t["pts"], circles, junction_lines):
@@ -589,7 +650,13 @@ def main():
             seg = np.diff(P, axis=0)
             headings = np.degrees(np.arctan2(seg[:, 1], seg[:, 0]))
             ref = headings[0]
-            if np.all(np.abs((headings - ref + 180) % 360 - 180) < 2.0):  # every dash within 2 deg of one heading
+            straight = np.all(np.abs((headings - ref + 180) % 360 - 180) < 2.0)  # every dash within 2 deg of one heading
+            if not straight and len(P) >= 3:
+                c = P.mean(axis=0)
+                _, _, vt = np.linalg.svd(P - c)
+                n = np.array([-vt[0][1], vt[0][0]])
+                straight = float(np.max(np.abs((P - c) @ n))) < RESID_TOL
+            if straight:
                 d = P[-1] - P[0]
                 chord = float(np.hypot(*d))
                 if chord > 3:
@@ -597,6 +664,7 @@ def main():
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
     FURNITURE = list(FURNITURE) + alignment_table_regions(blocks)  # tables.json's _regions plus this table it doesn't cover
+    NTS = nts_regions(blocks, page)
 
     def az_of(ln):
         """Grid azimuth of a drawn line (deg, clockwise from grid north), through the fit's rotation."""
@@ -641,6 +709,10 @@ def main():
     for bi, b in enumerate(blocks):
         if any(x0 <= b["cx"] <= x1 and y0 <= b["cy"] <= y1 for x0, y0, x1, y1 in FURNITURE):
             continue  # table cells and title block: the record, not labels on the drawing
+        if NTS and any(x0 <= b["cx"] <= x1 and y0 <= b["cy"] <= y1 for x0, y0, x1, y1 in NTS):
+            if any(TOKEN.search(t) or LEN.match(t) for t in b["text"].replace(" ", "").split("|")):
+                exceptions.append({"kind": "nts", "issue": "not to scale: inside detail inset", "region": region(b)})
+            continue  # a not-to-scale detail inset: drawn deliberately wrong, never checkable
         lines = b["text"].replace(" ", "").split("|")
         curve_data = any(ANG_TOK.search(t) or RAD_TOK.search(t) or LEN_TOK.search(t) or re.match(r"^[RL][=\-:]", t) for t in lines)
         if len(lines) == 1 and LEN.match(lines[0]):
