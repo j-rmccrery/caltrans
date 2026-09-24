@@ -21,8 +21,8 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from georef import (DEFAULT, OUT, READS, PDF, apply, callouts, frame, monument_symbols, real_text_blocks,  # noqa: E402
-                    segments, similarity, trace_leader, vs_caltrans_package)
+from georef import (DEFAULT, OUT, READS, PDF, apply, callouts, frame, monument_symbols, package_affine,  # noqa: E402
+                    package_xy, real_text_blocks, segments, similarity, trace_leader, vs_caltrans_package)
 from georef_ticks import fit as tick_fit, stub, tick_labels  # noqa: E402
 
 TOL = 1.0  # sheet ground units (ft or m): an observation the hypothesis explains
@@ -207,10 +207,31 @@ def main():
         a, b = p[:2]
         scale, rot = float(np.hypot(a, b)), float(np.degrees(np.arctan2(b, a)))
         print(f"record frame: scale {scale:.5f} units/pt | rotation {rot:.4f} deg | offset {votes['offset']}")
+        frame_kind, placed_by, pkg_report = "record", None, None
+        if votes["offset"].startswith("none"):
+            # no callout gave an offset: borrow one from Caltrans' own package at the sheet centre,
+            # keeping our sheet-derived scale and rotation. HARN vs NAD83(2011) at this site is well
+            # under a foot, so no datum shift is applied here.
+            aff = package_affine(page)
+            if aff is not None:
+                W, H = page.rect.width, page.rect.height
+                gx, gy = package_xy(aff, W / 2, H / 2)
+                tx = gx - a * (W / 2) - b * (H / 2)
+                ty = gy - b * (W / 2) + a * (H / 2)
+                p = np.array([a, b, tx, ty])
+                A, D, B, E, C, F, k = aff
+                a_pkg, b_pkg = (A * k - E * k) / 2, (B * k + D * k) / 2
+                pkg_scale, pkg_rot = float(np.hypot(a_pkg, b_pkg)), float(np.degrees(np.arctan2(b_pkg, a_pkg)))
+                dscale, drot = 100 * (pkg_scale / scale - 1), ((pkg_rot - rot + 90) % 180 - 90)
+                pkg_report = {"scale_ft_per_pt": pkg_scale, "rotation_deg": pkg_rot, "dscale_pct": dscale, "drot_deg": drot}
+                frame_kind, placed_by = "record+package", "caltrans package (offset only)"
+                print(f"package affine: scale {pkg_scale:.5f} units/pt ({dscale:+.2f} %) | rotation {pkg_rot:.4f} deg ({drot:+.4f} deg vs ours)")
+                print(f"offset from package at sheet centre: tx {tx:.1f} ty {ty:.1f}")
         vs_caltrans_package(page, p)
         (OUT / "georef.json").write_text(json.dumps({
-            "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; RECORD FRAME: rotation and scale from the printed bearings and distances, offset from one callout or none",
-            "params": [float(v) for v in p], "scale_ft_per_pt": scale, "rotation_deg": rot, "rms_ft": None, "credible": False, "weak": True, "frame": "record", "votes": votes,
+            "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; RECORD FRAME: rotation and scale from the printed bearings and distances, offset from one callout, the Caltrans package at the sheet centre, or none",
+            "params": [float(v) for v in p], "scale_ft_per_pt": scale, "rotation_deg": rot, "rms_ft": None, "credible": False, "weak": True,
+            "frame": frame_kind, "placed_by": placed_by, "votes": votes, "package": pkg_report,
             "control": [], "grid_lines": []}, indent=1))
         return
     best = None

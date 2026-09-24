@@ -83,17 +83,21 @@ def main():
     allpts = np.vstack(H)
     zx = (allpts[:, 0].min() - 20, allpts[:, 0].max() + 20)
     zy = (max(allpts[:, 1].min() - 20, ymin), min(allpts[:, 1].max() + 20, ymax))  # legend samples fall off the tile
+    # record-frame sheets (no coordinate callouts) have no control points to plot
     ctrl = np.array([[c["E"], c["N"]] for c in g["control"] if c["used"]])
-    cx, cy = to_utm.transform(ctrl[:, 0], ctrl[:, 1])
+    cx, cy = to_utm.transform(ctrl[:, 0], ctrl[:, 1]) if len(ctrl) else ([], [])
+    rms_txt = f"{g['rms_ft']:.2f} ft" if g["rms_ft"] is not None else f"n/a ({g.get('frame', 'grid')} frame)"
     for name, xl, yl, size in (("overlay_full", (xmin, xmax), (ymin, ymax), (16, 7.5)), ("overlay_zoom", zx, zy, (18, 8))):
         fig, ax = plt.subplots(figsize=size, dpi=150)
         ax.imshow(img, extent=(xmin, xmax, ymin, ymax), cmap="gray", origin="upper")
         ax.add_collection(LineCollection(L, colors="#00d5ff", linewidths=0.35, alpha=0.8))
         ax.add_collection(LineCollection(H, colors="#ff2a2a", linewidths=1.1))
-        ax.plot(np.asarray(cx) + HTDP_DE, np.asarray(cy) + HTDP_DN, "o", ms=5, mfc="yellow", mec="black", label="control read from sheet")
+        if len(ctrl):
+            ax.plot(np.asarray(cx) + HTDP_DE, np.asarray(cy) + HTDP_DN, "o", ms=5, mfc="yellow", mec="black", label="control read from sheet")
         ax.set_xlim(xl); ax.set_ylim(yl); ax.set_aspect("equal")
-        ax.set_title(f"R/W Record Map {SHEET} linework on LiDAR intensity | fit rms {g['rms_ft']:.2f} ft on {sum(c['used'] for c in g['control'])} control points | NAD83(2011) UTM 10N")
-        ax.legend(loc="lower right")
+        ax.set_title(f"R/W Record Map {SHEET} linework on LiDAR intensity | fit rms {rms_txt} on {sum(c['used'] for c in g['control'])} control points | NAD83(2011) UTM 10N")
+        if len(ctrl):
+            ax.legend(loc="lower right")
         fig.tight_layout(); fig.savefig(OUT / f"{name}.png"); plt.close(fig)
 
     feats = []

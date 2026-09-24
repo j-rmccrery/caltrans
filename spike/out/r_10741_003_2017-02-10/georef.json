@@ -1,17 +1,18 @@
 {
- "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; RECORD FRAME: rotation and scale from the printed bearings and distances, offset from one callout or none",
+ "note": "x=a*sx-b*sy+tx, y=b*sx+a*sy+ty with sy=-pdf_y; RECORD FRAME: rotation and scale from the printed bearings and distances, offset from one callout, the Caltrans package at the sheet centre, or none",
  "params": [
   0.9098307394570501,
   -1.0491791020224925,
-  0.0,
-  0.0
+  5988963.1239037905,
+  2133894.813509444
  ],
  "scale_ft_per_pt": 1.388729189792483,
  "rotation_deg": -49.06871255682398,
  "rms_ft": null,
  "credible": false,
  "weak": true,
- "frame": "record",
+ "frame": "record+package",
+ "placed_by": "caltrans package (offset only)",
  "votes": {
   "bearings": [
    12,
@@ -22,6 +23,12 @@
    21
   ],
   "offset": "none: local frame (no coordinate callout read)"
+ },
+ "package": {
+  "scale_ft_per_pt": 1.3886910911390644,
+  "rotation_deg": -49.06956812352399,
+  "dscale_pct": -0.002743418493578176,
+  "drot_deg": -0.0008555667000109679
  },
  "control": [],
  "grid_lines": []

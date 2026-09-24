@@ -201,22 +201,38 @@ def monument_symbols(page):
     return out
 
 
-def vs_caltrans_package(page, p):
-    """Caltrans' own georeferencing of the same sheet (tif + tfw from the D4 index), if downloaded."""
+def package_affine(page):
+    """Caltrans' own georeferencing of the same sheet (tif + tfw from the D4 index), if downloaded:
+    (A, D, B, E, C, F, k) where ground = A*col+B*row+C, D*col+E*row+F and k = raster px per sheet pt.
+    None when no package is on disk for this sheet."""
     tfw = next(iter((PDF.parent / "pkg").glob(PDF.stem + ".tfw")), None)
     if not tfw:
-        return
+        return None
     import rasterio
     A, D, B, E, C, F = [float(v) for v in tfw.read_text().split()]
     with rasterio.open(tfw.with_suffix(".tif")) as r:
         k = r.width / page.rect.width
+    return A, D, B, E, C, F, k
+
+
+def package_xy(aff, px, py):
+    """Ground (E, N) the package affine assigns to sheet point (px, py) in PDF points."""
+    A, D, B, E, C, F, k = aff
+    col, row = px * k - 0.5, py * k - 0.5
+    return A * col + B * row + C, D * col + E * row + F
+
+
+def vs_caltrans_package(page, p):
+    """Compare our fit to Caltrans' own georeferencing of the same sheet, at 9 sheet points."""
+    aff = package_affine(page)
+    if aff is None:
+        return
     a, b, tx, ty = p
     W, H = page.rect.width, page.rect.height
     d = []
     for px, py in itertools.product((0.2 * W, 0.5 * W, 0.8 * W), (0.2 * H, 0.5 * H, 0.8 * H)):
         ours = np.array([a * px + b * py + tx, b * px - a * py + ty])
-        col, row = px * k - 0.5, py * k - 0.5
-        d.append(np.hypot(*(ours - [A * col + B * row + C, D * col + E * row + F])))
+        d.append(np.hypot(*(ours - package_xy(aff, px, py))))
     print(f"vs Caltrans georeferenced package at 9 sheet points: median {np.median(d):.2f}, max {max(d):.2f} (sheet units)")
 
 

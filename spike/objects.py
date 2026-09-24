@@ -49,9 +49,12 @@ def main():
     for ln in g.get("grid_lines", []):
         feats.append(feat(None, kind="control line", printed={ln["axis"]: ln["value"]}, residual=round(ln["residual"], 3), units="ft",
                           status="verified" if ln["used"] else "refused", rule="grid tick label along a grid-line stub; one equation per stub end"))
+    fit_rule = "4-parameter similarity, sheet to CCS83 Zone 3 US survey ft (EPSG:2227), epoch 1991.35 as printed"
+    if g.get("placed_by"):
+        fit_rule += f"; rotation and scale from printed bearings/distances, offset from {g['placed_by']}"
     feats.append(feat(None, kind="georeferencing fit", measured={"scale_ft_per_pt": g["scale_ft_per_pt"], "rotation_deg": g["rotation_deg"], "rms_ft": g["rms_ft"]},
                       status="verified" if g.get("credible", True) else ("queued" if g.get("weak") else "refused"),
-                      rule="4-parameter similarity, sheet to CCS83 Zone 3 US survey ft (EPSG:2227), epoch 1991.35 as printed"))
+                      rule=fit_rule))
 
     # checks: printed value vs drawn geometry
     if (OUT / "checks.csv").exists():
