@@ -84,8 +84,13 @@ def containing_block(glyph_blocks, r):
     # pad from several pt away in plain x/y -- its tiny h axis is nearly horizontal at that angle, so
     # the pad alone "contains" an unrelated rect (R-71.70's "PID: AE9850" label, 58x14pt, snapped a
     # 2x2.5pt fragment this way, both as an "inside" hit and, unfiltered, as the "near" fallback too).
-    # Real lettering on these sheets is never under ~4pt; trust only a block at least that tall.
-    trustworthy = [gb for gb in glyph_blocks if gb["glyphs"] >= 3 and gb["glyph_h"] >= 4]
+    # The actual sliver measured 1.92pt tall (checked directly): a 4pt floor (leg C's original fix)
+    # excludes that, but also every genuinely small-but-real glyph cluster blocks.py's own per-character
+    # dilation produces (single digits, short tags), which is most of them -- on the six-sheet baseline
+    # that reroutes 462 of ~1400 annotations on R-10434.3 alone to a worse container and cost 4 passes
+    # across three sheets never gated against this change (loop 4 leg D found it). 3pt keeps the sliver
+    # excluded (checked: still None, both fragments 1.92pt) without reaching real lettering.
+    trustworthy = [gb for gb in glyph_blocks if gb["glyph_h"] >= 3]
     for gb in trustworthy:
         if inside(gb, cx, cy):
             return gb
