@@ -147,3 +147,4 @@ wl 6; .2 20/22 19/19 0/1 wl 3; .3 17/17 12/13 0/1 wl 1.
 
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
+| A | pass | 1 | 3DEP CA_NoCAL_3DEP_Supp_Funding_2018_D18, 10 LAZ tiles 414 MB in 532 s, EPSG:6350 -> 6339, ~9.7 pts/m2 all returns, 1 m class-2 DEM 4125x5431; `gap` tile in tiles.py for r_10434_003 and r_10741_001; inside 100 % / 100 %, R-10741.1 overlay viewed (road under the R/W lines); features .3: 190 pavement, 5 deck (97.8 % inside R/W), objects 5,422; .1: 1 pavement, objects 1,265. Finding: R-10434.3's current fit is 89.5 % on the south tile (E 547664-548630, N 4183675-4184316); loop 3's '0 % inside' was the stale rms 0.08 fit. Later: a south+gap mosaic so .3 keeps the 2025 tile where it has it; CA_SanFrancisco_B23 (2024) covers both boxes but its LAZ carries no CRS | legA |
