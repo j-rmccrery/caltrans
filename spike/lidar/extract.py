@@ -23,11 +23,15 @@ from scipy import ndimage
 from shapely.geometry import shape, mapping, LineString, MultiLineString
 from shapely.ops import unary_union
 
+sys.path.insert(0, str(Path(__file__).parent.parent))
+import tiles as tiles_mod  # noqa: E402
+from georef import OUT, PDF  # noqa: E402  (SHEET-aware)
+
 HERE = Path(__file__).parent
-OUT = HERE.parent / "out"
-CACHE = HERE / "cache"
-LAZ = HERE.parent.parent / "Sample Data" / "LiDAR-Point-cloud" / "points.laz"
-DEM = HERE.parent.parent / "Sample Data" / "LiDAR-Point-cloud" / "output.tin.tif"
+TILE = tiles_mod.tile_for(PDF)
+CACHE = TILE["cache"]
+LAZ = TILE["laz"]
+DEM = TILE["dem"]
 CELL = 1.0
 
 
@@ -77,6 +81,7 @@ def polygons(mask, transform, min_cells, to_ll, kind, **props):
 
 
 def main():
+    tiles_mod.ensure_cache(TILE)  # ortho + class67 cache render() needs; extract_grids.npz is built by grids() below
     G = grids()
     x0, y0, W, H = float(G["x0"]), float(G["y0"]), int(G["W"]), int(G["H"])
     # rasters are stored with row 0 at the south edge; flip to north-up for rasterio
@@ -107,7 +112,7 @@ def main():
     bld = ndimage.binary_opening(bld, iterations=1)
 
     # only pavement connected to the state highway corridor is this sheet's business
-    h = json.loads((HERE / "htdp.json").read_text())
+    h = json.loads((HERE / "htdp.json").read_text())  # same epoch shift for both tiles: 2 km apart, drift negligible over that distance
     to_utm = Transformer.from_crs("EPSG:6318", "EPSG:6339", always_xy=True)
     faces = []
     for f in json.loads((OUT / "parcels.geojson").read_text())["features"]:
@@ -151,22 +156,29 @@ def main():
     pav_polys = [shape({"type": "Polygon", "coordinates": [[to_utm.transform(a, b) for a, b in f["geometry"]["coordinates"][0]]]}).buffer(0) for f in feats if f["properties"]["kind"] == "pavement"]
     pav = unary_union(pav_polys)
     near = pav.intersection(corridor.buffer(15))  # the highway itself: pavement on or within 15 m of the R/W faces
-    inside = near.intersection(corridor).area
-    print(f"pavement on or near the state right-of-way: {near.area:,.0f} m²; {inside / near.area:.1%} inside the drawn R/W faces, "
-          f"{near.area - inside:,.0f} m² lies outside them within 15 m (record-vs-ground exceptions to review)")
-    rw = []
-    for f in json.loads((OUT / "sheet_linework.geojson").read_text())["features"]:
-        if f["properties"]["weight"] == "heavy":
-            xy = np.array(f["geometry"]["coordinates"]); x, y = to_utm.transform(xy[:, 0], xy[:, 1])
-            rw.append(LineString(zip(np.asarray(x) + h["dE_m"], np.asarray(y) + h["dN_m"])))
-    rw = MultiLineString(rw)
-    edge = near.boundary
-    pts = [edge.interpolate(t, normalized=True) for t in np.linspace(0, 1, 400)]
-    d = np.array([rw.distance(q) for q in pts])
-    print(f"highway pavement edge to nearest drawn R/W line: median {np.median(d):.1f} m, p10 {np.percentile(d, 10):.1f} m, p90 {np.percentile(d, 90):.1f} m")
+    if near.is_empty or near.area == 0:
+        # sheet's corridor has no LiDAR pavement nearby -- e.g. it sits outside this tile's coverage; nothing to check
+        print("pavement on or near the state right-of-way: none (sheet corridor has no LiDAR coverage here)")
+    else:
+        inside = near.intersection(corridor).area
+        print(f"pavement on or near the state right-of-way: {near.area:,.0f} m²; {inside / near.area:.1%} inside the drawn R/W faces, "
+              f"{near.area - inside:,.0f} m² lies outside them within 15 m (record-vs-ground exceptions to review)")
+        rw = []
+        for f in json.loads((OUT / "sheet_linework.geojson").read_text())["features"]:
+            if f["properties"]["weight"] == "heavy":
+                xy = np.array(f["geometry"]["coordinates"]); x, y = to_utm.transform(xy[:, 0], xy[:, 1])
+                rw.append(LineString(zip(np.asarray(x) + h["dE_m"], np.asarray(y) + h["dN_m"])))
+        rw = MultiLineString(rw)
+        edge = near.boundary
+        pts = [edge.interpolate(t, normalized=True) for t in np.linspace(0, 1, 400)]
+        d = np.array([rw.distance(q) for q in pts])
+        print(f"highway pavement edge to nearest drawn R/W line: median {np.median(d):.1f} m, p10 {np.percentile(d, 10):.1f} m, p90 {np.percentile(d, 90):.1f} m")
     deck_polys = [shape({"type": "Polygon", "coordinates": [[to_utm.transform(a, b) for a, b in f["geometry"]["coordinates"][0]]]}).buffer(0) for f in feats if f["properties"]["kind"] == "viaduct deck"]
     deck_u = unary_union(deck_polys)
-    print(f"viaduct deck {deck_u.area:,.0f} m²: {deck_u.intersection(corridor).area / deck_u.area:.1%} inside the drawn R/W faces")
+    if deck_u.is_empty or deck_u.area == 0:
+        print("viaduct deck: none (sheet corridor has no LiDAR coverage here)")
+    else:
+        print(f"viaduct deck {deck_u.area:,.0f} m²: {deck_u.intersection(corridor).area / deck_u.area:.1%} inside the drawn R/W faces")
 
 
 def render(pave, deck, bld, T, corridor):

@@ -17,15 +17,20 @@ from scipy import ndimage
 from shapely.geometry import Point, shape
 from shapely.strtree import STRtree
 
+sys.path.insert(0, str(Path(__file__).parent))
+import tiles as tiles_mod  # noqa: E402
+from georef import OUT, PDF  # noqa: E402  (SHEET-aware)
+
 HERE = Path(__file__).parent
-OUT = HERE / "out"
-CACHE = HERE / "lidar" / "cache"
-DEM = HERE.parent / "Sample Data" / "LiDAR-Point-cloud" / "output.tin.tif"
+TILE = tiles_mod.tile_for(PDF)
+CACHE = TILE["cache"]
+DEM = TILE["dem"]
 TUNNEL = {"61985-1", "61985-2", "61985-3", "61985-4"}
 
 
 def main():
-    h = json.loads((HERE / "lidar" / "htdp.json").read_text())
+    tiles_mod.ensure_cache(TILE)
+    h = json.loads((HERE / "lidar" / "htdp.json").read_text())  # same epoch shift for both tiles: 2 km apart, drift negligible over that distance
     to_utm = Transformer.from_crs("EPSG:6318", "EPSG:6339", always_xy=True)
     polys, names = [], []
     for f in json.loads((OUT / "parcels.geojson").read_text())["features"]:
