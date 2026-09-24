@@ -8,7 +8,7 @@ distance,19.572,13.83,-5.74,FAIL
 bearing,"N63°01'39""E","N63°00'48""E",0.9',pass
 distance,137.732,1.59,-136.15,FAIL
 arc length,152.039,138.82 (R=nan),-13.22,FAIL
-distance,12.133,31.82,+19.68,FAIL
+arc length,12.133,32.19 (R=nan),+20.06,FAIL
 distance,12.133,17.02,+4.89,FAIL
 bearing,"N63°01'39""E","N62°59'14""E",2.4',pass
 bearing,"N38°05'28""E","N37°56'31""E",9.0',FAIL
@@ -28,17 +28,17 @@ distance,156.833,7.94,-148.89,FAIL
 distance,144.700,7.94,-136.76,FAIL
 arc length,66.782,28.94 (R=nan),-37.84,FAIL
 arc length,29.067,8.07 (R=nan),-20.99,FAIL
-distance,7.619,2.10,-5.52,FAIL
+arc length,7.619,4.98 (R=nan),-2.64,FAIL
 distance,6.096,5.40,-0.70,FAIL
 distance,3.271,35.53,+32.25,FAIL
 distance,3.308,2.47,-0.83,FAIL
-distance,7.619,3.05,-4.57,FAIL
-distance,6.096,5.40,-0.70,FAIL
+arc length,7.619,5.41 (R=nan),-2.21,FAIL
+arc length,6.096,5.41 (R=nan),-0.68,FAIL
 distance,1.524,1.82,+0.30,pass
-distance,7.619,3.45,-4.17,FAIL
-distance,6.096,4.97,-1.13,FAIL
-distance,7.619,3.01,-4.61,FAIL
-distance,6.096,4.97,-1.13,FAIL
+arc length,7.619,5.40 (R=nan),-2.22,FAIL
+arc length,6.096,5.40 (R=nan),-0.70,FAIL
+arc length,7.619,5.40 (R=nan),-2.22,FAIL
+arc length,6.096,5.40 (R=nan),-0.70,FAIL
 arc length,1237.437,2.75 (R=1.7),-1234.69,FAIL
 bearing,"N29°55'49""W","N30°00'10""W",4.4',FAIL
 arc length,232.307,19.53 (R=nan),-212.77,FAIL
@@ -47,6 +47,8 @@ distance,311.460,7.94,-303.52,FAIL
 bearing,"N29°55'49""W","N29°56'20""W",0.5',pass
 arc length,311.443,5.75 (R=150.1),-305.69,FAIL
 bearing,"N63°00'45""E","N63°13'02""E",12.3',FAIL
+bearing,"N29°55'49""W","N29°31'47""W",24.0',FAIL
+arc length,363.521,4.50 (R=nan),-359.02,FAIL
 distance,152.541,152.39,-0.15,pass
 arc length,158.193,20.00 (R=nan),-138.19,FAIL
 distance,8.942,9.05,+0.11,pass
@@ -87,6 +89,7 @@ distance,43.946,43.41,-0.54,FAIL
 arc length,7.089,2.34 (R=nan),-4.75,FAIL
 bearing,"N29°55'49""W","N29°53'12""W",2.6',pass
 distance,93.514,22.99,-70.53,FAIL
+bearing,"N29°55'15""W","N29°46'11""W",9.1',FAIL
 bearing,"N60°04'45""E","N60°04'28""E",0.3',pass
 distance,11.283,2.67,-8.61,FAIL
 distance,24.383,10.81,-13.57,FAIL

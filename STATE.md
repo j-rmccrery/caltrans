@@ -3,7 +3,43 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-23 20:05 after loop 3; loop 3 plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-23 23:45 after loop 4; plan and status in `spike/LOOP.md`)
+
+**Coverage after loop 4.** Three LiDAR tiles (`spike/tiles.py`): south/Presidio 2025, north/Marin 2025, gap (USGS 3DEP
+2018, `Sample Data/LiDAR-Point-cloud/gap/`, ~9.7 pts/m2) for R-10741.1 and R-10434.3's east edge; all six baseline
+sheets have ground under them. Nine bench sheets: the six plus R-71.71 (grid lines, rms 0.01 ft), R-10258.1
+(callouts + grid, package 0.09 ft) and R-71.70 (unverified, below). Bench row `loop4-final`:
+presidio 39/47 30/49 13/19 wl 15; .1 26/37 18/31 14/32 wl 29; .3 42/58 32/51 23/39 wl 33; R-10741.1 14/19 12/13 1/1
+wl 3; .2 20/22 20/20 0/0 wl 2; .3 17/17 12/13 0/1 wl 1; R-71.71 14/19 16/21 1/4 wl 7; R-10258.1 12/52 17/28 2/16 wl 35.
+What moved and why: north dashes are 8.6-8.9 pt (the 8 pt cap chained tick marks instead), the north drafter's
+`A=` delta and OCR-joined curve blocks now feed L=R*delta, R-10434.3's line table was masked short by an unrelated
+curve table at the same x (12 cells checked as labels), comma-grouped distances (`18,966.64'`) now parse.
+
+**R-71.70 (CCS83 zone 2, 1"=~2900', NGS PIDs AE9850 RYER and AE9865 STAR RESET):** `georef.ngs_points` fetches the
+published positions (cached `spike/lidar/ngs_pids.json`), finds both brass-disk marks by leader, and the two-point
+fit gives scale 40.16 ft/pt, rotation 88.73; the sheet's own bearings say 90.02 (6/9 within 0.16 deg). 1.29 deg over
+the 31,700 ft baseline is ~18 pt on one mark or a non-grid basis of bearings. Crop both marks against the fit before
+trusting either. The mechanism is STATE gap 5, built; this sheet is its first test and does not verify yet.
+
+Do this, in order:
+
+1. **R-71.70's 1.29 deg**: render both PID marks with the two-point fit's reprojection of each other; read the
+   sheet's basis-of-bearings note; decide which is off. Then the NGS path is a second independent check on every
+   sheet that prints a PID.
+2. **Not-to-scale insets on OCR sheets**: the mask is built (`checks.py`, text-based) but R-10741.2's caption reads
+   as CJK glyphs; detect the inset by its dashed circle instead, or fix the OCR crop levelling for small captions.
+3. **Chords and record residuals**: the north dashed line measures 175.04 vs 176.73 printed (1.7 ft), an honest
+   exception; check whether the dashes stop short of the vertex circles by a cap and, if so, extend to the mark.
+4. **Arc lengths, what is left** (`spike/out/legC_misses.md`): run-sums against a neighbour tag.
+5. **R-10434.1 traverse** closed 1 -> 0 in loop 2 leg C; trace the moved edge.
+6. **Mosaic south + gap** so R-10434.3 keeps the 2025 tile where it has it; CA_SanFrancisco_B23 (2024) covers both
+   gap boxes but its LAZ carries no CRS, pin it down.
+7. **1950s scans on the north tile** (R-71.11/.20/.28, R-92.8/.9) through their packages like R-65.
+8. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze.
+
+## Next as of loop 3 (2026-09-23 20:05), kept for the record
+
+### Next (logged 2026-09-23 20:05 after loop 3; loop 3 plan and status in `spike/LOOP.md`)
 
 **The six-sheet baseline exists and reproduces.** South R-10434.1/.2/.3 (Presidio tile) and north R-10741.1/.2/.3
 (Marin tile, 2017, drafter CHaldenwang, no SHX annotations, no tables, read by OCR) all georeference from their

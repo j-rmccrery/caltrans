@@ -1,7 +1,7 @@
 check,printed,drawn,difference,result
 arc length,71.57,1961.46 (R=nan),+1889.89,FAIL
 bearing,"N69°38'14""E","S79°47'00""E",1834.8',FAIL
-distance,95.98',5550.42,+5454.44,FAIL
+arc length,95.98',3570.14 (R=nan),+3474.16,FAIL
 distance,77.36',3629.22,+3551.86,FAIL
 arc length,274.48',8006.90 (R=nan),+7732.42,FAIL
 arc length,54.33',3140.84 (R=nan),+3086.51,FAIL
