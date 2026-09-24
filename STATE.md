@@ -12,7 +12,7 @@ own callouts and sit on their tiles; Caltrans' packages check all six (max 0.4 f
 (two tile groups, 27 + 21 layers, renders `six_render_south.png` / `six_render_north.png`). Bench over six:
 `python spike/bench.py <label> --tables --tags --parcels --traverse presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3`;
 row `loop3-final` (equal to `six`, measured twice): presidio 39/47 30/49 13/19 wl 15 tags 24; .1 26/37 18/31 14/33
-wl 30; .3 42/70 32/51 23/39 wl 45; R-10741.1 13/16 12/12 1/4 wl 6; .2 20/22 19/19 0/3 wl 5; .3 17/17 12/13 0/2 wl 2.
+wl 30; .3 42/70 32/51 23/39 wl 45; R-10741.1 13/16 12/12 1/4 wl 6; .2 20/22 19/19 0/1 wl 3 (leg 5; was 0/3 wl 5); .3 17/17 12/13 0/1 wl 1 (was 0/2 wl 2).
 The .1/.3 rows moved from loop 2's (25/32, 41/70): those were measured on stale sibling state. Every future leg is
 gated on this row; a leg that moves a north row must say whether reads or association moved it.
 
@@ -30,8 +30,11 @@ between the tiles need USGS 3DEP.
 
 Do this, in order:
 
-1. **North label association** (loop 3 leg 5, not run): 12 crops of failing distance/bearing labels on R-10741.2,
-   name the biggest cause, fix it in `checks.py`; gate +3 distance passes on .2, no loss on the other five.
+1. **Chord checks.** On R-10741.2 the labels with no drawn line are chord citations: a bearing+distance pair
+   beside a curve (`S16°20'26"E 176.73'` with `(176.77')` under it, arc 176.77 vs chord 176.73). Check them as the
+   chord between the curve's ends. Loop 3 leg 5 did the rest of the north attribution (`spike/out/r_10741_002_2017-02-10/leg5_misses.md`):
+   the `A=` delta prefix and OCR-joined curve blocks are read now (curve L=R*delta 2/2 on .2); a not-to-scale detail
+   inset holds two labels no check can ever pass (mask NTS insets); `660.20'` has its degree sign OCR-read as a quote.
 2. **Arc lengths, what is left** (`spike/out/legC_misses.md`): run-sums against a neighbour tag.
 3. **R-10434.1 traverse** closed 1 -> 0 in loop 2 leg C; trace the moved edge.
 4. **1950s scans on the north tile** (D4 index: R-71.11/.20/.28, R-92.8/.9) through their packages like R-65.
