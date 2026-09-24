@@ -124,3 +124,26 @@ rotation, 0 callouts paired so no offset (`spike/out/r10741_run.log`).
 | 6 | done | 1 | `loop3-final` bench row; numbers.md over six sheets; status page rewritten and republished; STATE.md Next rewritten; memory | leg6 |
 
 Dispatches used: 8 of 16 (6 agents, one resumed). Started 18:00, ended 21:10 PDT. Every number above re-measured at the time of its row.
+
+---
+
+# Loop 4: coverage (started 2026-09-23 21:20 PDT, JR: "do that" on the four coverage gaps)
+
+Same rules as loop 3: commit each passed leg on `caltrans-spike`, no push; implementers on sonnet; gates re-measured by
+the orchestrator; two attempts then stash as `loop4-leg-N`; budget 16 dispatches or 7 h; `Sample Data/` read-only
+except new downloads placed under it; `demo.py --fast` must still run at the end. Baseline is bench row `loop3-final`:
+presidio 39/47 30/49 13/19 wl 15; .1 26/37 18/31 14/33 wl 30; .3 42/70 32/51 23/39 wl 45; R-10741.1 13/16 12/12 1/4
+wl 6; .2 20/22 19/19 0/1 wl 3; .3 17/17 12/13 0/1 wl 1.
+
+| # | Leg | Gate |
+|---|---|---|
+| A | Third LiDAR tile from USGS 3DEP for the strip between the tiles (the Golden Gate strait and bridge: R-10434.3 at N 4184705-4185241, R-10741.1 around N 4187000-4188100 west of the Marin tile), registered in `tiles.py`, caches built, rasters written, R-10434.3 and R-10741.1 through the tail | both sheets report linework inside their tile > 50 %; overlay PNGs viewed; the tile's flight date and density printed; south/north tiles untouched |
+| B | Chord checks: a bearing+distance pair beside a curve, with the arc length in parentheses under it, checked as the chord between the curve's ends; not-to-scale detail insets masked (their labels queued as "not to scale", never failed) | R-10741.2 exceptions 6 -> 2 or fewer with the chord pair passing (S16°20'26"E 176.73' vs the curve's chord) and the inset's two labels queued not failed; no loss on the other five; wrong-line not up; crops viewed |
+| C | R-71.70, R-71.71, R-10258 (Civil 3D 2016+, SHX annotations) through the chain: read_shx, tables, solve, checks; added to the bench | 3 sheets georeferenced from their own callouts (credible or weak), rms <= 0.1 ft, package check reported; bench rows for all nine; the six baseline rows unchanged |
+| D | R-10434.3 wrong-line triage by the exception page's method: 12 crops of wrong-line fails, biggest cause fixed | R-10434.3 wrong-line 45 -> 35 or fewer, distance passes not down; no loss on the other sheets; 8 new passing crops viewed |
+| E | Close-out: `demo.py --fast` under 180 s, `--six` (now nine) runs, bench row `loop4-final`, numbers.md, status page and PDF, STATE.md, memory | every number re-measured at report time |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
