@@ -1,0 +1,135 @@
+text blocks                   5.5s  ok  biggest blocks (likely merged tables): [39, 40, 41, 41, 56, 63, 70, 92]
+read text (SHX annotations)    2.7s  ok  reads_disagree: 829
+sheet frame                   1.6s  ok  map area [188, 202, 2448, 1086] of 2448x1584; furniture: 4 dense text blocks
+sheet alphabet + tables       9.2s  ok  vs keyed tables: 101/101 cells exact (4 truth rows not found: ['C1', 'C2', 'L1', 'L2'])
+tables from annotations       2.6s  ok  vs keyed tables: 111/111 cells exact (0 truth rows not found)
+read text by glyph         skipped (SHX annotation text covers this sheet)
+read text (OCR)            skipped (SHX annotation text covers this sheet)
+georeference                  2.5s  ok  credible
+linework on LiDAR             2.4s  ok  heavy linework inside LiDAR extent: 100.0%
+parcels                       9.0s  ok  largest unnamed faces (acres): [np.float64(0.45), np.float64(0.163), np.float64(0.148), np
+checks + exception queue      8.2s  ok      {'kind': 'bearing', 'text': 'N77°38\'06"W', 'drawn': 'N77°45\'54"W', 'off_arcmin': 7.8
+segment tags                 50.6s  ok    ?L0?@899,635/0.0 ?L0?@2003,552/0.0 ?C1@1245,801/2.14 ?C3@1047,651/0.0 ?L??11@1798,987/0.
+table checks via tags         5.2s  ok     queue: C22 - drawn run 816.07 ft vs table 434.47 ft
+record twin (traverse)        7.3s  ok  figure 61806        edges   4 by record   0 closure     0.00 ft  area        4,854 sq ft
+LiDAR features                5.2s  ok    ground = float(np.nanmedian(np.where(g_cnt > 0, g_z, np.nan)[rmask])) if rmask.any() els
+encroachment                  5.9s  ok  tunnel easement 61985-1+61985-2+61985-3+61985-4: length 289 m, ground over it 28.1-36.9 m
+rasters for QGIS              0.7s  ok  wrote C:\Users\johnr\projects\caltrans\spike\out\lidar_intensity.tif and C:\Users\johnr\pr
+object record                 0.5s  ok    parcel             verified      1
+exception page                3.4s  ok      15  Reader measured a different line
+QGIS project                  2.8s  ok  demo.qgz: 13 layers valid after round trip, CRS EPSG:6339, 7321 features; demo_render.png 
+figures                       2.6s  ok  fig_htdp.png: 547640,4184033 : 547730,4184077
+numbers for the slides        0.7s  ok  Blocker: 61985-1..4 do not close as separate figures. The drawing carries them as one stri
+total 129s
+-- R-10434.1 (r_10434_001_2020-09-16, south tile) --
+  text blocks                   4.1s  ok  biggest blocks (likely merged tables): [39, 41, 41, 42, 45, 63, 74, 92]
+  read text (SHX annotations)    2.2s  ok  reads_disagree: 719
+  sheet frame                   2.0s  ok  map area [200, 272, 2324, 1418] of 2448x1584; furniture: 2 dense text blocks
+  sheet alphabet + tables       7.4s  ok      ('C6', "243.51'", "44.62'")
+  tables from annotations       2.2s  ok  vs keyed tables: 0/57 cells exact (19 truth rows not found)
+  read text by glyph         skipped (SHX annotation text covers this sheet)
+  read text (OCR)            skipped (SHX annotation text covers this sheet)
+  georeference                  5.9s  ok  vs Caltrans georeferenced package at 9 sheet points: median 0.77, max 1.03 (sheet units)
+  linework on LiDAR             2.2s  ok  heavy linework inside LiDAR extent: 80.3%
+  parcels                       7.4s  ok  largest unnamed faces (acres): [np.float64(3.718), np.float64(2.915), np.float64(1.174), n
+  checks + exception queue      8.7s  ok      {'kind': 'arc length', 'text': "31.80'", 'drawn_ft': 308.19, 'off_ft': 276.39, 'region
+  segment tags                 56.9s  ok    C0?@813,679/1.71 C3@1291,1102/1.74 L1@886,1044/1814992.25 L2@888,1032/64.27 L3@924,1020/
+  table checks via tags         5.8s  ok     queue: C3 - drawn run 165.76 ft vs table 322.86 ft
+  record twin (traverse)        6.3s  ok  figure 46825|61806-1|61806-2|63269 edges   4 by record   0 closure     0.00 ft  area      
+  LiDAR features                5.4s  ok    ground = float(np.nanmedian(np.where(g_cnt > 0, g_z, np.nan)[rmask])) if rmask.any() els
+  encroachment                  0.8s  ok  building-like clusters inside named parcels: 3
+  object record                 0.5s  ok    parcel             info         55
+  R-10434.1 total 118s
+-- R-10434.3 (r_10434_003_2020-09-16, south tile) --
+  text blocks                  11.1s  ok  biggest blocks (likely merged tables): [51, 56, 58, 60, 63, 72, 92, 245]
+  read text (SHX annotations)    5.8s  ok  reads_disagree: 1403
+  sheet frame                   2.1s  ok  map area [180, 45, 2413, 1234] of 2448x1584; furniture: 6 dense text blocks
+  sheet alphabet + tables      13.1s  ok      ('L3', "7.61'", "96.27'")
+  tables from annotations       5.8s  ok  vs keyed tables: 0/111 cells exact (0 truth rows not found)
+  read text by glyph         skipped (SHX annotation text covers this sheet)
+  read text (OCR)            skipped (SHX annotation text covers this sheet)
+  georeference                  8.9s  ok  credible
+  linework on LiDAR             2.5s  ok  heavy linework inside LiDAR extent: 81.8%
+  parcels                      12.2s  ok  largest unnamed faces (acres): [np.float64(2.953), np.float64(0.772), np.float64(0.298), n
+  checks + exception queue     13.2s  ok      {'kind': 'arc length', 'text': "44.74'", 'drawn_ft': 67.56, 'off_ft': 22.82, 'region':
+  segment tags                 88.1s  ok    ?L0??@1714,1031/0.0 ?L1??@1223,215/0.0 ?L1??@1431,497/0.0 ?L1??@2069,991/0.0 ?C?1?@759,7
+  table checks via tags         7.6s  ok  WARNING: only 28 of 69 read tags found their segment on this sheet (its leader convention 
+  record twin (traverse)       11.6s  ok  figure 61806-5      edges   4 by record   0 closure     0.00 ft  area        6,058 sq ft  
+  LiDAR features                5.3s  ok    ground = float(np.nanmedian(np.where(g_cnt > 0, g_z, np.nan)[rmask])) if rmask.any() els
+  encroachment                  1.0s  ok  building-like clusters inside named parcels: 2
+  object record                 0.5s  ok    parcel             queued        2
+  R-10434.3 total 189s
+-- R-10741.1 (r_10741_001_2017-02-10, north tile) --
+  text blocks                   1.2s  ok  biggest blocks (likely merged tables): [22, 23, 23, 39, 39, 41, 63, 92]
+  read text (SHX annotations)    0.2s  ok  reads_disagree: 0
+  sheet frame                   0.6s  ok  map area [274, 121, 2226, 1503] of 2448x1584; furniture: 0 dense text blocks
+  sheet alphabet + tables       2.2s  ok  no NO. column: no tables; alphabet from the font seed alone, 369 exemplars over ()01234567
+  tables from annotations    skipped (no SHX annotations: tables from the glyph alphabet)
+  read text by glyph           61.1s  ok  read 311 blocks by glyph: 137 fully read, 356 unread glyphs
+  read text (OCR)            skipped (stroked sheet: read by glyph)
+  georeference                  1.7s  ok  vs Caltrans georeferenced package at 9 sheet points: median 0.09, max 0.10 (sheet units)
+  linework on LiDAR             1.1s  ok  WARNING: r_10741_001_2017-02-10 mostly outside its tile's LiDAR coverage (0.3% inside) -- 
+  parcels                       1.2s  ok  largest unnamed faces (acres): [np.float64(99.707), np.float64(4.692), np.float64(2.628), 
+  checks + exception queue      2.0s  ok      {'kind': 'arc length', 'text': "176.77'", 'drawn_ft': 158.21, 'off_ft': -18.56, 'regio
+  segment tags                 21.9s  ok    ?C0?@1400,1277/1.03 ??L1@1863,1395/0.0 ?L1?@1906,1497/0.0 ?L1?@1617,1346/0.0 C00?@322,12
+  table checks via tags         0.4s  ok  no table rows or no tags on this sheet: nothing to check
+  record twin (traverse)        1.1s  ok  labels naming a face total (leader + proximity, within 15/70 pt): 0
+  LiDAR features                1.1s  ok    ground = float(np.nanmedian(np.where(g_cnt > 0, g_z, np.nan)[rmask])) if rmask.any() els
+  encroachment                  0.6s  ok  building-like clusters inside named parcels: 0
+  object record                 0.5s  ok    parcel             info         56
+  R-10741.1 total 97s
+-- R-10741.2 (r_10741_002_2017-02-10, north tile) --
+  text blocks                   1.4s  ok  biggest blocks (likely merged tables): [21, 22, 22, 23, 39, 41, 63, 92]
+  read text (SHX annotations)    0.2s  ok  reads_disagree: 0
+  sheet frame                   0.6s  ok  map area [448, 114, 2342, 1502] of 2448x1584; furniture: 0 dense text blocks
+  sheet alphabet + tables       2.4s  ok  no NO. column: no tables; alphabet from the font seed alone, 428 exemplars over ()01234567
+  tables from annotations    skipped (no SHX annotations: tables from the glyph alphabet)
+  read text by glyph           75.0s  ok  read 382 blocks by glyph: 181 fully read, 391 unread glyphs
+  read text (OCR)            skipped (stroked sheet: read by glyph)
+  georeference                  1.8s  ok  vs Caltrans georeferenced package at 9 sheet points: median 0.13, max 0.15 (sheet units)
+  linework on LiDAR             1.2s  ok  heavy linework inside LiDAR extent: 59.9%
+  parcels                       1.3s  ok  largest unnamed faces (acres): [np.float64(33.996), np.float64(25.924), np.float64(4.676),
+  checks + exception queue      2.1s  ok      {'kind': 'arc length', 'text': "581.40'", 'drawn_ft': 992.95, 'off_ft': 411.55, 'regio
+  segment tags                 24.7s  ok    ?C0?@1400,1277/1.01 ??C0@2056,1472/0.0 C0@1600,1374/1.64 C1@1631,1395/2.23 C1@1677,1425/
+  table checks via tags         0.4s  ok  no table rows or no tags on this sheet: nothing to check
+  record twin (traverse)        1.2s  ok  figure 46825-5      edges  10 by record   9 closure   818.31 ft  area 1,242,350,535 sq ft
+  LiDAR features                1.2s  ok    ground = float(np.nanmedian(np.where(g_cnt > 0, g_z, np.nan)[rmask])) if rmask.any() els
+  encroachment                  2.9s  ok  building-like clusters inside named parcels: 2
+  object record                 0.5s  ok    parcel             info         38
+  R-10741.2 total 117s
+-- R-10741.3 (r_10741_003_2017-02-10, north tile) --
+  text blocks                   1.4s  ok  biggest blocks (likely merged tables): [21, 22, 22, 23, 26, 41, 63, 92]
+  read text (SHX annotations)    0.2s  ok  reads_disagree: 0
+  sheet frame                   0.6s  ok  map area [224, 273, 1905, 1503] of 2448x1584; furniture: 0 dense text blocks
+  sheet alphabet + tables       2.3s  ok  no NO. column: no tables; alphabet from the font seed alone, 431 exemplars over ()01234567
+  tables from annotations    skipped (no SHX annotations: tables from the glyph alphabet)
+  read text by glyph           71.1s  ok  read 349 blocks by glyph: 156 fully read, 384 unread glyphs
+  read text (OCR)            skipped (stroked sheet: read by glyph)
+  georeference                  1.8s  ok  vs Caltrans georeferenced package at 9 sheet points: median 0.03, max 0.04 (sheet units)
+  linework on LiDAR             1.2s  ok  heavy linework inside LiDAR extent: 99.3%
+  parcels                       1.2s  ok  largest unnamed faces (acres): [np.float64(49.177), np.float64(18.998), np.float64(3.822),
+  checks + exception queue      2.1s  ok      {'kind': 'arc length', 'text': '581.40', 'drawn_ft': 992.88, 'off_ft': 411.48, 'region
+  segment tags                 23.0s  ok    ?C0?@1400,1277/1.11 ??L1@1863,1395/0.0 ?L1?@1617,1346/0.0 ?C6?@1795,435/4.73 ?C9?@265,43
+  table checks via tags         0.4s  ok  no table rows or no tags on this sheet: nothing to check
+  record twin (traverse)        1.1s  ok  figure 46825-5      edges   6 by record   3 closure   156.01 ft  area  496,029,785 sq ft
+  LiDAR features                1.2s  ok    ground = float(np.nanmedian(np.where(g_cnt > 0, g_z, np.nan)[rmask])) if rmask.any() els
+  encroachment                  4.0s  ok  building-like clusters inside named parcels: 0
+  object record                 0.5s  ok    parcel             info         53
+  R-10741.3 total 112s
+rasters (south tile)             0.7s  ok
+rasters (north tile)             0.5s  ok
+QGIS six-sheet project         6.8s  ok
+  R-10434.1:
+  R-10434.2:
+  R-10434.3:
+  R-10741.1:
+    skip Object record: control points: 0 features (objects.geojson|geometrytype=Point)
+    skip Encroachment clusters: 0 features (encroachments.geojson)
+  R-10741.2:
+  R-10741.3:
+South: Presidio tile: 27 layers
+North: Marin tile: 21 layers
+six_render_south.png: 2000x900, 5365888 inked samples
+six_render_north.png: 2000x900, 1676033 inked samples
+ 
+--six total 640s, 0 failure(s)

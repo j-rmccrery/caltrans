@@ -24,7 +24,22 @@ OUT = Path(__file__).parent / "out" / (PDF.stem if "SHEET" in os.environ else ""
 # the sheet's reads: from AutoCAD SHX Text annotations (read_shx.py) where the sheet carries them,
 # else by glyph on a stroked sheet (read_glyphs.py), else by OCR
 _rs, _rg, _rr, _rt = OUT / "read_shx.json", OUT / "read_glyph.json", OUT / "read_rapid.json", OUT / "tables.json"
-_validated = _rt.exists() and _rt.stat().st_size > 20  # an alphabet the tables' NO. column validated; the font-seed-only one is not
+
+
+def _has_rows(p):
+    """tables.json with at least one table row: an alphabet the tables' NO. column validated. The font-seed-only
+    alphabet writes {} or {"_regions": []} (a byte-size test took the latter for validated, so the reads selector
+    flipped between OCR and glyph with whichever step wrote the file last)."""
+    if not p.exists():
+        return False
+    try:
+        t = json.loads(p.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+        return False
+    return isinstance(t, dict) and any(not k.startswith("_") for k in t)
+
+
+_validated = _has_rows(_rt)
 
 
 def _has_text(p):

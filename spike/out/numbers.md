@@ -14,16 +14,16 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 | curve L=R*delta | 10 | 10 |
 
 - Where a label passes, printed vs drawn agrees to 0.03 ft median (max 0.24) and 0.55′ median bearing.
-- Exception queue: 60 items = 18 genuine disagreements, 15 where the reader measured a different line, 22 labels with no line found, 5 lines leaving the sheet.
+- Exception queue: 59 items = 18 genuine disagreements, 15 where the reader measured a different line, 21 labels with no line found, 5 lines leaving the sheet.
 
 ## Table tags (L#, C#) read from the glyph paths, no OCR
-- 33 of 44 table rows found on the drawing (32 distinct), 12 partial reads queued, 22 associated (19 by leader arrowhead), 33 queue items.
+- 32 of 44 table rows found on the drawing (32 distinct), 14 partial reads queued, 24 associated (20 by leader arrowhead), 34 queue items.
 | check | checked | pass |
 |---|---|---|
-| bearing | 11 | 11 |
-| distance | 10 | 10 |
+| bearing | 12 | 11 |
+| distance | 11 | 10 |
 | radius | 8 | 5 |
-| arc length | 9 | 2 |
+| arc length | 10 | 3 |
 
 ## Parcels
 - 61 faces from the heavy linework, 9 named by a label or leader, 5 with a parcel-table area, 1 within 1 % of it (figures leave the sheet at matchlines; easement strips do not close).
@@ -41,9 +41,6 @@ Pass counts from `spike/out/bench.csv` (rows labelled `loop2-final`):
 
 | sheet | distance | bearing | arc length | tags associated | faces named |
 |---|---|---|---|---|---|
-| R-10434.2 Presidio | 39/47 | 30/49 | 13/19 | 24 | 9 |
-| R-10434.1 | 25/32 | 19/30 | 13/34 | 14 | 5 |
-| R-10434.3 | 41/70 | 31/50 | 21/33 | 28 | 13 |
 
 Closed chain on r_10434_002_2020-09-16: 5 edges (5 with a full record), end misfit 0.14 ft, record area 6,970.6 sq ft.
 

@@ -142,10 +142,10 @@
  },
  {
   "parcel": "61806-4|61985-2",
-  "edges": 69,
-  "by_record": 16,
-  "closure_ft": 66.42,
-  "record_area_sqft": 34529352.0,
+  "edges": 70,
+  "by_record": 17,
+  "closure_ft": 69.98,
+  "record_area_sqft": 69874315.4,
   "flags": [
    "chord direction drawn",
    "chord direction drawn",
@@ -184,6 +184,7 @@
    "drawn",
    "drawn",
    "drawn",
+   "chord direction drawn",
    "partial record",
    "partial record",
    "drawn",

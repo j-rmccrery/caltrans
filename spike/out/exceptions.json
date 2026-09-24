@@ -1283,17 +1283,6 @@
   ]
  },
  {
-  "kind": "distance",
-  "text": "11.18'",
-  "issue": "no line found beside label",
-  "region": [
-   1804,
-   1011,
-   1840,
-   1027
-  ]
- },
- {
   "kind": "bearing",
   "text": "S21°34'50\"E",
   "drawn": "N68°25'19\"E",

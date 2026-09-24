@@ -34,26 +34,26 @@
   }
  },
  "exceptions": {
-  "total": 60,
-  "unmatched": 22,
+  "total": 59,
+  "unmatched": 21,
   "matchline": 5,
   "disagree_small": 18,
   "wrong_line": 15
  },
  "tags": {
   "table_rows": 44,
-  "read": 33,
+  "read": 32,
   "distinct": 32,
-  "partial_queued": 12,
-  "associated": 22,
-  "by_leader": 19,
-  "queued": 33,
+  "partial_queued": 14,
+  "associated": 24,
+  "by_leader": 20,
+  "queued": 34,
   "distance": {
-   "checked": 10,
+   "checked": 11,
    "pass": 10
   },
   "bearing": {
-   "checked": 11,
+   "checked": 12,
    "pass": 11
   },
   "radius": {
@@ -61,8 +61,8 @@
    "pass": 5
   },
   "arc length": {
-   "checked": 9,
-   "pass": 2
+   "checked": 10,
+   "pass": 3
   }
  },
  "parcels": {

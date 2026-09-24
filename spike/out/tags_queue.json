@@ -70,6 +70,16 @@
   ]
  },
  {
+  "tag": "?L??21",
+  "issue": "tag partly unread",
+  "region": [
+   1991,
+   910,
+   2020,
+   924
+  ]
+ },
+ {
   "tag": "C0?",
   "issue": "tag partly unread",
   "region": [
@@ -77,6 +87,16 @@
    980,
    1728,
    994
+  ]
+ },
+ {
+  "tag": "C0?",
+  "issue": "tag partly unread",
+  "region": [
+   1906,
+   909,
+   1935,
+   924
   ]
  },
  {
@@ -90,28 +110,8 @@
   ]
  },
  {
-  "tag": "C1",
-  "issue": "no such table row",
-  "region": [
-   964,
-   627,
-   993,
-   641
-  ]
- },
- {
-  "tag": "C1",
-  "issue": "no such table row",
-  "region": [
-   1682,
-   1012,
-   1711,
-   1026
-  ]
- },
- {
   "tag": "C2",
-  "issue": "no such table row",
+  "issue": "no leader, no curve beside the tag",
   "region": [
    981,
    596,
@@ -161,17 +161,47 @@
  },
  {
   "tag": "L1",
-  "issue": "no such table row",
+  "issue": "drawn 40.16 ft vs table 1.86 ft",
   "region": [
    1082,
    554,
    1111,
    568
+  ],
+  "line": [
+   [
+    1121.0,
+    545.7
+   ],
+   [
+    1093.2,
+    537.7
+   ]
+  ]
+ },
+ {
+  "tag": "L1",
+  "issue": "drawn bearing off by 5237.7 arcmin",
+  "region": [
+   1082,
+   554,
+   1111,
+   568
+  ],
+  "line": [
+   [
+    1121.0,
+    545.7
+   ],
+   [
+    1093.2,
+    537.7
+   ]
   ]
  },
  {
   "tag": "L2",
-  "issue": "no such table row",
+  "issue": "leader points at no line",
   "region": [
    1125,
    598,

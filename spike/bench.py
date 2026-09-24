@@ -151,7 +151,8 @@ def reads_path(o):
             return any(b.get("text") for b in json.loads(p.read_text(encoding="utf-8")))
         except (ValueError, OSError):
             return False
-    validated = rt.exists() and rt.stat().st_size > 20
+    from georef import _has_rows
+    validated = _has_rows(rt)
     return rs if has_text(rs) else (rg if rg.exists() and rg.stat().st_size > 2 and (validated or not rr.exists()) else rr)
 
 
@@ -181,6 +182,7 @@ def run(key, steps):
     pdf = SHEETS[key]
     env = env_for(pdf)
     t = time.time()
+    tables = tables_cols(pdf) if "tables" in steps else {}  # before checks: tables.json masks table cells, so the annotation rebuild must be the last writer
     r = subprocess.run([str(PY), str(ROOT / "spike" / "checks.py")], capture_output=True, text=True, encoding="utf-8", errors="replace", env=env, cwd=ROOT)
     if r.returncode:
         print(r.stdout[-2000:], r.stderr[-3000:])
@@ -208,8 +210,7 @@ def run(key, steps):
         res.update(parcels_cols(pdf))
     if "traverse" in steps:
         res.update(traverse_cols(pdf))
-    if "tables" in steps:
-        res.update(tables_cols(pdf))
+    res.update(tables)
     res["secs"] = round(time.time() - t)  # includes any optional steps
     return res
 
