@@ -45,4 +45,5 @@ bearing,"N35°19'38""W","N35°18'23""W",1.3',pass
 distance,411.67',411.56,-0.11,pass
 distance,598.06',598.18,+0.12,pass
 curve L=R*delta,R=1169.9 Δ=15.6586° L=319.73,319.73,-0.00,pass
+arc length,R=1169.9' L=319.73',315.26,-4.47,FAIL
 curve L=R*delta,R=1920.0 Δ=17.3500° L=581.4,581.40,+0.00,pass

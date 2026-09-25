@@ -55,81 +55,14 @@
   ]
  },
  {
-  "kind": "arc length",
+  "kind": "distance",
   "text": "124.10'",
-  "drawn_ft": 13.31,
-  "off_ft": -110.79,
+  "issue": "no line found beside label",
   "region": [
    2119,
    639,
    2173,
    663
-  ],
-  "line": [
-   [
-    2189.2,
-    621.8
-   ],
-   [
-    2189.8,
-    621.5
-   ],
-   [
-    2190.4,
-    621.2
-   ],
-   [
-    2191.0,
-    620.9
-   ],
-   [
-    2191.5,
-    620.6
-   ],
-   [
-    2192.0,
-    620.2
-   ],
-   [
-    2192.5,
-    619.8
-   ],
-   [
-    2193.0,
-    619.3
-   ],
-   [
-    2193.4,
-    618.9
-   ],
-   [
-    2193.8,
-    618.4
-   ],
-   [
-    2194.2,
-    617.9
-   ],
-   [
-    2194.5,
-    617.4
-   ],
-   [
-    2194.9,
-    616.8
-   ],
-   [
-    2195.1,
-    616.2
-   ],
-   [
-    2195.4,
-    615.6
-   ],
-   [
-    2195.6,
-    615.0
-   ]
   ]
  },
  {
@@ -331,10 +264,10 @@
   ]
  },
  {
-  "kind": "arc length",
+  "kind": "distance",
   "text": "85.59'",
-  "drawn_ft": 82.39,
-  "off_ft": -3.2,
+  "drawn_ft": 53.06,
+  "off_ft": -32.53,
   "region": [
    969,
    567,
@@ -343,68 +276,12 @@
   ],
   "line": [
    [
-    1012.5,
-    575.6
-   ],
-   [
-    1010.7,
-    575.0
-   ],
-   [
     1009.7,
     574.8
    ],
    [
-    998.6,
-    571.7
-   ],
-   [
-    998.6,
-    571.7
-   ],
-   [
-    987.3,
-    568.7
-   ],
-   [
-    986.3,
-    568.4
-   ],
-   [
-    984.6,
-    567.9
-   ],
-   [
-    983.5,
-    567.6
-   ],
-   [
-    972.4,
-    564.5
-   ],
-   [
-    972.4,
-    564.5
-   ],
-   [
-    961.2,
-    561.5
-   ],
-   [
-    960.2,
-    561.2
-   ],
-   [
-    958.4,
-    560.7
-   ],
-   [
-    957.3,
-    560.4
-   ],
-   [
-    955.3,
-    559.8
+    972.9,
+    564.7
    ]
   ]
  },
@@ -982,6 +859,116 @@
   ]
  },
  {
+  "kind": "distance",
+  "text": "176.36'",
+  "issue": "no line found beside label",
+  "region": [
+   994,
+   558,
+   1032,
+   573
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1991.35",
+  "drawn_ft": 552.9,
+  "off_ft": -1438.45,
+  "region": [
+   1874,
+   1217,
+   1955,
+   1237
+  ],
+  "line": [
+   [
+    1621.5,
+    1208.8
+   ],
+   [
+    2019.6,
+    1208.8
+   ]
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "S21°34'50\"E",
+  "drawn": "N68°25'19\"E",
+  "off_arcmin": 5399.9,
+  "region": [
+   2328,
+   566,
+   2391,
+   586
+  ],
+  "line": [
+   [
+    2402.8,
+    535.3
+   ],
+   [
+    2407.4,
+    533.5
+   ]
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "7.68'",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2328,
+   566,
+   2391,
+   586
+  ]
+ },
+ {
+  "kind": "bearing",
+  "text": "N70°50'05\"E",
+  "drawn": "N70°44'17\"E",
+  "off_arcmin": 5.8,
+  "region": [
+   2316,
+   612,
+   2382,
+   638
+  ],
+  "line": [
+   [
+    2409.4,
+    538.7
+   ],
+   [
+    2416.5,
+    536.3
+   ]
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "57.72'",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2362,
+   516,
+   2398,
+   531
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "1991.35",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   256,
+   83,
+   597,
+   99
+  ]
+ },
+ {
   "kind": "arc length",
   "text": "L=171.66'",
   "drawn_ft": 530.45,
@@ -1137,116 +1124,6 @@
     2052.6,
     549.7
    ]
-  ]
- },
- {
-  "kind": "distance",
-  "text": "176.36'",
-  "issue": "no line found beside label",
-  "region": [
-   994,
-   558,
-   1032,
-   573
-  ]
- },
- {
-  "kind": "distance",
-  "text": "1991.35",
-  "drawn_ft": 552.9,
-  "off_ft": -1438.45,
-  "region": [
-   1874,
-   1217,
-   1955,
-   1237
-  ],
-  "line": [
-   [
-    1621.5,
-    1208.8
-   ],
-   [
-    2019.6,
-    1208.8
-   ]
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "S21°34'50\"E",
-  "drawn": "N68°25'19\"E",
-  "off_arcmin": 5399.9,
-  "region": [
-   2328,
-   566,
-   2391,
-   586
-  ],
-  "line": [
-   [
-    2402.8,
-    535.3
-   ],
-   [
-    2407.4,
-    533.5
-   ]
-  ]
- },
- {
-  "kind": "distance",
-  "text": "7.68'",
-  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
-  "region": [
-   2328,
-   566,
-   2391,
-   586
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N70°50'05\"E",
-  "drawn": "N70°44'17\"E",
-  "off_arcmin": 5.8,
-  "region": [
-   2316,
-   612,
-   2382,
-   638
-  ],
-  "line": [
-   [
-    2409.4,
-    538.7
-   ],
-   [
-    2416.5,
-    536.3
-   ]
-  ]
- },
- {
-  "kind": "distance",
-  "text": "57.72'",
-  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
-  "region": [
-   2362,
-   516,
-   2398,
-   531
-  ]
- },
- {
-  "kind": "distance",
-  "text": "1991.35",
-  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
-  "region": [
-   256,
-   83,
-   597,
-   99
   ]
  }
 ]

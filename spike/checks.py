@@ -216,6 +216,24 @@ def linework_segments(page, max_gray=0.6):
     return segs
 
 
+def circumradius3(P):
+    """Three-point circle through a piece's first, middle and last points (pt units)."""
+    A, B, C = P[0], P[len(P) // 2], P[-1]
+    den = 2 * abs((A[0] - C[0]) * (B[1] - A[1]) - (A[0] - B[0]) * (C[1] - A[1]))
+    return float(np.hypot(*(A - B)) * np.hypot(*(B - C)) * np.hypot(*(C - A)) / den) if den > 1e-6 else float("inf")
+
+
+def circle_center3(P):
+    """Centre of the same three-point circle (pt units), or None for three near-collinear points."""
+    (ax, ay), (bx, by), (cx, cy) = P[0], P[len(P) // 2], P[-1]
+    d = 2 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by))
+    if abs(d) < 1e-6:
+        return None
+    ux = ((ax ** 2 + ay ** 2) * (by - cy) + (bx ** 2 + by ** 2) * (cy - ay) + (cx ** 2 + cy ** 2) * (ay - by)) / d
+    uy = ((ax ** 2 + ay ** 2) * (cx - bx) + (bx ** 2 + by ** 2) * (ax - cx) + (cx ** 2 + cy ** 2) * (bx - ax)) / d
+    return np.array([ux, uy])
+
+
 def arcs_on_sheet(page):
     """Curved lines: runs of bezier items in a path, sampled; length and a circumradius estimate."""
     from overlay import bezier
@@ -238,23 +256,24 @@ def arcs_on_sheet(page):
                 P = np.array(run)
                 L = float(np.sum(np.hypot(*np.diff(P, axis=0).T)))
                 if L > 6:
-                    A, B, C = P[0], P[len(P) // 2], P[-1]
-                    den = 2 * abs((A[0] - C[0]) * (B[1] - A[1]) - (A[0] - B[0]) * (C[1] - A[1]))
-                    R = float(np.hypot(*(A - B)) * np.hypot(*(B - C)) * np.hypot(*(C - A)) / den) if den > 1e-6 else float("inf")
-                    out.append({"pts": P, "len_pt": L, "radius_pt": R, "width": round(d.get("width") or 0, 2), "color": c})
+                    out.append({"pts": P, "len_pt": L, "radius_pt": circumradius3(P), "width": round(d.get("width") or 0, 2), "color": c})
                 run = []
     return out
 
 
 def nearest_arc(b, arcs, tol_perp, tol_deg=8.0):
-    """Arc whose nearest point lies beside the label with its tangent along the label's reading direction."""
+    """Arc whose nearest point lies beside the label with its tangent along the label's reading direction.
+    The coarse distance prefilter below is a search-space cut, not the real perpendicular test (that's
+    `perp < tol_perp` further down) -- it stays a fixed, label-size-scaled reach on its own so a caller
+    passing a tight tol_perp (leg5 legB2: a label must sit close beside a curve to become an arc-length
+    candidate at all) doesn't also silently shrink how far along the curve the nearest point may fall."""
     c, u, n = frame(b)
     best = None
     for arc in arcs:
         P = arc["pts"]
         d = np.hypot(*(P - c).T)
         k = int(d.argmin())
-        if d[k] > tol_perp + b["w"] / 2:
+        if d[k] > 5.0 * b["glyph_h"] + b["w"]:
             continue
         t = P[min(k + 1, len(P) - 1)] - P[max(k - 1, 0)]
         t = t / max(np.hypot(*t), 1e-9)
@@ -675,6 +694,14 @@ def nts_regions(blocks, page):
     return regions
 
 
+def run_sum(drawn, Ls):
+    """Whether a drawn run equals the sum of several record arcs that share it because the boundary
+    between them isn't drawn (loop2 legC / STATE.md D3-6 / loop5 legB): the "pass as a run of N" rule.
+    Shared by the inline L= labels below and by tables.py's table-tag curves."""
+    total = sum(Ls)
+    return total, len(Ls) > 1 and abs(drawn - total) <= DIST_TOL + 0.0005 * total
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
@@ -762,7 +789,14 @@ def main():
         """Grid azimuth of a drawn line (deg, clockwise from grid north), through the fit's rotation."""
         dx, dy = ln["dir"][0], -ln["dir"][1]
         return math.degrees(math.atan2(a * dx - bb * dy, bb * dx + a * dy)) % 360
-    rows, exceptions, labels = [], [], []  # labels: every checked value with the line it was measured on (sheet pt), for the traverse
+    rows, exceptions, labels, len_pending = [], [], [], []  # labels: every checked value with the line it
+    # was measured on (sheet pt), for the traverse; len_pending: standalone L=/(T) labels whose own
+    # length matched no drawn piece, resolved by run-sum grouping after every block is scanned (below)
+    len_checked = set()  # id() of every block the standalone L=/(T) branch (below) already matched to a
+    # drawn piece and passed. The curve-data fillet check (further down) skips only these: a joined block
+    # whose L= is ALSO its own separate single-line block would otherwise pass twice for the identical
+    # drawn piece. A block the standalone branch missed or deferred is NOT marked -- the fillet check's
+    # radius match is a genuinely different search and gets its own try at exactly those
 
     def at_tip(bi, kind, want=None):
         """The line or arc a label's leader points at (within 4 pt of the arrowhead), if it has a leader.
@@ -815,10 +849,12 @@ def main():
             # among arcs within 5 glyph heights (never the nearest arc by distance alone).
             m = LEN.match(lines[0])
             want = float(m[1])
+            is_total = bool(m[2])
             # (T) used to be skipped here ("a run total over several tags, not a single arc"), but a
             # standalone (T) is just this one annotation's own drawn run between its vertex circles --
             # STATE.md measured that run against the printed (T) to 0.02 ft -- so it checks the same way
             led, arc = at_tip(bi, "arc", want)
+            near = far = None
             if arc is None and not led:
                 near = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 5.0 * b["glyph_h"]]
                 close = [x for x in near if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
@@ -833,15 +869,30 @@ def main():
                 # Tie-break on point count (prefer the specific piece over the whole path) then the
                 # candidate's own start coordinate, both properties of the candidate, not of list position
                 arc = min(close, key=lambda x: (abs(x["len_pt"] * scale - want), len(x["pts"]), float(x["pts"][0][0]), float(x["pts"][0][1]))) if close else None
+            if arc is not None:
+                drawn = arc["len_pt"] * scale
+                ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                if ok:  # own length matches a drawn piece directly: done, no need to look for a run-mate
+                    rows.append(["arc length", lines[0], f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass"])
+                    labels.append({"kind": "arc", "printed": lines[0], "ft": want, "line": shape(arc), "ok": True, "how": "leader" if led else "beside", "region": region(b)})
+                    len_checked.add(id(b))  # already resolved geometrically: the curve-data fillet check
+                    # further down (leg5 legB2) skips this block rather than re-measuring the same piece
+                    continue
+            # own length matches no drawn piece: a compound curve whose record boundary isn't drawn
+            # (loop2 legC, STATE.md D3-6) can only be checked as the run between drawn marks against the
+            # SUM of the record arcs sharing it -- the rule tables.py already applies to table tags. A
+            # leader tip already pins the drawn run above (at_tip finds the nearest candidate at the tip
+            # regardless of length); queue it for grouping with every other unresolved L=/(T) label that
+            # lands on the identical drawn object, resolved once every block is scanned. A label with no
+            # leader gets no length-blind guess here: nearest-by-distance without a tip to anchor it
+            # tried a busy curve cluster's neighbour more often than its own run (measured: wrong_line up
+            # on all three south sheets, no pass gained) -- it stays an unmatched exception, same as before
             if arc is None:
                 exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc within 5 glyph heights matches the printed length", "region": region(b)})
             else:
-                drawn = arc["len_pt"] * scale
-                ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
-                rows.append(["arc length", lines[0], f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
-                labels.append({"kind": "arc", "printed": lines[0], "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
-                if not ok:
-                    exceptions.append({"kind": "arc length", "text": lines[0], "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(arc)})
+                len_pending.append({"text": lines[0], "want": want, "total": is_total, "arc": arc, "led": led, "region": region(b)})
+                len_checked.add(id(b))  # a candidate WAS found here (just the wrong length): the fillet
+                # check's own radius-based search would only re-measure the identical piece and re-fail it
             continue
         # a bearing and its distance often come back as one OCR line: take the tokens inside each line
         parts = [m.group(0) for t in lines for m in TOKEN.finditer(t)] or lines
@@ -880,7 +931,17 @@ def main():
                 if ln is not None:
                     ln = span_for(ln, want, scale, chains)
                 if ln is None or abs(ln["len_pt"] * scale - want) > 1.0:
-                    arc = at_tip(bi, "arc", want)[1] if led else nearest_arc(b, arcs, 5.0 * b["glyph_h"])
+                    # a bare distance only becomes an arc-length candidate when the label itself sits
+                    # ON a curve (leg5 legB2, orchestrator): a leader tip landing on a curved piece, or
+                    # (no leader) the label centre within 1.5 glyph heights of one with its reading
+                    # direction within 15 deg of the piece's own tangent there -- not the old 5-glyph-
+                    # height, length-blind search, which was turning ordinary line distances beside a
+                    # curve-dense area (a bearing+distance label whose line search merely failed) into
+                    # fake arc-length fails against whatever curve happened to be nearest
+                    # tol_deg stays nearest_arc's own default (8): measured, a 15 deg allowance (as
+                    # first tried) let a genuinely unrelated label 30+ ft from any real match through --
+                    # every true arc match seen while tuning this sits under 6 deg, so 8 loses nothing
+                    arc = at_tip(bi, "arc", want)[1] if led else nearest_arc(b, arcs, 1.5 * b["glyph_h"])
                     if arc is not None and (ln is None or abs(arc["len_pt"] * scale - want) < abs(ln["len_pt"] * scale - want)):
                         drawn = arc["len_pt"] * scale
                         ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
@@ -901,15 +962,59 @@ def main():
                 if not ok:
                     exceptions.append({"kind": "distance", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(ln)})
 
+    # resolve the deferred standalone L=/(T) labels: group by the drawn arc OBJECT each one landed on
+    # (id() equality -- the same object means the same physical drawn run, tables.py's own by_run key)
+    by_run = {}
+    for p in len_pending:
+        by_run.setdefault(id(p["arc"]), []).append(p)
+    for group in by_run.values():
+        arc = group[0]["arc"]
+        drawn = arc["len_pt"] * scale
+        for p in group:  # a (T) total names this whole run itself, not a share of it: check it directly
+            if p["total"]:
+                ok = abs(drawn - p["want"]) <= DIST_TOL + 0.0005 * p["want"]
+                rows.append(["arc length", p["text"], f"{drawn:.2f}", f"{drawn - p['want']:+.2f}", "pass" if ok else "FAIL"])
+                labels.append({"kind": "arc", "printed": p["text"], "ft": p["want"], "line": shape(arc), "ok": ok, "how": "leader" if p["led"] else "beside", "region": p["region"]})
+                if not ok:
+                    exceptions.append({"kind": "arc length", "text": p["text"], "drawn_ft": round(drawn, 2), "off_ft": round(drawn - p["want"], 2), "region": p["region"], "line": shape(arc)})
+        piece = [p for p in group if not p["total"]]
+        Ls = [p["want"] for p in piece]
+        total, by_sum = run_sum(drawn, Ls)
+        if len(piece) <= 1:
+            # a standalone L= with no neighbour sharing its run stays as it is: a plain FAIL, same as
+            # before this leg (nothing to sum it with)
+            for p in piece:
+                rows.append(["arc length", p["text"], f"{drawn:.2f}", f"{drawn - p['want']:+.2f}", "FAIL"])
+                labels.append({"kind": "arc", "printed": p["text"], "ft": p["want"], "line": shape(arc), "ok": False, "how": "leader" if p["led"] else "beside", "region": p["region"]})
+                exceptions.append({"kind": "arc length", "text": p["text"], "drawn_ft": round(drawn, 2), "off_ft": round(drawn - p["want"], 2), "region": p["region"], "line": shape(arc)})
+        elif by_sum:
+            sum_str = f"{drawn:.2f} = " + " + ".join(f"{x:.2f}" for x in Ls)
+            for p in piece:
+                rows.append(["arc length", p["text"], sum_str, f"{drawn - total:+.2f}",
+                             f"pass as a run of {len(piece)}: the boundary between these arcs is not drawn"])
+                labels.append({"kind": "arc", "printed": p["text"], "ft": p["want"], "line": shape(arc), "ok": True, "how": "leader" if p["led"] else "beside", "region": p["region"]})
+        else:  # the run doesn't match the sum either: fail once against the sum, not once per label
+            texts = " + ".join(p["text"] for p in piece)
+            rows.append(["arc length", texts, f"{drawn:.2f}", f"{drawn - total:+.2f}", "FAIL"])
+            for p in piece:
+                labels.append({"kind": "arc", "printed": p["text"], "ft": p["want"], "line": shape(arc), "ok": False, "how": "leader" if p["led"] else "beside", "region": p["region"]})
+            exceptions.append({"kind": "arc length", "text": texts, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - total, 2), "region": piece[0]["region"], "line": shape(arc)})
+
     # curves: R, delta and L printed together (same block or stacked, or joined into one OCR line
     # with no "|" split -- RAD_TOK/ANG_TOK/LEN_TOK find those the same way TOKEN finds BEAR/DIST)
     curve_blocks = [b for b in blocks if any(RAD_TOK.search(t) or ANG_TOK.search(t) or LEN_TOK.search(t) for t in b["text"].replace(" ", "").split("|"))]
+    bidx = {id(bb): i for i, bb in enumerate(blocks)}  # curve_blocks entries are blocks' own dicts; a
+    # leader-tip lookup (tips, keyed by index into blocks) needs the index back
 
     def n_curve_toks(text):
         return sum(1 for pat in (RAD_TOK, ANG_TOK, LEN_TOK) for _ in pat.finditer(text))
     seen = set()
     for b in curve_blocks:
         parts = b["text"].replace(" ", "").split("|")
+        joined = [b]  # every block whose text ended up in `parts`, so the L= value's own drawn fillet
+        # can be searched for from wherever the "L=" text itself actually sits, not an arbitrary member
+        # of the joined group (leg5 legB2 cause 2: an R=/Δ= block can sit closer to a different,
+        # same-radius record arc than the one its own paired L= value describes)
         c, u, n = frame(b)
         b_joined = n_curve_toks(b["text"]) > 1
         for o in curve_blocks:
@@ -928,6 +1033,7 @@ def main():
                 along_ok = abs(op @ u) < 0.7 * max(b["w"], o["w"])
             if along_ok and 0 < op @ n < 3.2 * b["glyph_h"]:
                 parts += o["text"].replace(" ", "").split("|")
+                joined.append(o)
         R = next((float(m[1].replace(",", "")) for t in parts for m in [RAD_TOK.search(t)] if m), None)
         D = next((dms(*m.groups()[:3]) for t in parts for m in [ANG_TOK.search(t)] if m), None)
         L = next((float(m[1]) for t in parts for m in [LEN_TOK.search(t)] if m), None)
@@ -938,6 +1044,57 @@ def main():
             rows.append(["curve L=R*delta", f"R={R} Δ={D:.4f}° L={L}", f"{calc:.2f}", f"{calc - L:+.2f}", "pass" if ok else "FAIL"])
             if not ok:
                 exceptions.append({"kind": "curve", "text": b["text"], "calc_L": round(calc, 2), "printed_L": L, "region": region(b)})
+            # drawn-arc second opinion (leg5 legB2, cause 2), never a replacement for the R*delta check
+            # above: R=/L= inside a curve-data block often describes a short fillet too small for
+            # split_at to find a boundary mark on (R=8.72' L=16.73', R=15.00' L=7.09') -- find it by its
+            # own fitted radius (a three-point circle through its ends and midpoint, same method
+            # arcs_on_sheet already uses), not by length-blind nearest-piece proximity: a curve-dense
+            # corner can put several similar-length fillets within reach of one label
+            len_block = next((bb for bb in joined if LEN_TOK.search(bb["text"].replace(" ", ""))), b)
+            if id(len_block) in len_checked:
+                continue  # this L= value already got its own full geometric check above (it's also its
+                # own standalone "L=...'" block); a second row for the identical drawn piece would just
+                # double-count one label as two passes (or two, possibly conflicting, fails)
+            tip = tips.get(bidx.get(id(len_block)))
+            reach = max(4.0, 0.6 * tip[2]) if tip else 5.0 * len_block["glyph_h"]
+            pt = tip[0] if tip else np.array([len_block["cx"], len_block["cy"]])
+            fits = []
+            for x in sorted((x for x in arcs if poly_dist(pt, x["pts"]) < reach), key=lambda x: poly_dist(pt, x["pts"])):
+                if x["len_pt"] * scale > L + DIST_TOL + 0.0005 * L:
+                    continue  # a piece longer than the fillet's own printed total can't be the fillet, or
+                    # a fragment of it (this is a fillet's own radius search, not a compound-curve run: a
+                    # large R/W curve built from several same-radius facets can fool the 3-point
+                    # circumradius test at any point along it, far past this small label's own reach)
+                r_ft = circumradius3(x["pts"]) * scale
+                ctr = circle_center3(x["pts"])
+                if math.isfinite(r_ft) and ctr is not None and abs(r_ft - R) <= 0.02 * R:
+                    fits.append((x, ctr))
+            if fits:
+                # a radius-matching whole path and its own sub-piece(s) sit at the same centre too (a
+                # piece of a circle has the whole circle's radius): when one candidate's own length
+                # already matches the printed L, that is the fillet, on its own -- no summing. Only a
+                # genuinely fragmented short fillet (several pieces, none matching L alone) falls to the
+                # same-centre group-and-sum
+                exact = next((x for x, _ in fits if abs(x["len_pt"] * scale - L) <= DIST_TOL + 0.0005 * L), None)
+                if exact is not None:
+                    pieces = [exact]
+                else:
+                    # adjacent bezier sub-arcs of the same fillet share a fitted centre: group them onto
+                    # the nearest match (fits[0], distance-sorted above) and sum
+                    group = [fits[0]]
+                    for x, ctr in fits[1:]:
+                        if any(np.hypot(*(ctr - g[1])) < 0.5 / scale for g in group):
+                            group.append((x, ctr))
+                    pieces = [x for x, _ in group]
+                lens_ft = [x["len_pt"] * scale for x in pieces]
+                drawn = sum(lens_ft)
+                ok2 = abs(drawn - L) <= DIST_TOL + 0.0005 * L
+                sumtxt = f"{drawn:.2f}" if len(pieces) == 1 else f"{drawn:.2f} = " + " + ".join(f"{v:.2f}" for v in lens_ft)
+                printed = f"R={R}' L={L}'"
+                rows.append(["arc length", printed, sumtxt, f"{drawn - L:+.2f}", "pass" if ok2 else "FAIL"])
+                labels.append({"kind": "arc", "printed": printed, "ft": L, "line": shape(pieces[0]), "ok": ok2, "how": "leader" if tip else "beside", "region": region(len_block)})
+                if not ok2:
+                    exceptions.append({"kind": "arc length", "text": printed, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - L, 2), "region": region(len_block), "line": shape(pieces[0])})
 
     (OUT / "labels.json").write_text(json.dumps(labels, ensure_ascii=False), encoding="utf-8")
     with open(OUT / "checks.csv", "w", newline="", encoding="utf-8") as f:

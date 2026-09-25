@@ -22,7 +22,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, seg_dist, span_for, split_at, split_chains, tag_leaders  # noqa: E402
+from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, run_sum, seg_dist, span_for, split_at, split_chains, tag_leaders  # noqa: E402
 from georef import OUT, PDF, segments  # noqa: E402
 from gt import TABLES  # noqa: E402
 
@@ -241,8 +241,7 @@ def main():
         seg = hits[0][2]
         drawn = seg["len_pt"] * scale
         Ls = [h[1]["L"] for h in hits if not h[1]["total"]]
-        total = sum(Ls)
-        by_sum = len(Ls) > 1 and abs(drawn - total) <= DIST_TOL + 0.0005 * total
+        total, by_sum = run_sum(drawn, Ls)
         for t, row, seg, how, region in hits:
             sagitta = seg["len_pt"] ** 2 / (8 * row["R"] / scale)  # pt; a 46 ft arc on R=1470 bulges 0.1 pt: no radius in that
             ok_r = True
