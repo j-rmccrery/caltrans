@@ -91,6 +91,20 @@ def set_decimals(blocks):
     )
     return n
 BEAR_TOL = 0.05   # degrees (3 arc-minutes)
+LINEWORK_W = 0.7  # pt: a drawn piece's own half-width plus one rendering unit -- the positional slop
+# an endpoint carries, whatever the piece's length (loop6 leg C, leg B's finding: 4 bearing labels sat
+# on the right line and failed by 6-22 arcmin only because the drawn piece was short)
+BEAR_TOL_CAP = 0.5    # deg (30 arcmin): leg C follow-up -- the scaled tolerance must not grow so wide
+# on a short piece that it swallows a genuine disagreement as a pass
+MIN_BEARING_LEN_PT = 10.0  # pt: below this a straight piece's own azimuth is too uncertain to check a
+# bearing against at all (leg C follow-up) -- queued, never passed or failed
+
+
+def bearing_tol_deg(len_pt):
+    """A piece len_pt long has its azimuth known only to about atan(w / len_pt) -- the shorter the
+    piece, the less two endpoints each off by w pin down the direction between them. Never tighter
+    than the base BEAR_TOL, never looser than BEAR_TOL_CAP; scales with no per-sheet constant."""
+    return min(max(BEAR_TOL, math.degrees(math.atan2(LINEWORK_W, max(len_pt, 1e-6)))), BEAR_TOL_CAP)
 
 
 def dms(d, m, s):
@@ -332,6 +346,18 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, wan
         if mperp < 2.5 * b["glyph_h"] and malong < 0.6 * b["w"]:
             anchored.append((mperp, ln))
     cands += anchored
+    if want_az is not None and az_of is not None and len(cands) > 1:
+        # a label often sits between two parallel candidates; the one whose OWN heading agrees with the
+        # printed bearing (within its own length-scaled tolerance, loop6 leg C rule 1) wins over mere
+        # proximity, and one disagreeing by more than 3x that tolerance is dropped even if it's nearest
+        # (loop6 leg C rule 3: a wrong parallel neighbour). Only narrows what the earlier az filter above
+        # already admitted -- that filter already rejects most wrong candidates outright, so this mostly
+        # re-ranks survivors by agreement instead of leaving the last tiebreak to proximity alone.
+        scored = [(p, ln, az_diff(az_of(ln), want_az), bearing_tol_deg(ln["len_pt"])) for p, ln in cands]
+        survivors = [(p, ln, d, t) for p, ln, d, t in scored if d <= 3 * t]
+        if survivors:
+            agree = [(p, ln) for p, ln, d, t in survivors if d <= t]
+            cands = agree if agree else [(p, ln) for p, ln, d, t in survivors]
     if not cands:
         return None
     on = [(p, ln) for p, ln in cands if p < 0.35 * b["glyph_h"]]  # the label is written on the line itself (some drafters)
@@ -561,6 +587,28 @@ def span_for(piece, want_ft, scale, chains):
     s0, s1 = run[i]["s0"], run[j]["s1"]
     return {**piece, "p0": run[i]["p0"], "p1": run[j]["p1"], "dir": local_fit_dir(piece["_pts"], s0, s1, piece["dir"]),
             "len_pt": float(s1 - s0), "s0": s0, "s1": s1, "joined": j - i + 1}
+
+
+def chord_span(seed, want_ft, scale, arcs):
+    """A label beside a curved piece cites the CHORD between the piece's ends, not the arc length
+    (loop6 leg C rule 2). Where the printed distance is known, the contiguous run of same-parent pieces
+    (leg A/leg6A's parent/seq grouping) whose chord -- the straight line between the run's own two end
+    pieces' endpoints -- matches it within SMALL wins, if exactly one run does; else the seed piece's
+    own ends. Loop4's chord rule keyed off a parenthesised arc value and was deleted; this one is keyed
+    on geometry (the label sits along a curve), so it fires on a different, disjoint set of labels."""
+    if want_ft is None or "seq" not in seed:
+        return seed
+    run = sorted((x for x in arcs if x.get("parent") == seed.get("parent") and "seq" in x), key=lambda x: x["seq"])
+    if len(run) < 2:
+        return seed
+    k = next(i for i, x in enumerate(run) if x is seed)
+    tol = 1.0 + 0.001 * want_ft
+    hits = [(i, j) for i in range(0, k + 1) for j in range(k, len(run))
+            if abs(float(np.hypot(*(run[j]["pts"][-1] - run[i]["pts"][0]))) * scale - want_ft) <= tol]
+    if len(hits) != 1 or hits[0] == (k, k):
+        return seed
+    i, j = hits[0]
+    return {**seed, "_p0": run[i]["pts"][0], "_p1": run[j]["pts"][-1]}
 
 
 def touches_label(chain, labels_tree, labels):
@@ -831,6 +879,11 @@ def main():
         """Grid azimuth of a drawn line (deg, clockwise from grid north), through the fit's rotation."""
         dx, dy = ln["dir"][0], -ln["dir"][1]
         return math.degrees(math.atan2(a * dx - bb * dy, bb * dx + a * dy)) % 360
+
+    def dir_az(d):
+        """Same as az_of, for a bare direction vector (a chord, not a chain)."""
+        dx, dy = float(d[0]), -float(d[1])
+        return math.degrees(math.atan2(a * dx - bb * dy, bb * dx + a * dy)) % 360
     rows, exceptions, labels, len_pending = [], [], [], []  # labels: every checked value with the line it
     # was measured on (sheet pt), for the traverse; len_pending: standalone L=/(T) labels whose own
     # length matched no drawn piece, resolved by run-sum grouping after every block is scanned (below)
@@ -1015,6 +1068,58 @@ def main():
             continue
         # a bearing and its distance often come back as one OCR line: take the tokens inside each line
         parts = [m.group(0) for t in lines for m in TOKEN.finditer(t)] or lines
+
+        def chord_curve(bi, led):
+            """The curved piece a label beside a curve cites: at the leader tip (same search at_tip's
+            own "arc" kind already does for a leader), else nearest to the label itself."""
+            if led:
+                return at_tip(bi, "arc")[1]
+            return nearest_arc(b, arcs, 1.5 * b["glyph_h"])
+
+        def chord_bearing(bi, led, part, mate):
+            """No straight line found, or the one found doesn't match: if the label's nearest linework is
+            actually a curved piece, it's a chord citation (loop6 leg C rule 2), not an unmatched or
+            wrongly-matched label. Only ever tried once the straight-line search has already failed, so a
+            label that already resolves correctly via a chain is never touched by this -- the safest gate,
+            measured: an unconditional "nearest pool wins" race grabbed short irrelevant curve fragments
+            (tick marks, dash noise) ahead of a real nearby line and turned passes into fails."""
+            curve = chord_curve(bi, led)
+            if curve is None:
+                return None
+            want_az = azimuth(part)
+            d0 = curve["pts"][-1] - curve["pts"][0]
+            n0 = float(np.hypot(*d0))
+            if n0 < 1e-6 or az_diff(dir_az(d0 / n0), want_az) > 45.0:
+                return None  # nearest_arc only checks the curve's tangent against the label's reading
+                # direction, not the printed bearing; this sanity check rejects the rare unrelated grab
+            piece = chord_span(curve, mate, scale, arcs)
+            p0, p1 = piece.get("_p0", piece["pts"][0]), piece.get("_p1", piece["pts"][-1])
+            chord_pt = float(np.hypot(*(p1 - p0)))
+            if chord_pt < 1e-6:
+                return None
+            az = dir_az((p1 - p0) / chord_pt)
+            diff = min(abs((az - want_az + 180) % 360 - 180), abs((az + 180 - want_az + 180) % 360 - 180))
+            tol = bearing_tol_deg(chord_pt)
+            cline = [[round(float(x), 1), round(float(y), 1)] for x, y in (p0, p1)]
+            return az, diff, tol, cline
+
+        def chord_distance(bi, led, want, baz):
+            """Same fallback as chord_bearing, for the distance half of a bearing+distance block beside
+            a curve: the chord between the piece's ends (or its run, matched on this same printed
+            distance), only once the straight-line search has already failed to find its match."""
+            curve = chord_curve(bi, led)
+            if curve is None:
+                return None
+            d0 = curve["pts"][-1] - curve["pts"][0]
+            n0 = float(np.hypot(*d0))
+            if n0 < 1e-6 or (baz is not None and az_diff(dir_az(d0 / n0), baz) > 45.0):
+                return None
+            piece = chord_span(curve, want, scale, arcs)
+            p0, p1 = piece.get("_p0", piece["pts"][0]), piece.get("_p1", piece["pts"][-1])
+            drawn = float(np.hypot(*(p1 - p0))) * scale
+            cline = [[round(float(x), 1), round(float(y), 1)] for x, y in (p0, p1)]
+            return drawn, cline
+
         for part in parts:
             if BEAR.match(part) and BEAR.match(part)[6]:
                 rows.append(["bearing (R)", part, "", "", "radial: not checked"]); continue
@@ -1025,18 +1130,42 @@ def main():
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale, want_az=azimuth(part), az_of=az_of)
                 if ln is not None:
                     ln = span_for(ln, mate, scale, chains)
+                if ln is not None and ln["len_pt"] < MIN_BEARING_LEN_PT:
+                    # too short to carry a bearing at all (leg C follow-up): queued, not passed or
+                    # failed, and not handed to the chord fallback either -- a genuinely too-short piece
+                    # stays too-short whatever curve happens to sit nearby
+                    exceptions.append({"kind": "bearing", "text": part, "issue": f"piece too short to carry a bearing ({ln['len_pt']:.1f} pt)", "region": region(b)}); continue
+                ok = None
+                if ln is not None:
+                    dx, dy = ln["dir"][0], -ln["dir"][1]                      # sheet direction, y up
+                    gx, gy = a * dx - bb * dy, bb * dx + a * dy                # into the grid frame
+                    az = math.degrees(math.atan2(gx, gy)) % 360               # from grid north, clockwise
+                    want = azimuth(part)
+                    diff = min(abs((az - want + 180) % 360 - 180), abs((az + 180 - want + 180) % 360 - 180))
+                    tol = bearing_tol_deg(ln["len_pt"])
+                    ok = diff <= tol
+                if not ok:
+                    # a chord result is only ever taken when it PASSES -- never used to relabel one FAIL
+                    # (a wrongly-matched straight line, or no line at all) as a different FAIL (kept the
+                    # wrong-curve false-positive rate this rule measured out of wrong_line entirely: a
+                    # real chord citation agrees with the printed value; an accidental grab of an
+                    # unrelated curve essentially never does, so "only accept a pass" is also how the rule
+                    # tells a genuine chord label apart from a label that just has no match)
+                    chord = chord_bearing(bi, led, part, mate)
+                    if chord is not None:
+                        caz, cdiff, ctol, cline = chord
+                        if cdiff <= ctol:
+                            rows.append(["chord bearing", part, fmt_bearing(caz if abs((caz - azimuth(part) + 180) % 360 - 180) < 90 else caz + 180), f"{cdiff * 60:.1f}'", "pass"])
+                            labels.append({"kind": "chord bearing", "printed": part, "az": azimuth(part), "line": cline, "ok": True, "how": "beside", "region": region(b)})
+                            continue
                 if ln is None:
                     exceptions.append({"kind": "bearing", "text": part, "issue": "leader points at no line" if led else "no line found beside label", "region": region(b)}); continue
-                dx, dy = ln["dir"][0], -ln["dir"][1]                      # sheet direction, y up
-                gx, gy = a * dx - bb * dy, bb * dx + a * dy                # into the grid frame
-                az = math.degrees(math.atan2(gx, gy)) % 360               # from grid north, clockwise
-                want = azimuth(part)
-                diff = min(abs((az - want + 180) % 360 - 180), abs((az + 180 - want + 180) % 360 - 180))
-                ok = diff <= BEAR_TOL
                 rows.append(["bearing", part, fmt_bearing(az if abs((az - want + 180) % 360 - 180) < 90 else az + 180), f"{diff * 60:.1f}'", "pass" if ok else "FAIL"])
                 labels.append({"kind": "bearing", "printed": part, "az": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
                 if not ok:
-                    exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "region": region(b), "line": shape(ln)})
+                    # tol_arcmin travels with the exception so wrong-line classification downstream
+                    # (bench.py) uses the same scaled tolerance, not a flat cutoff, for this piece
+                    exceptions.append({"kind": "bearing", "text": part, "drawn": fmt_bearing(az), "off_arcmin": round(diff * 60, 1), "tol_arcmin": round(tol * 60, 1), "region": region(b), "line": shape(ln)})
             elif DIST.match(part):
                 m = DIST.match(part)
                 num_str, is_total = dist_num(m)
@@ -1049,6 +1178,19 @@ def main():
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale, want_az=baz, az_of=az_of)
                 if ln is not None:
                     ln = span_for(ln, want, scale, chains)
+                if (ln is None or abs(ln["len_pt"] * scale - want) > 1.0) and baz is not None:
+                    # a bearing+distance block beside a curve: the distance is the same chord the paired
+                    # bearing above measures, not an arc length (loop6 leg C rule 2) -- tried whenever the
+                    # straight line came up empty or doesn't match (same trigger the arc-length fallback
+                    # below uses), only kept when it PASSES (same never-trade-a-fail-for-a-fail rule
+                    # chord_bearing above uses)
+                    chord = chord_distance(bi, led, want, baz)
+                    if chord is not None:
+                        drawn, cline = chord
+                        if abs(drawn - want) <= DIST_TOL + 0.0005 * want:
+                            rows.append(["chord distance", part, f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass"])
+                            labels.append({"kind": "chord distance", "printed": part, "ft": want, "line": cline, "ok": True, "how": "beside", "region": region(b)})
+                            continue
                 if ln is None or abs(ln["len_pt"] * scale - want) > 1.0:
                     # a bare distance only becomes an arc-length candidate when the label itself sits
                     # ON a curve (leg5 legB2, orchestrator): a leader tip landing on a curved piece, or

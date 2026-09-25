@@ -24,7 +24,7 @@ distance,765.16',765.04,-0.12,pass
 bearing,"S20°32'23""W","S20°33'08""W",0.8',pass
 distance,462.09',462.14,+0.05,pass
 distance,214.92',214.97,+0.05,pass
-bearing,"N74°21'28""W","N74°17'48""W",3.7',FAIL
+bearing,"N74°21'28""W","N74°17'48""W",3.7',pass
 arc length,L=660.20',660.13,-0.07,pass
 distance,165.86',165.82,-0.04,pass
 bearing,"S16°20'26""E","S16°21'26""E",1.0',pass

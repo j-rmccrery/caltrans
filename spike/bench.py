@@ -40,7 +40,10 @@ SHEETS = {
     "r71_71": ROOT / "Sample Data" / "d4" / "r_00071_071_2024-07-16.pdf",
     "r10258": ROOT / "Sample Data" / "d4" / "r_10258_001_2020-04-17.pdf",
 }
-SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0}
+SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0, "chord distance": 5.0, "chord bearing": 60.0}
+# chord bearing/distance (loop6 leg C rule 2: a label beside a curve cites the chord, not the arc) count
+# toward the same distance/bearing columns as their straight-line namesakes -- CHORD_KIND maps the extra
+# row kind onto the FIELDS column it belongs under
 TAGS_COLS = ["tags_assoc", "tags_pass", "tags_fail", "tags_queued"]
 PARCELS_COLS = ["faces", "faces_named"]
 TRAVERSE_COLS = ["chains", "closed"]
@@ -204,14 +207,18 @@ def run(key, steps):
     exc = json.loads((o / "exceptions.json").read_text(encoding="utf-8"))
     res = {"sheet": key, "secs": round(time.time() - t)}
     for kind in ("distance", "bearing", "arc length"):
-        ks = [x for x in rows if x["check"] == kind]
+        ks = [x for x in rows if x["check"] in (kind, "chord " + kind)]
         res[kind] = f"{sum(1 for x in ks if x['result'].startswith('pass'))}/{len(ks)}"  # a checks.py
         # run-sum row ("pass as a run of N: ...", leg5/leg6A's grouping) is a pass; same fix as tags_pass above
     wrong = 0
     for e in exc:
         v = e.get("off_ft", e.get("off_arcmin"))
         k = e.get("kind")
-        if v is not None and k in SMALL and abs(v) > SMALL[k]:
+        # a bearing/chord-bearing exception carries its own scaled tolerance (checks.bearing_tol_deg,
+        # loop6 leg C rule 1): wrong-line uses that instead of the flat SMALL cutoff where it's wider,
+        # so a short piece's few-arcmin measurement slop doesn't get flagged "wrong line" either
+        cutoff = max(SMALL.get(k, 0), e["tol_arcmin"]) if "tol_arcmin" in e else SMALL.get(k)
+        if v is not None and cutoff is not None and abs(v) > cutoff:
             wrong += 1
     res["exceptions"] = len(exc)
     res["wrong_line"] = wrong

@@ -23,28 +23,6 @@
  },
  {
   "kind": "bearing",
-  "text": "N22°47'32\"W",
-  "drawn": "N22°50'33\"W",
-  "off_arcmin": 3.0,
-  "region": [
-   2123,
-   665,
-   2177,
-   686
-  ],
-  "line": [
-   [
-    2111.6,
-    667.9
-   ],
-   [
-    2105.8,
-    653.9
-   ]
-  ]
- },
- {
-  "kind": "bearing",
   "text": "N68°24'07\"E",
   "issue": "no line found beside label",
   "region": [
@@ -90,23 +68,12 @@
  {
   "kind": "bearing",
   "text": "N8°43'35\"W",
-  "drawn": "N8°26'19\"W",
-  "off_arcmin": 17.3,
+  "issue": "piece too short to carry a bearing (2.2 pt)",
   "region": [
    2177,
    432,
    2240,
    466
-  ],
-  "line": [
-   [
-    2229.6,
-    480.2
-   ],
-   [
-    2229.3,
-    478.0
-   ]
   ]
  },
  {
@@ -143,50 +110,6 @@
   ]
  },
  {
-  "kind": "bearing",
-  "text": "N77°38'06\"W",
-  "drawn": "N77°45'54\"W",
-  "off_arcmin": 7.8,
-  "region": [
-   2016,
-   446,
-   2069,
-   465
-  ],
-  "line": [
-   [
-    2061.4,
-    524.4
-   ],
-   [
-    2047.9,
-    521.4
-   ]
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N74°18'38\"W",
-  "drawn": "N74°35'27\"W",
-  "off_arcmin": 16.8,
-  "region": [
-   652,
-   422,
-   708,
-   437
-  ],
-  "line": [
-   [
-    874.4,
-    475.2
-   ],
-   [
-    569.4,
-    388.1
-   ]
-  ]
- },
- {
   "kind": "distance",
   "text": "76.46'",
   "drawn_ft": 54.91,
@@ -210,6 +133,17 @@
  },
  {
   "kind": "bearing",
+  "text": "N15°16'05\"E",
+  "issue": "piece too short to carry a bearing (7.7 pt)",
+  "region": [
+   878,
+   620,
+   933,
+   644
+  ]
+ },
+ {
+  "kind": "bearing",
   "text": "N75°41'44\"W",
   "issue": "leader points at no line",
   "region": [
@@ -224,6 +158,7 @@
   "text": "S75°41'44\"E",
   "drawn": "N74°47'34\"W",
   "off_arcmin": 54.2,
+  "tol_arcmin": 30.0,
   "region": [
    1038,
    594,
@@ -409,46 +344,13 @@
  },
  {
   "kind": "bearing",
-  "text": "N21°05'32\"W",
-  "drawn": "N21°10'25\"W",
-  "off_arcmin": 4.9,
-  "region": [
-   2006,
-   745,
-   2062,
-   770
-  ],
-  "line": [
-   [
-    1972.4,
-    735.1
-   ],
-   [
-    1965.5,
-    716.6
-   ]
-  ]
- },
- {
-  "kind": "bearing",
   "text": "S63°25'22\"E",
-  "drawn": "S63°33'48\"E",
-  "off_arcmin": 8.4,
+  "issue": "piece too short to carry a bearing (7.5 pt)",
   "region": [
    2041,
    707,
    2095,
    731
-  ],
-  "line": [
-   [
-    2024.2,
-    695.9
-   ],
-   [
-    2030.9,
-    699.3
-   ]
   ]
  },
  {
@@ -508,90 +410,13 @@
  },
  {
   "kind": "bearing",
-  "text": "S38°34'36\"W",
-  "drawn": "S38°39'36\"W",
-  "off_arcmin": 5.0,
-  "region": [
-   1619,
-   483,
-   1688,
-   515
-  ],
-  "line": [
-   [
-    1742.7,
-    602.2
-   ],
-   [
-    1726.3,
-    622.3
-   ]
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N19°13'28\"W",
-  "drawn": "N19°08'29\"W",
-  "off_arcmin": 5.0,
-  "region": [
-   2104,
-   523,
-   2157,
-   547
-  ],
-  "line": [
-   [
-    2065.5,
-    536.6
-   ],
-   [
-    2061.4,
-    524.4
-   ]
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N70°47'00\"E",
-  "drawn": "N70°53'40\"E",
-  "off_arcmin": 6.7,
-  "region": [
-   2146,
-   545,
-   2200,
-   560
-  ],
-  "line": [
-   [
-    2050.1,
-    541.7
-   ],
-   [
-    2063.8,
-    537.1
-   ]
-  ]
- },
- {
-  "kind": "bearing",
   "text": "N18°20'46\"W",
-  "drawn": "N27°54'07\"W",
-  "off_arcmin": 573.4,
+  "issue": "piece too short to carry a bearing (8.2 pt)",
   "region": [
    2069,
    575,
    2122,
    593
-  ],
-  "line": [
-   [
-    2052.6,
-    549.7
-   ],
-   [
-    2048.9,
-    542.4
-   ]
   ]
  },
  {
@@ -632,6 +457,7 @@
   "text": "N21°34'50\"W",
   "drawn": "N80°40'13\"W",
   "off_arcmin": 3545.4,
+  "tol_arcmin": 30.0,
   "region": [
    2162,
    576,
@@ -773,23 +599,12 @@
  {
   "kind": "bearing",
   "text": "S21°34'50\"E",
-  "drawn": "N68°25'19\"E",
-  "off_arcmin": 5399.9,
+  "issue": "piece too short to carry a bearing (4.9 pt)",
   "region": [
    2328,
    566,
    2391,
    586
-  ],
-  "line": [
-   [
-    2402.8,
-    535.3
-   ],
-   [
-    2407.4,
-    533.5
-   ]
   ]
  },
  {
@@ -806,23 +621,12 @@
  {
   "kind": "bearing",
   "text": "N70°50'05\"E",
-  "drawn": "N70°44'17\"E",
-  "off_arcmin": 5.8,
+  "issue": "piece too short to carry a bearing (7.4 pt)",
   "region": [
    2316,
    612,
    2382,
    638
-  ],
-  "line": [
-   [
-    2409.4,
-    538.7
-   ],
-   [
-    2416.5,
-    536.3
-   ]
   ]
  },
  {
