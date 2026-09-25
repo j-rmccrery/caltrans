@@ -3,7 +3,36 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-23 23:45 after loop 4; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-24 19:10 after loop 5; plan and status in `spike/LOOP.md`)
+
+**Loop 5 (south bearings, then arcs).** One root cause carried the bearings: a chained line kept its seed segment's
+direction and handed it to every cut piece, so labels along a multi-piece record line were compared with one
+arbitrary heading (17 of 36 south bearing fails). Each piece now takes the least-squares direction of its own
+points: south bearings 30/49 18/31 32/51 -> 34/49 20/31 37/52, nothing lost. Arcs: the loop 2 attribution is
+stale; the 65 south arc misses are bare distances grabbed by the length-blind arc fallback (32), standalone L= with
+no drawn arc in reach (25), and the compound-curve boundary class (8). The fallback now needs the label along a
+curve or a leader on one (7 fake arc fails gone), fillet L= is matched to the piece whose fitted radius equals its
+R= (measured, none passing), run-sums are shared with the table path and fire 0 times. Bench row `loop5-final`:
+presidio 40/48 34/49 13/17 wl 14; .1 26/38 20/31 14/30 wl 27; .3 42/59 37/52 23/36 wl 31; R-10741.1 14/18 12/13
+1/2 wl 3; .2 20/22 20/20 0/1 wl 2; .3 17/17 13/13 0/1 wl 1.
+
+Do this, in order:
+
+1. **Arcs, the 25 standalone L= with no drawn arc in reach** (`spike/out/leg5B_arcs.md`): crop 12, say whether the
+   arc is drawn at all (a fillet cut into slivers by `split_at`, a curve on a layer the pool skips, a matchline
+   cut) and fix the biggest.
+2. **South bearings, next cause**: leader to another line at a busy vertex (7 of 36); the leader's arrowhead
+   should win over proximity, as in `tables.py`.
+3. **R-71.70's 1.29 deg** (loop 4): crop both NGS marks against the two-point fit; read the basis-of-bearings note.
+4. **Not-to-scale insets on OCR sheets**: detect the inset by its dashed circle.
+5. **R-10434.1 traverse** closed 1 -> 0 in loop 2 leg C; trace the moved edge.
+6. **Mosaic south + gap**; pin down the 2024 CA_SanFrancisco_B23 CRS.
+7. **1950s scans on the north tile** (R-71.11/.20/.28, R-92.8/.9) through their packages like R-65.
+8. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze.
+
+## Next as of loop 4 (2026-09-23 23:45), kept for the record
+
+### Next (logged 2026-09-23 23:45 after loop 4; plan and status in `spike/LOOP.md`)
 
 **Coverage after loop 4.** Three LiDAR tiles (`spike/tiles.py`): south/Presidio 2025, north/Marin 2025, gap (USGS 3DEP
 2018, `Sample Data/LiDAR-Point-cloud/gap/`, ~9.7 pts/m2) for R-10741.1 and R-10434.3's east edge; all six baseline

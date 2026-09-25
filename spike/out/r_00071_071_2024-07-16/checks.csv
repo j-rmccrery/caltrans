@@ -1,21 +1,22 @@
 check,printed,drawn,difference,result
-bearing,"N3°03'27""E","N2°48'56""E",14.5',FAIL
+bearing,"N3°03'27""E","N3°03'27""E",0.0',pass
 bearing,"S1°40'31""E","S1°40'23""E",0.1',pass
 bearing,"N3°03'27""E","N3°03'27""E",0.0',pass
-bearing,"S5°03'11""W","S5°03'33""W",0.4',pass
+bearing,"S5°03'11""W","S5°03'22""W",0.2',pass
 bearing,"N3°03'27""E","N3°03'08""E",0.3',pass
-bearing,"S82°09'57""E","S82°05'53""E",4.1',FAIL
+bearing,"S82°09'57""E","S82°10'10""E",0.2',pass
 bearing,"S75°19'14""W","S75°19'31""W",0.3',pass
 bearing,"S82°37'36""E","S82°37'32""E",0.1',pass
-bearing,"S82°33'44""W","S82°24'19""W",9.4',FAIL
+bearing,"S82°33'44""W","S82°33'37""W",0.1',pass
 bearing,"S81°58'19""W","S81°58'19""W",0.0',pass
 distance,32.69',32.68,-0.01,pass
 bearing,"S82°09'57""E","S82°10'05""E",0.1',pass
 distance,18.26',19.73,+1.47,FAIL
-bearing,"S86°56'50""E","S87°04'59""E",8.2',FAIL
+bearing,"S86°56'50""E","S86°56'47""E",0.1',pass
 distance,55.35',55.34,-0.01,pass
+arc length,27.93',4.63 (R=nan),-23.30,FAIL
 distance,24.89',24.85,-0.04,pass
-bearing,"N86°56'50""W","N86°59'12""W",2.4',pass
+bearing,"N86°56'50""W","N86°56'46""W",0.1',pass
 arc length,20.03',12.21 (R=nan),-7.82,FAIL
 arc length,8.58',126.95 (R=nan),+118.37,FAIL
 bearing,"N3°03'10""E","N3°03'24""E",0.2',pass
