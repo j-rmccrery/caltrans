@@ -27,6 +27,17 @@ NODE = 3.0  # pt: two edge ends this close meet
 SAME = 1.5  # pt: a bearing's line and a distance's line this close are one line
 
 
+def sheet_glyph_h():
+    """Median glyph height on this sheet, in sheet pt: the natural unit for a snap tolerance that
+    scales with this sheet's own drawing instead of a constant in ft that would be wrong on a
+    differently-scaled sheet."""
+    p = OUT / "blocks.json"
+    if not p.exists():
+        return 6.0
+    blocks = json.loads(p.read_text(encoding="utf-8"))
+    return float(np.median([b["glyph_h"] for b in blocks])) if blocks else 6.0
+
+
 def build_edges():
     """Every placed record value (labels.json, tag_labels.json) as an edge, merged where a bearing and
     a distance describe the same line. Shared by traverse.py's own walk and other consumers (e.g. the
@@ -120,20 +131,68 @@ def main():
     print(f"record edges placed on the drawing: {len(edges)} ({sum(1 for e in edges if e['kind'] == 'line' and 'az' in e and 'ft' in e)} lines with bearing and distance, "
           f"{sum(1 for e in edges if e['kind'] == 'arc' and 'R' in e)} curves with R and L)")
 
-    # nodes: edge ends clustered
+    # an arc's own record length can never be shorter than the straight chord between its matched
+    # ends (L = R*theta, chord = 2R*sin(theta/2), and L >= chord for every theta >= 0): a piece whose
+    # printed length is shorter than its drawn chord was not matched to the curve it describes (e.g.
+    # loop2 leg C's wider bezier candidate pool: R-10434.1's '31.80'' measures a 308 ft run instead of
+    # its own 31.80 ft piece). Such an edge is dropped from the node graph -- it still gets its own
+    # one-edge entry below, flagged, but it can no longer sit at a shared vertex and turn a real
+    # pass-through into a branch that stops the chain walk.
+    scale = g["scale_ft_per_pt"]
+    for e in edges:
+        e["impossible"] = bool(e["kind"] == "arc" and "L" in e
+                                and e["L"] < float(np.hypot(*(e["p1"] - e["p0"]))) * scale * 0.98)
+        if e["impossible"]:
+            e["flags"].append(f"L {e['L']:.2f} ft shorter than the drawn chord: impossible match, dropped from the graph")
+
+    # nodes: edge ends clustered. An 'impossible' edge's ends are excluded from the shared tree, each
+    # kept as its own private node, so a wrong candidate match can never bridge two real chains or
+    # fracture one apart.
     ends = np.array([p for e in edges for p in (e["p0"], e["p1"])])
-    tree = cKDTree(ends)
+    possible = np.array([not edges[i // 2]["impossible"] for i in range(len(ends))])
+    good_idx = np.nonzero(possible)[0]
+    tree = cKDTree(ends[good_idx]) if len(good_idx) else None
     node_of = {}
-    for i in range(len(ends)):
+    for gi, i in enumerate(good_idx):
+        i = int(i)
         if i in node_of:
             continue
-        for j in tree.query_ball_point(ends[i], NODE):
-            node_of.setdefault(j, i)
+        for gj in tree.query_ball_point(ends[i], NODE):
+            node_of.setdefault(int(good_idx[gj]), i)
+    for i in np.nonzero(~possible)[0]:
+        node_of[int(i)] = int(i)
+
+    # a compound curve's cut point can land a few pt from where the next record edge starts (the same
+    # split_at regrouping as above): snap loose ends (degree 1, otherwise unconnected) within one
+    # glyph height of another loose end, so a small cut-point drift does not read as a chain break.
+    # Pairs only, never a radius merge over the whole point set -- that snowballs transitively into a
+    # spray of accidental branch points elsewhere on the sheet (tried, made Presidio and R-10434.1
+    # both worse: more, smaller chains, no new closures).
     adj = {}
     for k, e in enumerate(edges):
         n0, n1 = node_of[2 * k], node_of[2 * k + 1]
         e["n0"], e["n1"] = n0, n1
         adj.setdefault(n0, []).append(k); adj.setdefault(n1, []).append(k)
+    gh = sheet_glyph_h()
+    impossible_nodes = {node_of[int(i)] for i in np.nonzero(~possible)[0]}
+    loose = [n for n in adj if len(adj[n]) == 1 and n not in impossible_nodes]
+    if loose:
+        loose_pts = ends[loose]
+        ltree = cKDTree(loose_pts)
+        paired = set()
+        cand = sorted(ltree.query_pairs(gh), key=lambda p: np.hypot(*(loose_pts[p[0]] - loose_pts[p[1]])))
+        for i, j in cand:
+            ni, nj = loose[i], loose[j]
+            if ni in paired or nj in paired or ni == nj:
+                continue
+            paired.add(ni); paired.add(nj)
+            lo, hi = min(ni, nj), max(ni, nj)
+            for e in edges:
+                if e["n0"] == hi:
+                    e["n0"] = lo
+                if e["n1"] == hi:
+                    e["n1"] = lo
+            adj[lo] = adj.pop(lo) + adj.pop(hi)
 
     # chains: follow edges end to end while the way on is single
     used, chains = set(), []
