@@ -37,7 +37,6 @@ distance,52.93',52.93,+0.00,pass
 distance,2.76',2.80,+0.04,pass
 distance,7.24',7.24,+0.00,pass
 arc length,2.80',3.07 (R=3.3),+0.27,pass
-bearing,"N3°01'10""E","N3°21'58""E",20.8',FAIL
 distance,56.71',56.72,+0.01,pass
 distance,56.43',56.44,+0.01,pass
 distance,438.78',4.99,-433.79,FAIL

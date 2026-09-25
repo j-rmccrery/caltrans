@@ -191,35 +191,6 @@
  {
   "closed": false,
   "n_edges": 2,
-  "full_record": 2,
-  "misfit_max_ft": 133.07,
-  "misfit_end_ft": 133.07,
-  "edges": [
-   {
-    "edge": "N51°26'23\"E + 10.95'",
-    "kind": "line",
-    "az": 231.4397,
-    "ft": 10.95,
-    "misfit_ft": 98.44,
-    "flags": [],
-    "E": 5989686.89,
-    "N": 2132431.61
-   },
-   {
-    "edge": "N19°41'37\"W + 156.02'",
-    "kind": "line",
-    "az": 160.3064,
-    "ft": 156.02,
-    "misfit_ft": 133.07,
-    "flags": [],
-    "E": 5989739.47,
-    "N": 2132284.71
-   }
-  ]
- },
- {
-  "closed": false,
-  "n_edges": 2,
   "full_record": 0,
   "misfit_max_ft": 3.0,
   "misfit_end_ft": 3.0,

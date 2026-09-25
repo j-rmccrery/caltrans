@@ -1,0 +1,23 @@
+text blocks                   5.9s  ok  biggest blocks (likely merged tables): [39, 40, 41, 41, 56, 63, 70, 92]
+read text (SHX annotations)    2.7s  ok  reads_disagree: 829
+sheet frame                   1.7s  ok  map area [188, 202, 2448, 1086] of 2448x1584; furniture: 4 dense text blocks
+sheet alphabet + tables      11.2s  ok  vs keyed tables: 101/101 cells exact (4 truth rows not found: ['C1', 'C2', 'L1', 'L2'])
+tables from annotations       2.7s  ok  vs keyed tables: 111/111 cells exact (0 truth rows not found)
+read text by glyph         skipped (SHX annotation text covers this sheet)
+read text (OCR)            skipped (SHX annotation text covers this sheet)
+georeference                  2.6s  ok  credible
+linework on LiDAR             2.5s  ok  heavy linework inside LiDAR extent: 100.0%
+parcels                      13.1s  ok  largest unnamed faces (acres): [np.float64(0.45), np.float64(0.163), np.float64(0.148), np
+checks + exception queue     16.1s  ok      {'kind': 'bearing', 'text': 'N75°41\'44"W', 'issue': 'leader points at no line', 'regi
+segment tags                 51.7s  ok    ?L0?@899,635/0.0 ?L0?@2003,552/0.0 ?C1@1245,801/2.14 ?C3@1047,651/0.0 ?L??11@1798,987/0.
+table checks via tags         6.4s  ok     queue: C22 - drawn run 816.07 ft vs table 434.47 ft
+record twin (traverse)        9.8s  ok  figure 61806        edges   4 by record   0 closure     0.00 ft  area        4,854 sq ft
+LiDAR features                6.3s  ok    ground = float(np.nanmedian(np.where(g_cnt > 0, g_z, np.nan)[rmask])) if rmask.any() els
+encroachment                  7.7s  ok  tunnel easement 61985-1+61985-2+61985-3+61985-4: length 289 m, ground over it 28.1-36.9 m
+rasters for QGIS              0.7s  ok  wrote C:\Users\johnr\projects\caltrans\spike\out\lidar_intensity.tif and C:\Users\johnr\pr
+object record                 0.5s  ok    parcel             verified      1
+exception page                3.0s  ok      12  Reader measured a different line
+QGIS project                  5.7s  ok  demo.qgz: 13 layers valid after round trip, CRS EPSG:6339, 7321 features; demo_render.png 
+figures                       2.7s  ok  fig_htdp.png: 547640,4184033 : 547730,4184077
+numbers for the slides        0.7s  ok  Blocker: 61985-1..4 do not close as separate figures. The drawing carries them as one stri
+total 153s

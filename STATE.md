@@ -3,7 +3,36 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-24 19:10 after loop 5; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-24 23:30 after loop 6; plan and status in `spike/LOOP.md`)
+
+**Loop 6 (accuracy items 1-6).** Bench row `loop6-final`: presidio 41/49 41/43 16/19 wl 12; .1 26/37 21/23 12/24 wl 21;
+.3 42/59 41/42 26/39 wl 27; R-10741.1 14/18 13/13 1/2 wl 3; .2 20/20 18/18 0/1 wl 0; .3 17/17 13/13 0/1 wl 1.
+What moved: lone `L=` labels sum contiguous pieces of one parent curve (+6 arcs; 573.93 (T) is back); a bearing
+tolerance that scales with piece length, capped at 30 arcmin, with pieces under 10 pt queued as too short (+10
+bearings, 5 luck passes retired); chords beside curves by geometry (+4); parallel neighbours by printed bearing (+1);
+leader landing piece at busy vertices (+1); not-to-scale detail bubbles found by their dashed outline (R-10434.1's
+four, R-10741.2's one; four coincidence passes retired). Bearing denominators are now checkable pieces only.
+Findings that close items: the north seed font is not the read limit (LibreCAD simplex/romans digits are byte-
+identical to the Hershey seed; the unread blocks are prose paragraphs, a row-segmentation limit; code under
+`spike/out/leg6E_stash/`); R-10434.1's closed chain of loop 2 was a transient state, never committed, and no real
+loop closes there at any tolerance (`traverse.py` now drops arc edges with L < chord and snaps loose ends).
+
+Do this, in order:
+
+1. **Row segmentation of multi-line blocks on 2012-era sheets** (`block_rows` / `merge_pieces` in read_glyphs.py):
+   R-10741.2's unread blocks are GRANTOR NOTES and TITLE CODES paragraphs. Reads first, then the selector rule
+   (OCR vs glyph) re-measured.
+2. **South bearings, what is left**: 2/2/1 fails on .2/.1/.3 plus the too-short queue (6/8/11). The queue is the
+   drawing's own limit; the fails need crops.
+3. **Arcs, what is left**: presidio 3 fails, .1 12 (matchline cuts, details), .3 13. `leg6A_missing.md` classes (c) and (b).
+4. **R-71.70's 1.29 deg** (loop 4): crop both NGS marks against the two-point fit; basis-of-bearings note.
+5. **Mosaic south + gap**; the 2024 CA_SanFrancisco_B23 CRS.
+6. **1950s scans on the north tile** (R-71.11/.20/.28, R-92.8/.9) through their packages like R-65.
+7. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze.
+
+## Next as of loop 5 (2026-09-24 19:10), kept for the record
+
+### Next (logged 2026-09-24 19:10 after loop 5; plan and status in `spike/LOOP.md`)
 
 **Loop 5 (south bearings, then arcs).** One root cause carried the bearings: a chained line kept its seed segment's
 direction and handed it to every cut piece, so labels along a multi-piece record line were compared with one

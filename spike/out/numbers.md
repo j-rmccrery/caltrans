@@ -8,13 +8,13 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 ## Printed vs drawn (labels on the drawing)
 | check | checked | pass |
 |---|---|---|
-| distance | 48 | 40 |
-| bearing | 49 | 34 |
-| arc length | 17 | 13 |
+| distance | 49 | 41 |
+| bearing | 43 | 41 |
+| arc length | 16 | 13 |
 | curve L=R*delta | 10 | 10 |
 
-- Where a label passes, printed vs drawn agrees to 0.03 ft median (max 0.24) and 0.65′ median bearing.
-- Exception queue: 54 items = 13 genuine disagreements, 14 where the reader measured a different line, 22 labels with no line found, 5 lines leaving the sheet.
+- Where a label passes, printed vs drawn agrees to 0.03 ft median (max 0.24) and 1.0′ median bearing.
+- Exception queue: 43 items = 1 genuine disagreements, 12 where the reader measured a different line, 25 labels with no line found, 5 lines leaving the sheet.
 
 ## Table tags (L#, C#) read from the glyph paths, no OCR
 - 32 of 44 table rows found on the drawing (32 distinct), 14 partial reads queued, 24 associated (20 by leader arrowhead), 34 queue items.
@@ -37,15 +37,15 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 
 ## Record twin, 2026-09-23 loop 2
 
-Pass counts from `spike/out/bench.csv` (rows labelled `loop5-final`):
+Pass counts from `spike/out/bench.csv` (rows labelled `loop6-final`):
 
 | sheet | distance | bearing | arc length | tags associated | faces named |
 |---|---|---|---|---|---|
-| R-10434.2 Presidio | 40/48 | 34/49 | 13/17 | 24 | 9 |
-| R-10434.1 | 26/38 | 20/31 | 14/30 | 14 | 5 |
-| R-10434.3 | 42/59 | 37/52 | 23/36 | 28 | 12 |
-| R-10741.1 | 14/18 | 12/13 | 1/2 | 0 | 0 |
-| R-10741.2 | 20/22 | 20/20 | 0/1 | 0 | 2 |
+| R-10434.2 Presidio | 41/49 | 41/43 | 16/19 | 24 | 9 |
+| R-10434.1 | 26/37 | 21/23 | 12/24 | 14 | 5 |
+| R-10434.3 | 42/59 | 41/42 | 26/39 | 28 | 12 |
+| R-10741.1 | 14/18 | 13/13 | 1/2 | 0 | 0 |
+| R-10741.2 | 20/20 | 18/18 | 0/1 | 0 | 2 |
 | R-10741.3 | 17/17 | 13/13 | 0/1 | 0 | 1 |
 
 Closed chain on r_10434_002_2020-09-16: 5 edges (5 with a full record), end misfit 0.14 ft, record area 6,970.6 sq ft.

@@ -48,9 +48,9 @@ def build_edges():
         P = np.array(x["line"], float)
         e = {"src": x["printed"], "kind": "arc" if x["kind"] == "arc" else "line", "p0": P[0], "p1": P[-1], "pts": P, "flags": [],
              "region": tuple(x["region"]) if x.get("region") else None}
-        if x["kind"] == "bearing":
+        if x["kind"] in ("bearing", "chord bearing"):  # a chord is the straight edge between an arc's ends (loop 6 leg C)
             e["az"] = x["az"]
-        elif x["kind"] == "distance":
+        elif x["kind"] in ("distance", "chord distance"):
             e["ft"] = x["ft"]
         else:
             e["L"] = x["ft"]
