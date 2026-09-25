@@ -214,3 +214,28 @@ with a per-label pass-set diff, compared with `loop5-final`: presidio 40/48 34/4
 | G | done | 0 | `demo.py --fast` 153 s, 21 ok; `loop6-final` (canonical, nine sheets): presidio 41/49 41/43 16/19 wl 12; .1 26/37 21/23 12/24 wl 21; .3 42/59 41/42 26/39 wl 27; R-10741.1 14/18 13/13 1/2 wl 3; .2 20/20 18/18 0/1 wl 0; .3 17/17 13/13 0/1 wl 1; R-71.71 14/19 20/20 1/5 wl 8; R-10258.1 12/49 22/23 0/18 wl 36; R-71.70 unverified. numbers.md, status page and PDF, STATE.md Next, memory | leg6G |
 
 Dispatches used: 8 of 16 (6 agents, 2 resumes). Started 19:30, ended 2026-09-24 23:50 PDT. Every number above re-measured at the time of its row.
+
+---
+
+# Loop 7: the scan, by its own alphabet (started 2026-09-25 00:30 PDT, JR: "try it on the scans first. Go")
+
+STATE gap 1: 48 of 65 sheets are hand-lettered scans and read at about half. Bridge: a sheet's hand is one hand, so
+cluster the glyph images per sheet, label each cluster once, read the rest by template. Test sheet R-65.2 (1969,
+`Sample Data/d4/r_00065_002_1969-09-01_sn-02048.pdf`, out dir `spike/out/r_00065_002_1969-09-01_sn-02048/`): 273 boxes
+detected (`read_rapid.json`), 32 keyed boxes in `spike/gt_scan.py`; baseline on the keyed 32 (loop 1 consensus of
+RapidOCR + qwen2.5vl): 16 right, 1 wrong accepted, 15 queued. Same rules as loop 6; the six-sheet bench is not touched
+by this loop (scan code only: `spike/scan_*.py`, new `spike/scan_alphabet.py`), so its gate is the keyed 32 and the
+R-65.2 package. Two attempts, then stash as `loop7-leg-N`. No torch on the box; numpy/scipy (and scikit-learn if it
+installs) are the tools.
+
+| # | Leg | Gate |
+|---|---|---|
+| A | Glyph segmentation and clustering: each of the 273 boxes deskewed and binarised at 300 dpi, split into glyphs, each glyph normalised and clustered by bitmap distance; a contact sheet of clusters | on the 32 keyed boxes, >= 70 % of glyphs land in a cluster whose majority glyph is the right character (aligned to the keyed digits); cluster count, sizes and the sheet viewed |
+| B | Labelling and reading: clusters named from the boxes the two readers agree on, then by structure (digit slots in N/E callouts, degrees/minutes < 60, a decimal before two digits, R= and ' marks); every box read by template with a margin, else `?`; consensus with the two readers kept as the second opinion | on the keyed 32: right >= 24, wrong <= 1 (baseline 16 / 1 / 15); all 273 reads written as `read_alphabet.json` in the reads format; 12 crops of reads viewed (6 right, 6 queued) |
+| C | Georeference R-65.2 from the template reads (`scan_georef.py`: callouts, grid-label scale check) against the Caltrans package | fit credible or weak with package disagreement median < 5 ft at 9 points, or the blocker named with numbers |
+| D | Close-out: numbers, status page and PDF, STATE.md, memory | every number re-measured |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
