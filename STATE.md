@@ -3,7 +3,33 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-24 23:30 after loop 6; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-25 09:25 after loop 7; plan and status in `spike/LOOP.md`)
+
+**Loop 7 (the scan by its own alphabet, R-65.2).** `spike/scan_alphabet.py`: boxes levelled and binarised, glyphs
+segmented (fused pairs split at projection valleys), clustered by stroke-direction zoning (579 cap clusters, 98.6 %
+purity on the keyed glyphs), clusters named by gapped alignment to the boxes RapidOCR and qwen2.5vl agree on, by
+structure, and by the vision model shown each cluster's contact strip once. On the keyed 32: template alone 4 right /
+2 wrong / 26 queued; gated by consensus 7 / 0 / 25; the old two-reader consensus 16 / 1 / 15; union 18 / 32. It is a
+third reader with zero wrong, not a replacement. What bounds it: 552 of 730 clusters are too rare or too fused to
+name, and 8 of the 32 keyed boxes are detector boxes on the wrong text before any reader runs. Box 15 reads R=584 by
+all three readers against a keyed 1015.13'; re-key it.
+
+Six-sheet bench untouched by this loop: `loop6-final` stands (presidio 41/49 41/43 16/19 wl 12; .1 26/37 21/23 12/24
+wl 21; .3 42/59 41/42 26/39 wl 27; R-10741.1 14/18 13/13 1/2 wl 3; .2 20/20 18/18 0/1 wl 0; .3 17/17 13/13 0/1 wl 1).
+
+Do this, in order:
+
+1. **Scan text-line detection on the binarised page** (replace the OCR detector's boxes): horizontal and rotated
+   runs of glyph components, one box per lettered line, gated on the 32 keyed boxes landing on their text (today 24).
+   Then the alphabet reader and the two generic readers vote per box.
+2. **Row segmentation of multi-line blocks on 2012-era sheets** (`block_rows` / `merge_pieces`): the north reads.
+3. **South bearings and arcs, what is left**: bearings 2/2/1 fails; arcs 3/12/13 (`leg6A_missing.md` classes b, c).
+4. **R-71.70's 1.29 deg**; **mosaic south + gap**; **1950s scans on the north tile** through their packages.
+5. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze by 10-03.
+
+## Next as of loop 6 (2026-09-24 23:30), kept for the record
+
+### Next (logged 2026-09-24 23:30 after loop 6; plan and status in `spike/LOOP.md`)
 
 **Loop 6 (accuracy items 1-6).** Bench row `loop6-final`: presidio 41/49 41/43 16/19 wl 12; .1 26/37 21/23 12/24 wl 21;
 .3 42/59 41/42 26/39 wl 27; R-10741.1 14/18 13/13 1/2 wl 3; .2 20/20 18/18 0/1 wl 0; .3 17/17 13/13 0/1 wl 1.

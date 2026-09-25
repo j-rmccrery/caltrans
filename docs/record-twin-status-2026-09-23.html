@@ -80,7 +80,7 @@ svg{max-width:100%;height:auto;display:block}
 @media (max-width:760px){.io{grid-template-columns:1fr}.io .arrow{padding:0;transform:rotate(90deg)}}
 .tag{font-family:var(--mono);font-size:11.5px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
 /* timeline */
-.tl{display:grid;grid-template-columns:repeat(11,1fr);gap:0;margin:20px 0;border-top:1px solid var(--rule)}
+.tl{display:grid;grid-template-columns:repeat(12,1fr);gap:0;margin:20px 0;border-top:1px solid var(--rule)}
 .tl div{padding:12px 10px 0 0;border-top:4px solid var(--rule);margin-top:-1px;font-size:13.5px}
 .tl div.past{border-top-color:var(--green)}
 .tl div.now{border-top-color:var(--blue)}
@@ -111,7 +111,7 @@ ol.steps li p{margin:4px 0 0;font-size:14.5px;color:var(--ink2)}
   <div class="tb-meta">
     <b>Date</b><span>2026-09-23</span>
     <b>Demo</b><span>2026-10-05, 25 min live</span>
-    <b>Branch</b><span>caltrans-spike, loop 6 (2026-09-24 23:45)</span>
+    <b>Branch</b><span>caltrans-spike, loop 7 (2026-09-25 09:25)</span>
     <b>Demo sheet</b><span>R-10434.2, Presidio, SF-101</span>
     <b>Test set</b><span>R-10434.1/.2/.3 (Presidio tile) + R-10741.1/.2/.3 (Marin tile) + gap tile (3DEP 2018) · bench also R-71.71, R-10258.1, R-71.70 · 1969 R-65.1..4</span>
     <b>Run</b><span>python spike/demo.py --fast · 128 s · --six 640 s</span>
@@ -138,6 +138,7 @@ ol.steps li p{margin:4px 0 0;font-size:14.5px;color:var(--ink2)}
 <p>A fourth loop (21:20 to 00:40) went after coverage. A third LiDAR tile from USGS 3DEP (2018, about 10 pts/m²) now lies under R-10741.1 and the east edge of R-10434.3, so every baseline sheet has ground beneath it; R-10434.3 itself turned out to sit 89.5 % on the Presidio tile once its fit was redone, so loop 3's "gap" claim for it was a stale fit. Two more annotation-bearing sheets place from their own control (R-71.71 by grid lines, R-10258.1 by callouts and grid, package agreeing to 0.09 ft), and a third, R-71.70, now takes NGS first-order marks as control: both PIDs fetched, both brass disks found by leader, but the two-point fit disagrees with the sheet's own bearings by 1.29°, so it stays unverified. On the six: the north drafter's dashes were 8.6 to 8.9 pt and the 8 pt cap had been chaining tick marks instead, so the dashed parcel line beside S16°20'26"E now carries its bearing (20/20 on R-10741.2); R-10434.3's line table was masked short by an unrelated curve table at the same x, so 12 table cells had been checked as labels (wrong-line 45 to 33, every pass kept); comma-grouped distances read. One regression caught by the canonical bench and reverted before it shipped: a sliver guard added for R-71.70 had rerouted 462 real annotations on R-10434.3.</p>
 <p>A fifth loop (09-24 evening) went after the south bearings, then the arcs. The bearings had one root cause: a chained line kept its first segment's direction and handed it to every piece cut from it, so every label along a long multi-piece record line was compared with one arbitrary heading. Each piece now takes the direction fitted through its own points, and the three south sheets went from 30/49, 18/31, 32/51 to 34/49, 20/31, 37/52 with nothing lost. The arcs did not move, and the attribution says why: the compound-curve story from loop 2 is down to 8 of 65 misses; 32 are bare distances a length-blind fallback was scoring as arcs (now gated, 7 fake fails gone), and 25 are standalone L= labels with no drawn arc within reach, the next thing to look at.</p>
 <p>A sixth loop the same night took the six accuracy items in order. Arcs: a lone L= label now sums the contiguous pieces of the one curve it sits on, which brought back the 573.93 (T) total as 52.22 + 20.63 + 501.10 and five more (+6). Bearings: a tolerance that scales with the drawn piece's length, capped at 30 arcminutes, with pieces under 10 pt queued as too short to carry a bearing at all (+10, and five earlier passes on 5 to 8 pt pieces retired as luck); a bearing beside a curve is checked as the chord between the arc's ends (+4); a parallel neighbour is chosen by the printed bearing (+1); at a busy vertex the leader's landing piece wins (+1). Not-to-scale detail bubbles are now found by their dashed outline, caption or no caption: four on R-10434.1, one on R-10741.2, and four passes that sat inside them retired. Two hypotheses died honestly: the north drafter's font is not the read limit (the open simplex and romans strokes are identical to the seed already in use; the unread blocks are prose paragraphs), and R-10434.1's lost closed chain was a transient state that never closed for real. Bearing denominators now count checkable pieces only.</p>
+<p>A seventh loop, the next morning, tried the scan idea from gap 1 on R-65.2: cluster the glyph images of one hand, name each cluster once, read the rest by template. The clustering is clean (98.6 % purity on the keyed glyphs once glyphs are separated) and the naming works (57 of 61 agreed boxes vote, the vision model names 36 clusters from their contact strips with no disagreement), but the reader lands at 7 right, 0 wrong, 25 queued on the keyed 32 against the two-reader consensus's 16, 1, 15. As a third vote it lifts the union to 18. What stops it is not recognition: hand digits touch and fuse in 197 of 273 boxes, hatch runs through text, and 8 of the 32 keyed boxes are detector boxes sitting on the wrong text before any reader runs. The next lever on scans is text-line detection on the binarised page.</p>
 
 <div class="tl">
   <div class="past"><div class="d">09-09 to 09-21</div><div class="t">Spikes</div>Text from strokes, OCR, georef from callouts and grid ticks, LiDAR Q1–Q5, scan census. 8 of 11 CAD sheets georeference.</div>
@@ -149,6 +150,7 @@ ol.steps li p{margin:4px 0 0;font-size:14.5px;color:var(--ink2)}
   <div class="past"><div class="d">09-23 21:20–00:40</div><div class="t">Loop 4</div>Coverage: 3DEP gap tile, ground under all six; R-71.71 and R-10258.1 placed; NGS PID control built (R-71.70 unverified, 1.29°); north dashes seen, R-10434.3 table cells masked; bench row loop4-final.</div>
   <div class="past"><div class="d">09-24 18:00–19:15</div><div class="t">Loop 5</div>South bearings +11 from one cause (cut pieces inherited the seed direction); arcs re-attributed: fake arc fails gated out, fillets matched by radius; bench row loop5-final.</div>
   <div class="past"><div class="d">09-24 19:30–23:45</div><div class="t">Loop 6</div>Lone L= arcs summed on their curve (+6); bearing tolerance by piece length, chords beside curves, parallels by printed bearing (+16); detail bubbles by geometry; font-seed and closure hypotheses falsified; bench row loop6-final.</div>
+  <div class="past"><div class="d">09-25 08:45–09:25</div><div class="t">Loop 7</div>The scan by its own alphabet on R-65.2: clean clusters, thin coverage; a third reader (union 18 of 32, 0 wrong); detector boxes on the wrong text are the larger loss.</div>
   <div class="now"><div class="d">09-23 now</div><div class="t">Day 13</div>Slides, Q&amp;A sheet, recording not started. Remaining arc misses need a run-sum against a neighbour tag.</div>
   <div class="next"><div class="d">to 10-05</div><div class="t">Freeze, rehearse</div>Fallback recording. Two rehearsals. Freeze by 10-03.</div>
 </div>
@@ -464,7 +466,7 @@ geometry: Point [-122.46557, 37.80025]</code></pre></div>
 <tr class="group"><td colspan="3">Beyond the demo set</td></tr>
 <tr><td>Six-sheet baseline (all six sheets, two tiles)</td><td class="num">&uarr; table above</td><td>distance, bearing, arc, wrong-line, georef rms, vs package per sheet &mdash; see &ldquo;Accuracy on the six-sheet baseline&rdquo;</td></tr>
 <tr><td>Vector sheets georeferenced (all D4 vector sheets on disk)</td><td class="num">7 / 17</td><td>the 10 refused all fail on reads: other drafters' fonts, no tables to validate an alphabet (before the R-10741 set)</td></tr>
-<tr><td>Scan R-65.2 (1969, hand-lettered), 32 keyed boxes</td><td class="num">16 right · 1 wrong · 15 queued</td><td>two readers; not georeferenced by its own text. 48 of 65 sheets in the archive are scans</td></tr>
+<tr><td>Scan R-65.2 (1969, hand-lettered), 32 keyed boxes</td><td class="num">18 right · 0 wrong (gated) · 14 queued</td><td>three readers: RapidOCR, a local vision model, and the sheet's own alphabet (loop 7); 8 of the 14 are detector boxes on the wrong text. 48 of 65 sheets in the archive are scans</td></tr>
 </table></div>
 
 <div class="callout warn"><b>What the numbers do not claim.</b> The 0.04 ft residual is against numbers read off the same sheet. Independent check is Caltrans' package at about a foot, raster-limited. We claim records-research grade, not a survey tolerance, until a pilot sets one.</div>
@@ -494,6 +496,7 @@ geometry: Point [-122.46557, 37.80025]</code></pre></div>
 <h2>Next steps</h2>
 <p>In order. Loop 3 placed all six sheets and dropped leg 5 (north label association) when JR ended the loop, so it leads the list. Items 1 to 5 are code or a package fetch, gated against <code>bench.py</code>. Item 6 is the demo itself.</p>
 <ol class="steps">
+<li><div><b>Scan text-line detection on the binarised page</b><p>Replace the OCR detector's boxes with one box per lettered line built from glyph components; gate on the 32 keyed boxes landing on their text (today 24 of 32). Then the alphabet reader and the two generic readers vote per box.</p></div></li>
 <li><div><b>Row segmentation of multi-line blocks on 2012-era sheets</b><p>R-10741.2's unread blocks are GRANTOR NOTES and TITLE CODES paragraphs; the font is not the limit. Reads first, then the OCR-vs-glyph selector re-measured.</p></div></li>
 <li><div><b>South bearings, what is left</b><p>2 / 2 / 1 fails on the three sheets plus the too-short queue (6 / 8 / 11 pieces under 10 pt). The queue is the drawing's own limit; the fails need crops.</p></div></li>
 <li><div><b>Arcs, what is left</b><p>Presidio 3 fails, R-10434.1 12 (matchline cuts and details), R-10434.3 13. Classes (b) and (c) in <code>spike/out/leg6A_missing.md</code>.</p></div></li>
@@ -551,6 +554,6 @@ geometry: Point [-122.46557, 37.80025]</code></pre></div>
 
 <div class="callout"><b>Findings worth carrying forward.</b> Annotation text is the reader for Civil 3D 2016+ sheets; the glyph alphabet stays for 2012-era sheets. CAD layers did not help association once reads were exact; they still separate furniture from map. The exception page's wrong-line group is the fastest diagnostic there is: render the measured line, look at twelve crops, fix the biggest cause, repeat. Two generic readers agreeing on hand lettering is a floor, not a method.</div>
 
-<p class="eyebrow" style="margin-top:48px">Sources: STATE.md, ROADMAP.md, spike/LOOP.md, spike/out/loop_report.md, spike/out/legC_misses.md, spike/out/numbers.md, spike/out/bench.csv (rows "loop6-final") · every number re-measurable with <code>python spike/bench.py final --tables --tags --parcels --traverse presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3 r71_71 r10258 r71_70</code></p>
+<p class="eyebrow" style="margin-top:48px">Sources: STATE.md, ROADMAP.md, spike/LOOP.md, spike/out/loop_report.md, spike/out/legC_misses.md, spike/out/numbers.md, spike/out/bench.csv (rows "loop6-final"; scan numbers from spike/gt_scan.py against read_scan.json and read_alphabet.json) · every number re-measurable with <code>python spike/bench.py final --tables --tags --parcels --traverse presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3 r71_71 r10258 r71_70</code></p>
 
 </div>

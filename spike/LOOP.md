@@ -240,3 +240,10 @@ installs) are the tools.
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
 | A | pass on purity, segmentation is the limit | 1 | 273 boxes -> 2155 glyphs (1731 cap, 424 marks); 257 cap clusters at threshold 6.0; purity on aligned keyed glyphs 88.4 % pixel / 98.6 % zoning (cap), 84 % marks; confusions 3/5, 0/4, 3/8. Only 11 of 32 keyed boxes align: 197 boxes under-segment (touching hand digits fuse into pairs), 7 over-segment, and some detector boxes sit on the wrong text (166 on 'prohibited'). Sample and contact sheet viewed | leg7A |
+| B | gate missed twice; kept as a third reader (finding) | 2 | Attempt 1 (equal-count alignment): 3/2/27, naming starved (367 of 401 clusters unnamed). Attempt 2 (gapped alignment 57/61 boxes vote; VLM names 36 clusters from contact strips, 0 disagreements; zoning descriptor everywhere): template alone 4/2/26, gated by consensus 7/0/25, old consensus 16/1/15 reproduced. Union of the three readers 18/32 (+2: 100.12', 21°00'11"), no new coordinates. Remaining 14: 8 detector boxes on the wrong text, 2 fused digits, 1 hatch, 3 other; 552 of 730 clusters unnamed (rare or fused glyphs). Box 15: all three readers say R=584, the key says 1015.13' | leg7B |
+| C | skipped | 0 | The reads that improved are a distance and a bearing; the 12 keyed coordinate boxes are unchanged, so the callout fit would not move | - |
+| D | done | 0 | STATE.md, memory, status page scan section + PDF | leg7D |
+
+Dispatches used: 3 of 16 (2 agents, 1 resume). Started 2026-09-25 00:30, ran 08:45-09:20 PDT.
+
+**Finding for gap 1.** On a 1969 hand-lettered scan the per-sheet alphabet is real but bounded: purity is high once glyphs are separated, and separation is the problem (touching digits, hatch through the text, faint strokes at ~12 px). Box detection is the larger loss: 8 of the 32 keyed boxes sit on the wrong text before any reader runs. Next lever for scans is text-line detection on the binarised page (not the OCR detector's boxes), then the alphabet.
