@@ -17,6 +17,10 @@ all three readers against a keyed 1015.13'; re-key it.
 Six-sheet bench untouched by this loop: `loop6-final` stands (presidio 41/49 41/43 16/19 wl 12; .1 26/37 21/23 12/24
 wl 21; .3 42/59 41/42 26/39 wl 27; R-10741.1 14/18 13/13 1/2 wl 3; .2 20/20 18/18 0/1 wl 0; .3 17/17 13/13 0/1 wl 1).
 
+**Note (JR, 2026-09-25 16:50): pull in the new SAM information.** Not yet specified which SAM; if it is Meta's Segment
+Anything, the fit is scan text-line detection (item 1 below): prompt-free mask proposals on the binarised page as the box
+detector, scored on the 32 keyed boxes landing on their text (24 today). Ask JR before spending a leg on it.
+
 Do this, in order:
 
 1. **Scan text-line detection on the binarised page** (replace the OCR detector's boxes): horizontal and rotated
