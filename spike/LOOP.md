@@ -239,3 +239,4 @@ installs) are the tools.
 
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
+| A | pass on purity, segmentation is the limit | 1 | 273 boxes -> 2155 glyphs (1731 cap, 424 marks); 257 cap clusters at threshold 6.0; purity on aligned keyed glyphs 88.4 % pixel / 98.6 % zoning (cap), 84 % marks; confusions 3/5, 0/4, 3/8. Only 11 of 32 keyed boxes align: 197 boxes under-segment (touching hand digits fuse into pairs), 7 over-segment, and some detector boxes sit on the wrong text (166 on 'prohibited'). Sample and contact sheet viewed | leg7A |
