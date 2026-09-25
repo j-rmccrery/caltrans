@@ -167,8 +167,33 @@ def lines_on_sheet(segs, circles, max_turn_deg=0.6):
                     else:
                         p0 = a0 + d0 * ((circles[j] - a0) @ d0)
             al = np.array([(p0 - a0) @ d0, (p1 - a0) @ d0])
-        chains.append({"p0": p0, "p1": p1, "dir": d0, "len_pt": float(al.max() - al.min()), "width": w0, "n": len(chain)})
+        # this chain's raw segment endpoints, (al, x, y) relative to the final p0 (the same origin
+        # split_chains cuts against): a cut piece downstream (split_chains, span_for) refits its own
+        # local direction from just its slice of these, instead of inheriting d0 -- the seed segment's
+        # raw direction, arbitrary among however many segments got chained -- for its whole span, which
+        # is wrong wherever a multi-piece record line has a real kink partway along it
+        al0 = (pts - p0) @ d0
+        samples = sorted(zip(al0.tolist(), pts[:, 0].tolist(), pts[:, 1].tolist()))
+        chains.append({"p0": p0, "p1": p1, "dir": d0, "len_pt": float(al.max() - al.min()), "width": w0, "n": len(chain), "_pts": samples})
     return chains
+
+
+def local_fit_dir(samples, s0, s1, fallback, pad=1.0):
+    """A cut piece's own heading, fit (least squares) through only the raw segment endpoints whose
+    position along the parent chain falls in [s0, s1] (padded 1 pt for the endpoints right at a cut) --
+    not the parent's single seed-segment direction, which a multi-piece record line can wander well away
+    from by the time the label's own piece is reached. Falls back to the parent direction where a span
+    (a very short piece, or one that bridged a gap with no interior samples) can't support its own fit."""
+    pts = np.array([[x, y] for al, x, y in samples if s0 - pad <= al <= s1 + pad])
+    if len(pts) < 2:
+        return fallback
+    mean = pts.mean(axis=0)
+    d = pts[-1] - pts[0] if len(pts) == 2 else np.linalg.svd(pts - mean)[2][0]
+    n = np.hypot(*d)
+    if n < 1e-9:
+        return fallback
+    d = d / n
+    return d if d @ fallback >= 0 else -d
 
 
 def linework_segments(page, max_gray=0.6):
@@ -404,7 +429,8 @@ def split_chains(chains, circles, tol=2.0):
         stops = [0.0] + sorted(cuts) + [L]
         for s0, s1 in zip(stops, stops[1:]):
             if s1 - s0 >= 1:
-                out.append({**c, "p0": p + t * s0, "p1": p + t * s1, "len_pt": float(s1 - s0), "run": k, "s0": float(s0), "s1": float(s1)})
+                out.append({**c, "p0": p + t * s0, "p1": p + t * s1, "dir": local_fit_dir(c["_pts"], s0, s1, t),
+                            "len_pt": float(s1 - s0), "run": k, "s0": float(s0), "s1": float(s1)})
     return out
 
 
@@ -498,7 +524,9 @@ def span_for(piece, want_ft, scale, chains):
     i, j = hits[0]
     if (i, j) == (k, k):
         return piece
-    return {**piece, "p0": run[i]["p0"], "p1": run[j]["p1"], "len_pt": float(run[j]["s1"] - run[i]["s0"]), "s0": run[i]["s0"], "s1": run[j]["s1"], "joined": j - i + 1}
+    s0, s1 = run[i]["s0"], run[j]["s1"]
+    return {**piece, "p0": run[i]["p0"], "p1": run[j]["p1"], "dir": local_fit_dir(piece["_pts"], s0, s1, piece["dir"]),
+            "len_pt": float(s1 - s0), "s0": s0, "s1": s1, "joined": j - i + 1}
 
 
 def touches_label(chain, labels_tree, labels):

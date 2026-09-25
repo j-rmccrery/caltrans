@@ -26,7 +26,7 @@ bearing,"N51°26'23""E","N51°25'30""E",0.9',pass
 distance,150.08',150.12,+0.04,pass
 distance,272.10',272.08,-0.02,pass
 bearing,"S11°47'37""E","S11°48'27""E",0.8',pass
-bearing,"S41°08'37""E","S41°09'37""E",1.0',pass
+bearing,"S41°08'37""E","S41°08'09""E",0.5',pass
 distance,508.21',508.16,-0.05,pass
 distance,705.06',705.12,+0.06,pass
 bearing,"S41°08'37""E","S41°09'37""E",1.0',pass
@@ -38,10 +38,10 @@ distance,705.06',705.12,+0.06,pass
 bearing (R),"N16°11'57""E(R)",,,radial: not checked
 bearing (R),"S54°40'22""W(R)",,,radial: not checked
 bearing (R),"S73°48'03""E(R)",,,radial: not checked
-bearing,"S52°40'37""E","S52°40'02""E",0.6',pass
+bearing,"S52°40'37""E","S52°40'15""E",0.4',pass
 bearing,"S35°19'37""E","S35°19'29""E",0.1',pass
 distance,698.07',697.99,-0.08,pass
-bearing,"N35°19'38""W","N35°19'29""W",0.1',pass
+bearing,"N35°19'38""W","N35°18'23""W",1.3',pass
 distance,411.67',411.56,-0.11,pass
 distance,598.06',598.18,+0.12,pass
 curve L=R*delta,R=1169.9 Δ=15.6586° L=319.73,319.73,-0.00,pass
