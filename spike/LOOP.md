@@ -155,3 +155,23 @@ wl 6; .2 20/22 19/19 0/1 wl 3; .3 17/17 12/13 0/1 wl 1.
 | E | done | 0 | `demo.py --fast` 128 s, 21 ok; `loop4-final` (canonical, nine sheets): presidio 39/47 30/49 13/19 wl 15; .1 26/37 18/31 14/32 wl 29; .3 42/58 32/51 23/39 wl 33; R-10741.1 14/19 12/13 1/1 wl 3; .2 20/22 20/20 0/0 wl 2; .3 17/17 12/13 0/1 wl 1; R-71.71 14/19 16/21 1/4 wl 7; R-10258.1 12/44 17/30 2/25 wl 35; R-71.70 unverified. Every pass on the six kept vs loop3-final. numbers.md, status page and PDF, STATE.md Next, memory | legE |
 
 Dispatches used: 9 of 16 (5 agents, 4 resumes). Started 21:20, ended 00:45 PDT. Every number above re-measured at the time of its row.
+
+---
+
+# Loop 5: south bearings, then arcs (started 2026-09-24 00:50 PDT, JR: "do a loop on south bearing attribution, then arcs")
+
+Same rules as loop 4. Every gate is the canonical six-sheet bench, `python spike/bench.py <label> --tables presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3`
+(tables rebuilt from annotations before checks), compared with `loop4-final`: presidio 39/47 30/49 13/19 wl 15; .1 26/37 18/31
+14/32 wl 29; .3 42/58 32/51 23/39 wl 33; R-10741.1 14/19 12/13 1/1 wl 3; .2 20/22 20/20 0/0 wl 2; .3 17/17 12/13 0/1 wl 1.
+Legs run in sequence (both edit `checks.py`). Two attempts, then stash as `loop5-leg-N`.
+
+| # | Leg | Gate |
+|---|---|---|
+| A | South bearing attribution: 12 crops of failing bearing labels on each of R-10434.2/.1/.3 (36), cause classes counted, biggest cause fixed in `checks.py` with a rule that generalises; second cause if the first gives < 5 | bearing passes +5 or more summed over the three south sheets, none lost on any of the six; distance/arc passes not down; wrong-line not up; 8 new passing crops viewed on the right line |
+| B | Arc run-sums (`spike/out/legC_misses.md`): a compound curve whose record boundary is not drawn is checked as the run between the marks that are drawn against the sum of the tags that share it; standalone `L=` blocks with a neighbour tag join that sum; `(T)` totals checked as runs | arc passes +4 or more summed over the three south sheets, none lost; wrong-line not up; 6 new passing arc crops viewed |
+| C | Close-out: `demo.py --fast` under 180 s, bench row `loop5-final` (nine sheets, canonical), numbers.md, status page and PDF, STATE.md, memory | every number re-measured at report time |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
