@@ -22,8 +22,8 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, arcs_on_sheet, azimuth, fmt_bearing, leaders, lines_on_sheet, linework_segments, poly_dist, run_sum, seg_dist, span_for, split_at, split_chains, tag_leaders  # noqa: E402
-from georef import OUT, PDF, segments  # noqa: E402
+from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, azimuth, build_pool, fmt_bearing, leaders, lines_on_sheet, linework_segments, parent_window, poly_dist, run_sum, seg_dist, span_for, split_chains, tag_leaders  # noqa: E402
+from georef import OUT, PDF, READS, real_text_blocks, segments  # noqa: E402
 from gt import TABLES  # noqa: E402
 
 RADIUS_TOL = 0.01  # fraction: a polyline arc's fitted radius vs the printed one
@@ -96,37 +96,22 @@ def main():
             csv.writer(f).writerow(["tag", "check", "printed", "drawn", "difference", "result", "association"])
         print("no table rows or no tags on this sheet: nothing to check"); return
 
+    # leg8A: the identical ARC pool checks.py itself measures labels against (curves split at
+    # junctions/circles/ticks, each piece carrying "parent" + "seq" -- build_pool's own doc string),
+    # not a second, independently-built split -- so a curve tag's piece knows its parent curve the same
+    # way an inline L= label's does (leg6A). Line tags keep tables.py's own chain pool: build_pool's
+    # chains are filtered for checks.py's OWN inline-label use (a stub joined to a leader, or touching
+    # ANY text label within 150 pt, is dropped -- right for a free-floating bearing/distance annotation,
+    # wrong for a table tag, whose short lot-line segment often sits right next to its own tag; sharing
+    # it here lost L1/L5/L10/L17/L18 on r10434_1, measured).
+    blocks = json.loads(READS.read_text(encoding="utf-8")) + real_text_blocks(page)
+    pool = build_pool(page, blocks)
+    arcs, ticks = pool["arcs"], pool["ticks"]
     paths, leader_pids = leaders(page)
-    # black lines of any weight (the alignment curves C9-C14 are 0.36 pt), minus the leaders, which share
-    # the lettering weight; a leader tip may land on any of them, a tag with no leader only on a heavy one
     segs = [s for s in linework_segments(page, max_gray=0.2) if s[3] not in leader_pids]
     _, circles = segments(page)
     chains = [c for c in lines_on_sheet(segs, circles) if c["len_pt"] >= 1 and not (c["width"] < BOUNDARY and c["len_pt"] < 9)]  # thin stubs are stationing ticks
     chains = split_chains(chains, circles)  # pieces between breaks; a tag's span is chosen among them by the table's distance
-    junction_lines = [c for c in chains if c["len_pt"] >= 20]  # boundary lines of any weight; ticks are handled apart
-    # short thin perpendicular strokes: radial ticks on the thin alignment curves mark where an arc ends;
-    # kept with direction so split_at can reject a dash of a line running alongside the curve (loop2 leg
-    # C). Built from `segs` (leaders already excluded above), not a fresh linework_segments() call -- a
-    # leader's own curly path has 5-9 pt straight sub-segments right at its tip, exactly where a tag's
-    # leader-tip search looks for a cut
-    ticks = [((s0 + s1) / 2, (s1 - s0) / np.hypot(*(s1 - s0))) for s0, s1, w, _ in segs if w < BOUNDARY and 5 < np.hypot(*(s1 - s0)) < 9]
-    # a bezier path is one drawn object, same compound-curve problem as checks.py (loop2 leg C): it used
-    # to go in whole while the polyline branch below was already split at the same marks. But a short
-    # chain's end lands near a curve by coincidence more often than a real boundary line meets one, and a
-    # curve that was never compound needs no cut at all -- keep the whole path as a candidate too, and add
-    # its split pieces alongside it, so whichever one matches the table row wins per curve, not per sheet
-    arcs = []
-    for arc in arcs_on_sheet(page):
-        if max(arc.get("color", (0,))) < 0.2 and np.hypot(*(arc["pts"][0] - arc["pts"][-1])) > 2:  # not a point-symbol circle
-            arcs.append({"pts": arc["pts"], "len_pt": arc["len_pt"], "width": arc["width"]})
-            pieces = split_at(arc["pts"], circles, junction_lines, ticks=ticks if arc["width"] < BOUNDARY else ())
-            if len(pieces) > 1:
-                for P in pieces:
-                    arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "width": arc["width"]})
-    for c in lines_on_sheet(segs, circles, max_turn_deg=20.0):  # R=60 ft curves turn 7 deg per facet
-        if c["n"] >= 3 and c["len_pt"] > 12:
-            for P in split_at(c["pts"], circles, junction_lines, ticks=ticks if c["width"] < BOUNDARY else ()):
-                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "width": c["width"]})
 
     def along(seg, pt):
         """Unit direction of a chain, or of the arc facet nearest pt."""
@@ -145,8 +130,30 @@ def main():
             found = [(d, s) for d, s in found if abs(along(s, pt) @ arrow) < math.cos(math.radians(30))]
         return found
 
+    TICK_HALF = 4.5  # pt: a radial tick/stub is drawn 5-9 pt long (build_pool's own ticks range); half
+    # that either side of the stored midpoint, since only midpoint + direction are kept
+
+    def tick_target(tip, reach):
+        """A curve tag's leader tip that lands on a radial tick or short straight stub, not the curve
+        itself (leg8A): the tick within `reach` of the tip, whose own far end sits within 2 pt of a
+        curve piece, names that piece -- not the tick. Nearest such piece wins where more than one
+        tick is that close."""
+        best = None
+        for m, d in ticks:
+            if np.hypot(*(m - tip)) >= reach:
+                continue
+            for end in (m + TICK_HALF * d, m - TICK_HALF * d):
+                for arc in arcs:
+                    dd = poly_dist(end, arc["pts"])
+                    if dd < 2.0 and (best is None or dd < best[0]):
+                        best = (dd, arc)
+        return best[1] if best else None
+
     tips = tag_leaders(tags, paths)
     ambig = []  # diagnostic: ambiguous tags, for the table-order adjacency headroom
+    tick_fires = 0  # leg8A: tags resolved via a radial tick/stub instead of the curve directly
+    window_fires = 0  # leg8A: tags whose own L matched a contiguous window of their parent, alone
+    group_fires = 0  # leg8A: tags that only passed as part of a same-parent group run
     out, queue, curve_hits, placed = [], [], [], []  # placed: every tag's table values with the line they sit on, for the traverse
     for ti, t in enumerate(tags):
         region = [round(t["cx"] - 2 * t["gh"]), round(t["cy"] - t["gh"]), round(t["cx"] + 2 * t["gh"]), round(t["cy"] + t["gh"])]
@@ -166,6 +173,13 @@ def main():
             reach = 4.0 if kind == "line" else max(4.0, 0.6 * hsize)
             cands = candidates(kind, tip, reach)  # ponytail: no arrow-direction test; a tag at a line's end gets its arrow along the line
             how = "leader"
+            if not cands and kind == "curve":
+                # the leader tip may land on a radial tick or short straight stub that meets the curve,
+                # not the drawn curve itself (leg8A): resolve to the piece the tick's own far end touches
+                arc = tick_target(tip, reach)
+                if arc is not None:
+                    cands = [(poly_dist(tip, arc["pts"]), arc)]
+                    tick_fires += 1
             if not cands:
                 queue.append({"tag": t["tag"], "issue": f"leader points at no {kind}", "region": region}); continue
         else:
@@ -232,17 +246,39 @@ def main():
         else:
             curve_hits.append((t, row, seg, how, region))
 
-    # curves: a drawn run between junctions may hold several record arcs whose boundary is not drawn;
-    # a tag passes on its own length, or all tags on the run pass together when the run equals their sum
-    by_run = {}
-    for hit in curve_hits:
-        by_run.setdefault(id(hit[2]), []).append(hit)
-    for hits in by_run.values():
-        seg = hits[0][2]
-        drawn = seg["len_pt"] * scale
-        Ls = [h[1]["L"] for h in hits if not h[1]["total"]]
+    # curves: leg8A -- grouped by PARENT curve (leg6A's parent + seq on every piece), not by the specific
+    # piece a leader happened to land on. Each tag first gets its own chance to pass alone: its own
+    # resolved piece, or -- leg6A's own search, `parent_window` -- a contiguous window of same-parent
+    # pieces around it. Only tags that fail both join their parent's group, checked as a run: the drawn
+    # length between the group's own outermost marks (every piece from the first tag's own piece to the
+    # last, in seq order -- covering a record boundary between them that isn't itself separately drawn,
+    # same as leg6A's standalone L=/(T) window) against the sum of the group's printed lengths.
+    def emit_run(sub, drawn, ref_seg):
+        nonlocal group_fires
+        if len(sub) < 2:
+            for t, row, seg, how, region in sub:
+                d = seg["len_pt"] * scale
+                out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{d:.2f}", f"{d - row['L']:+.2f}", "FAIL", how])
+                queue.append({"tag": t["tag"], "issue": f"drawn {d:.2f} ft vs table {row['L']:.2f} ft", "region": region, "line": shape(seg)})
+            return
+        Ls = [row["L"] for t, row, seg, how, region in sub]
         total, by_sum = run_sum(drawn, Ls)
-        for t, row, seg, how, region in hits:
+        for t, row, seg, how, region in sub:
+            if by_sum:
+                out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f} = {' + '.join(f'{x:.2f}' for x in Ls)}", f"{drawn - total:+.2f}",
+                            f"pass as a run of {len(Ls)}: the boundary between these arcs is not drawn", how])
+                group_fires += 1
+            else:
+                out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "FAIL", how])
+                queue.append({"tag": t["tag"], "issue": f"drawn run {drawn:.2f} ft vs table {row['L']:.2f} ft (run holds {len(Ls)} tags summing {total:.2f})", "region": region, "line": shape(ref_seg)})
+
+    by_parent = {}
+    for hit in curve_hits:
+        by_parent.setdefault(hit[2]["parent"], []).append(hit)
+    for group_hits in by_parent.values():
+        remaining = []
+        for t, row, seg, how, region in group_hits:
+            drawn = seg["len_pt"] * scale
             sagitta = seg["len_pt"] ** 2 / (8 * row["R"] / scale)  # pt; a 46 ft arc on R=1470 bulges 0.1 pt: no radius in that
             ok_r = True
             if sagitta < 0.5:
@@ -253,7 +289,7 @@ def main():
                 out.append([t["tag"], "radius", f"{row['R']:.2f}", f"{R:.2f}", f"{(R - row['R']) / row['R'] * 100:+.2f}%", "pass" if ok_r else "FAIL", how])
             if not ok_r:
                 queue.append({"tag": t["tag"], "issue": f"fitted radius {R:.1f} ft vs table {row['R']:.2f} ft", "region": region, "line": shape(seg)})
-            if row["total"]:
+            if row["total"]:  # a (T) total names this whole run itself, not a share of it: never grouped
                 ok_t = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}(T)", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "pass" if ok_t else "FAIL", how])
                 if not ok_t:
@@ -262,12 +298,28 @@ def main():
             ok_l = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
             if ok_l:
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "pass", how])
-            elif by_sum:
-                out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f} = {' + '.join(f'{x:.2f}' for x in Ls)}", f"{drawn - total:+.2f}",
-                            f"pass as a run of {len(Ls)}: the boundary between these arcs is not drawn", how])
-            else:
-                out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "FAIL", how])
-                queue.append({"tag": t["tag"], "issue": f"drawn run {drawn:.2f} ft vs table {row['L']:.2f} ft" + (f" (run holds {len(Ls)} arcs summing {total:.2f})" if len(Ls) > 1 else ""), "region": region, "line": shape(seg)})
+                continue
+            window = parent_window(arcs, seg, row["L"], scale)
+            if window is not None:
+                wdrawn = sum(x["len_pt"] for x in window) * scale
+                out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{wdrawn:.2f} = " + " + ".join(f"{x['len_pt'] * scale:.2f}" for x in window),
+                            f"{wdrawn - row['L']:+.2f}", f"pass as a run of {len(window)}: the boundary within its own curve is not drawn", how])
+                window_fires += 1
+                continue
+            remaining.append((t, row, seg, how, region))
+        # pieces carrying "seq" (split_at's own cuts) span the outermost marks in seq order; a candidate
+        # with no "seq" is the whole, unsplit curve -- never itself compound, so every tag resolving to
+        # it already shares the identical object, and its own length already IS the group's span
+        seqed = [h for h in remaining if "seq" in h[2]]
+        whole = [h for h in remaining if "seq" not in h[2]]
+        if whole:
+            emit_run(whole, whole[0][2]["len_pt"] * scale, whole[0][2])
+        if seqed:
+            seqed.sort(key=lambda h: h[2]["seq"])
+            lo, hi, parent = seqed[0][2]["seq"], seqed[-1][2]["seq"], seqed[0][2]["parent"]
+            span_pieces = sorted((x for x in arcs if x.get("parent") == parent and "seq" in x and lo <= x["seq"] <= hi), key=lambda x: x["seq"])
+            drawn = sum(x["len_pt"] for x in span_pieces) * scale
+            emit_run(seqed, drawn, max(span_pieces, key=lambda x: x["len_pt"]))
 
     with open(OUT / "tags_checks.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["tag", "check", "printed", "drawn", "difference", "result", "association"]); w.writerows(out)
@@ -292,6 +344,7 @@ def main():
     assoc = {r[0] for r in out}
     print(f"tags read {len(tags)} ({len(complete)} complete, {len(tags) - len(complete)} partial) of {len(rows)} table rows | "
           f"associated {len(assoc)} ({sum(1 for r in out if r[6] == 'leader') // 2} by leader) | queued {len(queue)}")
+    print(f"  leg8A: tick/stub resolution {tick_fires} | own-window pass {window_fires} | group-run pass {group_fires}")
     for check in ("bearing", "distance", "radius", "arc length"):
         rs = [r for r in out if r[1] == check and (r[5] in ("pass", "FAIL") or r[5].startswith("pass as a run"))]
         print(f"  {check:11} checked {len(rs):3}  pass {sum(r[5].startswith('pass') for r in rs):3}  fail {sum(r[5] == 'FAIL' for r in rs):3}" + (f"  ({sum(r[5].startswith('pass as') for r in rs)} as a run)" if any(r[5].startswith('pass as') for r in rs) else ""))

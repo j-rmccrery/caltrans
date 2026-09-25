@@ -873,6 +873,26 @@ def run_sum(drawn, Ls):
     return total, len(Ls) > 1 and abs(drawn - total) <= DIST_TOL + 0.0005 * total
 
 
+def parent_window(arcs, seed, want, scale):
+    """The contiguous window of same-parent pieces (in seq order) around `seed` whose printed length
+    `want` it alone -- not shared with any other label/tag -- uniquely matches (leg6A's search): tried
+    before a label or table tag is ever grouped with a neighbour (leg8A). `seed` must be one of
+    split_at's own pieces (carries "seq"), never the whole unsplit candidate, which is never itself
+    part of a sum-group. Returns the window as a list of pieces in seq order, or None."""
+    if "seq" not in seed:
+        return None
+    run = sorted((x for x in arcs if x.get("parent") == seed["parent"] and "seq" in x), key=lambda x: x["seq"])
+    k = next(i for i, x in enumerate(run) if x is seed)
+    tol = DIST_TOL + 0.0005 * want
+    hits = [(i, j) for i in range(0, k + 1) for j in range(k, len(run))
+            if abs(sum(x["len_pt"] for x in run[i:j + 1]) * scale - want) <= tol
+            and chord_ok(run[i]["pts"][0], run[j]["pts"][-1], want, scale, tol)]
+    if len(hits) == 1 and hits[0] != (k, k):
+        i, j = hits[0]
+        return run[i:j + 1]
+    return None
+
+
 def build_pool(page, blocks):
     """Every candidate a label can be checked against: straight-line chains (split at junctions/circles),
     curved-piece arcs (bezier/polyline curves and dashed trains, split the same way), leader tips, the
@@ -1147,20 +1167,15 @@ def main():
                 # against the sheet: the blue run always sits right beside the red label.
                 wide = sorted((x for x in arcs if poly_dist(seed_at, x["pts"]) < 160.0 and "seq" in x),
                               key=lambda x: poly_dist(seed_at, x["pts"]))
-                tol = DIST_TOL + 0.0005 * want
                 # the nearest piece is usually the seed, but not always the one WHOSE parent contains the
                 # printed run (a nearer, unrelated stub can sit closer to the label than the target curve
                 # itself does): try the 20 nearest in order (all of them, in practice -- 160pt rarely
                 # holds more) and take the first whose own parent yields a unique matching window
+                # (parent_window, shared with tables.py's table-tag curves -- leg8A)
                 for seed in wide[:20]:
-                    run = sorted((x for x in arcs if x.get("parent") == seed["parent"] and "seq" in x), key=lambda x: x["seq"])
-                    k = next(i for i, x in enumerate(run) if x is seed)
-                    hits = [(i, j) for i in range(0, k + 1) for j in range(k, len(run))
-                            if abs(sum(x["len_pt"] for x in run[i:j + 1]) * scale - want) <= tol
-                            and chord_ok(run[i]["pts"][0], run[j]["pts"][-1], want, scale, tol)]
-                    if len(hits) == 1 and hits[0] != (k, k):
-                        i, j = hits[0]
-                        group_arc = run[i:j + 1]
+                    window = parent_window(arcs, seed, want, scale)
+                    if window is not None:
+                        group_arc = window
                         break
             if group_arc is not None:
                 drawn = sum(x["len_pt"] for x in group_arc) * scale

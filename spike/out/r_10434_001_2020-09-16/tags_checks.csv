@@ -25,5 +25,5 @@ L17,bearing,"N74°58'44""W","N74°58'50""W",0.1',pass,beside
 L17,distance,163.87,163.86,-0.01,pass,beside
 L18,bearing,"N2°05'55""E","N2°05'47""E",0.1',pass,beside
 L18,distance,175.13,175.13,-0.00,pass,beside
-C3,radius,460.00,460.44,+0.10%,pass,beside
-C3,arc length,322.86,92.70,-230.16,FAIL,beside
+C3,radius,460.00,460.27,+0.06%,pass,beside
+C3,arc length,322.86,86.68,-236.18,FAIL,beside
