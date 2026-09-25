@@ -175,3 +175,4 @@ Legs run in sequence (both edit `checks.py`). Two attempts, then stash as `loop5
 
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
+| A | pass | 1 | 36 crops: kink / cut point with the seed direction 17, leader to another line 7, wrong parallel neighbour 4, label on a curve 4, unmasked inset 2, (T) total vs one fragment 2. One fix: a cut piece's direction is fitted through its own points (`local_fit_dir`), not inherited from the chain's seed segment. `leg5A-check` vs `loop4-final`: bearings 30 -> 34, 18 -> 20, 32 -> 37 (+11 vs the +5 gate); presidio distance 39 -> 40; wrong-line 15 -> 14, 29 -> 28, 33; north unchanged except R-10741.3 bearing 12 -> 13; per-label pass sets: nothing lost; 8 passing crops viewed, all on the described line | leg5A |
