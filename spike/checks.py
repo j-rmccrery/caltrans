@@ -21,6 +21,8 @@ from pathlib import Path
 import numpy as np
 import pymupdf
 from scipy.spatial import cKDTree
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
 
 sys.path.insert(0, str(Path(__file__).parent))
 from georef import OUT, READS, PDF, frame, real_text_blocks, segments  # noqa: E402
@@ -59,9 +61,12 @@ AREA_CTX = re.compile(r"SQ\.?\s?FT|ACRES?\b|\bAC\.|±", re.I)  # a parcel-area f
 # table ("*28.31 AC.") or a legend: not a distance; "AC." (the abbreviation) is as common on this sheet as
 # the spelled-out word and was not being caught -- an acreage table read as four false distance labels
 DETAIL_RE = re.compile(r"\bDETAIL\b", re.I)
-_NTS_TOKEN = r"(?<![A-Za-z])N\.?T\.?S\.?(?![A-Za-z])"  # "N.T.S." as its own token: a bare substring match
-# (no letter boundary) would also fire inside ordinary words that happen to contain "nts" -- agents,
-# easements, monuments, instruments, all common on a survey sheet's boilerplate and legend
+_NTS_TOKEN = r"(?<![A-Za-z])(?:N\.?T\.?S\.?|NOT\s+TO\s+SCALE)(?![A-Za-z])"  # "N.T.S." or the spelled-out
+# "NOT TO SCALE" as its own token: a bare substring match (no letter boundary) would also fire inside
+# ordinary words that happen to contain "nts" -- agents, easements, monuments, instruments, all common
+# on a survey sheet's boilerplate and legend. The spelled-out form is here because R-10434.1's DETAIL
+# "D" is captioned "NOT TO SCALE", never "N.T.S." (checked: its "DETAIL "D"" text is never read at all
+# at this drafter's font, only this line is) -- loop6 leg F
 NTS_RE = re.compile(_NTS_TOKEN, re.I)
 SCALE_NTS_RE = re.compile(r"SCALE.*?" + _NTS_TOKEN, re.I)
 DIST_TOL = 0.30   # ft, plus 0.05 %
@@ -708,53 +713,156 @@ def sheet_lines(page, blocks):
 
 
 
-def nts_circle(page, cx, cy, reach):
-    """The dashed circle drawn around a detail caption, if the sheet's vector data separately carries
-    one: stroked, dash-attributed paths within reach whose combined extent is roughly circular. None ->
-    the caller falls back to a plain box.
-    ponytail: a bounding-box union of dash-attributed strokes, not a real circle fit -- upgrade if a
-    sheet draws its inset ring some other way (e.g. as many short plain-stroke facets) and this misses it."""
-    box = None
+def _dash_points(page, blocks):
+    """Every short stroke endpoint (dashes.py's own <10 pt line-item decomposition, any CAD layer --
+    unlike collect_dashes(), which only trusts the named easement/parcel-segment layers) that isn't
+    part of a real text block's own oriented box. A detail inset's dashed ring can live on any
+    furniture layer, and at some drafters' scale (R-10434.1's DETAIL "D") the ring's own dash marks are
+    exactly glyph-sized, so the usual 'small multi-stroke path is a character' rect-size rule
+    (linework_segments/arcs_on_sheet) can't tell a dash from a digit there -- excluding by the blocks
+    the reader already placed can."""
+    from dashes import _strokes
+    if not blocks:
+        return []
+    centers = np.array([[b["cx"], b["cy"]] for b in blocks])
+    btree = cKDTree(centers)
+    reach = max(float(np.median([b["w"] for b in blocks])), 20.0)
+
+    def in_text(p):
+        for j in btree.query_ball_point(p, reach):
+            b = blocks[j]
+            c, u, n = frame(b)
+            if abs((p - c) @ u) < b["w"] / 2 and abs((p - c) @ n) < b["h"] / 2:
+                return True
+        return False
+
+    out = []
     for d in page.get_drawings():
-        if d["type"] != "s" or d.get("dashes") in (None, "[] 0", ""):
+        if d["type"] != "s":
             continue
-        r = d["rect"]
-        mx, my = (r.x0 + r.x1) / 2, (r.y0 + r.y1) / 2
-        if math.hypot(mx - cx, my - cy) > reach:
-            continue
-        box = (r.x0, r.y0, r.x1, r.y1) if box is None else (min(box[0], r.x0), min(box[1], r.y0), max(box[2], r.x1), max(box[3], r.y1))
-    if box is None:
-        return None
-    w, h = box[2] - box[0], box[3] - box[1]
-    return box if w > 20 and abs(w - h) < 0.3 * max(w, h) else None
+        for a, b in _strokes(d):
+            if not in_text((a + b) / 2):
+                out.append((a, b))
+    return out
 
 
-def nts_regions(blocks, page):
-    """Not-to-scale detail insets: a caption 'DETAIL "X"' / 'Scale: = N.T.S.' (an N.T.S. block within 3
-    glyph heights of a DETAIL block, or one block that reads both at once) marks a region -- the dashed
-    circle drawn around it if there is one, else a box 12 glyph heights around the caption. Labels inside
-    are not-to-scale citations, checked against nothing."""
-    details = [b for b in blocks if DETAIL_RE.search(b["text"])]
-    caps, cap_ids = [], set()
-    for b in blocks:
-        if SCALE_NTS_RE.search(b["text"]):
-            caps.append(b); cap_ids.add(id(b))
-    for b in blocks:
-        if id(b) in cap_ids or not NTS_RE.search(b["text"]):
+def _circle_clusters(strokes, reach=15.0, min_pts=8):
+    """Connected components of dash points within `reach` pt of one another, each fitted to a circle
+    (Kasa least squares): radius, residual, and arc coverage (360 minus the widest angular gap around
+    the fitted centre). A dashed ring made of two tangent loops (a bowtie -- R-10434.1's DETAIL "D")
+    comes back as one wider, higher-residual circle spanning both; that still clears the radius/
+    coverage gates below and still masks both loops' labels, so it is kept as one region rather than
+    solved as two true circles."""
+    pts = np.array([q for a, b in strokes for q in (a, b)])
+    if len(pts) < min_pts:
+        return []
+    tree = cKDTree(pts)
+    pairs = tree.query_pairs(reach, output_type="ndarray")
+    if len(pairs) == 0:
+        return []
+    rows = np.concatenate([pairs[:, 0], pairs[:, 1]])
+    cols = np.concatenate([pairs[:, 1], pairs[:, 0]])
+    g = coo_matrix((np.ones(len(rows)), (rows, cols)), shape=(len(pts), len(pts)))
+    ncomp, labels = connected_components(g, directed=False)
+    out = []
+    for k in range(ncomp):
+        P = pts[labels == k]
+        if len(P) < min_pts:
             continue
-        c, u, n = frame(b)
-        gh = b["glyph_h"]
-        if any(abs((np.array([d["cx"], d["cy"]]) - c) @ n) < 3 * gh and abs((np.array([d["cx"], d["cy"]]) - c) @ u) < 0.6 * max(b["w"], d["w"]) + 3 * gh for d in details):
-            caps.append(b); cap_ids.add(id(b))
-    regions = []
-    for cap in caps:
-        gh = cap["glyph_h"]
-        near = [d for d in details if math.hypot(d["cx"] - cap["cx"], d["cy"] - cap["cy"]) < 20 * gh] + [cap]
-        cx = sum(g["cx"] for g in near) / len(near)
-        cy = sum(g["cy"] for g in near) / len(near)
-        box = 12 * gh
-        regions.append(nts_circle(page, cx, cy, box) or (cx - box, cy - box, cx + box, cy + box))
-    return regions
+        x, y = P[:, 0], P[:, 1]
+        sol, *_ = np.linalg.lstsq(np.c_[2 * x, 2 * y, np.ones(len(x))], x ** 2 + y ** 2, rcond=None)
+        cx, cy, cc = sol
+        r = math.sqrt(max(cc + cx ** 2 + cy ** 2, 0))
+        if not (0 < r < 1e4):
+            continue
+        resid = float(np.sqrt(np.mean((np.hypot(x - cx, y - cy) - r) ** 2)))
+        ang = np.sort(np.degrees(np.arctan2(y - cy, x - cx)) % 360)
+        gaps = np.diff(np.concatenate([ang, ang[:1] + 360]))
+        cov = 360 - float(gaps.max())
+        out.append({"cx": float(cx), "cy": float(cy), "r": r, "resid": resid, "cov": cov, "n": len(P)})
+    return out
+
+
+def _rim_crossing(cx, cy, r, gh, leader_paths, segs):
+    """A leader or plain line with one end inside this circle and the other clearly (2 glyph heights)
+    outside its rim -- the 'see detail' tie (rule b) used when no caption reads. R-10741.2's DETAIL "A"
+    has no readable caption (OCR reads it as CJK glyphs) but its own N51 deg 26'23"E boundary runs from
+    the inset's vertex, out through the dashed rim, onto the main sheet -- that crossing is the tie."""
+    c = np.array([cx, cy])
+    tol = 2.0 * gh
+    pairs = [(p0, p1) for p0, p1, *_ in leader_paths] + [(a, b) for a, b, w, pid in segs]
+    for a, b in pairs:
+        da, db = float(np.hypot(*(a - c))), float(np.hypot(*(b - c)))
+        if (da < r and db > r + tol) or (db < r and da > r + tol):
+            return True
+    return False
+
+
+_CJK_RE = re.compile(r"[一-鿿]")  # this drafter's DETAIL "A" caption OCRs as CJK ideographs
+# (R-10741.2, loop6 leg F) -- a real signal that a caption block sits there but reads corrupted, unlike
+# a bare "no non-ASCII text nearby" test, which would also trip on every ordinary degree-sign bearing
+
+INSET_GH_MULT = 5.0  # radius must exceed this many local glyph heights. The rule of thumb was 8x;
+# measured against R-10434.1's DETAIL "D" (the only readable-caption case on hand, two tangent dashed
+# loops) its true radius is 5.6-9.5x its own interior label's glyph height depending on which loop --
+# 8x excludes the loop that holds 14.91', so this is calibrated down to 5x. Still clears R-10741.2's
+# DETAIL "A" (15x) by a wide margin; a vertex circle never reaches this test at all (solid, not dashed,
+# so it never enters _dash_points' pool), and an open R/W curve is excluded by the coverage gate below
+INSET_GH_MAX = 30.0  # and radius must stay under this many local glyph heights: a detail inset is a
+# LOCAL enlargement, never sheet-spanning -- caught on R-10434.3, whose sparse dash points near one
+# real "NOT TO SCALE" caption chained, through a wide connected-components reach, into one 665 pt
+# (62x) blob covering 765 labels and most of the sheet (resid 44% of r, plainly not a circle at all).
+# The two real insets on hand top out at 15x (R-10741.2's DETAIL "A"); 30x leaves a wide margin
+
+
+def detail_insets(blocks, page, glyph_h_med):
+    """Not-to-scale detail insets, found by their drawn geometry instead of a readable caption: a
+    dashed closed curve (any CAD layer, dashes.py's short-stroke decomposition) whose fitted circle has
+    radius > INSET_GH_MULT glyph heights and arc coverage > 300 deg, containing real text, tied to
+    being an inset either by a caption ('N.T.S.'/'NOT TO SCALE' -- NTS_RE) within 5 glyph heights of
+    its rim, or -- when no caption reads -- a leader or plain line crossing from its rim to a point
+    clearly outside it. Works where OCR garbles the caption into CJK glyphs (R-10741.2's DETAIL "A")
+    and where 'DETAIL "X"' is never read at all at this drafter's font, only the plainer 'NOT TO SCALE'
+    beside it (R-10434.1's DETAIL "D"). Returns (regions, report): regions are the fired circles
+    [{"cx","cy","r","gh"}], for masking labels and excluding linework inside them from every candidate
+    pool; report is every candidate circle this sheet's geometry produced, fired or not, with its
+    radius in glyph heights and coverage (leg6F_insets.png)."""
+    clusters = _circle_clusters(_dash_points(page, blocks))
+    btree = cKDTree(np.array([[b["cx"], b["cy"]] for b in blocks])) if blocks else None
+    leader_paths, _ = leaders(page)
+    segs = linework_segments(page, max_gray=0.6)
+    report, regions = [], []
+    for cl in clusters:
+        cx, cy, r, cov = cl["cx"], cl["cy"], cl["r"], cl["cov"]
+        inside = []
+        if btree is not None and r > 0:
+            for j in btree.query_ball_point([cx, cy], r):
+                b = blocks[j]
+                if math.hypot(b["cx"] - cx, b["cy"] - cy) < r:
+                    inside.append(b)
+        gh = float(np.median([b["glyph_h"] for b in inside])) if inside else glyph_h_med
+        row = {"cx": cx, "cy": cy, "r_pt": r, "r_gh": r / gh, "cov": cov, "resid": cl["resid"],
+               "n_labels": len(inside), "fired": False, "reason": ""}
+        if not inside or r <= INSET_GH_MULT * gh or r > INSET_GH_MAX * gh or cov <= 300:
+            report.append(row)
+            continue
+        inside_ids = {id(x) for x in inside}
+        near = [b for b in blocks if id(b) not in inside_ids and math.hypot(b["cx"] - cx, b["cy"] - cy) < r + 5 * gh]
+        cap = next((b for b in near if NTS_RE.search(b["text"])), None)
+        # a readable caption that names a *different* scale ("SCALE: 1"=100'", a to-scale enlargement,
+        # not a not-to-scale one -- R-10434.1's real DETAIL "E") is positive evidence this circle is NOT
+        # an NTS inset: the leader-tie fallback (rule b) is for when no caption reads at all (garbled
+        # OCR), not for overriding one that reads and says something else
+        other_caption = cap is None and any(re.search(r"\bSCALE\b", b["text"], re.I) or DETAIL_RE.search(b["text"]) for b in near)
+        garbled = any(_CJK_RE.search(b["text"]) for b in near)  # a caption block IS there, reading corrupted
+        if cap is not None:
+            row["fired"], row["reason"] = True, f"caption {cap['text']!r}"
+        elif not other_caption and garbled and _rim_crossing(cx, cy, r, gh, leader_paths, segs):
+            row["fired"], row["reason"] = True, "garbled caption + leader/line crosses rim"
+        report.append(row)
+        if row["fired"]:
+            regions.append({"cx": cx, "cy": cy, "r": r, "gh": gh})
+    return regions, report
 
 
 def run_sum(drawn, Ls):
@@ -858,9 +966,20 @@ def build_pool(page, blocks):
     tips = tag_leaders(blocks, paths)
     from overlay import FURNITURE
     FURNITURE = list(FURNITURE) + alignment_table_regions(blocks) + line_curve_table_regions(blocks)  # tables.json's _regions plus tables it doesn't cover
-    NTS = nts_regions(blocks, page)
+    NTS, NTS_REPORT = detail_insets(blocks, page, glyph_h_med)
+    if NTS:  # linework INSIDE a fired inset is excluded from every candidate pool (loop6 leg F): the
+        # bubble's own little enlarged jog must never become a candidate for a main-sheet label. A
+        # single midpoint sample is the wrong test for a long, unsplit compound curve that merely
+        # passes near/through an inset drawn overlapping the main plan (r10434_1 lost 2 real arc passes
+        # this way, first attempt) -- a piece is excluded only when it is essentially the inset's own
+        # linework: both chain endpoints inside, or almost all of an arc's sampled points inside
+        def _inside_nts(p):
+            return any(math.hypot(p[0] - c["cx"], p[1] - c["cy"]) < c["r"] for c in NTS)
+        chains = [c for c in chains if not (_inside_nts(c["p0"]) and _inside_nts(c["p1"]))]
+        arcs = [x for x in arcs if np.mean([_inside_nts(p) for p in x["pts"]]) < 0.8]
     return {"chains": chains, "circles": circles, "paths": paths, "segs": segs, "arcs": arcs, "tips": tips,
-            "FURNITURE": FURNITURE, "NTS": NTS, "junction_lines": junction_lines, "ticks": ticks, "glyph_h_med": glyph_h_med}
+            "FURNITURE": FURNITURE, "NTS": NTS, "NTS_REPORT": NTS_REPORT, "junction_lines": junction_lines,
+            "ticks": ticks, "glyph_h_med": glyph_h_med}
 
 
 def main():
@@ -947,7 +1066,7 @@ def main():
     for bi, b in enumerate(blocks):
         if any(x0 <= b["cx"] <= x1 and y0 <= b["cy"] <= y1 for x0, y0, x1, y1 in FURNITURE):
             continue  # table cells and title block: the record, not labels on the drawing
-        if NTS and any(x0 <= b["cx"] <= x1 and y0 <= b["cy"] <= y1 for x0, y0, x1, y1 in NTS):
+        if NTS and any(math.hypot(b["cx"] - c["cx"], b["cy"] - c["cy"]) < c["r"] + 2 * c["gh"] for c in NTS):
             if any(TOKEN.search(t) or LEN.match(t) for t in b["text"].replace(" ", "").split("|")):
                 exceptions.append({"kind": "nts", "issue": "not to scale: inside detail inset", "region": region(b)})
             continue  # a not-to-scale detail inset: drawn deliberately wrong, never checkable

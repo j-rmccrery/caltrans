@@ -2,8 +2,6 @@ check,printed,drawn,difference,result
 bearing,"S16°48'23""W","S16°49'24""W",1.0',pass
 distance,225.82',225.83,+0.01,pass
 bearing,"S10°30'18""E","S10°31'29""E",1.2',pass
-bearing,"N51°26'23""E","N51°26'42""E",0.3',pass
-distance,10.95',109.41,+98.46,FAIL
 distance,371.76',371.79,+0.03,pass
 bearing,"S58°55'30""E","S58°56'27""E",0.9',pass
 distance,399.46',399.40,-0.06,pass
@@ -12,8 +10,6 @@ distance,371.75',371.79,+0.04,pass
 bearing,"S37°04'23""E","S37°04'08""E",0.3',pass
 distance,205.60',205.46,-0.14,pass
 distance,230.00,230.03,+0.03,pass
-bearing,"N19°41'37""W","N19°39'14""W",2.4',pass
-distance,156.02',219.09,+63.07,FAIL
 bearing,"N09°38'23""E","N9°38'39""E",0.3',pass
 distance,255.00',254.81,-0.19,pass
 bearing,"S16°20'26""E","S16°20'27""E",0.0',pass
