@@ -521,6 +521,20 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
     return pieces
 
 
+CHORD_REJECTS = [0]  # module-level counter: candidate spans dropped by chord_ok below, for the bench report
+
+
+def chord_ok(p0, p1, want_ft, scale, tol):
+    """An arc (or a run of facets standing in for one) is never shorter than the straight chord between
+    its own ends -- a candidate span whose endpoints are already farther apart than the printed length is
+    not that length's run, whatever its facet lengths sum to (R-10434.1's 31.80' matching a 306 ft curve
+    run this way, loop6 leg B)."""
+    ok = float(np.hypot(*(np.asarray(p1) - np.asarray(p0)))) * scale <= want_ft + tol
+    if not ok:
+        CHORD_REJECTS[0] += 1
+    return ok
+
+
 def span_for(piece, want_ft, scale, chains):
     """The breaks on a drawn run (circles, line ends, crossings) are candidate endpoints; the printed
     distance says which pair. Among the contiguous spans of pieces on the piece's run, the one whose
@@ -537,7 +551,7 @@ def span_for(piece, want_ft, scale, chains):
     for i in range(0, k + 1):
         for j in range(k, len(run)):
             L = (run[j]["s1"] - run[i]["s0"]) * scale
-            if abs(L - want_ft) <= tol:
+            if abs(L - want_ft) <= tol and chord_ok(run[i]["p0"], run[j]["p1"], want_ft, scale, tol):
                 hits.append((i, j))
     if len(hits) != 1:
         return piece
@@ -826,11 +840,17 @@ def main():
     # drawn piece. A block the standalone branch missed or deferred is NOT marked -- the fillet check's
     # radius match is a genuinely different search and gets its own try at exactly those
 
-    def at_tip(bi, kind, want=None):
+    def at_tip(bi, kind, want=None, want_az=None):
         """The line or arc a label's leader points at (within 4 pt of the arrowhead), if it has a leader.
-        Several pieces meet at an arrowhead (the segment, a stub, a crossing line): the one whose length
-        matches the printed distance wins, else the nearest. Returns (led, segment); led False = no
-        leader, or the leader belongs to another value in the same block: fall back to 'beside'."""
+        Busy vertex (loop6 leg B): several drawn lines can share the identical arrowhead. The piece(s)
+        whose own endpoint truly IS the tip (not one merely passing near it) come first; where more than
+        one does -- a real vertex, several record lines ending together -- the printed bearing (want_az,
+        the OTHER value already sitting in the same bearing+distance block) decides among THEM before any
+        length is even looked at, since a sibling piece's length can match the printed distance by sheer
+        coincidence (measured: R-10434.3's 11.05' stub, wrong direction, beat its own 10.95' by chance).
+        Only once bearing has picked (or had nothing to say) does length, then nearest, apply. Returns
+        (led, segment); led False = no leader, or the leader belongs to another value in the same block:
+        fall back to 'beside'."""
         if bi not in tips:
             return False, None
         tip, _, hsize = tips[bi]
@@ -850,7 +870,18 @@ def main():
                 return True, min(close, key=lambda t: t[0])[1]
             if sum(1 for t in blocks[bi]["text"].replace(" ", "").split("|") if DIST.match(t)) > 1:
                 return False, None  # two dimensions in one block, the leader is the other one's
-        return True, min(cands, key=lambda t: t[0])[1]
+        if kind == "line" and want_az is not None and len(cands) > 1:
+            # busy vertex: several record lines end at the identical arrowhead, and no length match
+            # settled it above -- prefer the piece(s) whose own endpoint IS the tip (not one merely
+            # passing near it), and among those let the printed bearing pick (loop6 leg B). Tried ahead
+            # of the length check instead (bearing always first): regressed a different, previously-
+            # correct label sharing the same busy vertex on R-10434.3 (S71 deg 08' 19" W, legitimately
+            # length-picked) -- so this only ever narrows the fallback, never overrides a length match
+            landing = [t for t in cands if min(np.hypot(*(t[1]["p0"] - tip)), np.hypot(*(t[1]["p1"] - tip))) < reach] or cands
+            fit = [t for t in landing if az_diff(az_of(t[1]), want_az) < max(AZ_FILTER, math.degrees(math.atan2(0.3, t[1]["len_pt"] * scale)))]
+            if fit:
+                return True, min(fit, key=lambda t: t[0])[1]
+        return True, min(cands, key=lambda t: t[0])[1]  # proximity: fallback only
 
     def region(b):
         return [round(b["cx"] - b["w"] / 2 - 4), round(b["cy"] - b["h"] / 2 - 4), round(b["cx"] + b["w"] / 2 + 4), round(b["cy"] + b["h"] / 2 + 4)]
@@ -953,7 +984,8 @@ def main():
                     run = sorted((x for x in arcs if x.get("parent") == seed["parent"] and "seq" in x), key=lambda x: x["seq"])
                     k = next(i for i, x in enumerate(run) if x is seed)
                     hits = [(i, j) for i in range(0, k + 1) for j in range(k, len(run))
-                            if abs(sum(x["len_pt"] for x in run[i:j + 1]) * scale - want) <= tol]
+                            if abs(sum(x["len_pt"] for x in run[i:j + 1]) * scale - want) <= tol
+                            and chord_ok(run[i]["pts"][0], run[j]["pts"][-1], want, scale, tol)]
                     if len(hits) == 1 and hits[0] != (k, k):
                         i, j = hits[0]
                         group_arc = run[i:j + 1]
@@ -988,7 +1020,7 @@ def main():
                 rows.append(["bearing (R)", part, "", "", "radial: not checked"]); continue
             if BEAR.match(part):
                 mate = next((float(dist_num(DIST.match(t))[0]) for t in parts if DIST.match(t)), None)
-                led, ln = at_tip(bi, "line", mate)
+                led, ln = at_tip(bi, "line", mate, want_az=azimuth(part))
                 if not led:
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale, want_az=azimuth(part), az_of=az_of)
                 if ln is not None:
@@ -1012,7 +1044,7 @@ def main():
                     continue  # (T) totals, curve data (R=, Δ, L=), a station number, or a parcel-area figure: not a line length
                 want = float(num_str)
                 baz = next((azimuth(t) for t in parts if BEAR.match(t) and not BEAR.match(t)[6]), None)  # the bearing printed with it
-                led, ln = at_tip(bi, "line", want)
+                led, ln = at_tip(bi, "line", want, want_az=baz)
                 if not led:
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale, want_az=baz, az_of=az_of)
                 if ln is not None:
@@ -1194,6 +1226,7 @@ def main():
     for k, (n, ok) in kinds.items():
         print(f"  {k:16} checked {n:3}  pass {ok:3}  fail {n - ok:3}" if k != "bearing (R)" else f"  {k:16} {n:3} radial bearings, not checked against a line")
     print(f"  exceptions (fails + unmatched labels): {len(exceptions)}")
+    print(f"  chord-sanity rejections (span chord > printed length): {CHORD_REJECTS[0]}")
     for e in exceptions[:12]:
         print("   ", e)
 

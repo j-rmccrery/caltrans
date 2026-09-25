@@ -57,8 +57,8 @@ distance,168.52',168.55,+0.03,pass
 bearing,"N67°37'21""W","N67°37'51""W",0.5',pass
 distance,50.48',50.39,-0.09,pass
 arc length,L=150.85',150.89,+0.04,pass
-bearing,"S86°03'39""W","S86°36'02""W",32.4',FAIL
-arc length,62.27',57.57 (R=nan),-4.70,FAIL
+bearing,"S86°03'39""W","S86°02'49""W",0.8',pass
+distance,62.27',62.28,+0.01,pass
 bearing (R),"S10°20'15""W(R)",,,radial: not checked
 bearing (R),"S2°27'57""E(R)",,,radial: not checked
 bearing (R),"S0°45'35""W(R)",,,radial: not checked

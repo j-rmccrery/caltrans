@@ -8,7 +8,7 @@ bearing,"N20°31'36""W","N20°37'54""W",6.3',FAIL
 distance,3.63',3.64,+0.01,pass
 bearing,"S72°10'10""W","S72°10'19""W",0.1',pass
 distance,97.14',97.14,-0.00,pass
-bearing,"S19°02'15""E","N71°08'60""E",5388.8',FAIL
+bearing,"S19°02'15""E","S18°58'15""E",4.0',FAIL
 arc length,5.27',75.18 (R=nan),+69.91,FAIL
 bearing,"S71°08'19""W","S71°08'60""W",0.7',pass
 distance,75.17',75.18,+0.01,pass
