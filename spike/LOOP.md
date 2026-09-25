@@ -204,3 +204,5 @@ with a per-label pass-set diff, compared with `loop5-final`: presidio 40/48 34/4
 
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
+| A | pass | 1 | 12 largest lone-L= misses: fillet / compound curve split into slivers 8, matchline or detail inset 3, wrong chain 1. Fix: pieces carry parent + seq; a lone L=/(T) sums a contiguous window of its parent (unique exact sum, 160 pt seed). Fires 6. `leg6A-check` vs `loop5-final`: presidio 16/20 (was 13/17), .3 26/39 (was 23/36), .1 and north identical; distance/bearing unchanged; 6 crops viewed, each sum on the labelled curve. bench.py now counts 'pass as a run' rows as passes | leg6A |
+| D | attempt 1 committed, gate open | 1 | The closed chain on .1 was a transient mid-leg state, never committed. Edges 31.80' (matched to a 306 ft run: chord > L), 14.91' and 8.12' (inside a not-to-scale inset) are wrong matches from loop 2's bezier pool. traverse.py drops an arc edge whose L is shorter than its drawn chord and snaps loose ends within one glyph height; Presidio's 2 closures byte-identical; .1 still 0. Needs checks.py to reject chord > L spans (leg B) and the inset mask (leg F) | e2fa3b5 |
