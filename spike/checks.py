@@ -10,6 +10,7 @@ the exception queue is driven by geometry, which is the point.
 usage: [SHEET=<pdf>] python spike/checks.py   ->  spike/out[/<sheet>]/checks.csv, exceptions.json
 """
 import csv
+import itertools
 import json
 import math
 import os
@@ -702,14 +703,12 @@ def run_sum(drawn, Ls):
     return total, len(Ls) > 1 and abs(drawn - total) <= DIST_TOL + 0.0005 * total
 
 
-def main():
-    page = pymupdf.open(PDF)[0]
-    g = json.loads((OUT / "georef.json").read_text())
-    a, bb = g["params"][:2]
-    scale = float(np.hypot(a, bb))
-    rot = np.degrees(np.arctan2(bb, a))
-    blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
-    set_decimals(blocks)
+def build_pool(page, blocks):
+    """Every candidate a label can be checked against: straight-line chains (split at junctions/circles),
+    curved-piece arcs (bezier/polyline curves and dashed trains, split the same way), leader tips, the
+    furniture/NTS mask regions. Shared by main() and by any crop/report tool that needs the identical
+    pool checks.py itself measured against (leg6A_crops.py), so a diagnostic never silently drifts from
+    what the checker actually saw."""
     chains, circles, paths, segs = sheet_lines(page, blocks)
     # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers; a drawn curve runs
     # through several record arcs, so it is cut where lines meet it and at vertex circles
@@ -728,18 +727,31 @@ def main():
     # that was never compound in the first place needs no cut at all -- so the whole path is always kept
     # as a candidate too, and its split pieces are added alongside it, not in place of it: whichever one
     # actually matches the printed length wins, on a curve-by-curve basis instead of one sheet-wide rule
+    # every piece split_at cuts from one original curve object carries a "parent" tag shared by every
+    # piece cut from that SAME object: radius_pt can't serve as the sibling key (lines_on_sheet's
+    # polyline branch -- most of this drafter's curves -- hardcodes it NaN, only the bezier branch fits a
+    # real one), and a fresh circle re-fit per piece (leg6A, first attempt) is too noisy over a long,
+    # many-point compound-curve sliver to match its own siblings reliably. A plain counter, not id() of
+    # the loop's own x/c/t dict (leg6A, second attempt): those are unreferenced the moment their loop
+    # body ends, and CPython's allocator reused the freed address for the very next same-sized dict often
+    # enough to splice unrelated curves' pieces into one "parent" (measured on r10434_1: an 869 ft curve's
+    # group pulled in an 800 ft piece from a different curve entirely) -- a strictly incrementing int
+    # can't collide.
+    parent_id = itertools.count()
     arcs = []
     for x in arcs_on_sheet(page):
         if max(x["color"]) < 0.2 and np.hypot(*(x["pts"][0] - x["pts"][-1])) > 2:
-            arcs.append({"pts": x["pts"], "len_pt": x["len_pt"], "radius_pt": x["radius_pt"], "width": x["width"]})
+            parent = next(parent_id)
+            arcs.append({"pts": x["pts"], "len_pt": x["len_pt"], "radius_pt": x["radius_pt"], "width": x["width"], "parent": parent})  # the whole, unsplit: no "seq" (never itself part of a sum-group)
             pieces = split_at(x["pts"], circles, junction_lines, ticks=ticks if x["width"] < 0.8 else ())
             if len(pieces) > 1:
-                for P in pieces:
-                    arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": x["radius_pt"], "width": x["width"]})
+                for i, P in enumerate(pieces):
+                    arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": x["radius_pt"], "width": x["width"], "parent": parent, "seq": i})
     for c in lines_on_sheet(segs, circles, max_turn_deg=20.0):
         if c["n"] >= 3 and c["len_pt"] > 12:
-            for P in split_at(c["pts"], circles, junction_lines, ticks=ticks if c["width"] < 0.8 else ()):
-                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"]})
+            parent = next(parent_id)
+            for i, P in enumerate(split_at(c["pts"], circles, junction_lines, ticks=ticks if c["width"] < 0.8 else ())):
+                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"], "parent": parent, "seq": i})
     # the dashed easement/parcel line (leg B, widened leg 5b): each dash is its own path, so nothing
     # above sees it; chained into trains (dashes.py) and split at the same circles/junctions as the
     # solid curves, so a train spanning several record segments (compound curve) becomes one arc per
@@ -761,11 +773,12 @@ def main():
     for t in dash_trains(collect_dashes(page), bridge=6.0 * glyph_h_med):
         if len(t["pts"]) < 3:
             continue
-        for P in split_at(t["pts"], circles, junction_lines):
+        parent = next(parent_id)
+        for i, P in enumerate(split_at(t["pts"], circles, junction_lines)):
             L = float(np.sum(np.hypot(*np.diff(P, axis=0).T)))
             if L <= dash_floor:
                 continue
-            arcs.append({"pts": P, "len_pt": L, "radius_pt": t["radius_pt"], "width": 0.84})
+            arcs.append({"pts": P, "len_pt": L, "radius_pt": t["radius_pt"], "width": 0.84, "parent": parent, "seq": i})
             seg = np.diff(P, axis=0)
             headings = np.degrees(np.arctan2(seg[:, 1], seg[:, 0]))
             ref = headings[0]
@@ -784,6 +797,21 @@ def main():
     from overlay import FURNITURE
     FURNITURE = list(FURNITURE) + alignment_table_regions(blocks) + line_curve_table_regions(blocks)  # tables.json's _regions plus tables it doesn't cover
     NTS = nts_regions(blocks, page)
+    return {"chains": chains, "circles": circles, "paths": paths, "segs": segs, "arcs": arcs, "tips": tips,
+            "FURNITURE": FURNITURE, "NTS": NTS, "junction_lines": junction_lines, "ticks": ticks, "glyph_h_med": glyph_h_med}
+
+
+def main():
+    page = pymupdf.open(PDF)[0]
+    g = json.loads((OUT / "georef.json").read_text())
+    a, bb = g["params"][:2]
+    scale = float(np.hypot(a, bb))
+    rot = np.degrees(np.arctan2(bb, a))
+    blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
+    set_decimals(blocks)
+    pool = build_pool(page, blocks)
+    chains, circles, paths, segs, arcs, tips = pool["chains"], pool["circles"], pool["paths"], pool["segs"], pool["arcs"], pool["tips"]
+    FURNITURE, NTS = pool["FURNITURE"], pool["NTS"]
 
     def az_of(ln):
         """Grid azimuth of a drawn line (deg, clockwise from grid north), through the fit's rotation."""
@@ -878,15 +906,74 @@ def main():
                     len_checked.add(id(b))  # already resolved geometrically: the curve-data fillet check
                     # further down (leg5 legB2) skips this block rather than re-measuring the same piece
                     continue
-            # own length matches no drawn piece: a compound curve whose record boundary isn't drawn
-            # (loop2 legC, STATE.md D3-6) can only be checked as the run between drawn marks against the
-            # SUM of the record arcs sharing it -- the rule tables.py already applies to table tags. A
-            # leader tip already pins the drawn run above (at_tip finds the nearest candidate at the tip
-            # regardless of length); queue it for grouping with every other unresolved L=/(T) label that
-            # lands on the identical drawn object, resolved once every block is scanned. A label with no
-            # leader gets no length-blind guess here: nearest-by-distance without a tip to anchor it
-            # tried a busy curve cluster's neighbour more often than its own run (measured: wrong_line up
-            # on all three south sheets, no pass gained) -- it stays an unmatched exception, same as before
+            # own length matches no single drawn piece: a compound curve/fillet whose record boundary
+            # isn't drawn is cut by split_at at every circle/tick/crossing it DOES find (leg6A: including
+            # stationing ties along MAIN LINE curves, which read as ordinary radial ticks) into slivers no
+            # single one of which is the printed length. The leader-tip run-sum below (len_pending/by_run)
+            # only ever fires between labels that already found a piece via at_tip's own fallback; a label
+            # whose leader is a plain curved bracket with no arrowhead/circle (tag_leaders never sees it,
+            # so led is False here) or whose tip lands in the gap between two slivers gets no seed at all
+            # under the old code and was a flat, silent MISS 25 times on the 3 south sheets (loop5 legB).
+            # Fix: seed from the leader tip if there is one, else the nearest piece to the label -- same
+            # "leader tip or nearest piece" seed the fillet-radius check below already uses for a joined
+            # R=/L= block, generalised to a lone L=/(T) with no printed R of its own. Every piece sharing
+            # the seed's "parent" (build_pool's own id, one per original curve object before split_at cut
+            # it) is a genuine sibling slice of that same physical curve -- checked, not assumed (a fresh
+            # circle re-fit per piece, attempt 1, was too noisy over a long many-point sliver to recover
+            # its own siblings). But the WHOLE parent isn't always one printed curve: `lines_on_sheet`'s
+            # generous max_turn_deg (20 deg, for curves) chains tangent road edges through a busy
+            # interchange into one long parent spanning several named curves end to end (measured on
+            # r10434_1: an 869 ft label's parent also carried an unrelated 800 ft piece from the next road
+            # over) -- summing every same-parent sibling regardless of position matched nothing on either
+            # north-facing south sheet (attempt 2, zero fires off the seed's own curve). Each piece keeps
+            # its "seq" (order along the parent, the same order split_at emitted it in); only CONTIGUOUS
+            # windows of seq around the seed are tried, exactly as span_for already does for a straight
+            # line's own record-segment run -- and only accepted when exactly one window's sum matches
+            # (a tie is not a match, same rule span_for and run_sum both already use). Only ever asserted
+            # on a match -- never a single wrong piece -- so this can't repeat legB's reverted length-blind
+            # fallback (which asserted the nearest piece outright and cost wrong_line +3/+3/+6 for zero
+            # pass gain on the three south sheets).
+            group_arc = None
+            if arc is None:
+                seed_at = tips[bi][0] if led and bi in tips else np.array([b["cx"], b["cy"]])
+                # same 160pt cap the near/far single-piece search above already uses -- measured (leg6A)
+                # that widening this past 160pt is where the safety net stops being safe: at 500pt one
+                # south-sheet label's "unique" matching window belonged to a curve 179pt away, a visibly
+                # different physical curve, with the true drawn piece for that label simply missing from
+                # the pool (crop-verified false positive, reverted). Below 160pt every fire crop-checked
+                # against the sheet: the blue run always sits right beside the red label.
+                wide = sorted((x for x in arcs if poly_dist(seed_at, x["pts"]) < 160.0 and "seq" in x),
+                              key=lambda x: poly_dist(seed_at, x["pts"]))
+                tol = DIST_TOL + 0.0005 * want
+                # the nearest piece is usually the seed, but not always the one WHOSE parent contains the
+                # printed run (a nearer, unrelated stub can sit closer to the label than the target curve
+                # itself does): try the 20 nearest in order (all of them, in practice -- 160pt rarely
+                # holds more) and take the first whose own parent yields a unique matching window
+                for seed in wide[:20]:
+                    run = sorted((x for x in arcs if x.get("parent") == seed["parent"] and "seq" in x), key=lambda x: x["seq"])
+                    k = next(i for i, x in enumerate(run) if x is seed)
+                    hits = [(i, j) for i in range(0, k + 1) for j in range(k, len(run))
+                            if abs(sum(x["len_pt"] for x in run[i:j + 1]) * scale - want) <= tol]
+                    if len(hits) == 1 and hits[0] != (k, k):
+                        i, j = hits[0]
+                        group_arc = run[i:j + 1]
+                        break
+            if group_arc is not None:
+                drawn = sum(x["len_pt"] for x in group_arc) * scale
+                biggest = max(group_arc, key=lambda x: x["len_pt"])
+                sum_str = f"{drawn:.2f} = " + " + ".join(f"{x['len_pt'] * scale:.2f}" for x in group_arc)
+                rows.append(["arc length", lines[0], sum_str, f"{drawn - want:+.2f}",
+                             f"pass as a run of {len(group_arc)}: contiguous slivers of one curve, no leader/length seed"])
+                labels.append({"kind": "arc", "printed": lines[0], "ft": want, "line": shape(biggest), "ok": True,
+                               "how": "leader" if led else "beside", "region": region(b)})
+                len_checked.add(id(b))
+                continue
+            # a compound curve whose record boundary isn't drawn can also be checked as the run between
+            # drawn marks against the SUM of the record arcs sharing it -- the rule tables.py already
+            # applies to table tags. A leader tip already pins the drawn run above (at_tip finds the
+            # nearest candidate at the tip regardless of length); queue it for grouping with every other
+            # unresolved L=/(T) label that lands on the identical drawn object, resolved once every block
+            # is scanned.
             if arc is None:
                 exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc within 5 glyph heights matches the printed length", "region": region(b)})
             else:

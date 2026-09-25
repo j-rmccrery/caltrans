@@ -86,7 +86,10 @@ def tags_cols(pdf):
         queue = json.loads((o / "tags_queue.json").read_text(encoding="utf-8"))
         return {
             "tags_assoc": len({r["tag"] for r in rows}),
-            "tags_pass": sum(1 for r in rows if r["result"] == "pass"),
+            "tags_pass": sum(1 for r in rows if r["result"].startswith("pass")),  # tables.py's own run-sum
+            # rows ("pass as a run of N: ...", its `_regions`/curve-table grouping) are a pass, exact
+            # equality here missed them silently since loop2 legC introduced that message (measured:
+            # presidio already carries 2 on disk) -- same convention tables.py's own printed summary uses
             "tags_fail": sum(1 for r in rows if r["result"] == "FAIL"),
             "tags_queued": len(queue),
         }
@@ -202,7 +205,8 @@ def run(key, steps):
     res = {"sheet": key, "secs": round(time.time() - t)}
     for kind in ("distance", "bearing", "arc length"):
         ks = [x for x in rows if x["check"] == kind]
-        res[kind] = f"{sum(1 for x in ks if x['result'] == 'pass')}/{len(ks)}"
+        res[kind] = f"{sum(1 for x in ks if x['result'].startswith('pass'))}/{len(ks)}"  # a checks.py
+        # run-sum row ("pass as a run of N: ...", leg5/leg6A's grouping) is a pass; same fix as tags_pass above
     wrong = 0
     for e in exc:
         v = e.get("off_ft", e.get("off_arcmin"))

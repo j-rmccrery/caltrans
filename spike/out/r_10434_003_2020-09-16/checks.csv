@@ -1,4 +1,5 @@
 check,printed,drawn,difference,result
+arc length,L=577.57',577.59 = 481.01 + 96.58,+0.02,"pass as a run of 2: contiguous slivers of one curve, no leader/length seed"
 bearing,"N49°21'51""E","N49°18'31""E",3.3',FAIL
 distance,5.24',5.23,-0.01,pass
 bearing,"N42°00'53""W","N41°22'34""W",38.3',FAIL
@@ -96,6 +97,7 @@ distance,57.38',57.38,+0.00,pass
 arc length,L=58.07',58.10,+0.03,pass
 bearing (R),"N43°19'10""W(R)",,,radial: not checked
 bearing (R),"N43°19'10""W(R)",,,radial: not checked
+arc length,L=129.96',129.99 = 2.18 + 127.81,+0.03,"pass as a run of 2: contiguous slivers of one curve, no leader/length seed"
 arc length,L=344.50',344.55,+0.05,pass
 arc length,L=415.25',415.25,+0.00,pass
 bearing (R),"N43°50'58""E(R)",,,radial: not checked
@@ -130,6 +132,7 @@ bearing,"S5°49'27""E","S5°49'42""E",0.3',pass
 bearing (R),"N48°40'43""W(R)",,,radial: not checked
 bearing,"N69°25'55""E","N72°12'17""E",166.4',FAIL
 distance,147.28',12.43,-134.85,FAIL
+arc length,L=124.05',124.02 = 98.97 + 25.05,-0.03,"pass as a run of 2: contiguous slivers of one curve, no leader/length seed"
 bearing (R),"N28°28'13""W(R)",,,radial: not checked
 arc length,L=38.33',38.37,+0.04,pass
 bearing (R),"S73°38'34""W(R)",,,radial: not checked
