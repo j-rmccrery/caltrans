@@ -247,3 +247,20 @@ installs) are the tools.
 Dispatches used: 3 of 16 (2 agents, 1 resume). Started 2026-09-25 00:30, ran 08:45-09:20 PDT.
 
 **Finding for gap 1.** On a 1969 hand-lettered scan the per-sheet alphabet is real but bounded: purity is high once glyphs are separated, and separation is the problem (touching digits, hatch through the text, faint strokes at ~12 px). Box detection is the larger loss: 8 of the 32 keyed boxes sit on the wrong text before any reader runs. Next lever for scans is text-line detection on the binarised page (not the OCR detector's boxes), then the alphabet.
+
+---
+
+# Loop 8: table tags by parent curve (started 2026-09-25 11:10 PDT, JR: "wire the machinery in then")
+
+One leg. Baseline `loop6-final`: presidio 41/49 41/43 16/19 wl 12 tags 24 assoc / 31 pass / 12 fail; .1 26/37 21/23 12/24
+wl 21 tags 14 / 23 / 5; .3 42/59 41/42 26/39 wl 27 tags 28 / 26 / 28; north unchanged (no tables). Gate = canonical bench with
+per-label pass sets and the tag columns (`--tables --tags`).
+
+| # | Leg | Gate |
+|---|---|---|
+| A | Table tags on curves grouped by parent curve (leg 6A's parent + seq on every piece), not by the piece their leader lands on; a leader landing on a radial tick resolves to the curve piece the tick meets; a tag whose own L matches no piece is searched as a contiguous window of its parent; groups of tags on one parent are checked as a run against the sum | tag passes +4 or more summed over the south (`tags_pass`), no tag pass lost, inline distance/bearing/arc passes unchanged or up, wrong-line not up; C15/C16 on Presidio pass as a run or the crop names why not; 6 crops viewed |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
