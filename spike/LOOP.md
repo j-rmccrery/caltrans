@@ -180,3 +180,27 @@ Legs run in sequence (both edit `checks.py`). Two attempts, then stash as `loop5
 | C | done | 0 | `demo.py --fast` 133 s, 21 ok; `loop5-final` (canonical, nine sheets): presidio 40/48 34/49 13/17 wl 14; .1 26/38 20/31 14/30 wl 27; .3 42/59 37/52 23/36 wl 31; R-10741.1 14/18 12/13 1/2 wl 3; .2 20/22 20/20 0/1 wl 2; .3 17/17 13/13 0/1 wl 1; R-71.71 14/19 20/21 1/5 wl 8 (bearings +4 from leg A); R-10258.1 12/49 22/30 0/18 wl 36 (bearings +5 from leg A; its 2 arc passes went with leg B's fallback gate, not inspected, open); R-71.70 unverified. Six rows equal leg5B-check. numbers.md, status page and PDF, STATE.md Next, memory | leg5C |
 
 Dispatches used: 3 of 16 (2 agents, 1 resume). Started 2026-09-24 ~18:00, ended 19:20 PDT. Every number above re-measured at the time of its row.
+
+---
+
+# Loop 6: accuracy items 1-6 (started 2026-09-24 19:30 PDT, JR: "do 1-6 in a loop")
+
+Same rules as loop 5. Gate = canonical six-sheet bench `python spike/bench.py <label> --tables presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3`
+with a per-label pass-set diff, compared with `loop5-final`: presidio 40/48 34/49 13/17 wl 14; .1 26/38 20/31 14/30 wl 27;
+.3 42/59 37/52 23/36 wl 31; R-10741.1 14/18 12/13 1/2 wl 3; .2 20/22 20/20 0/1 wl 2; .3 17/17 13/13 0/1 wl 1. A, B, C, F edit
+`checks.py` and run in sequence; D and E run alongside A. Two attempts, then stash as `loop6-leg-N`.
+
+| # | Leg | Gate |
+|---|---|---|
+| A | Standalone `L=` arcs with no drawn arc in reach (25 of 65 south misses): crop 12, count the causes (fillet cut into slivers, curve on a layer the pool skips, matchline cut, not drawn), fix the biggest | arc passes +6 summed over the south, none lost; wrong-line not up; 6 crops viewed |
+| B | Busy-vertex leaders (7 of 36 south bearing fails): the leader's arrowhead decides the line, as `tables.py` does for tags | bearing passes +4 summed over the south, none lost; distance not down; wrong-line not up; crops viewed |
+| C | Labels beside a curve and wrong parallel neighbours (4 + 4 of 36): a bearing+distance beside a curve checked as the chord between the arc's ends; the printed bearing rejects a parallel neighbour whose heading disagrees | bearing passes +4 summed, none lost; wrong-line down; crops viewed |
+| D | R-10434.1 traverse: the closed chain lost in loop 2 leg C (chains 44 -> 43, closed 1 -> 0); trace the moved edge endpoint | R-10434.1 closed >= 1 with the misfit and record area reported; Presidio closed stays 2; bench unchanged |
+| E | North reads: a real stroke font as the glyph seed instead of Hershey simplex (any .shx on disk; else an open stroke font pack such as QCAD .cxf / LibreCAD .lff); measured on R-10741.2 (glyph 187/382 fully read, OCR selected) | R-10741.2 glyph fully-read >= 300/382 and bearings+distances parsed >= OCR's (23, 34); a READS=read_glyph.json bench on the three north sheets reported against the OCR rows; the selector rule stays unless the glyph rows are better on every north sheet (orchestrator decides) |
+| F | Not-to-scale insets on OCR sheets: detect the inset by its dashed circle (a dashed closed curve of radius > 8 glyph heights with a leader), caption text optional | R-10741.2's two inset labels (10.95', 156.02') queued not failed; no other sheet moves; crop viewed |
+| G | Close-out: `demo.py --fast`, `loop6-final` (nine sheets), numbers.md, status page and PDF, STATE.md, memory | every number re-measured |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
