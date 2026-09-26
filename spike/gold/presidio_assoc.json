@@ -1238,5 +1238,29 @@
   "verdict_by_code": "FAIL",
   "correct_line": "true",
   "note": "same edge as tag:C22:radius; arc-length FAIL reads as a segmentation shortfall, not a wrong curve."
+ },
+ {
+  "id": "tag:L14:bearing",
+  "kind": "tag bearing",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop"
+ },
+ {
+  "id": "tag:L21:bearing",
+  "kind": "tag bearing",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop: leader lands on MAIN LINE 2 centreline; distance fails because station ticks cut it"
+ },
+ {
+  "id": "tag:L20:bearing",
+  "kind": "tag bearing",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "unsure",
+  "note": "orchestrator, loop 13 leg H crop: leader lands on a thin line inside a corridor of parallels; bearing match is weak evidence"
  }
 ]

@@ -143,6 +143,17 @@
   ]
  },
  {
+  "kind": "distance",
+  "text": "860.77'(T)",
+  "issue": "no line found beside label",
+  "region": [
+   888,
+   488,
+   939,
+   504
+  ]
+ },
+ {
   "kind": "bearing",
   "text": "N75°41'44\"W",
   "issue": "leader points at no line",
@@ -151,6 +162,84 @@
    505,
    951,
    528
+  ]
+ },
+ {
+  "kind": "arc length",
+  "text": "235.42'(T)",
+  "drawn_ft": 648.14,
+  "off_ft": 412.72,
+  "region": [
+   888,
+   505,
+   951,
+   528
+  ],
+  "line": [
+   [
+    955.3,
+    559.8
+   ],
+   [
+    984.6,
+    567.9
+   ],
+   [
+    1036.9,
+    582.2
+   ],
+   [
+    1063.1,
+    589.4
+   ],
+   [
+    1089.3,
+    596.6
+   ],
+   [
+    1141.7,
+    611.0
+   ],
+   [
+    1167.8,
+    618.2
+   ],
+   [
+    1220.2,
+    632.5
+   ],
+   [
+    1272.6,
+    646.9
+   ],
+   [
+    1298.7,
+    654.1
+   ],
+   [
+    1351.1,
+    668.4
+   ],
+   [
+    1353.9,
+    669.2
+   ],
+   [
+    1365.1,
+    672.3
+   ],
+   [
+    1376.4,
+    675.3
+   ],
+   [
+    1379.2,
+    676.1
+   ],
+   [
+    1405.5,
+    682.5
+   ]
   ]
  },
  {
@@ -542,6 +631,17 @@
   ]
  },
  {
+  "kind": "distance",
+  "text": "399.86'(T)",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
+  "region": [
+   2324,
+   445,
+   2375,
+   459
+  ]
+ },
+ {
   "kind": "arc length",
   "text": "L=289.24'",
   "issue": "no arc within 5 glyph heights matches the printed length",
@@ -561,6 +661,28 @@
    550,
    2330,
    564
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "241.32'(T)",
+  "drawn_ft": 648.13,
+  "off_ft": 406.81,
+  "region": [
+   1162,
+   638,
+   1212,
+   653
+  ],
+  "line": [
+   [
+    955.3,
+    559.8
+   ],
+   [
+    1405.5,
+    682.5
+   ]
   ]
  },
  {
@@ -600,6 +722,17 @@
   "kind": "bearing",
   "text": "N70°50'05\"E",
   "issue": "piece too short to carry a bearing (7.4 pt)",
+  "region": [
+   2316,
+   612,
+   2382,
+   638
+  ]
+ },
+ {
+  "kind": "distance",
+  "text": "102.46'(T)",
+  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
   "region": [
    2316,
    612,

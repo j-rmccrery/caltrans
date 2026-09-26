@@ -1606,5 +1606,101 @@
   "verdict_by_code": "FAIL",
   "correct_line": "false",
   "note": "line is the same over-long merged chain as label 135 (~608ft); doesn't isolate this curve's own 1049.90' arc"
+ },
+ {
+  "id": "tag:C35:radius",
+  "kind": "tag radius",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop"
+ },
+ {
+  "id": "tag:L18:bearing",
+  "kind": "tag bearing",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop"
+ },
+ {
+  "id": "tag:L18:distance",
+  "kind": "tag distance",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop"
+ },
+ {
+  "id": "tag:L34:bearing",
+  "kind": "tag bearing",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop"
+ },
+ {
+  "id": "tag:L34:distance",
+  "kind": "tag distance",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop"
+ },
+ {
+  "id": "tag:L43:bearing",
+  "kind": "tag bearing",
+  "printed": "",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop"
+ },
+ {
+  "id": "label:legH:102.46'(T)",
+  "kind": "distance",
+  "printed": "102.46'(T)",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop (spike/out_legH)"
+ },
+ {
+  "id": "label:legH:195.48'(T)",
+  "kind": "distance",
+  "printed": "195.48'(T)",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop (spike/out_legH)"
+ },
+ {
+  "id": "label:legH:247.31'(T)",
+  "kind": "distance",
+  "printed": "247.31'(T)",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop (spike/out_legH)"
+ },
+ {
+  "id": "label:legH:524.56'(T)",
+  "kind": "distance",
+  "printed": "524.56'(T)",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop (spike/out_legH)"
+ },
+ {
+  "id": "label:legH:74.43'(T)",
+  "kind": "distance",
+  "printed": "74.43'(T)",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop (spike/out_legH)"
+ },
+ {
+  "id": "label:legH:87.74'(T)",
+  "kind": "distance",
+  "printed": "87.74'(T)",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator, loop 13 leg H crop (spike/out_legH)"
  }
 ]

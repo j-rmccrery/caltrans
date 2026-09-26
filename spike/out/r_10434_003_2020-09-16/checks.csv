@@ -35,8 +35,10 @@ bearing,"S87°05'53""E","S87°06'52""E",1.0',pass
 distance,97.03',97.05,+0.02,pass
 arc length,L=39.86'(T),39.84,-0.02,pass
 arc length,L=145.57',145.60,+0.03,pass
+arc length,494.26'(T),514.57 (R=nan),+20.31,FAIL
 bearing (R),"N64°50'35""W(R)",,,radial: not checked
 bearing,"S86°10'51""E","S86°10'18""E",0.6',pass
+distance,195.48'(T),195.48,+0.00,pass as a run of 2: the boundary between these segments is not drawn
 bearing (R),"S9°21'03""W(R)",,,radial: not checked
 bearing (R),"S4°47'01""W(R)",,,radial: not checked
 bearing (R),"S10°12'53""W(R)",,,radial: not checked
@@ -44,12 +46,14 @@ arc length,L=137.00',137.02,+0.02,pass
 distance,11.05',10.95,-0.10,pass
 distance,54.68',55.60,+0.92,FAIL
 bearing,"S82°02'18""W","S82°01'58""W",0.3',pass
+distance,74.43'(T),74.42,-0.01,pass as a run of 5: the boundary between these segments is not drawn
 distance,11.97',12.00,+0.03,pass
 bearing,"S81°06'31""W","S81°08'14""W",1.7',pass
 distance,36.00',35.96,-0.04,pass
 bearing,"S8°53'29""E","S8°51'54""E",1.6',pass
 distance,30.46',30.49,+0.03,pass
 bearing,"N86°41'46""W","N86°42'01""W",0.3',pass
+distance,247.31'(T),247.30,-0.01,pass as a run of 2: the boundary between these segments is not drawn
 distance,202.20',195.85,-6.35,FAIL
 distance,45.11',195.85,+150.74,FAIL
 distance,14.11',14.07,-0.04,pass
@@ -67,6 +71,7 @@ bearing (R),"N0°19'35""W(R)",,,radial: not checked
 distance,11.12',11.08,-0.04,pass
 bearing,"S88°06'40""W","S88°06'17""W",0.4',pass
 distance,52.66',52.68,+0.02,pass
+arc length,31.57'(T),132.42 (R=725.0),+100.85,FAIL
 distance,25.36',29.27,+3.91,FAIL
 bearing,"S82°04'24""W","S82°04'37""W",0.2',pass
 distance,140.02',139.99,-0.03,pass
@@ -137,7 +142,9 @@ distance,198.23',198.23,+0.00,pass
 bearing,"N35°15'31""W","N35°25'19""W",9.8',pass
 distance,198.23',198.25,+0.02,pass
 arc length,L=126.97',126.94,-0.03,pass
+distance,524.56'(T),524.52,-0.04,pass as a run of 3: the boundary between these segments is not drawn
 bearing (R),"S46°48'46""W(R)",,,radial: not checked
+distance,87.74'(T),87.78,+0.04,pass
 arc length,L=52.20',52.19,-0.01,pass
 bearing,"S48°59'54""E","S48°59'57""E",0.1',pass
 arc length,58.60',58.64 (R=nan),+0.04,pass
@@ -180,6 +187,7 @@ bearing (R),"N28°35'08""W(R)",,,radial: not checked
 bearing (R),"N31°07'38""W(R)",,,radial: not checked
 bearing (R),"N45°21'40""E(R)",,,radial: not checked
 bearing (R),"N12°26'18""E(R)",,,radial: not checked
+distance,102.46'(T),102.48,+0.02,pass as a run of 2: the boundary between these segments is not drawn
 bearing (R),"N52°30'03""W(R)",,,radial: not checked
 bearing (R),"N18°08'17""E(R)",,,radial: not checked
 distance,803.00',48.00,-755.00,FAIL

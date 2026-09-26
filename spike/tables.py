@@ -32,6 +32,25 @@ CLEAR = 1.5        # the nearest candidate must be this many times closer than t
 BOUNDARY = 0.8     # pt: R/W lines are 1.98, parcel and easement lines 0.84; hatch and ticks are 0.36-0.42
 
 
+def partial_matches(tag, rows):
+    """Table row NO.s consistent with a partly-read tag string (an embedded '?' for one glyph tags.py
+    could not classify): either the '?' is a genuine extra character at that position (same length,
+    wildcard) or a spurious/incomplete neighbour glyph tags.py could not rule out (drop it, shorter).
+    Both are real strings that could be what's printed on the sheet; geometry -- not this function --
+    decides which one, if any, is real (leg H)."""
+    base = tag.replace("(T)", "")
+    stripped = base.replace("?", "")
+    positional = re.compile("^" + "".join("." if c == "?" else re.escape(c) for c in base) + "$")
+    return sorted({k for k in rows if k == stripped or positional.match(k)})
+
+
+def shx_consistent(base, candidate):
+    """Whether an SHX-read full tag (no '?') is a plausible clean read of the same partly-read glyph
+    string -- same rule as partial_matches, one candidate at a time."""
+    stripped = base.replace("?", "")
+    return candidate == stripped or (len(candidate) == len(base) and all(c == "?" or c == d for c, d in zip(base, candidate)))
+
+
 def table_rows():
     """{tag: {...}} from the tables as read by alphabet.py (tables.json); a row with an unread cell is
     left out, so its tag queues as "no such table row". Falls back to the keyed tables (gt.py)."""
@@ -158,6 +177,7 @@ def main():
     a, bb = g["params"][:2]
     scale = float(np.hypot(a, bb))
     tags = json.loads((OUT / "tags.json").read_text(encoding="utf-8"))
+    shx_tags = json.loads((OUT / "tags_shx.json").read_text(encoding="utf-8")) if (OUT / "tags_shx.json").exists() else []
     rows = table_rows()
     if not rows or not tags:
         (OUT / "tags_queue.json").write_text("[]", encoding="utf-8")
@@ -225,6 +245,68 @@ def main():
         return best[1] if best else None
 
     tips = tag_leaders(tags, paths)
+    complete_nos = {tg["tag"].replace("(T)", "") for tg in tags if "?" not in tg["tag"]}  # NO.s already
+    # spoken for by a fully-read tag elsewhere on the sheet: never also claimed by a partly-read one
+    partial_shx = partial_record = 0  # leg H: partly-unread tags resolved by a clean SHX read / by the
+    # record (exactly one candidate table row's own line/curve passing its check)
+
+    def geometry_check(ti, t, row):
+        """Whether tag t's own drawn geometry -- the identical leader-tip/beside search, tick-target
+        fallback and disambiguation the main per-tag loop below uses, same tolerances -- matches THIS
+        candidate row's printed values. True only on a full pass (bearing AND distance for a line,
+        radius AND length for a curve); a still-ambiguous or unmeasurable candidate is never a pass
+        either way (leg H, for resolving a partly-read tag by record)."""
+        kind = row["kind"]
+        gh = t["gh"]
+        tip = tips.get(ti)
+        if tip is not None:
+            tipxy, arrow, hsize = tip
+            reach = 4.0 if kind == "line" else max(4.0, 0.6 * hsize)
+            cands = candidates(kind, tipxy, reach)
+            if not cands and kind == "curve":
+                arc = tick_target(tipxy, reach)
+                if arc is not None:
+                    cands = [(poly_dist(tipxy, arc["pts"]), arc)]
+        else:
+            cands = candidates(kind, np.array([t["cx"], t["cy"]]), BESIDE * gh, BOUNDARY, exclude_dashdot=True)
+        if not cands:
+            return False
+        if len(cands) > 1 and cands[1][0] < CLEAR * cands[0][0]:
+            if kind == "line":
+                fit = [(d, s) for d, s in cands if az_diff(math.degrees(math.atan2(a * s["dir"][0] + bb * s["dir"][1], bb * s["dir"][0] - a * s["dir"][1])) % 360, row["az"]) < AZ_FILTER]
+                if row.get("dist") and not row["total"]:
+                    fit2 = [(d, s) for d, s in fit if abs(span_for(s, row["dist"], scale, chains)["len_pt"] * scale - row["dist"]) < 1.0]
+                    fit = fit2 or fit
+            else:
+                fit = [(d, s) for d, s in cands if len(s["pts"]) >= 3 and abs(fit_radius(s["pts"]) * scale - row["R"]) < 0.02 * row["R"]]
+                # (no "nearest wins" fallback here, unlike the main loop's own diagnostic path: an empty
+                # fit means this candidate row's own radius matches nothing found here -- not a pass,
+                # never a guess)
+            if len(fit) == 1 or (len(fit) > 1 and fit[1][0] >= CLEAR * fit[0][0]):
+                cands = fit
+        if not (len(cands) == 1 or cands[1][0] >= CLEAR * cands[0][0]):
+            return False  # still ambiguous: no evidence either way
+        seg = cands[0][1]
+        if kind == "line":
+            if row["total"]:
+                return False  # a (T) run total is never checked as a single segment; no evidence
+            seg = span_for(seg, row["dist"], scale, chains)
+            drawn = seg["len_pt"] * scale
+            dx, dy = seg["dir"][0], -seg["dir"][1]
+            gx, gy = a * dx - bb * dy, bb * dx + a * dy
+            az = math.degrees(math.atan2(gx, gy)) % 360
+            dbrg = min(abs((az - row["az"] + 180) % 360 - 180), abs((az + 180 - row["az"] + 180) % 360 - 180))
+            ok_b = dbrg <= max(BEAR_TOL, math.degrees(math.atan2(0.10, row["dist"])))
+            ok_d = abs(drawn - row["dist"]) <= DIST_TOL + 0.0005 * row["dist"]
+            return ok_b and ok_d
+        sagitta = seg["len_pt"] ** 2 / (8 * row["R"] / scale)
+        if sagitta < 0.5:
+            return False  # too flat to fit a radius: not usable evidence
+        R = fit_radius(seg["pts"]) * scale
+        ok_r = abs(R - row["R"]) <= RADIUS_TOL * row["R"]
+        ok_l = abs(seg["len_pt"] * scale - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
+        return ok_r and ok_l
+
     ambig = []  # diagnostic: ambiguous tags, for the table-order adjacency headroom
     tick_fires = 0  # leg8A: tags resolved via a radial tick/stub instead of the curve directly
     window_fires = 0  # leg8A: tags whose own L matched a contiguous window of their parent, alone
@@ -232,8 +314,32 @@ def main():
     out, queue, curve_hits, placed = [], [], [], []  # placed: every tag's table values with the line they sit on, for the traverse
     for ti, t in enumerate(tags):
         region = [round(t["cx"] - 2 * t["gh"]), round(t["cy"] - t["gh"]), round(t["cx"] + 2 * t["gh"]), round(t["cy"] + t["gh"])]
+        how_note = ""
         if "?" in t["tag"]:
-            queue.append({"tag": t["tag"], "issue": "tag partly unread", "region": region}); continue
+            base = t["tag"].replace("(T)", "")
+            suffix = "(T)" if "(T)" in t["tag"] else ""
+            # a cleaner read first: an SHX annotation naming the same tag, unambiguously (leg H)
+            shx = [s for s in shx_tags if "?" not in s["tag"] and math.hypot(s["cx"] - t["cx"], s["cy"] - t["cy"]) < 3 * t["gh"]
+                   and shx_consistent(base, s["tag"].replace("(T)", ""))]
+            cand_nos = [n for n in partial_matches(t["tag"], rows) if n not in complete_nos]
+            if len(shx) == 1:
+                resolved_no, how_note = shx[0]["tag"].replace("(T)", ""), "resolved-by-shx"
+                partial_shx += 1
+            else:
+                passing = [n for n in cand_nos if geometry_check(ti, t, rows[n])]
+                if len(passing) == 1:
+                    resolved_no, how_note = passing[0], "resolved-by-record"
+                    partial_record += 1
+                else:
+                    if not cand_nos:
+                        reason = "no table row NO. matches the readable characters"
+                    elif not passing:
+                        reason = f"{len(cand_nos)} candidate rows ({', '.join(cand_nos)}) matched but none passed its own check"
+                    else:
+                        reason = f"{len(passing)} candidate rows passed ({', '.join(passing)})"
+                    queue.append({"tag": t["tag"], "issue": f"tag partly unread: {reason}", "region": region}); continue
+            complete_nos.add(resolved_no)
+            t = {**t, "tag": resolved_no + suffix}
         row = rows.get(t["tag"].replace("(T)", ""))
         if row is None:
             queue.append({"tag": t["tag"], "issue": "no such table row", "region": region}); continue
@@ -300,6 +406,8 @@ def main():
         seg = cands[0][1]
         if kind == "line" and not row["total"]:
             seg = span_for(seg, row["dist"], scale, chains)
+        if how_note:
+            how = f"{how}; {how_note}"
         placed.append({"tag": t["tag"], "kind": kind, **{k: row[k] for k in ("az", "dist", "total", "R", "L", "delta") if k in row}, "line": shape(seg), "how": how})
         if kind == "line":
             drawn = seg["len_pt"] * scale
@@ -444,6 +552,7 @@ def main():
           f"associated {len(assoc)} ({sum(1 for r in out if r[6] == 'leader') // 2} by leader) | queued {len(queue)}")
     print(f"  leg8A: tick/stub resolution {tick_fires} | own-window pass {window_fires} | group-run pass {group_fires}")
     print(f"  leg9A: consecutive-row-run pass {row_run_fires}")
+    print(f"  leg H: partial tags resolved by SHX read {partial_shx} | by record (unique candidate row) {partial_record}")
     for check in ("bearing", "distance", "radius", "arc length"):
         rs = [r for r in out if r[1] == check and (r[5] in ("pass", "FAIL") or r[5].startswith("pass as a run"))]
         print(f"  {check:11} checked {len(rs):3}  pass {sum(r[5].startswith('pass') for r in rs):3}  fail {sum(r[5] == 'FAIL' for r in rs):3}" + (f"  ({sum(r[5].startswith('pass as') for r in rs)} as a run)" if any(r[5].startswith('pass as') for r in rs) else ""))

@@ -1,4 +1,8 @@
 tag,check,printed,drawn,difference,result,association
+L20,bearing,"S68°24'07""W","S68°23'39""W",0.5',pass,leader; resolved-by-shx
+L20,distance,609.42,82.13,-527.29,FAIL,leader; resolved-by-shx
+L21,bearing,"N75°11'28""W","N75°10'49""W",0.7',pass,leader; resolved-by-shx
+L21,distance,1529.50,74.26,-1455.24,FAIL,leader; resolved-by-shx
 L1,bearing,"N18°06'50""E","S74°35'27""E",5237.7',FAIL,leader
 L1,distance,1.86,40.16,+38.30,FAIL,leader
 L3,bearing,"S75°11'28""E","S75°10'36""E",0.9',pass,beside
@@ -19,6 +23,8 @@ L12,bearing,"S61°07'09""W","S61°03'39""W",3.5',pass,leader
 L12,distance,34.89,34.86,-0.03,pass,leader
 L13,bearing,"N10°18'39""E","N10°16'54""E",1.8',pass,leader
 L13,distance,39.97,39.96,-0.01,pass,leader
+L14,bearing,"N89°32'10""E","N89°32'30""E",0.3',pass,beside; resolved-by-shx
+L14,distance,122.69(T),68.83,,total over several segments; not checked,beside; resolved-by-shx
 L16,bearing,"S88°01'40""E","S88°18'18""E",16.6',pass,leader
 L16,distance,6.44,6.42,-0.02,pass,leader
 L17,bearing,"S4°41'30""E","S4°39'02""E",2.5',pass,leader

@@ -1,4 +1,8 @@
 tag,check,printed,drawn,difference,result,association
+L18,bearing,"N79°58'45""W","N79°58'54""W",0.2',pass,leader; resolved-by-record
+L18,distance,89.17,89.17,+0.00,pass,leader; resolved-by-record
+L43,bearing,"S89°15'37""W","S89°15'53""W",0.3',pass,leader; resolved-by-shx
+L43,distance,110.85,111.94,+1.09,FAIL,leader; resolved-by-shx
 L2,bearing,"N19°09'55""W","N19°16'23""W",6.5',pass,leader
 L2,distance,5.75,13.01,+7.26,FAIL,leader
 L3,bearing,"N18°18'55""W","S86°15'59""W",4525.1',FAIL,beside
@@ -31,6 +35,8 @@ L29,bearing,"N34°46'20""W","N34°43'17""W",3.1',pass,leader
 L29,distance,13.35,13.35,-0.00,pass,leader
 L31,bearing,"N36°09'18""W","S54°41'43""W",5349.0',FAIL,leader
 L31,distance,33.75,30.69,-3.06,FAIL,leader
+L34,bearing,"N72°53'52""W","N72°54'32""W",0.7',pass,beside; resolved-by-shx
+L34,distance,50.46,50.44,-0.02,pass,beside; resolved-by-shx
 L36,bearing,"N72°24'02""E","N72°23'45""E",0.3',pass,beside
 L36,distance,110.55,110.55,+0.00,pass,beside
 L37,bearing,"N72°19'10""E","N71°24'33""E",54.6',FAIL,leader
@@ -39,14 +45,26 @@ L38,bearing,"N34°55'48""W","N34°55'30""W",0.3',pass,beside
 L38,distance,167.07,167.02,-0.05,pass,beside
 L39,bearing,"S79°16'27""W","S79°16'18""W",0.2',pass,beside
 L39,distance,373.80,100.00,-273.80,FAIL,beside
+C35,radius,759.00,759.15,+0.02%,pass,leader; resolved-by-shx
+C35,arc length,524.10,248.13,-275.97,FAIL,leader; resolved-by-shx
+C36,radius,2900.00,1439.94,-50.35%,FAIL,leader; resolved-by-shx
+C36,arc length,516.59,472.66,-43.93,FAIL,leader; resolved-by-shx
+C37,radius,1440.00,3154.44,+119.06%,FAIL,leader; resolved-by-shx
+C37,arc length,521.85,598.20,+76.35,FAIL,leader; resolved-by-shx
+C4,radius,46.74,2879.66,+6061.01%,FAIL,leader; resolved-by-shx
+C33,radius,2884.00,2879.66,-0.15%,pass,leader
+C4,arc length,56.55,607.70,+551.15,FAIL,leader; resolved-by-shx
+C33,arc length,1049.90,607.70,-442.20,FAIL,leader
 C5,radius,46.74,46.71,-0.06%,pass,leader
-C5,arc length,29.82,70.50 = 86.37 + 56.55 + 29.82,-102.24,FAIL,leader
+C5,arc length,29.82,70.50 = 86.37 + 29.82,-45.69,FAIL,leader
 C7,radius,508.00,2412.81,+374.96%,FAIL,beside
 C7,arc length,61.27,96.18,+34.91,FAIL,beside
 C8,radius,508.00,870.19,+71.30%,FAIL,beside
 C8,arc length,35.00(T),60.08,+25.08,FAIL,beside
 C9,radius,508.00,,,arc too flat to measure a radius (sagitta 0.20 pt); not checked,leader
 C9,arc length,1.53,33.53,+32.00,FAIL,leader
+C11,radius,500.00,,,arc too flat to measure a radius (sagitta 0.29 pt); not checked,leader; resolved-by-shx
+C11,arc length,31.84,39.84,+8.00,FAIL,leader; resolved-by-shx
 C12,radius,50.31,,,arc too flat to measure a radius (sagitta 0.26 pt); not checked,leader
 C38,radius,15.00,1618.43,+10689.55%,FAIL,leader
 C38,arc length,6.39,160.21,+153.82,FAIL,leader
@@ -61,5 +79,3 @@ C26,radius,1312.00,1312.91,+0.07%,pass,beside
 C26,arc length,328.02,244.10,-83.92,FAIL,beside
 C29,radius,825.00,825.04,+0.00%,pass,beside
 C29,arc length,470.62,308.21,-162.41,FAIL,beside
-C33,radius,2884.00,2879.66,-0.15%,pass,leader
-C33,arc length,1049.90,607.70,-442.20,FAIL,leader

@@ -369,70 +369,70 @@
   "closed": false,
   "n_edges": 6,
   "full_record": 5,
-  "misfit_max_ft": 0.14,
-  "misfit_end_ft": 0.07,
+  "misfit_max_ft": 133.06,
+  "misfit_end_ft": 132.98,
   "edges": [
    {
-    "edge": "176.33'",
+    "edge": "222.86'(T)",
     "kind": "line",
-    "az": 358.377,
-    "ft": 176.33,
-    "misfit_ft": 0.04,
+    "az": 358.3129,
+    "ft": 222.86,
+    "misfit_ft": 132.98,
     "flags": [
      "bearing from drawing"
     ],
-    "E": 5992641.89,
-    "N": 2120405.64
+    "E": 5992637.97,
+    "N": 2120538.52
    },
    {
     "edge": "L1",
     "kind": "line",
     "az": 270.0,
     "ft": 12.43,
-    "misfit_ft": 0.14,
+    "misfit_ft": 133.06,
     "flags": [],
-    "E": 5992629.46,
-    "N": 2120405.64
+    "E": 5992625.54,
+    "N": 2120538.52
    },
    {
     "edge": "L2",
     "kind": "line",
     "az": 284.2517,
     "ft": 9.31,
-    "misfit_ft": 0.12,
+    "misfit_ft": 133.04,
     "flags": [],
-    "E": 5992620.44,
-    "N": 2120407.93
+    "E": 5992616.52,
+    "N": 2120540.81
    },
    {
     "edge": "L3",
     "kind": "line",
     "az": 0.0594,
     "ft": 10.05,
-    "misfit_ft": 0.12,
+    "misfit_ft": 132.95,
     "flags": [],
-    "E": 5992620.45,
-    "N": 2120417.98
+    "E": 5992616.53,
+    "N": 2120550.86
    },
    {
     "edge": "L4",
     "kind": "line",
     "az": 75.1717,
     "ft": 9.32,
-    "misfit_ft": 0.12,
+    "misfit_ft": 133.06,
     "flags": [],
-    "E": 5992629.46,
-    "N": 2120420.36
+    "E": 5992625.54,
+    "N": 2120553.24
    },
    {
     "edge": "L5",
     "kind": "line",
     "az": 90.0,
     "ft": 12.01,
-    "misfit_ft": 0.07,
+    "misfit_ft": 132.98,
     "flags": [],
-    "E": 5992641.47,
-    "N": 2120420.36
+    "E": 5992637.55,
+    "N": 2120553.24
    }
   ]
  },
@@ -496,42 +496,42 @@
   "closed": false,
   "n_edges": 3,
   "full_record": 1,
-  "misfit_max_ft": 69.2,
-  "misfit_end_ft": 69.2,
+  "misfit_max_ft": 69.23,
+  "misfit_end_ft": 66.22,
   "edges": [
-   {
-    "edge": "S2°05'55\"W",
-    "kind": "line",
-    "az": 182.0986,
-    "ft": 201.29,
-    "misfit_ft": 0.02,
-    "flags": [
-     "distance from drawing"
-    ],
-    "E": 5992633.67,
-    "N": 2119718.46
-   },
-   {
-    "edge": "447.55'",
-    "kind": "line",
-    "az": 2.0958,
-    "ft": 447.55,
-    "misfit_ft": 0.06,
-    "flags": [
-     "bearing from drawing"
-    ],
-    "E": 5992650.04,
-    "N": 2120165.71
-   },
    {
     "edge": "50.70' + N88°28'28\"W",
     "kind": "line",
-    "az": 271.5256,
+    "az": 91.5256,
     "ft": 50.7,
-    "misfit_ft": 69.2,
+    "misfit_ft": 69.23,
     "flags": [],
-    "E": 5992599.36,
-    "N": 2120167.06
+    "E": 5992699.32,
+    "N": 2120214.29
+   },
+   {
+    "edge": "57.52'(T)",
+    "kind": "line",
+    "az": 358.3956,
+    "ft": 57.52,
+    "misfit_ft": 69.23,
+    "flags": [
+     "bearing from drawing"
+    ],
+    "E": 5992697.71,
+    "N": 2120271.79
+   },
+   {
+    "edge": "176.33'",
+    "kind": "line",
+    "az": 358.377,
+    "ft": 176.33,
+    "misfit_ft": 66.22,
+    "flags": [
+     "bearing from drawing"
+    ],
+    "E": 5992692.71,
+    "N": 2120448.05
    }
   ]
  },
@@ -637,6 +637,39 @@
     ],
     "E": 5991543.17,
     "N": 2121583.19
+   }
+  ]
+ },
+ {
+  "closed": false,
+  "n_edges": 2,
+  "full_record": 0,
+  "misfit_max_ft": 0.06,
+  "misfit_end_ft": 0.06,
+  "edges": [
+   {
+    "edge": "S2°05'55\"W",
+    "kind": "line",
+    "az": 182.0986,
+    "ft": 201.29,
+    "misfit_ft": 0.02,
+    "flags": [
+     "distance from drawing"
+    ],
+    "E": 5992633.67,
+    "N": 2119718.46
+   },
+   {
+    "edge": "447.55'",
+    "kind": "line",
+    "az": 2.0958,
+    "ft": 447.55,
+    "misfit_ft": 0.06,
+    "flags": [
+     "bearing from drawing"
+    ],
+    "E": 5992650.04,
+    "N": 2120165.71
    }
   ]
  },
@@ -765,6 +798,39 @@
     "flags": [],
     "E": 5992596.51,
     "N": 2120615.25
+   }
+  ]
+ },
+ {
+  "closed": false,
+  "n_edges": 2,
+  "full_record": 0,
+  "misfit_max_ft": 57.0,
+  "misfit_end_ft": 4.63,
+  "edges": [
+   {
+    "edge": "131.94'",
+    "kind": "line",
+    "az": 5.2776,
+    "ft": 131.94,
+    "misfit_ft": 57.0,
+    "flags": [
+     "bearing from drawing"
+    ],
+    "E": 5992124.29,
+    "N": 2122334.23
+   },
+   {
+    "edge": "134.03'(T)",
+    "kind": "line",
+    "az": 186.8175,
+    "ft": 134.03,
+    "misfit_ft": 4.63,
+    "flags": [
+     "bearing from drawing"
+    ],
+    "E": 5992108.38,
+    "N": 2122201.15
    }
   ]
  },
@@ -1011,27 +1077,6 @@
     ],
     "E": 5992642.32,
     "N": 2119718.45
-   }
-  ]
- },
- {
-  "closed": false,
-  "n_edges": 1,
-  "full_record": 0,
-  "misfit_max_ft": 57.0,
-  "misfit_end_ft": 57.0,
-  "edges": [
-   {
-    "edge": "131.94'",
-    "kind": "line",
-    "az": 5.2776,
-    "ft": 131.94,
-    "misfit_ft": 57.0,
-    "flags": [
-     "bearing from drawing"
-    ],
-    "E": 5992124.29,
-    "N": 2122334.23
    }
   ]
  },

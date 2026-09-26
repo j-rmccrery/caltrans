@@ -1,7 +1,7 @@
 [
  {
   "tag": "?L0?",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: no table row NO. matches the readable characters",
   "region": [
    885,
    628,
@@ -11,7 +11,7 @@
  },
  {
   "tag": "?L0?",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: no table row NO. matches the readable characters",
   "region": [
    1989,
    545,
@@ -21,7 +21,7 @@
  },
  {
   "tag": "?C1",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: no table row NO. matches the readable characters",
   "region": [
    1231,
    794,
@@ -31,7 +31,7 @@
  },
  {
   "tag": "?C3",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: 1 candidate rows (C3) matched but none passed its own check",
   "region": [
    1033,
    644,
@@ -41,7 +41,7 @@
  },
  {
   "tag": "?L??11",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: no table row NO. matches the readable characters",
   "region": [
    1784,
    980,
@@ -50,28 +50,48 @@
   ]
  },
  {
-  "tag": "?L20",
-  "issue": "tag partly unread",
+  "tag": "L20",
+  "issue": "drawn 82.13 ft vs table 609.42 ft",
   "region": [
    2244,
    517,
    2271,
    530
+  ],
+  "line": [
+   [
+    2281.1,
+    527.5
+   ],
+   [
+    2226.1,
+    549.2
+   ]
   ]
  },
  {
-  "tag": "?L21",
-  "issue": "tag partly unread",
+  "tag": "L21",
+  "issue": "drawn 74.26 ft vs table 1529.50 ft",
   "region": [
    537,
    457,
    567,
    472
+  ],
+  "line": [
+   [
+    538.4,
+    445.4
+   ],
+   [
+    486.8,
+    431.5
+   ]
   ]
  },
  {
   "tag": "?L??21",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: no table row NO. matches the readable characters",
   "region": [
    1991,
    910,
@@ -81,7 +101,7 @@
  },
  {
   "tag": "C0?",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: no table row NO. matches the readable characters",
   "region": [
    1699,
    980,
@@ -91,7 +111,7 @@
  },
  {
   "tag": "C0?",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: no table row NO. matches the readable characters",
   "region": [
    1906,
    909,
@@ -101,7 +121,7 @@
  },
  {
   "tag": "C00?",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: no table row NO. matches the readable characters",
   "region": [
    2077,
    202,
@@ -130,8 +150,8 @@
   ]
  },
  {
-  "tag": "C9??",
-  "issue": "tag partly unread",
+  "tag": "C9",
+  "issue": "no leader, no curve beside the tag",
   "region": [
    1613,
    718,
@@ -220,18 +240,8 @@
   ]
  },
  {
-  "tag": "L14??",
-  "issue": "tag partly unread",
-  "region": [
-   1633,
-   768,
-   1661,
-   782
-  ]
- },
- {
   "tag": "L15?",
-  "issue": "tag partly unread",
+  "issue": "tag partly unread: 1 candidate rows (L15) matched but none passed its own check",
   "region": [
    1628,
    658,

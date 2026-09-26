@@ -1329,6 +1329,25 @@ def main():
         P = seg["pts"][:: max(1, len(seg["pts"]) // 20)] if "pts" in seg else [seg["p0"], seg["p1"]]
         return [[round(float(x), 1), round(float(y), 1)] for x, y in P]
 
+    def paired_bearing(b):
+        """A bearing from a block stacked directly beside b (same reading angle, aligned along the
+        reading axis, close along the perpendicular) when b's own text carries none of its own -- the
+        common drafting convention of a bearing on one line and its distance on the next, read as two
+        separate blocks rather than one "|"-joined block (leg H2, for a bare (T) run total whose own
+        block is just the distance)."""
+        c, u, n = frame(b)
+        best = None
+        for o in blocks:
+            if o is b or abs(((o["angle"] - b["angle"] + 90) % 180) - 90) > 2:
+                continue
+            d = np.array([o["cx"], o["cy"]]) - c
+            along, perp = abs(d @ u), abs(d @ n)
+            if along < 0.6 * max(b["w"], o["w"]) and perp < 2.0 * b["glyph_h"]:
+                for t in o["text"].replace(" ", "").split("|"):
+                    if BEAR.match(t) and not BEAR.match(t)[6] and (best is None or perp < best[0]):
+                        best = (perp, azimuth(t))
+        return best[1] if best else None
+
     for bi, b in enumerate(blocks):
         if any(x0 <= b["cx"] <= x1 and y0 <= b["cy"] <= y1 for x0, y0, x1, y1 in FURNITURE):
             continue  # table cells and title block: the record, not labels on the drawing
@@ -1549,15 +1568,40 @@ def main():
             elif DIST.match(part):
                 m = DIST.match(part)
                 num_str, is_total = dist_num(m)
-                if is_total or curve_data or STATION.search(b["text"]) or AREA_CTX.search(b["text"]) or NOTES_CTX.search(b["text"]):
-                    continue  # (T) totals, curve data (R=, Δ, L=), a station number, a parcel-area figure, or a coordinate-basis note: not a line length
+                if curve_data or STATION.search(b["text"]) or AREA_CTX.search(b["text"]) or NOTES_CTX.search(b["text"]):
+                    continue  # curve data (R=, Δ, L=), a station number, a parcel-area figure, or a
+                    # coordinate-basis note: not a line length. A bare "NNN.NN'(T)" run total (no "L="
+                    # prefix -- that one is caught above, in the standalone-L= branch) used to be
+                    # skipped outright here too ("a run total over several tags, not a single line"),
+                    # dropping 20 genuine, measurable tokens (spike/out_coverage/attribution.md,
+                    # bucket a-runtotal -- every one confirmed a real drawn-line run beside real
+                    # linework). It is checked below exactly like an ordinary distance: the same
+                    # leader-tip/nearest-line search finds a seed piece on its run (want won't match
+                    # the seed's own single-piece length, so at_tip/nearest_line's own proximity
+                    # fallback picks it), then span_for's existing contiguous-sum search -- the same
+                    # machinery a standalone "L=...(T)" label already uses -- accepts it only when
+                    # exactly one contiguous span of that run sums to the printed total (leg H)
                 want = float(num_str)
                 baz = next((azimuth(t) for t in parts if BEAR.match(t) and not BEAR.match(t)[6]), None)  # the bearing printed with it
+                if baz is None and is_total:
+                    baz = paired_bearing(b)  # leg H2: the bearing can sit in its OWN adjacent block
                 led, ln = at_tip(bi, "line", want, want_az=baz)
                 if not led:
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale, want_az=baz, az_of=az_of)
                 if ln is not None:
                     ln = span_for(ln, want, scale, chains)
+                    if is_total and ln is not None and baz is not None and az_diff(az_of(ln), baz) > bearing_tol_deg(ln["len_pt"] * scale):
+                        # leg H2: a bare (T) run total whose block carries a bearing must be measured on
+                        # a run whose OWN direction -- after span_for's own possibly multi-piece join --
+                        # actually passes that bearing, not just the seed piece's coarser per-piece
+                        # pre-filter a joined span can drift away from (a window on a DIFFERENT, similar-
+                        # bearing line coincidentally summed to the same printed total: r10434_3's
+                        # "195.48'(T)" measured on the ticked N86 deg 41'46" line sharing its left circle
+                        # with the true "247.31'(T)" run, 0.4 deg off -- close enough to pass the coarse
+                        # filter, wrong enough to be a different physical line). Reject; falls through to
+                        # the chord/arc fallbacks, then a plain "no line" exception, same as any other
+                        # unmatched total -- never a guessed pass.
+                        ln = None
                 if (ln is None or abs(ln["len_pt"] * scale - want) > 1.0) and baz is not None:
                     # a bearing+distance block beside a curve: the distance is the same chord the paired
                     # bearing above measures, not an arc length (loop6 leg C rule 2) -- tried whenever the
@@ -1598,7 +1642,10 @@ def main():
                     exceptions.append({"kind": "distance", "text": part, "issue": "line runs to the sheet edge (matchline); not checkable on this sheet", "region": region(b)}); continue
                 drawn = ln["len_pt"] * scale
                 ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
-                rows.append(["distance", part, f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
+                result = "pass" if ok else "FAIL"
+                if is_total and ok and ln.get("joined", 1) > 1:
+                    result = f"pass as a run of {ln['joined']}: the boundary between these segments is not drawn"
+                rows.append(["distance", part, f"{drawn:.2f}", f"{drawn - want:+.2f}", result])
                 labels.append({"kind": "distance", "printed": part, "ft": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
                 if not ok:
                     exceptions.append({"kind": "distance", "text": part, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - want, 2), "region": region(b), "line": shape(ln)})
