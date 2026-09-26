@@ -289,3 +289,25 @@ alignment curve drawn as several PDF paths end to end; our parent is one path, s
 | A | pass by orchestrator override (+1 of +3, no loss, six fake fails removed), 2 attempts | 2 | Rule 1 stitch (1 pt, 3 deg, 2 %): 7 parents from 14 paths on Presidio; the 6-glyph bridge measured and reverted (C21's gap holds a different curve: tangent 8.4 deg off, radius 9.3 % off; and it moved C33 on .3 across the 1 % radius tolerance). Rule 2 dash-dot trains: 14 / 19 / 24 per sheet; by proximity they produced six fake fails on .3 (all the same alignment centreline), so dash-dot pieces are excluded from the no-leader search; .3 back to 28 / 26 / 28. Rule 3 consecutive rows: C15 passes as a run of 3 (C15, C16, untagged C18; 573.95 vs 573.93). C20 reaches a check, fails honestly (leader on the centreline). C21 unchanged, blocker measured. `leg9A-check`: presidio 25 / 34 / 10, everything else equal to loop8-final, dash trains identical; crops viewed | leg9A |
 
 Dispatches used: 2 of 16 (1 agent, 1 resume). Started 17:40, closed 20:25 PDT. `loop9-final` (nine sheets, canonical): presidio tags 25 / 34 / 10; the six baseline rows otherwise equal loop8-final; R-10258.1 (not a gate sheet) 12/50 23/24 0/17 under the stitch.
+
+---
+
+# Loop 10: C21 traced by eye (started 2026-09-26 00:40 PDT, JR: "then do that for c21")
+
+`spike/c21_trace.py` (orchestrator) drew every curved piece in the checker's own pool around Presidio's C21 with fitted
+radii. Finding: C21 (R=1380, L=876.88) is on the sheet in five pieces of the same thin line: p104/2 255.91 ft and p104/3
+193.93 ft (R 1382), then across a 10.7 pt gap at the C9/C10 fillet p97/0 86.86 ft (junction sliver, fit R 295) and p97/1
+278.14 ft (R 1382), then 62.04 ft of p97/2 (R 1370) to the point [1931, 660] where two short lines end 3.6-4.2 pt from
+the curve. C21 begins at [1320, 660], where the same PDF path turns from a straight tangent (p104/1, R 15,922) into the
+curve. Two defects: (1) the stitch measured tangents on the two junction slivers (0 deg vs -11 deg), not on the arcs, so
+it refused a join whose long pieces agree at R 1382 on both sides; (2) `split_at`'s junction tolerance (2 pt) misses
+lines that stop 3.6-4.2 pt short of the curve, so the boundary at [1931, 660] is not a cut. Baseline `loop9-final`.
+
+| # | Leg | Gate |
+|---|---|---|
+| A | (1) Join test across a gap uses the tangent and circle of at least 40 ft (or the whole piece if shorter) on each side, skipping a piece under 40 ft when a longer one follows on the same path; the far side must lie on the near arc's circle within 1.5 pt. (2) A junction line whose end lies within max(2 pt, 0.5 glyph height) of a curve cuts it. (3) C21's window then sums 255.91 + 193.93 + 86.86 + 278.14 + 62.04 | Presidio C21 passes (876.88 vs the drawn run within tolerance) or the remaining difference is named; tag passes not down on any of the six (per-tag diff), inline passes not down (per-label diff), wrong-line not up; Presidio dash trains identical; R-10434.1 L-tags identical; crop of C21's run viewed |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
