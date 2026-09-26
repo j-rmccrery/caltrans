@@ -13,14 +13,13 @@
  },
  {
   "parcel": "61806|61806-4|61806-5|61806-9|63269",
-  "edges": 138,
-  "by_record": 24,
-  "closure_ft": 306.94,
-  "record_area_sqft": 545497223.2,
+  "edges": 137,
+  "by_record": 23,
+  "closure_ft": 288.12,
+  "record_area_sqft": 365935778.0,
   "flags": [
    "partial record",
    "partial record",
-   "chord direction drawn",
    "drawn",
    "drawn",
    "drawn",
@@ -141,10 +140,10 @@
  },
  {
   "parcel": "61806-4|61985-2",
-  "edges": 70,
-  "by_record": 16,
-  "closure_ft": 77.47,
-  "record_area_sqft": 167456199.6,
+  "edges": 69,
+  "by_record": 15,
+  "closure_ft": 133.55,
+  "record_area_sqft": 336164491.7,
   "flags": [
    "chord direction drawn",
    "chord direction drawn",
@@ -206,7 +205,6 @@
    "drawn",
    "drawn",
    "drawn",
-   "chord direction drawn",
    "chord direction drawn",
    "chord direction drawn"
   ]

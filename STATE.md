@@ -3,7 +3,34 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-25 09:25 after loop 7; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-25 17:00 after loop 8; plan and status in `spike/LOOP.md`)
+
+**Loop 8 (table tags by parent curve, one leg).** `tables.py` now takes curve arcs from `checks.build_pool` (every piece
+carries its parent curve and sequence) and a curve tag tries its own piece, then a contiguous window of its own curve
+(`checks.parent_window`, shared with the inline L= path), then a same-parent run against the sum; a leader tip on a
+radial tick resolves to the curve piece the tick meets. Presidio row checks 31 pass / 12 fail -> 33 / 9 (C16 as a run of
+its own two pieces, C19's arc; C19's false radius fail gone; C21 now measured on the right piece and still a real fail).
+No other column moved on any sheet; no same-parent partner exists for any remaining curve fail on .1/.3. C15 on
+Presidio cannot pass alone: the drawn run is C15 + C16 + C18 (C18 untagged on this sheet) = 573.93 (T), which passes as
+the total. Bench row `loop8-final`.
+
+Note (JR, 2026-09-25 16:50): pull in the new SAM information. Which SAM is unconfirmed (see the loop 7 Next below).
+
+Do this, in order:
+
+1. **Scan text-line detection on the binarised page** (replace the OCR detector's boxes); if "SAM" is Segment Anything,
+   it is a candidate detector here; gate: the 32 keyed boxes landing on their text (24 today).
+2. **Row segmentation of multi-line blocks on 2012-era sheets**: the north reads.
+3. **Curve tags, what is left**: C21-class (leader on the long curve, record is a short sub-arc: 449.84 vs 876.88),
+   C20-class (record cites a dash-dot boundary no pool models), C15-class (a row whose piece includes an untagged
+   neighbour: check consecutive table rows as a run even when a row has no tag on the drawing).
+4. **South bearings and arcs, what is left**: bearings 2/2/1 fails; inline arcs 3/12/13.
+5. **R-71.70's 1.29 deg**; **mosaic south + gap**; **1950s scans on the north tile** through their packages.
+6. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze by 10-03.
+
+## Next as of loop 7 (2026-09-25 09:25), kept for the record
+
+### Next (logged 2026-09-25 09:25 after loop 7; plan and status in `spike/LOOP.md`)
 
 **Loop 7 (the scan by its own alphabet, R-65.2).** `spike/scan_alphabet.py`: boxes levelled and binarised, glyphs
 segmented (fused pairs split at projection valleys), clustered by stroke-direction zoning (579 cap clusters, 98.6 %

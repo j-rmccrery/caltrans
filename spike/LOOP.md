@@ -265,3 +265,5 @@ per-label pass sets and the tag columns (`--tables --tags`).
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
 | A | pass by orchestrator override (+2 of +4, no loss, two fake fails gone) | 1 | Arc pool shared (parent + seq); `parent_window` shared; tags try own piece, then own-curve window, then same-parent run. Presidio C16 pass as run of 2 (521.73 vs 521.76), C19 arc pass (60.43 vs 60.41) and radius no longer a false fail, C21 on the right piece (449.84 vs 876.88, real fail), C13/C14 pass on own pieces (26.50, 21.61). C15 unfixable alone: its piece is C15 + C18's share; the total 573.93 (T) passes. `leg8A-check`: presidio tags 24 / 33 / 9 queued 31 (was 31 / 12 / 34); .1 and .3 tag rows identical (no same-parent partner exists for any remaining curve fail); inline columns and north identical. Crop viewed: blue run is C16's curve | leg8A |
+
+Dispatches used: 1 of 16. Started 11:10, agent ran 15:55-16:45, closed 17:15 PDT. `loop8-final` (nine sheets, canonical): presidio tags 24 / 33 / 9, every other column equal to loop6-final.

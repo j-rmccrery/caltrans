@@ -48,7 +48,7 @@ def record_twin_block():
     return "\n".join(lines) + "\n"
 
 SQFT_PER_ACRE = 43560.0
-BENCH_LABEL = "loop6-final"
+BENCH_LABEL = "loop8-final"
 
 
 def load(name):

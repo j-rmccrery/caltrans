@@ -1105,20 +1105,20 @@
   "closed": false,
   "n_edges": 1,
   "full_record": 0,
-  "misfit_max_ft": 223.67,
-  "misfit_end_ft": 223.67,
+  "misfit_max_ft": 229.67,
+  "misfit_end_ft": 229.67,
   "edges": [
    {
     "edge": "C3",
     "kind": "arc",
-    "az": 346.0218,
+    "az": 345.6273,
     "ft": 316.27,
-    "misfit_ft": 223.67,
+    "misfit_ft": 229.67,
     "flags": [
      "chord direction from drawing"
     ],
-    "E": 5992642.15,
-    "N": 2121180.63
+    "E": 5992639.16,
+    "N": 2121186.06
    }
   ]
  },
