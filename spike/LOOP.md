@@ -335,3 +335,6 @@ touched; the gate is these areas, the pavement-outside-R/W number (the encroachm
 
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
+| A | pass on the renders and the areas; demo timing gate missed (pre-existing) | 1 | Class audit: ground is class 2 on every tile, class 17 present on every tile (gap 0.15 %); the 'different ground class' hypothesis was wrong, the gap tile's problem was fragmentation under the 400 m2 floor. Deck by height above DTM: +45 m2 inside R/W on Presidio, +91 on .3 (class 17 already covers the structure; growth fills parapet and joint holes). Gap-tile pavement 0 -> 2,176 m2. Highway surface per tile (south structure 33,988 / at grade 146,620; north at grade 7,418; gap tile not written, open). Pavement outside R/W within 15 m unchanged (9,606). Renders viewed: the west viaduct and Doyle Drive read as one purple stripe, the at-grade corridor continuous across the seam; the blank middle is the Battery tunnels, now drawn record-only. `demo.py --fast` 245 s (checks 64 + tags 51 + tables 66 s), over the 180 s gate; a regression from loops 8-9, not this leg. objects.py crash on queued entries fixed by the orchestrator | leg11A |
+
+Dispatches used: 1 of 16. Started 03:30, closed 04:40 PDT.

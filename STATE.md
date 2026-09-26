@@ -3,7 +3,33 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-26 03:10 after loop 10; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-26 04:40 after loop 11; plan and status in `spike/LOOP.md`)
+
+**Loop 11 (the road as one surface).** Purple in the renders was the vendor's class-17 deck only. Now: `extract.py --audit`
+prints each tile's class histogram (ground is class 2 everywhere; class 17 present on all three tiles); deck grows from
+class-17 seeds into dark, flat cells >= 2 m above the ground DTM; the 3DEP gap tile's pavement (190 fragments under the
+400 m2 floor) comes through a wider closing; `lidar/surface.py` dissolves pavement + deck inside the union of the R/W
+faces per tile into one highway surface (structure / at grade), drawn in `six.qgz` above the per-kind layers; tunnel
+easement faces are styled record-only. Gains are honest and small (deck +45 / +91 m2 inside R/W; gap pavement 2,176 m2);
+the continuity in the render comes from the union. Pavement outside the R/W unchanged (Presidio 9,606 m2).
+
+**Regression to fix first: `demo.py --fast` is 245 s** (checks 64 s, tags 51 s, tables 66 s), over the 180 s gate; loops
+8-9 added curve stitching, dash-dot trains and window searches. Profile those three and restore < 180 s without moving
+`loop9-final`.
+
+Note (JR, 2026-09-25 16:50): pull in the new SAM information. Which SAM is unconfirmed.
+
+Do this, in order:
+
+1. **demo.py --fast under 180 s** (above).
+2. **Highway surface for the gap tile** (`surface.py` ran for south and north only) and a per-tile mosaic of features.
+3. **C21 and the point-of-tangency class, scoped** (loop 10: >= 100 ft radius windows; PT cuts inside a failing tag's parent).
+4. **Scan text-line detection**; **north row segmentation**; **south bearings/arcs left**; **R-71.70's 1.29 deg**.
+5. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze by 10-03.
+
+## Next as of loop 10 (2026-09-26 03:10), kept for the record
+
+### Next (logged 2026-09-26 03:10 after loop 10; plan and status in `spike/LOOP.md`)
 
 **Loop 10 (C21 traced by eye; one leg, two attempts, no code shipped).** `spike/c21_trace.py` found C21 whole on the
 sheet: a tangent, then five pieces of one thin line across the C9/C10 fillet (255.91 + 193.93 + 86.86 + 278.14 + 62.04 =
