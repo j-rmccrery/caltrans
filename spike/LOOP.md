@@ -311,3 +311,6 @@ lines that stop 3.6-4.2 pt short of the curve, so the boundary at [1931, 660] is
 
 | leg | state | dispatches | gate result | commit |
 |---|---|---|---|---|
+| A | failed twice, stashed as `spike/out/loop10_legA.patch` (finding) | 2 | Attempt 1: end-fit join and near-miss cut, both no-ops in production: the trace ran on a different block set (no `real_text_blocks`), so production has no cut at [1499.8, 699.4] and p104 reaches the gap as one blended 449.84 ft piece (fit R 1418.75, 2.8 % off p97/1's 1382); and the three lines at [1931, 660] run along the curve's tangent, not across it (a point of tangency, not a radial). Attempt 2: 40 ft end-fit windows are numerically unstable at the sheet's 2-decimal precision (p104's last 40 ft fit R 1535, 60 ft 1527, 80 ft 1443, 100 ft 1379, whole tail 1382; p97/1's first 40 ft 1054), so the join still refuses; a PT cut as a vertex snap lands at [1927, 662] and would let Presidio's tags rise 34 -> 36 pass, but sheet-wide it fragments other curves: R-10434.3 loses C33 and C25 radius passes, R-10741.1 loses a distance pass, wrong-line up on three sheets. Rejected. What would work, not tried: radius fits on >= 100 ft windows, and PT cuts scoped to a failing tag's own parent rather than every curve | - |
+
+Dispatches used: 2 (1 agent, 1 resume). Started 00:40, closed 03:05 PDT. No code shipped; `loop9-final` stands.

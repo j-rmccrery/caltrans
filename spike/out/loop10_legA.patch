@@ -1,0 +1,349 @@
+diff --git a/spike/checks.py b/spike/checks.py
+index 35961e6..5727c36 100644
+--- a/spike/checks.py
++++ b/spike/checks.py
+@@ -504,12 +504,34 @@ def split_chains(chains, circles, tol=2.0):
+     return out
+ 
+ 
+-def split_at(P, circles, chains, tol=2.0, ticks=()):
++def split_at(P, circles, chains, tol=2.0, ticks=(), end_tol=None, glyph_h=None):
+     """A curved chain runs on through its tangent points. What the drawing puts where one record arc ends:
+     a vertex circle, a boundary line ENDING on the curve at an angle (not merely crossing it), or, on a
+     thin alignment curve, a short radial tick. Where nothing is drawn (the C15/C16 boundary on the
+     R=1470 curve) the record alone knows, so the caller compares the run against the sum of its arcs.
+-    Cuts are the exact meeting points, not the nearest facet vertex."""
++    Cuts are the exact meeting points, not the nearest facet vertex.
++    Loop10 leg A rule 2: `end_tol` (default `tol`) is the separate, wider tolerance for a line's END lying
++    on the curve (Presidio's p97/2: two short line chains stop 3.6-5.5 pt short of the record's own
++    boundary at [1931, 660], past the flat 2 pt `tol` this used to share with the circle/tick tests) --
++    callers pass max(2.0, 0.5 * the sheet's median glyph height) so a near-miss junction still cuts on a
++    sheet whose text (and so its line ends) sit coarser than 2 pt. Two independent, narrow cases, both
++    requiring the chain to be longer than 3 glyph heights (`glyph_h`) or the plain, unwidened `tol` applies,
++    byte-for-byte as before this rule:
++      - a RADIAL/boundary line whose own direction is within 30 deg of the curve's normal at that facet (a
++        line actually meeting the curve, not a dash or edge running alongside it);
++      - a PT (point of tangency, attempt 2): a straight chain that BEGINS on the curve within `end_tol` and
++        whose own direction is within 3 deg of the curve's local TANGENT there -- the drawn arc simply ends
++        and a straight line continues (Presidio's p97/2: two of three candidate chains near [1931, 660] run
++        within 1 deg of the curve's own tangent there, not near its normal, so they fail the ordinary
++        line-meets-curve intersection test above, which excludes near-parallel lines as numerically
++        degenerate). Snapped to the nearest SAMPLE POINT of P (`pt_near`, computed once up front, the same
++        shape as `circle_near`), not inserted as a new interpolated mid-facet point the way the radial case
++        above is: a candidate meeting the curve almost exactly at an existing vertex (measured: 3.6-4.4 pt
++        away, same order as the vertex spacing itself here) leaves every adjacent facet too short for the
++        interior-margin cut test to ever register it."""
++    end_tol = tol if end_tol is None else end_tol
++    cos30 = math.cos(math.radians(30))
++    cos3 = math.cos(math.radians(3))
+     A = np.array([c["p0"] for c in chains]); B = np.array([c["p1"] for c in chains])
+     D = np.array([c["dir"] for c in chains]); LN = np.hypot(*(B - A).T)
+     T, TD = (np.array([m for m, _ in ticks]), np.array([d for _, d in ticks])) if len(ticks) else (np.zeros((0, 2)), np.zeros((0, 2)))
+@@ -536,6 +558,31 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
+                 i = j
+             else:
+                 i += 1
++    # loop10 leg A rule 2 attempt 2 (PT): a qualifying chain's own end can land almost exactly ON an
++    # existing sample vertex of P (Presidio's [1931, 660]: the nearest curve vertex sits 4.4 pt away, the
++    # candidate chains' own ends closer still) -- the per-facet interior cut below (`s`/`al`, margin 0.3 pt
++    # off each facet's own two ends) then has no facet long enough to register it on, since every facet
++    # near a real vertex-close meeting is itself only a fraction of a pt long. Snapped to the nearest
++    # SAMPLE POINT instead, the same way circle_near is, not inserted as a new interpolated point.
++    pt_near = np.zeros(len(P), dtype=bool)
++    if end_tol > tol and glyph_h and len(P) > 2:
++        ends_all = np.vstack([A, B]) if len(chains) else np.zeros((0, 2))
++        dirs_all = np.vstack([D, D]) if len(chains) else np.zeros((0, 2))
++        long_all = np.concatenate([LN, LN]) > 3 * glyph_h if len(chains) else np.zeros(0, dtype=bool)
++        if np.any(long_all):
++            cand, cdirs = ends_all[long_all], dirs_all[long_all]
++            ptree = cKDTree(P)
++            pd, pi = ptree.query(cand)
++            lt = np.zeros_like(P)
++            lt[1:-1] = P[2:] - P[:-2]
++            lt[0] = P[1] - P[0]
++            lt[-1] = P[-1] - P[-2]
++            ltn = np.hypot(*lt.T)
++            ltn[ltn < 1e-9] = 1.0
++            lt = lt / ltn[:, None]
++            for dist, idx, cdir in zip(pd, pi, cdirs):
++                if dist < end_tol and 0 < idx < len(P) - 1 and abs(cdir @ lt[idx]) > cos3:
++                    pt_near[idx] = True
+     sin30 = math.sin(math.radians(30))
+     pts, cut = [P[0]], [True]
+     for i in range(len(P) - 1):
+@@ -549,7 +596,13 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
+         ap = A - p
+         s = np.where(ok, (ap[:, 0] * D[:, 1] - ap[:, 1] * D[:, 0]) / np.where(ok, den, 1), -1)
+         r = np.where(ok, (ap[:, 0] * t[1] - ap[:, 1] * t[0]) / np.where(ok, den, 1), -1)
+-        ends = (np.abs(r) < tol) | (np.abs(r - LN) < tol)
++        if end_tol > tol and glyph_h:
++            radial = np.abs(D @ n) > cos30  # within 30 deg of the facet's own normal, not its tangent
++            widen = radial & (LN > 3 * glyph_h)
++            et = np.where(widen, end_tol, tol)
++        else:
++            et = end_tol
++        ends = (np.abs(r) < et) | (np.abs(r - LN) < et)
+         cuts += s[ok & ends & (s > 0.3) & (s < L - 0.3)].tolist()
+         if len(T):
+             d = T - p
+@@ -561,7 +614,7 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
+         for sk in sorted(set(round(x, 2) for x in cuts)):
+             pts.append(p + sk * t); cut.append(True)
+         pts.append(q)
+-        cut.append(bool(circle_near[i + 1]))
++        cut.append(bool(circle_near[i + 1]) or bool(pt_near[i + 1]))
+     cut[-1] = True
+     pieces, start = [], 0
+     for i in range(1, len(pts)):
+@@ -574,9 +627,18 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
+ STITCH_GAP = 1.0        # pt: curve paths whose ends meet this close are one drawn curve, not two
+ STITCH_TANGENT_DEG = 3.0  # deg: end tangents must agree this closely across the join
+ STITCH_RADIUS_FRAC = 0.02  # fraction: fitted (three-point) radii must agree this closely across the join
+-STITCH_ON_CIRCLE = 1.0  # pt: a bridged join's far point must land this close to the near path's own
++STITCH_ON_CIRCLE = 1.5  # pt: a bridged join's far point must land this close to the near path's own
+ # fitted circle (leg9A attempt 2: a gap wider than STITCH_GAP needs its own evidence that the arc
+-# actually continues through the gap, not just that the two paths happen to point the same way)
++# actually continues through the gap, not just that the two paths happen to point the same way).
++# Loop10 leg A widened this from 1.0 to 1.5 pt alongside the junction-sliver-aware end fit below.
++STITCH_BRIDGE = 15.0  # pt: chain_curve_paths' own bridged-join reach (loop10 leg A) -- just past the
++# 10.65 pt gap at Presidio's C9/C10 fillet junction (p104/p97), not the much wider text-wipeout reach
++# tried and reverted in leg9A attempt 2, which pulled in unrelated curve pairs at this sheet's scale
++STITCH_END_FT = 40.0  # ft: a bridged join's end fit (radius AND tangent) is measured over at least this
++# much of the path at that end (whole piece if shorter) -- but see _end_fit_ft: a junction sliver
++# shorter than this, with a longer piece following on the same raw path, hands the fit to that longer
++# piece instead, so a fillet's short kinked stub (Presidio's p97/0, 86.86 ft, fit R 295 against the
++# true 1382) never corrupts the radius/tangent test for the real arc sitting right behind it.
+ 
+ 
+ def _end_tangent(P, end, k=4):
+@@ -598,11 +660,98 @@ STITCH_END_SPAN = 40  # points: a join test needs the curvature AT the end that'
+ def _end_circle(P, end, span=STITCH_END_SPAN):
+     """(centre, radius) fit to just the `span` points nearest this end (all of them, short of that): the
+     LOCAL curvature at the end that would do the joining, immune to whatever the rest of a long or
+-    compound raw path does elsewhere."""
++    compound raw path does elsewhere. Superseded for chain_curve_paths' own bridged join by _end_fit_ft
++    below (loop10 leg A); kept here unused for reference/backward compat."""
+     return circle_fit_lsq(P[:span] if end == 0 else P[-span:])
+ 
+ 
+-def chain_curve_paths(raws, bridge=0.0):
++SLIVER_RESID_TOL = 1.0  # pt: a touching piece's OWN least-squares circle fit residual past this is a
++# kink, not an arc (Presidio's p97/0, the 86.86 ft C9/C10 fillet sliver: residual 1.2 pt fitting R 295,
++# vs 0.04-0.05 pt for the genuine record arcs on either side of it -- 86.86 ft alone is not short enough
++# to trip the plain length check below, so a real junction sliver needs this second signal)
++
++
++def _window_ft(piece, from_tip_start, scale, min_ft):
++    """The leading `min_ft` feet of `piece` (all of it, if shorter), measured from its own start
++    (from_tip_start=True) or its own end (False); `piece` is always ordered the same way as the raw path
++    it came from, so "start"/"end" here track the raw path's own s0/s1 direction, not which side is
++    physically nearer the join."""
++    seg = np.hypot(*np.diff(piece, axis=0).T)
++    if len(seg) == 0:
++        return piece
++    if from_tip_start:
++        cum = np.concatenate([[0], np.cumsum(seg)]) * scale
++        k = int(np.searchsorted(cum, min_ft)) + 1
++        return piece[:min(k, len(piece))]
++    cum = np.concatenate([[0], np.cumsum(seg[::-1])]) * scale
++    k = int(np.searchsorted(cum, min_ft)) + 1
++    return piece[-min(k, len(piece)):]
++
++
++def _end_fit_ft(P, end, circles, chains, ticks, scale, min_ft=STITCH_END_FT):
++    """Loop10 leg A rule 1 (attempt 2): (heading, centre, radius, swapped) for a bridged join at this raw
++    path's end, fit to the LAST `min_ft` feet of the near piece's own points (or the FIRST `min_ft` feet,
++    once swapped past a sliver to the far side's long piece) -- split_at's OWN piece cuts on this raw path
++    (not a blind point count) decide what "the piece" is, `_window_ft` decides which `min_ft`-foot slice of
++    it. Attempt 1 fit the WHOLE selected piece instead and got burned the other way: p104 reaches the C9/C10
++    gap as one un-split 449.84 ft piece blending an R 1539 stretch into an R 1382 one (no vertex circle
++    marks that internal boundary, and the one line that used to survive as a cut there depends on exactly
++    which text blocks are on the sheet), so ITS whole-piece fit is a blend (R 1418.75, off the true 1382 by
++    2.81%, just past the 2% gate) even though the LAST 40 ft of it -- closest to the join, past where the
++    blend happens -- fits the true 1382 cleanly. The touching piece hands its fit off to the next, longer
++    piece on the same raw path (`swapped`=True) when it is either shorter than `min_ft` or, regardless of
++    length, a poor circle fit on its own (SLIVER_RESID_TOL) -- a short or kinked junction transition
++    (Presidio's p97/0, an 86.86 ft fillet sliver fit R 295 with residual 1.2 pt) is not the record arc
++    sitting right behind it (p97/1, 278.14 ft at the true R 1382); FIRST 40 ft of p97/1 is used, not its
++    whole 278.14 ft, so both ends of the join are measured the same way. `swapped` tells chain_curve_paths
++    this end sits right against a real junction, not just any nearby curve fragment (measured: without this
++    gate, the same bridge that lets p104 join p97 also strings together an unrelated R~183 ft curve drawn as
++    many short separate PDF paths a few pt apart on this same sheet, and that consolidation -- geometrically
++    defensible on its own -- shifted which drawn piece several unrelated inline labels matched, costing 3
++    previously-passing labels; every one of that curve's own raw fragments is a single, un-split piece, so
++    `swapped` is never true for it and the wide join no longer considers it at all). Heading is the ANALYTIC
++    tangent at the raw path's own literal tip (perpendicular to the fitted circle's radius there, signed by
++    the piece's own direction of travel). The sliver's own exact endpoint still decides whether the two
++    paths physically meet (chain_curve_paths' own gap/on-circle test uses the raw path's literal p0/p1,
++    untouched by this)."""
++    pieces = split_at(P, circles, chains, ticks=ticks)
++    order = pieces if end == 0 else pieces[::-1]
++    piece = order[0]
++    plen_ft = float(np.sum(np.hypot(*np.diff(piece, axis=0).T))) * scale
++    swapped = False
++    if len(order) > 1:
++        c0, r0 = circle_fit_lsq(piece) if len(piece) >= 4 else (None, float("nan"))
++        resid0 = float(np.max(np.abs(np.hypot(*(piece - c0).T) - r0))) if c0 is not None else 0.0
++        # residual alone, not plain shortness -- min_ft is generous enough (40 ft) that a clean, merely-
++        # short piece (common on any coarsely-fragmented curve, not just a junction) would otherwise swap
++        # too, and chain_curve_paths' own bridge gate leans on `swapped` to mean "a real junction sits
++        # here", not "this piece happens to be short" (loop10 leg A: the plain length trigger alone still
++        # strung together Presidio's own unrelated R~183/343 ft curves under the wide bridge)
++        if resid0 > SLIVER_RESID_TOL:
++            nxt = order[1]
++            nlen_ft = float(np.sum(np.hypot(*np.diff(nxt, axis=0).T))) * scale
++            if nlen_ft > plen_ft:
++                piece = nxt
++                swapped = True
++    window = _window_ft(piece, end == 0, scale, min_ft)
++    if len(window) < 2:
++        window = piece
++    tip = P[0] if end == 0 else P[-1]
++    fallback = window[-1] - window[0]
++    fn = np.hypot(*fallback)
++    heading = fallback / fn if fn > 1e-9 else fallback
++    center, radius = circle_fit_lsq(window) if len(window) >= 3 else (None, float("nan"))
++    if center is not None and math.isfinite(radius) and 0 < radius < 1e6:
++        rad_vec = tip - center
++        rn = np.hypot(*rad_vec)
++        if rn > 1e-9:
++            perp = np.array([-rad_vec[1], rad_vec[0]]) / rn
++            heading = perp if perp @ heading >= 0 else -perp  # travel direction of the piece, not the
++            # arbitrary +90 deg rotation of the radius vector
++    return heading, center, radius, swapped
++
++
++def chain_curve_paths(raws, bridge=0.0, circles=(), chains=(), ticks=(), scale=1.0, min_ft=STITCH_END_FT):
+     """Loop9 leg A rule 1: chain curve paths (bezier or polyline, build_pool's own raw whole-curve
+     candidates, before split_at ever cuts one) whose ends meet within STITCH_GAP (or within `bridge` --
+     a text wipeout or a crossing callout leader can blank a thin alignment curve for a few glyph heights,
+@@ -616,6 +765,14 @@ def chain_curve_paths(raws, bridge=0.0):
+     two paths can point the same way and share a radius by coincidence at a wider reach, but only a join
+     where the far point actually sits ON the near arc's circle is evidence the SAME arc continues through
+     the gap, not just that some other similar-radius curve happens to sit nearby pointing the same way.
++    Loop10 leg A: that bridged end fit is now split_at-aware (_end_fit_ft) instead of a blind point count,
++    so a short junction sliver right at the join (Presidio's C9/C10 fillet, between p104 and p97) hands
++    its radius/tangent fit to the longer piece behind it rather than corrupting the test itself; `circles`,
++    `chains` (junction lines) and `ticks` are build_pool's own pool, passed through so this pre-split can
++    use the SAME cuts the final split_at pass will make, and `scale` (ft per pt) turns `min_ft` into a
++    point-distance. The ORIGINAL tight-join test (gap <= STITCH_GAP) is untouched by any of this -- still
++    circumradius3's whole-path fit, byte-for-byte, since touching it once already regressed a passing tag
++    (r10434_3's C33) for no gain (leg9A).
+     `raws`: [{"pts": Nx2 array, "width": float, "ticks_ok": bool, "source": "bezier"|"poly"}], each one
+     of build_pool's existing raw curve candidates (unchanged). Returns groups in the same shape plus
+     "n_merged" (paths joined into this one, 1 = untouched) and, for a merged group, "source" dropped
+@@ -631,9 +788,13 @@ def chain_curve_paths(raws, bridge=0.0):
+         # anywhere) before the wider bridge ever existed. Only a join past STITCH_GAP falls back to the
+         # local end fit; touching the tight join's own radius source regressed a passing tag on
+         # r10434_3 (C33) even with bridge=0, from nothing but the different fitting method
++        r_ticks = ticks if r.get("ticks_ok") else ()  # same per-raw gating build_pool's own final
++        # split_at pass uses below -- a wide line's dash-length sub-segments must not be read as ticks
+         info.append({"p0": P[0], "p1": P[-1], "h0": _end_tangent(P, 0), "h1": _end_tangent(P, 1),
+                      "radius": circumradius3(P) if len(P) >= 3 else float("nan"),
+-                     "ends": [_end_circle(P, 0), _end_circle(P, 1)] if len(P) >= 3 else [(None, float("nan"))] * 2})
++                     "ft_ends": [_end_fit_ft(P, 0, circles, chains, r_ticks, scale, min_ft),
++                                 _end_fit_ft(P, 1, circles, chains, r_ticks, scale, min_ft)]
++                     if len(P) >= 3 else [(None, None, float("nan"), False)] * 2})
+     uf = list(range(n))
+ 
+     def find(x):
+@@ -655,18 +816,33 @@ def chain_curve_paths(raws, bridge=0.0):
+                         ri, rj = info[i]["radius"], info[j]["radius"]
+                         if not (math.isfinite(ri) and math.isfinite(rj)) or abs(ri - rj) > STITCH_RADIUS_FRAC * max(ri, rj):
+                             continue
++                        hi = info[i]["h0"] if ei == 0 else info[i]["h1"]
++                        hj = info[j]["h0"] if ej == 0 else info[j]["h1"]
+                     else:
+-                        ci, ri = info[i]["ends"][ei]
+-                        cj, rj = info[j]["ends"][ej]
++                        hi, ci, ri, swapped_i = info[i]["ft_ends"][ei]
++                        hj, cj, rj, swapped_j = info[j]["ft_ends"][ej]
++                        if not (swapped_i or swapped_j):
++                            continue  # loop10 leg A: a wide join needs evidence THIS end sits against a
++                            # real junction sliver, not just that some other curve fragment happens to be
++                            # a bridge-reach away with a matching radius -- see _end_fit_ft's own docstring
++                            # (Presidio's own R~183 ft curve, drawn as many short separate PDF paths a few
++                            # pt apart, would otherwise string together under the same bridge and shift
++                            # which drawn piece 3 unrelated inline labels matched)
+                         if not (math.isfinite(ri) and math.isfinite(rj)) or abs(ri - rj) > STITCH_RADIUS_FRAC * max(ri, rj):
+-                            continue  # the curvature AT this end, not the raw path's overall (possibly
+-                            # compound) fit -- see _end_circle
++                            continue  # the curvature AT this end (junction-sliver-aware), not the raw
++                            # path's overall (possibly compound) fit -- see _end_fit_ft
+                         on_i = ci is None or abs(float(np.hypot(*(pj - ci))) - ri) < STITCH_ON_CIRCLE
+                         on_j = cj is None or abs(float(np.hypot(*(pi - cj))) - rj) < STITCH_ON_CIRCLE
+-                        if not (on_i and on_j):
++                        # loop10 leg A: OR, not AND -- a junction-sliver-adjacent end's own fitted circle
++                        # can be a hair off extrapolating ACROSS the very sliver it's next to (Presidio's
++                        # p104/p97: the far path's start missed the near circle by 2.4 pt this way) even
++                        # though the near path's start lands on the FAR circle within 0.03 pt; the far
++                        # circle -- built from the piece not touching the sliver -- is the more reliable
++                        # one, and only one of the two needs to hold for this to be the same arc through
++                        # the gap, not evidence it isn't (radius agreement and tangent agreement, both
++                        # still required above/below, are what rules out an unrelated similar curve)
++                        if not (on_i or on_j):
+                             continue
+-                    hi = info[i]["h0"] if ei == 0 else info[i]["h1"]
+-                    hj = info[j]["h0"] if ej == 0 else info[j]["h1"]
+                     # one path arrives where the other leaves (ei=1,ej=0 or ei=0,ej=1): headings must
+                     # point the SAME way through the join; two paths meeting end-to-end or start-to-start
+                     # are drawn in opposite directions, so one heading must be reversed to compare
+@@ -1059,9 +1235,13 @@ def build_pool(page, blocks):
+     what the checker actually saw."""
+     chains, circles, paths, segs = sheet_lines(page, blocks)
+     glyph_h_med = float(np.median([b["glyph_h"] for b in blocks])) if blocks else 6.0
++    scale = json.loads((OUT / "georef.json").read_text())["scale_ft_per_pt"] if (OUT / "georef.json").exists() else 1.0
+     # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers; a drawn curve runs
+     # through several record arcs, so it is cut where lines meet it and at vertex circles
+     junction_lines = [c for c in chains if c["len_pt"] >= 9]
++    end_tol = max(2.0, 0.5 * glyph_h_med)  # loop10 leg A rule 2: a junction line whose end stops just
++    # short of the curve (not the flat 2 pt split_at used to require) still cuts it, scaled to how coarse
++    # this sheet's own text -- and so its line ends -- actually sit
+     # radial ticks mark a record-arc boundary on the thin alignment curves same as tables.py (loop2 leg C:
+     # neither branch below used to pass ticks to split_at, so a curve with no line/circle at the boundary
+     # -- most of them -- was never cut there at all); kept with their own direction so split_at can tell
+@@ -1100,14 +1280,18 @@ def build_pool(page, blocks):
+                 for c in lines_on_sheet(segs, circles, max_turn_deg=20.0) if c["n"] >= 3 and c["len_pt"] > 12]
+     # leg9A attempt 2: tried a 6-glyph-height bridge (join across a wipeout/crossing-leader gap, gated
+     # on end tangent + radius + the far point landing on the near arc's own fitted circle -- see
+-    # chain_curve_paths). Measured, not kept: C21's own nearest candidate at that reach (10.65 pt away)
+-    # fails all three gates at once (tangent off 8.4 deg, radius off 9.3%, on-circle residual 2.4 pt) --
+-    # a genuinely different curve, not C21 obscured by a wipeout -- so the bridge gains C21 nothing, and
+-    # it cost a real regression elsewhere: r10434_3's C33 (radius pass at 2884' record / 2879.66' measured,
+-    # -0.15%) re-parents under the wider reach to a piece measuring 2925.48' (+1.44%), crossing tables.py's
+-    # 1% RADIUS_TOL and losing a pass. Bridge back to 0 (the original, proven-safe tight join only); the
+-    # widened form stays in chain_curve_paths (bridge=<pt>) for the record and for re-measuring later.
+-    curve_groups = chain_curve_paths(bez_raw + poly_raw, bridge=0.0)
++    # chain_curve_paths). Measured, not kept AT THE TIME: C21's own nearest candidate at that reach
++    # (10.65 pt away, the C9/C10 fillet junction) failed all three gates at once (tangent off 8.4 deg,
++    # radius off 9.3%, on-circle residual 2.4 pt) -- because the end fit was reading straight off an
++    # 86.86 ft junction sliver (fit R 295), not the 1382 ft arc sitting right behind it. Bridge back to 0.
++    # Loop10 leg A: the end fit (_end_fit_ft) is now split_at-aware, letting p104 join p97 across that
++    # same 10.65 pt gap -- but reusing the SAME 6-glyph-height reach (~47 pt here) to do it re-merged
++    # several OTHER, unrelated curve pairs on this sheet too (7 stitched parents from 14 paths -> 4 from
++    # 18; presidio lost 3 previously-passing inline arc-length labels and gained a new FAIL; r10434_3's
++    # C33 regressed exactly as leg9A attempt 2 warned). STITCH_BRIDGE stays close to the one gap this leg
++    # actually needs to close (10.65 pt) plus headroom, not the far wider reach a text wipeout would need.
++    curve_groups = chain_curve_paths(bez_raw + poly_raw, bridge=STITCH_BRIDGE,
++                                      circles=circles, chains=junction_lines, ticks=ticks, scale=scale)
+     stitch_merges = sum(1 for g in curve_groups if g["n_merged"] > 1)
+     stitch_paths = sum(g["n_merged"] for g in curve_groups if g["n_merged"] > 1)
+     parent_id = itertools.count()
+@@ -1122,7 +1306,7 @@ def build_pool(page, blocks):
+         if merged or g["source"] == "bezier":
+             arcs.append({"pts": g["pts"], "len_pt": float(np.sum(np.hypot(*np.diff(g["pts"], axis=0).T))),
+                          "radius_pt": radius_pt, "width": g["width"], "parent": parent})  # the whole, unsplit: no "seq" (never itself part of a sum-group)
+-        pieces = split_at(g["pts"], circles, junction_lines, ticks=ticks if g["ticks_ok"] else ())
++        pieces = split_at(g["pts"], circles, junction_lines, ticks=ticks if g["ticks_ok"] else (), end_tol=end_tol, glyph_h=glyph_h_med)
+         # a merged group, like a polyline curve always did, is checkable piece by piece even where
+         # split_at found no internal cut at all (a single-piece "run of 1"); an untouched bezier path
+         # keeps its old rule -- only add pieces when it's actually cut, since its whole entry above
+@@ -1162,7 +1346,7 @@ def build_pool(page, blocks):
+         if len(t["pts"]) < 3:
+             continue
+         parent = next(parent_id)
+-        for i, P in enumerate(split_at(t["pts"], circles, junction_lines)):
++        for i, P in enumerate(split_at(t["pts"], circles, junction_lines, end_tol=end_tol, glyph_h=glyph_h_med)):
+             L = float(np.sum(np.hypot(*np.diff(P, axis=0).T)))
+             if L <= dash_floor:
+                 continue
