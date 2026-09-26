@@ -148,6 +148,49 @@ def score(out_dir):
     return {"per_kind": by_kind, "fail_breakdown": fails, "unsure": unsure}
 
 
+def _same_line(a, b, tol=3.0):
+    """Two measured lines (two endpoints each, PDF pt) are the same when both ends agree within tol, either order."""
+    import math
+    d = lambda p, q: math.hypot(p[0] - q[0], p[1] - q[1])
+    return (d(a[0], b[0]) <= tol and d(a[-1], b[-1]) <= tol) or (d(a[0], b[-1]) <= tol and d(a[-1], b[0]) <= tol)
+
+
+def current(run_out, gold_dir=Path(__file__).parent / "gold", manifest=Path(__file__).parent / "out_gold" / "presidio" / "_manifest.json"):
+    """Score a CURRENT run (run_out = the dir holding labels.json / tags_checks.csv) against the gold set, so the
+    bench tracks precision as code changes. Labels rejoin by (kind, region); tags by (tag, check).
+    right  = passes now on the line the gold set says is correct
+    wrong  = passes now on a line the gold set says is wrong, or on a different line than the keyed correct one
+    unkeyed = passes now with no gold entry, or keyed unsure: look at these before trusting a gain."""
+    import csv
+    gold = {g["id"]: g for g in json.loads((Path(gold_dir) / "presidio_assoc.json").read_text(encoding="utf-8"))}
+    man = {(m["kind"], tuple(m["region"])): m for m in json.loads(Path(manifest).read_text(encoding="utf-8")) if m.get("region") and m["id"].startswith("label:")}
+    right = wrong = unkeyed = 0
+    for lab in json.loads((Path(run_out) / "labels.json").read_text(encoding="utf-8")):
+        if not lab.get("ok"):
+            continue
+        m = man.get((lab["kind"], tuple(lab["region"])))
+        g = gold.get(m["id"]) if m else None
+        if g is None or str(g["correct_line"]) == "unsure":
+            unkeyed += 1
+        elif str(g["correct_line"]).lower() == "true" and m.get("line") and _same_line(lab["line"], m["line"]):
+            right += 1
+        elif str(g["correct_line"]).lower() == "false" and m.get("line") and not _same_line(lab["line"], m["line"]):
+            unkeyed += 1  # moved off the keyed wrong line: new line not keyed yet
+        else:
+            wrong += 1
+    for r in csv.DictReader(open(Path(run_out) / "tags_checks.csv", encoding="utf-8")):
+        if not r["result"].startswith("pass"):
+            continue
+        g = gold.get(f"tag:{r['tag']}:{r['check']}")
+        if g is None or str(g["correct_line"]) == "unsure":
+            unkeyed += 1
+        elif str(g["correct_line"]).lower() == "true":
+            right += 1
+        else:
+            wrong += 1
+    return {"right": right, "wrong": wrong, "unkeyed": unkeyed}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("cmd", nargs="?", default="render", choices=["render", "score"])

@@ -49,7 +49,10 @@ PARCELS_COLS = ["faces", "faces_named"]
 TRAVERSE_COLS = ["chains", "closed"]
 TABLES_COLS = ["table_rows", "rows_clean"]
 READ_COLS = ["frame", "blocks_read", "bearings_parsed", "distances_parsed"]
-FIELDS = ["label", "sheet", "distance", "bearing", "arc length", "exceptions", "wrong_line", "no_line", "secs"] + TAGS_COLS + PARCELS_COLS + TRAVERSE_COLS + TABLES_COLS + READ_COLS
+# coverage: distance+bearing passes over every parsed distance/bearing token (a rate over checked values alone
+# rises when labels are queued); gold: presidio passes scored against spike/gold (right/wrong/unkeyed)
+QUALITY_COLS = ["coverage", "gold"]
+FIELDS = ["label", "sheet", "distance", "bearing", "arc length", "exceptions", "wrong_line", "no_line", "secs"] + TAGS_COLS + PARCELS_COLS + TRAVERSE_COLS + TABLES_COLS + READ_COLS + QUALITY_COLS
 
 
 def env_for(pdf):
@@ -231,6 +234,16 @@ def run(key, steps):
     if "traverse" in steps:
         res.update(traverse_cols(pdf))
     res.update(tables)
+    try:
+        passes = sum(int(str(res[k]).split("/")[0]) for k in ("distance", "bearing"))
+        parsed = int(res.get("distances_parsed") or 0) + int(res.get("bearings_parsed") or 0)
+        res["coverage"] = f"{passes}/{parsed}" if parsed else ""
+    except (ValueError, KeyError):
+        res["coverage"] = ""
+    if key == "presidio" and "tags" in steps:
+        import gold_assoc
+        g = gold_assoc.current(o)
+        res["gold"] = f"{g['right']}/{g['wrong']}/{g['unkeyed']}"
     res["secs"] = round(time.time() - t)  # includes any optional steps
     return res
 
@@ -249,8 +262,12 @@ def main():
     f = OUT / "bench.csv"
     if f.exists():
         existing_header = next(csv.reader(open(f, encoding="utf-8")), [])
-        if existing_header != FIELDS:
-            f.rename(OUT / "bench_old.csv")
+        if existing_header != FIELDS:  # migrate in place: old rows keep their values, new columns blank
+            old = list(csv.DictReader(open(f, encoding="utf-8")))
+            with open(f, "w", newline="", encoding="utf-8") as fh:
+                w = csv.DictWriter(fh, fieldnames=FIELDS, extrasaction="ignore")
+                w.writeheader()
+                w.writerows(old)
     new = not f.exists()
     with open(f, "a", newline="", encoding="utf-8") as fh:
         w = csv.DictWriter(fh, fieldnames=FIELDS)
