@@ -3,7 +3,36 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-26 04:40 after loop 11; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-26 13:00 after loop 12, the review legs; plan and status in `spike/LOOP.md`)
+
+**Loop 12 (review gaps 1-4, five sonnet legs, four in parallel).** Pushed `caltrans-spike` to 2b3b4a4 first; loop 12 commits
+1841651..66618a6 are local. Bench row `legE` is the baseline now.
+- **Perf:** `demo.py --fast` 245 s -> 160 s cold (checks 64 -> 28 s, tables 66 -> 4 s): vectorised `dashes.estimate_reach`,
+  disk cache of `checks.build_pool` keyed on inputs and every spike/*.py. Outputs byte-identical.
+- **Gold set:** `spike/gold/presidio_assoc.json`, all 155 checked labels on Presidio keyed by crop. Pass precision 132/132
+  (no luck passes on this sheet); fails 9 wrong-line, 13 real, 1 unsure. Bench column `gold` = right/wrong/unkeyed from the
+  current run; column `coverage` = distance+bearing passes over parsed tokens (Presidio 82/307).
+- **Record self-checks** (`record_checks.py`, in demo): alignment coordinate tables land on the fit at median 0.02-0.07 ft
+  (independent of the callouts; not better control); L=R*Delta holds on all 68 curve rows; found a drafting error on the
+  record (R-10434.1 row L prints northing 2,21,919.67) and a table-reader bug (R-10434.3 L34-L45 lost DISTANCE; fixed in
+  `read_shx.build_tables`, tags 26 -> 31 passes). No chord columns printed; tangency check found no simple joins.
+- **Matchline** (`matchline.py`): proven same-line pairs across sheets agree to <= 0.17 ft; R-10741.2/.3 12 shared labels,
+  median 0.19 ft. R-10741.1/.2 share no line. The ROADMAP Q&A claim is now measured.
+- **Ground check** (`lidar/ground_check.py`): none of the six sheets draws buildings, walls or pavement edges; deck vs drawn
+  corridor is a width, not a tie. The 0.668 m epoch shift cannot be tested from these sheets.
+- Noise: `EPOCH 1991.35` no longer checked as a distance.
+
+Do this, in order:
+
+1. Demo prep: slides, Q&A sheet (add matchline and record-error findings), recorded fallback; two rehearsals; freeze 10-03.
+2. Gold set on a second sheet (R-10434.3, busiest) before quoting precision beyond Presidio.
+3. Epoch shift on the ground needs a tie the LiDAR sees: NGS marks on hard surface, or a sheet that draws structures.
+4. Carried: gap-tile highway surface; C21 scoped fix; scan text-line detection (SAM unconfirmed); north row segmentation;
+   R-71.70 1.29 deg; exceptions_page.crop hides the measured line when it is > 190 pt from the label (7 Presidio crops).
+
+## Next as of loop 11 (2026-09-26 04:40), kept for the record
+
+### Next (logged 2026-09-26 04:40 after loop 11; plan and status in `spike/LOOP.md`)
 
 **Session close 2026-09-26 04:50.** Loops 3-11 committed on `caltrans-spike` (cd8b498..0fd9117, 66 commits), nothing pushed.
 Status page version 13; field guide `docs/record-twin-how-it-works.html`. Memory index for the session:

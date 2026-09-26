@@ -338,3 +338,21 @@ touched; the gate is these areas, the pavement-outside-R/W number (the encroachm
 | A | pass on the renders and the areas; demo timing gate missed (pre-existing) | 1 | Class audit: ground is class 2 on every tile, class 17 present on every tile (gap 0.15 %); the 'different ground class' hypothesis was wrong, the gap tile's problem was fragmentation under the 400 m2 floor. Deck by height above DTM: +45 m2 inside R/W on Presidio, +91 on .3 (class 17 already covers the structure; growth fills parapet and joint holes). Gap-tile pavement 0 -> 2,176 m2. Highway surface per tile (south structure 33,988 / at grade 146,620; north at grade 7,418; gap tile not written, open). Pavement outside R/W within 15 m unchanged (9,606). Renders viewed: the west viaduct and Doyle Drive read as one purple stripe, the at-grade corridor continuous across the seam; the blank middle is the Battery tunnels, now drawn record-only. `demo.py --fast` 245 s (checks 64 + tags 51 + tables 66 s), over the 180 s gate; a regression from loops 8-9, not this leg. objects.py crash on queued entries fixed by the orchestrator | leg11A |
 
 Dispatches used: 1 of 16. Started 03:30, closed 04:40 PDT.
+
+
+---
+
+# Loop 12: review gaps 1-4 (2026-09-26 11:30-13:00 PDT, JR: "push the commits then do 1-4 ... in parallel with sonnet subagents")
+
+Isolation: leg A owned spike/out and the bench; legs B-D read a frozen snapshot of spike/out and wrote new files only.
+
+| leg | work | gate (re-measured by orchestrator) | result | commit |
+|---|---|---|---|---|
+| A | demo perf | < 180 s, outputs identical, bench = loop9-final | 150 s, byte-identical; perfA = loop9-final except R-10741.2 faces 38 -> 37, already in the pre-leg snapshot. Orchestrator added source files to the cache key | f958217 |
+| B | gold association set, Presidio | every crop keyed; 3 random pass crops re-viewed | 155 keyed; pass precision 132/132; fails 9 wrong-line / 13 real / 1 unsure | 1841651 |
+| C | alignment tables + record self-checks | crops of every failing self-check viewed | residual median 0.02-0.07 ft; 0/68 L=R*Delta fails; record drafting error (agent called it a misread; the crop shows the sheet prints it); R-10434.3 DISTANCE loss | 1841651 |
+| D | matchline + ground check | proven pairs only (first pass paired different lines: sent back) | <= 0.17 ft on proven pairs, labels 0.19 ft median; no drawn buildings on any sheet; epoch untestable | 1841651 |
+| - | bench `coverage`, `gold` columns; in-place header migration | smoke row | Presidio 82/307, gold 132/0/0 | d55ce90 |
+| E | table reader root cause, EPOCH noise, self-checks in demo | per-label pass diff, gold wrong = 0, demo < 180 s | R-10434.3 tags 26 -> 31 pass, nothing lost; demo 160 s cold | 66618a6 |
+
+Dispatches: 6 (A, B, C, D, D-retry, E), all sonnet. Lessons: a subagent's "all columns match" and "only one PDF on disk" were both wrong; re-measure. A disk cache keyed on inputs only would have broken the diagnostic-pool rule on the next code edit.
