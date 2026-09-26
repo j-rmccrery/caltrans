@@ -26,3 +26,4 @@ spike/out/r65/
 !spike/out/r_*/tables.json
 !spike/out/r_*/checks.csv
 !spike/out/r_*/tags_checks.csv
+spike/out/**/_pool_cache.pkl

@@ -166,36 +166,53 @@ def estimate_reach(dashes):
     wide-pitched run is still found); 1.5x the median of those gaps, floored at REACH_FLOOR. Presidio's
     rw_EASE strokes run close to end to end (median gap ~3 pt) and floor here, unchanged from the old
     constant; this drafter's RW-PARCEL-SEG dashes run a wider, sparser pitch (median ~31 pt) and need
-    the wider reach to chain into one run instead of fragments."""
+    the wider reach to chain into one run instead of fragments.
+    Vectorised (loop11 perf fix): the per-end Python loop over every candidate in the 4xREACH_FLOOR
+    ball was O(n * neighbours) at Python speed -- 44s alone on Presidio's ~8000-stroke dash-dot net
+    (collect_dashdot casts a much wider layer net than collect_dashes' ~350). Same geometry, computed
+    with one query_pairs() call plus numpy array ops instead of a per-point query_ball_point loop with
+    a per-candidate Python inner loop; verified bit-identical against the original on both dash sets."""
     if len(dashes) < 2:
         return REACH_FLOOR
-    ends = np.array([q for a, b in dashes for q in (a, b)])
+    n = len(dashes)
+    A = np.array([a for a, b in dashes])
+    B = np.array([b for a, b in dashes])
+    d = B - A
+    norm = np.maximum(np.hypot(d[:, 0], d[:, 1]), 1e-9)
+    unit = d / norm[:, None]
+    ends = np.empty((2 * n, 2))
+    ends[0::2], ends[1::2] = A, B
+    dirs = np.empty((2 * n, 2))
+    dirs[0::2], dirs[1::2] = -unit, unit  # cur_dir at the a-end (walking backward) / b-end (forward)
+    owner = np.repeat(np.arange(n), 2)  # which dash each end belongs to
+    farpts = ends[np.arange(2 * n) ^ 1]  # the OTHER end of the same dash as this end (pairs are (2k, 2k+1))
     tree = cKDTree(ends)
-    idx = [(k, e) for k in range(len(dashes)) for e in (0, 1)]
-    gaps = []
-    for k, (a, b) in enumerate(dashes):
-        d = (b - a) / max(np.hypot(*(b - a)), 1e-9)
-        for start, direction in ((a, -1), (b, 1)):
-            cur_dir = d * direction
-            best = None
-            for j in tree.query_ball_point(start, 4 * REACH_FLOOR):
-                k2, e2 = idx[j]
-                if k2 == k:
-                    continue
-                a2, b2 = dashes[k2]
-                near, far = (a2, b2) if e2 == 0 else (b2, a2)
-                v = near - start
-                along, side = v @ cur_dir, abs(v @ np.array([-cur_dir[1], cur_dir[0]]))
-                if along <= 0.1 or side > SIDE_TOL:
-                    continue
-                dl = (far - near) / max(np.hypot(*(far - near)), 1e-9)
-                if dl @ cur_dir < math.cos(math.radians(TURN_DEG)):
-                    continue
-                if best is None or along < best:
-                    best = along
-            if best is not None:
-                gaps.append(best)
-    return max(1.5 * float(np.median(gaps)), REACH_FLOOR) if gaps else REACH_FLOOR
+    pairs = tree.query_pairs(4 * REACH_FLOOR, output_type="ndarray")
+    if len(pairs) == 0:
+        return REACH_FLOOR
+    I = np.concatenate([pairs[:, 0], pairs[:, 1]])  # bidirectional: each candidate considered from both ends
+    J = np.concatenate([pairs[:, 1], pairs[:, 0]])
+    keep = owner[I] != owner[J]  # never a dash's own other end (same as the original's k2 == k skip)
+    I, J = I[keep], J[keep]
+    if len(I) == 0:
+        return REACH_FLOOR
+    start, near, cur_dir, far = ends[I], ends[J], dirs[I], farpts[J]
+    v = near - start
+    along = (v * cur_dir).sum(1)
+    perp = np.stack([-cur_dir[:, 1], cur_dir[:, 0]], axis=1)
+    side = np.abs((v * perp).sum(1))
+    dl_raw = far - near
+    dl = dl_raw / np.maximum(np.hypot(dl_raw[:, 0], dl_raw[:, 1]), 1e-9)[:, None]
+    turn = (dl * cur_dir).sum(1)
+    valid = (along > 0.1) & (side <= SIDE_TOL) & (turn >= math.cos(math.radians(TURN_DEG)))
+    I, along = I[valid], along[valid]
+    if len(I) == 0:
+        return REACH_FLOOR
+    order = np.argsort(I, kind="stable")
+    I_s, along_s = I[order], along[order]
+    uniq, first_idx = np.unique(I_s, return_index=True)  # min "along" per start point (best), same as the original's per-point best
+    gaps = np.minimum.reduceat(along_s, first_idx)
+    return max(1.5 * float(np.median(gaps)), REACH_FLOOR) if len(gaps) else REACH_FLOOR
 
 
 def circle_fit(P):

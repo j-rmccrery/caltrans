@@ -10,10 +10,12 @@ the exception queue is driven by geometry, which is the point.
 usage: [SHEET=<pdf>] python spike/checks.py   ->  spike/out[/<sheet>]/checks.csv, exceptions.json
 """
 import csv
+import hashlib
 import itertools
 import json
 import math
 import os
+import pickle
 import re
 import sys
 from pathlib import Path
@@ -1051,12 +1053,54 @@ def parent_window(arcs, seed, want, scale):
     return None
 
 
+def _pool_cache_key(blocks):
+    """Cache identity for build_pool's (page, blocks): the PDF's own path + mtime (the page content) plus
+    the exact blocks list and the ASSOC diagnostic flags, which are the only things build_pool's result
+    can depend on. Hashed with hashlib (not the builtin hash()), which is salted per-process and would
+    never agree between checks.py's and tables.py's separate interpreters."""
+    h = hashlib.sha256()
+    h.update(str(PDF).encode())
+    h.update(str(PDF.stat().st_mtime_ns).encode())
+    h.update(json.dumps(blocks, sort_keys=True, default=str).encode())
+    h.update(",".join(sorted(ASSOC)).encode())
+    for src in sorted(Path(__file__).parent.glob("*.py")):  # any code edit invalidates: a stale pool must never
+        h.update(src.read_bytes())                           # outlive the code that built it
+    return h.hexdigest()
+
+
+POOL_CACHE_FILE = "_pool_cache.pkl"
+
+
 def build_pool(page, blocks):
     """Every candidate a label can be checked against: straight-line chains (split at junctions/circles),
     curved-piece arcs (bezier/polyline curves and dashed trains, split the same way), leader tips, the
     furniture/NTS mask regions. Shared by main() and by any crop/report tool that needs the identical
     pool checks.py itself measured against (leg6A_crops.py), so a diagnostic never silently drifts from
-    what the checker actually saw."""
+    what the checker actually saw.
+    Loop11 perf fix: checks.py and tables.py both call this with the identical (PDF, blocks) -- curve
+    stitching, dash-dot chaining and every split_at cut redone from scratch a second time, ~all of
+    tables.py's own runtime. Cached to disk (OUT/_pool_cache.pkl) keyed on _pool_cache_key; a stale,
+    missing or unreadable cache just recomputes, so nothing is ever trusted unread."""
+    key = _pool_cache_key(blocks)
+    cache_path = OUT / POOL_CACHE_FILE
+    if cache_path.exists():
+        try:
+            with open(cache_path, "rb") as f:
+                cached_key, cached_pool = pickle.load(f)
+            if cached_key == key:
+                return cached_pool
+        except Exception:
+            pass  # any read/unpickle problem: fall through and recompute, same as a cold cache
+    pool = _build_pool_uncached(page, blocks)
+    try:
+        with open(cache_path, "wb") as f:
+            pickle.dump((key, pool), f)
+    except OSError:
+        pass
+    return pool
+
+
+def _build_pool_uncached(page, blocks):
     chains, circles, paths, segs = sheet_lines(page, blocks)
     glyph_h_med = float(np.median([b["glyph_h"] for b in blocks])) if blocks else 6.0
     # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers; a drawn curve runs
