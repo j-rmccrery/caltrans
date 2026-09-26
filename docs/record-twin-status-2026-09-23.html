@@ -111,15 +111,19 @@ ol.steps li p{margin:4px 0 0;font-size:14.5px;color:var(--ink2)}
   <div class="tb-meta">
     <b>Date</b><span>2026-09-23</span>
     <b>Demo</b><span>2026-10-05, 25 min live</span>
-    <b>Branch</b><span>caltrans-spike, loop 11 (2026-09-26 04:40)</span>
+    <b>Branch</b><span>caltrans-spike, loop 13 (2026-09-26 15:15)</span>
     <b>Demo sheet</b><span>R-10434.2, Presidio, SF-101</span>
     <b>Test set</b><span>R-10434.1/.2/.3 (Presidio tile) + R-10741.1/.2/.3 (Marin tile) + gap tile (3DEP 2018) · bench also R-71.71, R-10258.1, R-71.70 · 1969 R-65.1..4</span>
-    <b>Run</b><span>python spike/demo.py --fast · 245 s (regressed, see next steps) · --six 923 s</span>
+    <b>Run</b><span>python spike/demo.py --fast · 177 s cold (gate 180 s) · --six 923 s</span>
   </div>
 </header>
 
 <div class="stats">
   <div class="stat"><div class="n">83%</div><div class="l">printed distances that match the drawn line</div><div class="d">41/49 on R-10434.2 · was 44%</div></div>
+  <div class="stat"><div class="n">0 wrong</div><div class="l">passes on the wrong line, every pass keyed by eye</div><div class="d">R-10434.2 134 right · R-10434.3 152 right · 1 unsure</div></div>
+  <div class="stat"><div class="n">58%</div><div class="l">of drawing labels a check can address, checked and passing</div><div class="d">98/170 on R-10434.2 · 115/246 on R-10434.3</div></div>
+  <div class="stat"><div class="n">0.17 ft</div><div class="l">worst offset where adjacent sheets draw the same line</div><div class="d">fitted independently · shared labels 0.19 ft median</div></div>
+  <div class="stat"><div class="n">1</div><div class="l">drafting error found in the record itself</div><div class="d">R-10434.1 alignment row L prints northing 2,21,919.67</div></div>
   <div class="stat"><div class="n">0.04 ft</div><div class="l">georeferencing RMS, 18 of 19 control points</div><div class="d">no hand-typed coordinates</div></div>
   <div class="stat"><div class="n">44/44</div><div class="l">table rows read clean from the CAD text</div><div class="d">111/111 keyed cells match</div></div>
   <div class="stat"><div class="n">1</div><div class="l">figure closed by traverse from the printed record</div><div class="d">5 edges · misfit 0.14 ft · area +0.06%</div></div>
@@ -144,6 +148,8 @@ ol.steps li p{margin:4px 0 0;font-size:14.5px;color:var(--ink2)}
 <p>A tenth, short loop traced C21 by eye with the checker's own candidate pool drawn on the sheet. It is all there: a tangent, then five pieces of one thin line across the C9/C10 fillet (255.91 + 193.93 + 86.86 + 278.14 + 62.04 = 876.88 ft), ending where three straight lines start along the curve's tangent, a point of tangency. Two rules stop the checker from seeing that: the join across the fillet compares a blended whole-piece radius (2.8 % off), and there is no point-of-tangency cut. Both fixes were tried and rejected on the no-loss gate, with numbers: radius fits on 40 ft windows swing from 1535 to 1382 ft at this sheet's two-decimal precision (100 ft is the floor), and a sheet-wide tangency cut fragments other curves and costs three passes elsewhere. The diff is kept; the scoped version is the next step. Nothing shipped; the loop 9 numbers stand.</p>
 <p>An eleventh loop answered a question about the screen: why the purple road surface stops abruptly. Purple was the LiDAR vendor's bridge-deck class alone; it ends where the road leaves the structure, at the Battery tunnels (no return at all), where the class thins at parapets and joints, and on the 2018 3DEP tile, whose pavement came out as 190 fragments under the polygon floor. The class audit found ground on class 2 and deck on class 17 on every tile, so the fix was geometry and assembly, not classes: deck now grows from class-17 seeds into dark, flat cells two metres above the ground DTM; fragmented tiles get a wider closing; and one highway surface per tile dissolves pavement and deck inside the right-of-way faces, marked structure or at grade. The tunnel easements are drawn as record only, below ground. Gains in area are small and honest; the continuity on the screen comes from the union. Found on the way: the one-command demo has slipped to 245 s after the curve work of loops 8 and 9, the first item on the list.</p>
 
+<p>Loops twelve and thirteen (09-26, midday and afternoon) came from a review of what the earlier loops could not see, and the answer was mostly measurement. First, <b>is a pass on the right line?</b> Every checked label on two sheets was keyed by eye from a crop: on R-10434.2 and R-10434.3, 286 passes are on the line the drafter meant and none are on a wrong one, with one left unsure; the luck passes found by eye in earlier loops do not recur. Second, <b>what share of the drawing is checked?</b> Every value-shaped token on the three Presidio sheets now has a named fate (a table cell, a note, an area, a radial, a pass, a fail, a queue reason); none drops silently. Over the labels a check could address, 98 of 170 pass on R-10434.2, 60 of 168 on R-10434.1 and 115 of 246 on R-10434.3; that is the honest coverage figure and it is on the bench now. Third, <b>independent checks</b>: Caltrans' printed alignment coordinates land on the fit at 0.02 to 0.07 ft; L = R&middot;&Delta; holds on all 68 curve rows; adjacent sheets, each fitted from its own callouts, draw the same line within 0.17 ft. Those checks found a drafting error in the record itself (R-10434.1, alignment row L, northing printed 2,21,919.67) and a reader bug that had dropped twelve distances from an R-10434.3 table (fixed). Coverage work then resolved tags with an unread glyph from the CAD text or from the one table row that passes its own check, and checked bare (T) run totals with the printed bearing required on the run: 16 new passes, none lost, every new crop viewed (one wrong-line pass was caught that way and the rule tightened). The demo run is back under its gate at 177 s cold. What could not be shown: none of the six sheets draws buildings or pavement edges, so the 0.668 m epoch shift cannot be tested on the ground from these sheets.</p>
+
 <div class="tl">
   <div class="past"><div class="d">09-09 to 09-21</div><div class="t">Spikes</div>Text from strokes, OCR, georef from callouts and grid ticks, LiDAR Q1–Q5, scan census. 8 of 11 CAD sheets georeference.</div>
   <div class="past"><div class="d">09-22</div><div class="t">Plan reset</div>Association is the wall. Product = the numbers walked as a traverse. Scans = QA story, not input. 13-day roadmap.</div>
@@ -159,7 +165,9 @@ ol.steps li p{margin:4px 0 0;font-size:14.5px;color:var(--ink2)}
   <div class="past"><div class="d">09-25 17:40–20:15</div><div class="t">Loop 9</div>Curve paths stitched into one parent; dash-dot trains; consecutive table rows as a run (C15 passes); C21 measured, not fixed; bench row loop9-final.</div>
   <div class="past"><div class="d">09-26 00:40–03:10</div><div class="t">Loop 10</div>C21 traced by eye: whole on the sheet, five pieces to a point of tangency; two fixes measured and rejected; nothing shipped.</div>
   <div class="past"><div class="d">09-26 03:30–04:40</div><div class="t">Loop 11</div>The road as one surface: class audit per tile, deck by height above ground, gap-tile pavement, tunnels record-only; demo --fast regressed to 245 s.</div>
-  <div class="now"><div class="d">09-23 now</div><div class="t">Day 13</div>Slides, Q&amp;A sheet, recording not started. Remaining arc misses need a run-sum against a neighbour tag.</div>
+  <div class="past"><div class="d">09-26 11:30–13:00</div><div class="t">Loop 12</div>Review gaps: demo 245 to 160 s; gold set on R-10434.2 (132/132 right); alignment tables and L = R&middot;&Delta; as self-checks (a record error found); matchlines within 0.17 ft; table reader fixed.</div>
+  <div class="past"><div class="d">09-26 13:00–15:15</div><div class="t">Loop 13</div>Gold set on R-10434.3 (0 wrong); every token attributed, honest coverage on the bench; unread tags resolved by the record, (T) totals checked: +16 passes, 0 lost.</div>
+  <div class="now"><div class="d">09-26 now</div><div class="t">Demo prep</div>Slides, Q&amp;A sheet and recording not started. Freeze 10-03.</div>
   <div class="next"><div class="d">to 10-05</div><div class="t">Freeze, rehearse</div>Fallback recording. Two rehearsals. Freeze by 10-03.</div>
 </div>
 
@@ -365,12 +373,13 @@ geometry: Point [-122.46557, 37.80025]</code></pre></div>
 
 <!-- ============================================================ -->
 <h2>Accuracy on the nine-sheet bench (six-sheet baseline)</h2>
+<p><b>Updated 09-26 15:15:</b> the six baseline rows below are bench row <code>legH2</code>, re-measured after loop 13. The prose that follows describes loop 3 and is kept for the record.</p>
 <p>Six sheets, two LiDAR tiles: three Presidio vector sheets by one drafter (R-10434.1/.2/.3, 2020) and three on the Marin approach of the Golden Gate Bridge by another (R-10741.1/.2/.3, 2017, Route 101, no SHX annotations, read by OCR). Every number re-measured by <code>spike/bench.py loop3-final</code> on 09-23 at 20:05, not from memory; the row was written twice and matched. R-10434.1 and .3 move from the loop 2 prose (25/32, 41/70 distance passes) to 26/37, 42/70 here because those loop 2 rows were measured on stale sibling state, fixed in loop 3 leg 3; Presidio is unchanged. "Pass" means the printed value agrees with the drawn geometry under the fit: distances to a few hundredths of a foot, bearings to under a minute, on both tiles.</p>
 <div class="tw"><table>
 <tr><th>Sheet</th><th>Tile</th><th class="num">Blocks read</th><th class="num">Distance</th><th class="num">Bearing</th><th class="num">Arc</th><th class="num">Wrong-line</th><th class="num">Georef RMS</th><th class="num">vs package</th></tr>
-<tr><td>R-10434.2 (Presidio)</td><td>South</td><td class="num">831/831</td><td class="num">41/49</td><td class="num">41/43</td><td class="num">16/19</td><td class="num">12</td><td class="num">0.04 ft</td><td class="num">~0.6&ndash;1.1 ft</td></tr>
-<tr><td>R-10434.1</td><td>South</td><td class="num">721/721</td><td class="num">26/37</td><td class="num">21/23</td><td class="num">12/24</td><td class="num">21</td><td class="num">0.02 ft</td><td class="num">n/m</td></tr>
-<tr><td>R-10434.3</td><td>South + gap</td><td class="num">1403/1403</td><td class="num">42/59</td><td class="num">41/42</td><td class="num">26/39</td><td class="num">27</td><td class="num">0.02 ft</td><td class="num">n/m</td></tr>
+<tr><td>R-10434.2 (Presidio)</td><td>South</td><td class="num">831/831</td><td class="num">41/49</td><td class="num">41/43</td><td class="num">16/20</td><td class="num">13</td><td class="num">0.04 ft</td><td class="num">~0.6&ndash;1.1 ft</td></tr>
+<tr><td>R-10434.1</td><td>South</td><td class="num">721/721</td><td class="num">27/39</td><td class="num">21/23</td><td class="num">12/24</td><td class="num">22</td><td class="num">0.02 ft</td><td class="num">n/m</td></tr>
+<tr><td>R-10434.3</td><td>South + gap</td><td class="num">1403/1403</td><td class="num">48/64</td><td class="num">41/42</td><td class="num">26/41</td><td class="num">28</td><td class="num">0.02 ft</td><td class="num">n/m</td></tr>
 <tr><td>R-10741.1</td><td>Gap (3DEP)</td><td class="num">311/311</td><td class="num">14/18</td><td class="num">13/13</td><td class="num">1/2</td><td class="num">3</td><td class="num">0.04 ft</td><td class="num">0.29 ft (9 pts, max)</td></tr>
 <tr><td>R-10741.2</td><td>North</td><td class="num">381/382</td><td class="num">20/20</td><td class="num">18/18</td><td class="num">0/1</td><td class="num">0</td><td class="num">0.05 ft</td><td class="num">0.37 ft (9 pts, max)</td></tr>
 <tr><td>R-10741.3</td><td>North</td><td class="num">348/349</td><td class="num">17/17</td><td class="num">13/13</td><td class="num">0/1</td><td class="num">1</td><td class="num">0.03 ft</td><td class="num">0.40 ft (9 pts, max)</td></tr>
@@ -481,6 +490,27 @@ geometry: Point [-122.46557, 37.80025]</code></pre></div>
 <div class="callout warn"><b>What the numbers do not claim.</b> The 0.04 ft residual is against numbers read off the same sheet. Independent check is Caltrans' package at about a foot, raster-limited. We claim records-research grade, not a survey tolerance, until a pilot sets one.</div>
 
 <!-- ============================================================ -->
+<h2>Is a pass right, and how much is checked</h2>
+<p>Two questions a pass rate cannot answer. <b>Precision</b>: every checked label on R-10434.2 and R-10434.3 was rendered with the line the checker measured and keyed by eye; the bench re-scores each run against those keys. <b>Coverage</b>: every distance or bearing token on the sheet is attributed; the denominator is the labels a check could address (table cells, notes, areas and radial bearings excluded, each counted in its own bucket).</p>
+<div class="tw"><table>
+<tr><th>Sheet</th><th class="num">Passes keyed</th><th class="num">On the right line</th><th class="num">Wrong line</th><th class="num">Unsure</th><th class="num">Coverage</th></tr>
+<tr><td>R-10434.2 (Presidio)</td><td class="num">135</td><td class="num">134</td><td class="num">0</td><td class="num">1</td><td class="num">98/170 (58%)</td></tr>
+<tr><td>R-10434.1</td><td class="num">not keyed</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">&mdash;</td><td class="num">60/168 (36%)</td></tr>
+<tr><td>R-10434.3</td><td class="num">152</td><td class="num">152</td><td class="num">0</td><td class="num">0</td><td class="num">115/246 (47%)</td></tr>
+</table></div>
+<p>Independent checks added in loop 12, none of which use the labels being checked:</p>
+<div class="tw"><table>
+<tr><th>Check</th><th>Result</th></tr>
+<tr><td>Caltrans alignment coordinate tables vs the callout fit</td><td>median 0.02&ndash;0.07 ft on the three Presidio sheets; a second opinion, not better control than the callouts</td></tr>
+<tr><td>L = R&middot;&Delta; on every curve-table row</td><td>68 of 68 hold</td></tr>
+<tr><td>Table rows with every cell read</td><td>12 rows on R-10434.3 were missing their distance; reader fixed</td></tr>
+<tr><td>Record self-consistency</td><td>R-10434.1 alignment row L prints northing 2,21,919.67: a drafting error on the record</td></tr>
+<tr><td>Same line on adjacent sheets, each fitted alone</td><td>&le; 0.17 ft on proven same-line pairs; 12 shared labels on R-10741.2/.3 within 0.19 ft median</td></tr>
+<tr><td>Sheet features vs LiDAR (buildings, walls, pavement edges)</td><td>none drawn on any of the six sheets; the epoch shift is modelled (NGS HTDP), not measured on the ground</td></tr>
+</table></div>
+<p>Where coverage is still lost, largest first: drawing labels queued with a reason (no line in reach, piece too short, matchline), several labels claiming one drawn line, stationing ticks cutting a centreline into short pieces, and 42 tags on R-10434.3 still partly unread.</p>
+
+<!-- ============================================================ -->
 <h2>The easements, settled</h2>
 <div class="two">
 <div>
@@ -503,19 +533,14 @@ geometry: Point [-122.46557, 37.80025]</code></pre></div>
 
 <!-- ============================================================ -->
 <h2>Next steps</h2>
-<p>In order. Loop 3 placed all six sheets and dropped leg 5 (north label association) when JR ended the loop, so it leads the list. Items 1 to 5 are code or a package fetch, gated against <code>bench.py</code>. Item 6 is the demo itself.</p>
+<p>In order, as of 09-26 15:15. Demo preparation leads now: the freeze is 10-03.</p>
 <ol class="steps">
-<li><div><b>demo.py --fast back under 180 s</b><p>Now 245 s: checks 64 s, tags 51 s, tables 66 s after the curve stitching, dash-dot trains and window searches of loops 8 and 9. Profile the three and restore the gate without moving the loop 9 numbers. Then a highway surface for the gap tile.</p></div></li>
-<li><div><b>Scan text-line detection on the binarised page</b><p>Replace the OCR detector's boxes with one box per lettered line built from glyph components; gate on the 32 keyed boxes landing on their text (today 24 of 32). Then the alphabet reader and the two generic readers vote per box.</p></div></li>
-<li><div><b>Row segmentation of multi-line blocks on 2012-era sheets</b><p>R-10741.2's unread blocks are GRANTOR NOTES and TITLE CODES paragraphs; the font is not the limit. Reads first, then the OCR-vs-glyph selector re-measured.</p></div></li>
-<li><div><b>South bearings, what is left</b><p>2 / 2 / 1 fails on the three sheets plus the too-short queue (6 / 8 / 11 pieces under 10 pt). The queue is the drawing's own limit; the fails need crops.</p></div></li>
-<li><div><b>C21 and the point-of-tangency class, scoped</b><p>Traced: C21 is five pieces across the C9/C10 fillet ending at a point of tangency. Fix, scoped: radius fits on windows of at least 100 ft, and a tangency cut applied only inside the parent of a tag whose own window search failed, never sheet-wide. Diff at <code>spike/out/loop10_legA.patch</code>; gate as loop 10's.</p></div></li>
-<li><div><b>Arcs, what is left</b><p>Presidio 3 fails, R-10434.1 12 (matchline cuts and details), R-10434.3 13. Classes (b) and (c) in <code>spike/out/leg6A_missing.md</code>.</p></div></li>
-<li><div><b>R-71.70's 1.29°</b><p>Crop both NGS marks against the two-point fit; read the basis-of-bearings note. Then NGS control is a second independent check on every sheet that prints a PID.</p></div></li>
-<li><div><b>South + gap mosaic; the 2024 San Francisco tile</b><p>R-10434.3 should keep the 2025 tile where it has it. CA_SanFrancisco_B23 covers both gap boxes but its LAZ carries no CRS.</p></div></li>
-<li><div><b>The 1950s scans on the north tile</b><p>R-71.11/.20/.28 and R-92.8/.9 through their Caltrans packages the same way R-65.1/.3/.4 went onto the Presidio tile.</p></div></li>
-<li><div><b>Slides, Q&amp;A sheet, recorded fallback, rehearsals, freeze</b><span class="pill notyet" style="margin-left:8px">days 11–13</span><p>Non-demo minutes and the scan segment as slides; every number from numbers.md. Record one full run. Two rehearsals inside 25 minutes. No code after the freeze on 10-03.</p></div></li>
-<li><div><b>Parked until after 10-05</b><p>Scan reading by per-sheet template alphabet (gap 1, the archive's biggest cost). Per-object uncertainty. More drawn-geometry work on 61985-1..4: their outlines are in the deeds.</p></div></li>
+<li><div><b>Slides, Q&amp;A sheet, recorded fallback, rehearsals, freeze</b><span class="pill notyet" style="margin-left:8px">not started</span><p>Non-demo minutes and the scan segment as slides; every number from numbers.md and the bench. The Q&amp;A gains the matchline figure, the gold-set precision and the record error. Record one full run. Two rehearsals inside 25 minutes. No code after 10-03.</p></div></li>
+<li><div><b>Coverage, the next causes</b><p>Queued drawing labels (33 / 51 / 58 on the three Presidio sheets), several labels claiming one line, centrelines cut by stationing ticks, 42 partly unread tags on R-10434.3. Each leg gated on no pass lost and zero wrong on both gold sets, every new crop viewed.</p></div></li>
+<li><div><b>Demo headroom</b><p>177 s cold against 180 s. Tag segmentation (51 s of glyph sweeps) is the next cut.</p></div></li>
+<li><div><b>The epoch shift on the ground</b><p>Needs a tie the LiDAR sees: NGS marks on hard surface, or a sheet that draws structures.</p></div></li>
+<li><div><b>Carried</b><p>Gap-tile highway surface; C21 and the point-of-tangency class, scoped; scan text-line detection; north row segmentation; R-71.70's 1.29&deg;; the 1950s scans on the north tile.</p></div></li>
+<li><div><b>Parked until after 10-05</b><p>Scan reading by per-sheet template alphabet. Per-object uncertainty. More drawn-geometry work on 61985-1..4.</p></div></li>
 </ol>
 
 <!-- ============================================================ -->
@@ -565,6 +590,6 @@ geometry: Point [-122.46557, 37.80025]</code></pre></div>
 
 <div class="callout"><b>Findings worth carrying forward.</b> Annotation text is the reader for Civil 3D 2016+ sheets; the glyph alphabet stays for 2012-era sheets. CAD layers did not help association once reads were exact; they still separate furniture from map. The exception page's wrong-line group is the fastest diagnostic there is: render the measured line, look at twelve crops, fix the biggest cause, repeat. Two generic readers agreeing on hand lettering is a floor, not a method.</div>
 
-<p class="eyebrow" style="margin-top:48px">Sources: STATE.md, ROADMAP.md, spike/LOOP.md, spike/out/loop_report.md, spike/out/legC_misses.md, spike/out/numbers.md, spike/out/bench.csv (rows "loop9-final", unchanged by loop 10; scan numbers from spike/gt_scan.py against read_scan.json and read_alphabet.json) · every number re-measurable with <code>python spike/bench.py final --tables --tags --parcels --traverse presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3 r71_71 r10258 r71_70</code></p>
+<p class="eyebrow" style="margin-top:48px">Sources: STATE.md, ROADMAP.md, spike/LOOP.md, spike/out/loop_report.md, spike/out/legC_misses.md, spike/out/numbers.md, spike/out/bench.csv (rows "legH2", the second written, for the six-sheet table; gold sets spike/gold/*_assoc.json; coverage spike/out_coverage/attribution.md; matchlines spike/out_ground/matchline.md; record checks spike/out_record/summary.md; scan numbers from spike/gt_scan.py against read_scan.json and read_alphabet.json) · every number re-measurable with <code>python spike/bench.py final --tables --tags --parcels --traverse presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3 r71_71 r10258 r71_70</code></p>
 
 </div>
