@@ -1,0 +1,375 @@
+{
+ "label": "R-10434.2",
+ "snap_subdir": "",
+ "read_source": "read_shx.json",
+ "part_a": {
+  "found": true,
+  "rows_read": 8,
+  "pairs": [
+   {
+    "a": "65+48.80 EC",
+    "b": "71+58.22 BC",
+    "station_diff_ft": 609.42,
+    "chord_ft": 609.43,
+    "diff_ft": 0.01,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "71+58.22 BC",
+    "b": "80+35.10 EC",
+    "station_diff_ft": 876.88,
+    "chord_ft": 862.19,
+    "diff_ft": -14.69,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "80+35.10 EC",
+    "b": "72+11.01 BC",
+    "station_diff_ft": -824.09,
+    "chord_ft": 828.04,
+    "diff_ft": 3.95,
+    "curve": true,
+    "non_monotonic": true,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "72+11.01 BC",
+    "b": "82+08.49 EC",
+    "station_diff_ft": 997.48,
+    "chord_ft": 982.16,
+    "diff_ft": -15.32,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "82+08.49 EC",
+    "b": "95+57.08 BC",
+    "station_diff_ft": 1348.59,
+    "chord_ft": 1318.08,
+    "diff_ft": -30.51,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": true
+   },
+   {
+    "a": "95+57.08 BC",
+    "b": "95+42.99 BC",
+    "station_diff_ft": -14.09,
+    "chord_ft": 37.95,
+    "diff_ft": 23.86,
+    "curve": true,
+    "non_monotonic": true,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "95+42.99 BC",
+    "b": "95+64.60 BC",
+    "station_diff_ft": 21.61,
+    "chord_ft": 46.7,
+    "diff_ft": 25.09,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   }
+  ],
+  "residuals": [
+   {
+    "station": "65+48.80 EC",
+    "residual_ft": 0.04,
+    "likely_misread": false
+   },
+   {
+    "station": "71+58.22 BC",
+    "residual_ft": 0.04,
+    "likely_misread": false
+   },
+   {
+    "station": "80+35.10 EC",
+    "residual_ft": 0.06,
+    "likely_misread": false
+   },
+   {
+    "station": "72+11.01 BC",
+    "residual_ft": 0.94,
+    "likely_misread": false
+   },
+   {
+    "station": "82+08.49 EC",
+    "residual_ft": 0.1,
+    "likely_misread": false
+   },
+   {
+    "station": "95+57.08 BC",
+    "residual_ft": 3.06,
+    "likely_misread": false
+   },
+   {
+    "station": "95+42.99 BC",
+    "residual_ft": 0.09,
+    "likely_misread": false
+   },
+   {
+    "station": "95+64.60 BC",
+    "residual_ft": 0.05,
+    "likely_misread": false
+   }
+  ],
+  "alt_fit": {
+   "n_points": 8,
+   "scale_ft_per_pt": 1.389051394728154,
+   "rotation_deg": 0.5608340559511984,
+   "tx": 5992687.6902462775,
+   "ty": 2121226.9042994836,
+   "rms_ft": 0.9728862760788124,
+   "vs_callout_fit": {
+    "scale_diff": 0.00019791713710404224,
+    "rotation_diff_deg": 0.02466725284211413
+   }
+  }
+ },
+ "part_b": {
+  "labels_found": 0
+ },
+ "part_c": {
+  "found": true,
+  "n_curve_rows": 23,
+  "n_line_rows": 21,
+  "curve_self_check": [
+   {
+    "tag": "C1",
+    "R": 50.22,
+    "delta_deg": 12.748611,
+    "L_printed": 11.18,
+    "L_calc": 11.174,
+    "diff": -0.006,
+    "pass": true
+   },
+   {
+    "tag": "C2",
+    "R": 50.22,
+    "delta_deg": 67.068056,
+    "L_printed": 58.79,
+    "L_calc": 58.785,
+    "diff": -0.005,
+    "pass": true
+   },
+   {
+    "tag": "C3",
+    "R": 232.04,
+    "delta_deg": 1.855556,
+    "L_printed": 7.51,
+    "L_calc": 7.515,
+    "diff": 0.005,
+    "pass": true
+   },
+   {
+    "tag": "C4",
+    "R": 232.04,
+    "delta_deg": 33.712222,
+    "L_printed": 136.53,
+    "L_calc": 136.53,
+    "diff": -0.0,
+    "pass": true
+   },
+   {
+    "tag": "C5",
+    "R": 55.5,
+    "delta_deg": 42.3975,
+    "L_printed": 41.07,
+    "L_calc": 41.069,
+    "diff": -0.001,
+    "pass": true
+   },
+   {
+    "tag": "C6",
+    "R": 34.5,
+    "delta_deg": 74.102778,
+    "L_printed": 44.62,
+    "L_calc": 44.62,
+    "diff": 0.0,
+    "pass": true
+   },
+   {
+    "tag": "C7",
+    "R": 399.82,
+    "delta_deg": 3.225556,
+    "L_printed": 22.51,
+    "L_calc": 22.508,
+    "diff": -0.002,
+    "pass": true
+   },
+   {
+    "tag": "C8",
+    "R": 399.82,
+    "delta_deg": 1.473333,
+    "L_printed": 10.28,
+    "L_calc": 10.281,
+    "diff": 0.001,
+    "pass": true
+   },
+   {
+    "tag": "C9",
+    "R": 179.38,
+    "delta_deg": 39.325,
+    "L_printed": 123.12,
+    "L_calc": 123.118,
+    "diff": -0.002,
+    "pass": true
+   },
+   {
+    "tag": "C10",
+    "R": 179.38,
+    "delta_deg": 36.136111,
+    "L_printed": 113.14,
+    "L_calc": 113.134,
+    "diff": -0.006,
+    "pass": true
+   },
+   {
+    "tag": "C11",
+    "R": 179.38,
+    "delta_deg": 3.188889,
+    "L_printed": 9.98,
+    "L_calc": 9.984,
+    "diff": 0.004,
+    "pass": true
+   },
+   {
+    "tag": "C12",
+    "R": 60.0,
+    "delta_deg": 45.930556,
+    "L_printed": 48.1,
+    "L_calc": 48.098,
+    "diff": -0.002,
+    "pass": true
+   },
+   {
+    "tag": "C13",
+    "R": 60.0,
+    "delta_deg": 25.327222,
+    "L_printed": 26.52,
+    "L_calc": 26.523,
+    "diff": 0.003,
+    "pass": true
+   },
+   {
+    "tag": "C14",
+    "R": 60.0,
+    "delta_deg": 20.603333,
+    "L_printed": 21.58,
+    "L_calc": 21.576,
+    "diff": -0.004,
+    "pass": true
+   },
+   {
+    "tag": "C15",
+    "R": 1470.0,
+    "delta_deg": 1.790556,
+    "L_printed": 45.93,
+    "L_calc": 45.939,
+    "diff": 0.009,
+    "pass": true
+   },
+   {
+    "tag": "C16",
+    "R": 1470.0,
+    "delta_deg": 20.336389,
+    "L_printed": 521.76,
+    "L_calc": 521.757,
+    "diff": -0.003,
+    "pass": true
+   },
+   {
+    "tag": "C17",
+    "R": 342.74,
+    "delta_deg": 1.799167,
+    "L_printed": 10.76,
+    "L_calc": 10.763,
+    "diff": 0.003,
+    "pass": true
+   },
+   {
+    "tag": "C18",
+    "R": 1470.0,
+    "delta_deg": 0.243056,
+    "L_printed": 6.24,
+    "L_calc": 6.236,
+    "diff": -0.004,
+    "pass": true
+   },
+   {
+    "tag": "C19",
+    "R": 1520.0,
+    "delta_deg": 2.277222,
+    "L_printed": 60.41,
+    "L_calc": 60.412,
+    "diff": 0.002,
+    "pass": true
+   },
+   {
+    "tag": "C20",
+    "R": 1639.0,
+    "delta_deg": 34.869722,
+    "L_printed": 997.48,
+    "L_calc": 997.481,
+    "diff": 0.001,
+    "pass": true
+   },
+   {
+    "tag": "C21",
+    "R": 1380.0,
+    "delta_deg": 36.406667,
+    "L_printed": 876.88,
+    "L_calc": 876.874,
+    "diff": -0.006,
+    "pass": true
+   },
+   {
+    "tag": "C22",
+    "R": 3600.0,
+    "delta_deg": 6.915,
+    "L_printed": 434.47,
+    "L_calc": 434.482,
+    "diff": 0.012,
+    "pass": true
+   },
+   {
+    "tag": "C23",
+    "R": 15.0,
+    "delta_deg": 21.460833,
+    "L_printed": 5.62,
+    "L_calc": 5.618,
+    "diff": -0.002,
+    "pass": true
+   }
+  ],
+  "fails": [],
+  "chord_note": "no chord column printed in this sheet's curve tables (cells are always R, delta, L)",
+  "tangency": {
+   "available": true,
+   "n_tags_traced": 25,
+   "adjacency": {
+    "line-line": 4,
+    "line-curve": 5,
+    "curve-curve": 5
+   },
+   "n_line_curve_line_joins_found": 0,
+   "n_tangent_within_tol": 0,
+   "detail": [],
+   "note": "info only, and only a direct line-curve-line join is checked (a curve bracketed by two more curves -- a compound-curve chain or a corner where several pieces meet, both common here per STATE.md/loop notes on curve stitching -- is not chained through); a non-tangent join is legal record either way, not a fail"
+  },
+  "crops": []
+ }
+}

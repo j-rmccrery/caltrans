@@ -1,0 +1,14 @@
+{
+ "label": "R-10741.3",
+ "snap_subdir": "r_10741_003_2017-02-10",
+ "read_source": "read_glyph.json",
+ "part_a": {
+  "found": false
+ },
+ "part_b": {
+  "labels_found": 0
+ },
+ "part_c": {
+  "found": false
+ }
+}

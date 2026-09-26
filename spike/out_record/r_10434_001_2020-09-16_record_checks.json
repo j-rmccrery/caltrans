@@ -1,0 +1,378 @@
+{
+ "label": "R-10434.1",
+ "snap_subdir": "r_10434_001_2020-09-16",
+ "read_source": "read_shx.json",
+ "part_a": {
+  "found": true,
+  "rows_read": 17,
+  "pairs": [
+   {
+    "a": "102+35.06 PRC",
+    "b": "103+76.69 PCC",
+    "station_diff_ft": 141.63,
+    "chord_ft": 137.28,
+    "diff_ft": -4.35,
+    "curve": false,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "103+76.69 PCC",
+    "b": "106+24.88 EC",
+    "station_diff_ft": 248.19,
+    "chord_ft": 213.72,
+    "diff_ft": -34.47,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "106+24.88 EC",
+    "b": "106+00.00 POT",
+    "station_diff_ft": -24.88,
+    "chord_ft": 533.48,
+    "diff_ft": 508.6,
+    "curve": true,
+    "non_monotonic": true,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "106+00.00 POT",
+    "b": "107+75.13 BC",
+    "station_diff_ft": 175.13,
+    "chord_ft": 175.13,
+    "diff_ft": -0.0,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "107+75.13 BC",
+    "b": "110+97.99 PCC",
+    "station_diff_ft": 322.86,
+    "chord_ft": 316.27,
+    "diff_ft": -6.59,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "110+97.99 PCC",
+    "b": "114+25.48 EC",
+    "station_diff_ft": 327.49,
+    "chord_ft": 321.86,
+    "diff_ft": -5.63,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "114+25.48 EC",
+    "b": "116+89.35 BC",
+    "station_diff_ft": 263.87,
+    "chord_ft": 163.87,
+    "diff_ft": -100.0,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "116+89.35 BC",
+    "b": "118+93.20 PCC",
+    "station_diff_ft": 203.85,
+    "chord_ft": 302.5,
+    "diff_ft": 98.65,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "118+93.20 PCC",
+    "b": "122+05.12 EC",
+    "station_diff_ft": 311.92,
+    "chord_ft": 311.42,
+    "diff_ft": -0.5,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "122+05.12 EC",
+    "b": "113+69.58 PCC",
+    "station_diff_ft": -835.54,
+    "chord_ft": 77.24,
+    "diff_ft": -758.3,
+    "curve": true,
+    "non_monotonic": true,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "113+69.58 PCC",
+    "b": "117+26.79 EC",
+    "station_diff_ft": 357.21,
+    "chord_ft": 1899724.42,
+    "diff_ft": 1899367.21,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": true,
+    "different_alignment": false
+   },
+   {
+    "a": "117+26.79 EC",
+    "b": "122+98.84 POT",
+    "station_diff_ft": 572.05,
+    "chord_ft": 1900450.09,
+    "diff_ft": 1899878.04,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": true,
+    "different_alignment": false
+   },
+   {
+    "a": "122+98.84 POT",
+    "b": "117+46.25 EC",
+    "station_diff_ft": -552.59,
+    "chord_ft": 536.09,
+    "diff_ft": -16.5,
+    "curve": true,
+    "non_monotonic": true,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "117+46.25 EC",
+    "b": "122+82.34 POT",
+    "station_diff_ft": 536.09,
+    "chord_ft": 536.09,
+    "diff_ft": -0.0,
+    "curve": true,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "122+82.34 POT",
+    "b": "99+91.55 PCC",
+    "station_diff_ft": -2290.79,
+    "chord_ft": 2268.11,
+    "diff_ft": -22.68,
+    "curve": false,
+    "non_monotonic": true,
+    "likely_misread": false,
+    "different_alignment": false
+   },
+   {
+    "a": "99+91.55 PCC",
+    "b": "108+77.11 PCC",
+    "station_diff_ft": 885.56,
+    "chord_ft": 902.77,
+    "diff_ft": 17.21,
+    "curve": false,
+    "non_monotonic": false,
+    "likely_misread": false,
+    "different_alignment": false
+   }
+  ],
+  "residuals": [
+   {
+    "station": "102+35.06 PRC",
+    "residual_ft": 0.03,
+    "likely_misread": false
+   },
+   {
+    "station": "103+76.69 PCC",
+    "residual_ft": 0.06,
+    "likely_misread": false
+   },
+   {
+    "station": "106+24.88 EC",
+    "residual_ft": 3.12,
+    "likely_misread": false
+   },
+   {
+    "station": "106+00.00 POT",
+    "residual_ft": 0.04,
+    "likely_misread": false
+   },
+   {
+    "station": "107+75.13 BC",
+    "residual_ft": 0.04,
+    "likely_misread": false
+   },
+   {
+    "station": "110+97.99 PCC",
+    "residual_ft": 0.03,
+    "likely_misread": false
+   },
+   {
+    "station": "114+25.48 EC",
+    "residual_ft": 0.06,
+    "likely_misread": false
+   },
+   {
+    "station": "116+89.35 BC",
+    "residual_ft": 0.06,
+    "likely_misread": false
+   },
+   {
+    "station": "118+93.20 PCC",
+    "residual_ft": 0.03,
+    "likely_misread": false
+   },
+   {
+    "station": "122+05.12 EC",
+    "residual_ft": 0.01,
+    "likely_misread": false
+   },
+   {
+    "station": "113+69.58 PCC",
+    "residual_ft": 0.03,
+    "likely_misread": false
+   },
+   {
+    "station": "117+26.79 EC",
+    "residual_ft": 1897280.98,
+    "likely_misread": true
+   },
+   {
+    "station": "122+98.84 POT",
+    "residual_ft": 236.84,
+    "likely_misread": false
+   },
+   {
+    "station": "117+46.25 EC",
+    "residual_ft": 0.0,
+    "likely_misread": false
+   },
+   {
+    "station": "122+82.34 POT",
+    "residual_ft": 235.23,
+    "likely_misread": false
+   },
+   {
+    "station": "99+91.55 PCC",
+    "residual_ft": 0.05,
+    "likely_misread": false
+   },
+   {
+    "station": "108+77.11 PCC",
+    "residual_ft": 0.03,
+    "likely_misread": false
+   }
+  ],
+  "alt_fit": {
+   "n_points": 14,
+   "scale_ft_per_pt": 1.388885714133644,
+   "rotation_deg": 90.3705939789882,
+   "tx": 5991180.361254891,
+   "ty": 2119127.103565334,
+   "rms_ft": 0.8008183588298461,
+   "vs_callout_fit": {
+    "scale_diff": 1.0829475770357533e-05,
+    "rotation_diff_deg": 0.011602423680088236
+   }
+  }
+ },
+ "part_b": {
+  "labels_found": 1,
+  "snapped_to_a_line": 1,
+  "pairs": [],
+  "note": "line_dist is straight-line ft between the two labels' nearest-segment points, not arc-traced along curves, and 'nearest segment' can pick the wrong parallel line (same ambiguity STATE.md's Known Traps already documents for this codebase)"
+ },
+ "part_c": {
+  "found": true,
+  "n_curve_rows": 7,
+  "n_line_rows": 18,
+  "curve_self_check": [
+   {
+    "tag": "C1",
+    "R": 1575.0,
+    "delta_deg": 11.346944,
+    "L_printed": 311.92,
+    "L_calc": 311.915,
+    "diff": -0.005,
+    "pass": true
+   },
+   {
+    "tag": "C2",
+    "R": 509.0,
+    "delta_deg": 36.863611,
+    "L_printed": 327.49,
+    "L_calc": 327.486,
+    "diff": -0.004,
+    "pass": true
+   },
+   {
+    "tag": "C3",
+    "R": 460.0,
+    "delta_deg": 40.213611,
+    "L_printed": 322.86,
+    "L_calc": 322.856,
+    "diff": -0.004,
+    "pass": true
+   },
+   {
+    "tag": "C4",
+    "R": 133.0,
+    "delta_deg": 106.919167,
+    "L_printed": 248.19,
+    "L_calc": 248.19,
+    "diff": 0.0,
+    "pass": true
+   },
+   {
+    "tag": "C5",
+    "R": 164.0,
+    "delta_deg": 49.481111,
+    "L_printed": 141.63,
+    "L_calc": 141.632,
+    "diff": 0.002,
+    "pass": true
+   },
+   {
+    "tag": "C6",
+    "R": 500.0,
+    "delta_deg": 27.904722,
+    "L_printed": 243.51,
+    "L_calc": 243.515,
+    "diff": 0.005,
+    "pass": true
+   },
+   {
+    "tag": "C7",
+    "R": 3600.0,
+    "delta_deg": 6.915,
+    "L_printed": 434.47,
+    "L_calc": 434.482,
+    "diff": 0.012,
+    "pass": true
+   }
+  ],
+  "fails": [],
+  "chord_note": "no chord column printed in this sheet's curve tables (cells are always R, delta, L)",
+  "tangency": {
+   "available": true,
+   "n_tags_traced": 14,
+   "adjacency": {
+    "line-line": 8,
+    "line-curve": 0,
+    "curve-curve": 0
+   },
+   "n_line_curve_line_joins_found": 0,
+   "n_tangent_within_tol": 0,
+   "detail": [],
+   "note": "info only, and only a direct line-curve-line join is checked (a curve bracketed by two more curves -- a compound-curve chain or a corner where several pieces meet, both common here per STATE.md/loop notes on curve stitching -- is not chained through); a non-tangent join is legal record either way, not a fail"
+  },
+  "crops": []
+ }
+}
