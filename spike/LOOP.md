@@ -356,3 +356,16 @@ Isolation: leg A owned spike/out and the bench; legs B-D read a frozen snapshot 
 | E | table reader root cause, EPOCH noise, self-checks in demo | per-label pass diff, gold wrong = 0, demo < 180 s | R-10434.3 tags 26 -> 31 pass, nothing lost; demo 160 s cold | 66618a6 |
 
 Dispatches: 6 (A, B, C, D, D-retry, E), all sonnet. Lessons: a subagent's "all columns match" and "only one PDF on disk" were both wrong; re-measure. A disk cache keyed on inputs only would have broken the diagnostic-pool rule on the next code edit.
+
+
+---
+
+# Loop 13: precision on R-10434.3, then coverage (2026-09-26 13:00-15:15 PDT, JR: "do it")
+
+| leg | work | gate (orchestrator) | result | commit |
+|---|---|---|---|---|
+| F | gold set R-10434.3 | crop of the one reported wrong pass viewed | agent keyed label 95 wrong (leader lands on the R=1873 curve); re-keyed: 140/0/0 | 533bd8e |
+| G | coverage attribution | buckets sum to bench denominators | 0 silent drops; honest coverage 98/170, 59/168, 109/246 | 533bd8e |
+| H | partly read tags, bare (T) totals | per-label diff vs HEAD, all new-pass crops viewed, gold wrong 0, demo < 180 s | 19 new, 1 wrong (195.48'(T) on a parallel line) sent back; rule: printed bearing must pass on the run. Final +16, 0 lost; demo 177 s cold | 7205909 |
+
+Dispatches: 3 + 1 retry, sonnet. Disagreements settled by crop: agent's label-95 "wrong" (right), agent's L20/L21 "wrong" (L21 right, L20 unsure).

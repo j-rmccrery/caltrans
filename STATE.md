@@ -3,7 +3,30 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-26 13:00 after loop 12, the review legs; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-26 15:15 after loop 13; plan and status in `spike/LOOP.md`)
+
+**Loop 13 (precision on a second sheet, then coverage).** Bench row `legH2` (second of the two) is the baseline.
+- Gold set on R-10434.3 (`gold_assoc.py --sheet r10434_3`): 152/0/0 after this loop; Presidio 134/0/1 (L20 unsure).
+  No wrong-line pass anywhere keyed; the one the agent reported (label 95) was on the right curve.
+- Coverage attribution (`coverage_attrib.py`, `out_coverage/attribution.md`): every parsed token has a named bucket.
+  Bench `coverage` is now honest (drawing-label passes incl. arcs over addressable labels): Presidio 98/170,
+  R-10434.1 60/168, R-10434.3 115/246.
+- Leg H: partly read tags resolved from SHX text or by the record (exactly one unclaimed row passes); bare (T) totals
+  checked, with the printed bearing (own block or stacked beside it) required on the measured run. +16 passes, 0 lost.
+- demo --fast 177 s cold under load: headroom is thin; `tags.py` (51 s, glyph sweeps) is the next cut.
+
+Do this, in order:
+
+1. Demo prep: slides, Q&A sheet, recorded fallback; two rehearsals; freeze 10-03.
+2. Coverage, next causes (attribution.md): f-queued drawing labels (33/51/58: no line, too short, matchline);
+   several labels claiming one line (R-10434.3 labels 40/41/114/130); station ticks cut centrelines into pieces
+   (Presidio L21 distance 1529.50 vs a 74 ft piece); 42 partly read tags still queued on R-10434.3.
+3. `tags.py` time (cache like build_pool) to restore demo headroom.
+4. Carried from loop 12 Next items 2-4.
+
+## Next as of loop 12, kept for the record
+
+### Next (logged 2026-09-26 13:00 after loop 12, the review legs; plan and status in `spike/LOOP.md`)
 
 **Loop 12 (review gaps 1-4, five sonnet legs, four in parallel).** Pushed `caltrans-spike` to 2b3b4a4 first; loop 12 commits
 1841651..66618a6 are local. Bench row `legE` is the baseline now.
