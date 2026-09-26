@@ -314,3 +314,24 @@ lines that stop 3.6-4.2 pt short of the curve, so the boundary at [1931, 660] is
 | A | failed twice, stashed as `spike/out/loop10_legA.patch` (finding) | 2 | Attempt 1: end-fit join and near-miss cut, both no-ops in production: the trace ran on a different block set (no `real_text_blocks`), so production has no cut at [1499.8, 699.4] and p104 reaches the gap as one blended 449.84 ft piece (fit R 1418.75, 2.8 % off p97/1's 1382); and the three lines at [1931, 660] run along the curve's tangent, not across it (a point of tangency, not a radial). Attempt 2: 40 ft end-fit windows are numerically unstable at the sheet's 2-decimal precision (p104's last 40 ft fit R 1535, 60 ft 1527, 80 ft 1443, 100 ft 1379, whole tail 1382; p97/1's first 40 ft 1054), so the join still refuses; a PT cut as a vertex snap lands at [1927, 662] and would let Presidio's tags rise 34 -> 36 pass, but sheet-wide it fragments other curves: R-10434.3 loses C33 and C25 radius passes, R-10741.1 loses a distance pass, wrong-line up on three sheets. Rejected. What would work, not tried: radius fits on >= 100 ft windows, and PT cuts scoped to a failing tag's own parent rather than every curve | - |
 
 Dispatches used: 2 (1 agent, 1 resume). Started 00:40, closed 03:05 PDT. No code shipped; `loop9-final` stands.
+
+---
+
+# Loop 11: the road as one surface (started 2026-09-26 03:30 PDT, JR: "Go" on the deck gaps)
+
+Purple in the QGIS renders is the viaduct-deck layer: a 1 m cell with >= 2 vendor class-17 returns, closed once, polygons
+over 30 m2. It stops where the road leaves the structure (at grade = grey pavement; the Battery tunnels = no return), where
+the vendor's class-17 thins (parapets, joints, tree shadow), on the 2018 3DEP tile (no pavement extracted at all: classes
+differ), and at sheet seams (features are per tile but stacked per sheet in QGIS). Baseline, area inside the drawn R/W
+faces (m2): Presidio tile pavement 51,763 / deck 12,760 (Presidio), 60,652 / 12,688 (R-10434.1); gap tile 0 / 10,676
+(R-10434.3), 0 / 0 (R-10741.1); north tile 21,308 / 0 (R-10741.2), 23,763 / 3,149 (R-10741.3). The six-sheet bench is not
+touched; the gate is these areas, the pavement-outside-R/W number (the encroachment claim) and the renders.
+
+| # | Leg | Gate |
+|---|---|---|
+| A | (1) Class audit per tile (which classes exist, counts) and a height-above-DTM deck rule where class 17 is thin or absent: a cell dark, flat, within 3 m of deck and >= 2 m above the ground DTM is deck; (2) pavement on the 3DEP tile from the same dark-flat-ground rule with whatever ground class that tile uses; (3) one "highway surface" layer per tile = union of pavement and deck clipped to the R/W faces, with kind = at grade / structure, published in `six.qgz` above the per-kind layers; (4) tunnel easement faces (parcel names 61985-*) styled "record only, below ground"; (5) features merged per tile before the project, no sheet seams | deck area inside R/W faces up on the Presidio tile and on the gap tile with the class audit reported; pavement present on the gap tile; pavement-outside-R/W within 15 m (the encroachment number, 9,014 m2 on Presidio) not up by more than 5 %; both tile renders viewed with the corridor continuous where the road is on the surface; `demo.py --fast` still 21 steps under 180 s |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
