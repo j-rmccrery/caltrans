@@ -83,6 +83,75 @@ def shape(seg):
     return [[round(float(x), 1), round(float(y), 1)] for x, y in P]
 
 
+ROW_RUN_MAX_SKIP = 1  # at most this many differently-tagged rows skipped per direction while
+# expanding (Presidio: C17 sits between C16 and C18 by NO. but is a different curve, R=342.74 not
+# R=1470 -- skipped over, not a stop, so the run still reaches C18)
+ROW_RUN_MAX_ROWS = 6  # a safety cap on how far a run of untagged rows alone can sweep before hitting
+# another tagged same-parent row -- ponytail: a flat cap, not a smarter geometric stop, since every
+# known case (Presidio's C15/C16/C18) needs only 3
+
+
+def row_run(tag, seg, rows_, tag_by_num_, arcs_, scale_):
+    """Loop9 leg A rule 3: the table's own consecutive NO.-order rows around a still-failing tag, folding
+    in any row that's untagged on the drawing or tagged to the SAME parent curve: the drawn span between
+    the outermost of those rows' own marks, checked against the sum of ALL their printed lengths (tagged
+    and untagged alike) -- a record boundary that isn't drawn at all, and whose row carries no tag
+    either, is otherwise unreachable (C15's own piece is C15's share plus C18's, with nothing marking
+    where one ends and the other begins). None where the seed carries no "seq" (never itself part of
+    a sum-group), the table has no row before/after it to try, or fewer than 2 rows end up in the run.
+    Module-level (not nested in main()) so a crop/report tool can call the identical resolution main()
+    used, the same reason build_pool is shared (leg6A_crops.py)."""
+    m = re.match(r"([LC])(\d+)", tag)
+    if not m or "seq" not in seg:
+        return None
+    letter, seed_n = m[1], int(m[2])
+    nums = sorted(int(k[len(letter):]) for k in rows_ if k[:len(letter)] == letter and k[len(letter):].isdigit())
+    if seed_n not in nums:
+        return None
+    idx = nums.index(seed_n)
+    parent = seg["parent"]
+    seed_R = rows_.get(f"{letter}{seed_n}", {}).get("R")
+    included = {seed_n}
+    for step in (-1, 1):
+        skip, i = 0, idx + step
+        while 0 <= i < len(nums) and len(included) < ROW_RUN_MAX_ROWS:
+            n = nums[i]
+            hit = tag_by_num_.get(n)
+            # a row with no tag on the drawing at all has no geometry of its own to check a parent
+            # against; its own table R is what says whether it's this same physical curve (C18) or a
+            # genuinely different one that just happens to sit between two tagged rows by NO. (C17,
+            # R=342.74 -- not R=1470.00) -- table_rows() already reads it whether or not it's drawn
+            if hit is not None:
+                qualifies = hit[2].get("parent") == parent
+            else:
+                r = rows_.get(f"{letter}{n}", {}).get("R")
+                qualifies = r is not None and seed_R is not None and r == seed_R
+            if qualifies:
+                included.add(n)
+            else:
+                skip += 1
+                if skip > ROW_RUN_MAX_SKIP:
+                    break
+            i += step
+    if len(included) < 2:
+        return None
+    tagged_pieces = [tag_by_num_[n][2] for n in included if n in tag_by_num_ and "seq" in tag_by_num_[n][2]]
+    if not tagged_pieces:
+        return None
+    lo, hi = min(x["seq"] for x in tagged_pieces), max(x["seq"] for x in tagged_pieces)
+    span_pieces = sorted((x for x in arcs_ if x.get("parent") == parent and "seq" in x and lo <= x["seq"] <= hi), key=lambda x: x["seq"])
+    if not span_pieces:
+        return None
+    keys = [f"{letter}{n}" for n in sorted(included)]
+    if any(k not in rows_ for k in keys):
+        return None
+    Ls = [rows_[k]["L"] for k in keys]
+    drawn = sum(x["len_pt"] for x in span_pieces) * scale_
+    total, by_sum = run_sum(drawn, Ls)
+    untagged = [f"{letter}{n}" for n in sorted(included) if n not in tag_by_num_]
+    return keys, untagged, drawn, Ls, total, by_sum, span_pieces
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
@@ -122,8 +191,14 @@ def main():
         v = P[min(k + 1, len(P) - 1)] - P[max(k - 1, 0)]
         return v / max(np.hypot(*v), 1e-9)
 
-    def candidates(kind, pt, radius, min_width=0.0, arrow=None):
-        pool = [ln for ln in chains if ln["width"] >= min_width] if kind == "line" else [arc for arc in arcs if arc["width"] >= min_width]
+    def candidates(kind, pt, radius, min_width=0.0, arrow=None, exclude_dashdot=False):
+        # loop9 leg A attempt 2: a dash-dot train (rule 2) is excluded from the no-leader "beside" curve
+        # search -- proximity alone let several unrelated small curves (r10434_3's C6/C32/C9/C33) latch
+        # onto the SAME wide alignment-centerline dash-dot train as their nearest candidate, none of them
+        # actually its record. A leader landing squarely on the piece is a much stronger signal and still
+        # reaches it (Presidio's C20 resolves this way).
+        pool = [ln for ln in chains if ln["width"] >= min_width] if kind == "line" else \
+            [arc for arc in arcs if arc["width"] >= min_width and not (exclude_dashdot and arc.get("dashdot"))]
         dist = (lambda s: seg_dist(pt, s["p0"], s["p1"])) if kind == "line" else (lambda s: poly_dist(pt, s["pts"]))
         found = sorted(((dist(s), s) for s in pool if dist(s) < radius), key=lambda t: t[0])
         if arrow is not None:  # an arrow points across the line it means, not along it: a stationing tick lies along the arrow
@@ -183,7 +258,7 @@ def main():
             if not cands:
                 queue.append({"tag": t["tag"], "issue": f"leader points at no {kind}", "region": region}); continue
         else:
-            cands = candidates(kind, np.array([t["cx"], t["cy"]]), BESIDE * gh, BOUNDARY)
+            cands = candidates(kind, np.array([t["cx"], t["cy"]]), BESIDE * gh, BOUNDARY, exclude_dashdot=True)
         if not cands:
             queue.append({"tag": t["tag"], "issue": f"no leader, no {kind} beside the tag", "region": region}); continue
         if len(cands) > 1 and cands[1][0] < CLEAR * cands[0][0]:
@@ -246,6 +321,15 @@ def main():
         else:
             curve_hits.append((t, row, seg, how, region))
 
+    # loop9 leg A rule 3: NO.-int -> the resolved (t, row, seg, how, region) hit for every curve tag that
+    # found ITS OWN geometry (pass or fail; a tag still queued for want of a candidate at all carries no
+    # entry) -- row_run's own "is this neighbour on my parent" test.
+    tag_by_num = {}
+    for hit in curve_hits:
+        m = re.match(r"[LC](\d+)", hit[0]["tag"])
+        if m:
+            tag_by_num[int(m[1])] = hit
+
     # curves: leg8A -- grouped by PARENT curve (leg6A's parent + seq on every piece), not by the specific
     # piece a leader happened to land on. Each tag first gets its own chance to pass alone: its own
     # resolved piece, or -- leg6A's own search, `parent_window` -- a contiguous window of same-parent
@@ -254,9 +338,22 @@ def main():
     # last, in seq order -- covering a record boundary between them that isn't itself separately drawn,
     # same as leg6A's standalone L=/(T) window) against the sum of the group's printed lengths.
     def emit_run(sub, drawn, ref_seg):
-        nonlocal group_fires
+        nonlocal group_fires, row_run_fires
         if len(sub) < 2:
             for t, row, seg, how, region in sub:
+                rr = row_run(t["tag"], seg, rows, tag_by_num, arcs, scale)
+                if rr is not None:
+                    keys, untagged, rdrawn, Ls, total, by_sum, span_pieces = rr
+                    label = f"rows {', '.join(keys)}" + (f"; {', '.join(untagged)} untagged" if untagged else "")
+                    sum_str = f"{rdrawn:.2f} = " + " + ".join(f"{v:.2f}" for v in Ls)
+                    if by_sum:
+                        out.append([t["tag"], "arc length", f"{row['L']:.2f}", sum_str, f"{rdrawn - total:+.2f}",
+                                    f"pass as a run of {len(keys)} ({label}): the boundary between these arcs is not drawn", how])
+                        row_run_fires += 1
+                    else:
+                        out.append([t["tag"], "arc length", f"{row['L']:.2f}", sum_str, f"{rdrawn - total:+.2f}", "FAIL", how])
+                        queue.append({"tag": t["tag"], "issue": f"drawn run {rdrawn:.2f} ft vs row-run table total {total:.2f} ft ({label})", "region": region, "line": shape(span_pieces[-1])})
+                    continue
                 d = seg["len_pt"] * scale
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{d:.2f}", f"{d - row['L']:+.2f}", "FAIL", how])
                 queue.append({"tag": t["tag"], "issue": f"drawn {d:.2f} ft vs table {row['L']:.2f} ft", "region": region, "line": shape(seg)})
@@ -272,6 +369,7 @@ def main():
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "FAIL", how])
                 queue.append({"tag": t["tag"], "issue": f"drawn run {drawn:.2f} ft vs table {row['L']:.2f} ft (run holds {len(Ls)} tags summing {total:.2f})", "region": region, "line": shape(ref_seg)})
 
+    row_run_fires = 0  # leg9A: tags that only passed as a run of consecutive table rows (some untagged)
     by_parent = {}
     for hit in curve_hits:
         by_parent.setdefault(hit[2]["parent"], []).append(hit)
@@ -345,6 +443,7 @@ def main():
     print(f"tags read {len(tags)} ({len(complete)} complete, {len(tags) - len(complete)} partial) of {len(rows)} table rows | "
           f"associated {len(assoc)} ({sum(1 for r in out if r[6] == 'leader') // 2} by leader) | queued {len(queue)}")
     print(f"  leg8A: tick/stub resolution {tick_fires} | own-window pass {window_fires} | group-run pass {group_fires}")
+    print(f"  leg9A: consecutive-row-run pass {row_run_fires}")
     for check in ("bearing", "distance", "radius", "arc length"):
         rs = [r for r in out if r[1] == check and (r[5] in ("pass", "FAIL") or r[5].startswith("pass as a run"))]
         print(f"  {check:11} checked {len(rs):3}  pass {sum(r[5].startswith('pass') for r in rs):3}  fail {sum(r[5] == 'FAIL' for r in rs):3}" + (f"  ({sum(r[5].startswith('pass as') for r in rs)} as a run)" if any(r[5].startswith('pass as') for r in rs) else ""))

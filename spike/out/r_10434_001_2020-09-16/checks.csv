@@ -98,7 +98,7 @@ bearing,"N38°07'02""W","N38°06'57""W",0.1',pass
 arc length,536.09',183.47 (R=nan),-352.62,FAIL
 bearing,"N38°07'02""W","N38°06'57""W",0.1',pass
 arc length,572.05',183.47 (R=nan),-388.58,FAIL
-arc length,L=23.48',16.98,-6.50,FAIL
+arc length,L=23.48',40.45,+16.97,FAIL
 arc length,L=303.85',196.07,-107.78,FAIL
 arc length,L=1804.98',58.71,-1746.27,FAIL
 arc length,L=5.57',6.38,+0.81,FAIL

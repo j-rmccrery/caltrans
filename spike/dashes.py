@@ -15,7 +15,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from georef import OUT, PDF  # noqa: E402
+from georef import OUT, PDF, frame  # noqa: E402
 
 REACH_FLOOR = 20.0  # pt: never chain tighter than this, even if a sheet's dashes sit almost end to end
 SIDE_TOL = 1.0   # pt: sideways offset off the current heading
@@ -24,6 +24,107 @@ PARCEL_SEG_ID = re.compile(r"^RW-PARCEL-SEG-\d")  # a numbered-parcel suffix (CH
 # RW-PARCEL-SEG-9178-16), not a named one (Presidio/r10434's RW-PARCEL-SEG-Directors_Deeds,
 # RW-PARCEL-SEG-REACQUISITION -- solid lines already handled without dash_trains, and a layer-free
 # scan of them re-triggers the 2,800-stroke/250-train flood this layer restriction exists to avoid)
+
+DOTDASH_MAX_LEN = 15.0  # pt: covers this drafter's ~11.7 pt dash-dot dash and its own ~1.8-3.6 pt dot
+DOTDASH_SKIP_LAYER = re.compile(r"LBL|TEXT|TXT|ANNO|TBL|ATT_FIELD|Wipeout|PNT|border|Format|Seal", re.I)
+# a dash-dot boundary can live on any CAD layer (Presidio's C20 sits on RW-ALGN-LNWK-EXIST-XA, the same
+# solid-alignment layer as ordinary boundary linework, not a dash-specific one), so collect_dashdot casts
+# a much wider net than collect_dashes' named-pattern layers -- this excludes only the layers that are
+# never boundary linework at all (label lettering, tables, sheet furniture: the same categories
+# checks.NOT_LINEWORK already names for the same reason), so the net doesn't have to be as wide as "every
+# stroke on the sheet"
+
+
+def _dotdash_strokes(d):
+    for it in d["items"]:
+        if it[0] == "l":
+            a, b = np.array([it[1].x, it[1].y]), np.array([it[2].x, it[2].y])
+            L = float(np.hypot(*(b - a)))
+            if 0 < L < DOTDASH_MAX_LEN:
+                yield a, b
+
+
+def collect_dashdot(page, blocks):
+    """Every short stroke that could be part of a dash-dot boundary line: any CAD layer except the ones
+    collect_dashes already owns (so the identical strokes never chain twice into two candidate trains for
+    the same physical line) or one of DOTDASH_SKIP_LAYER's non-linework categories, dark (a light-grey
+    hatch stroke is not a boundary), and outside every real text block's own oriented box (glyph strokes
+    read the same as short dashes at this drafter's font size -- the same false-candidate checks.py's own
+    _dash_points already guards against, for the identical reason)."""
+    if not blocks:
+        return []
+    centers = np.array([[b["cx"], b["cy"]] for b in blocks])
+    btree = cKDTree(centers)
+    reach = max(float(np.median([b["w"] for b in blocks])), 20.0)
+
+    def in_text(p):
+        for j in btree.query_ball_point(p, reach):
+            b = blocks[j]
+            c, u, n = frame(b)
+            if abs((p - c) @ u) < b["w"] / 2 and abs((p - c) @ n) < b["h"] / 2:
+                return True
+        return False
+
+    out = []
+    for d in page.get_drawings():
+        layer = d.get("layer") or ""
+        if _is_dash_layer(layer) or DOTDASH_SKIP_LAYER.search(layer):
+            continue
+        c = d.get("color")
+        if c is None or max(c) > 0.6:
+            continue
+        r = d["rect"]
+        if max(r.width, r.height) > 20:
+            # a genuine dash/dot mark is its own small, isolated drawn object (this drafter's rw_EASE
+            # dashes and this pattern's own dash/dot alike, checked: both stay under 12 pt); a big
+            # multi-facet polyline (an ordinary solid curve or line, tessellated into many short facets on
+            # the identical layer) is one drawing object spanning the whole curve -- without this, its own
+            # facets read as a dash-dot pattern too (they vary in length just like a real one), and
+            # dash_trains() -- built to chain exactly this kind of same-heading run -- chains the entire
+            # curve into one enormous false "train"
+            continue
+        for a, b in _dotdash_strokes(d):
+            if not in_text((a + b) / 2):
+                out.append((a, b))
+    return out
+
+
+def dashdot_trains(page, blocks, bridge=None):
+    """Loop9 leg A rule 2: a dash-dot pattern (long dash, short dot, repeating, same heading) chained
+    into a train the same way dash_trains() already chains a plain dashed line -- the chaining itself
+    doesn't care about a stroke's own length, only its position and heading, so collect_dashdot's wider
+    net plus the ordinary dash_trains() walk (reach estimated from THIS pattern's own gaps, same as a
+    plain dash) already does the chaining; what's added here is recognising the RESULT as a genuine
+    dash-dot run rather than noise. A chained train's own point-to-point segment lengths are exactly its
+    original strokes' lengths in walk order (every original stroke contributes exactly one new point), so
+    the pattern is read straight off the output polyline, no separate bookkeeping needed: kept only where
+    both a long-dash cluster and a short-dot cluster are clearly present (the short cluster's members are
+    under 40% of the median segment length -- this drafter's dot 1.8-3.6 pt vs dash ~11.5 pt is a wide
+    gap, never close to that line) and each cluster has at least 2 members, so an ordinary uniform dash
+    (all one length -- already collect_dashes()' own job where it applies) or a stray noise fragment
+    can't pass as a dash-dot line."""
+    trains = dash_trains(collect_dashdot(page, blocks), bridge=bridge)
+    out = []
+    for t in trains:
+        seg = np.diff(t["pts"], axis=0)
+        lens = np.hypot(*seg.T)
+        if len(lens) < 4:
+            continue
+        med = float(np.median(lens))
+        if med <= 0:
+            continue
+        short, long_ = lens[lens < 0.4 * med], lens[lens >= 0.4 * med]
+        if len(short) < 2 or len(long_) < 2:
+            continue
+        # "repeating" (a real linetype), not merely bimodal: the dash cluster's own lengths stay close to
+        # one value -- a chain that wandered from one physical dash-dot run onto a different, unrelated
+        # one (or onto an ordinary solid curve's varying tessellation facets, `collect_dashdot`'s object-
+        # size filter isn't perfect right at a busy vertex) shows up as a dash cluster with much wider
+        # spread than a genuine single pattern's plot-scale rounding ever produces
+        if float(np.std(long_) / np.mean(long_)) > 0.5:
+            continue
+        out.append(t)
+    return out
 
 
 def _strokes(d):

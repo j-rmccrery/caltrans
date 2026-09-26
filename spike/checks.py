@@ -254,6 +254,25 @@ def circle_center3(P):
     return np.array([ux, uy])
 
 
+def circle_fit_lsq(P):
+    """(centre, radius) from a least-squares (algebraic) circle through EVERY point of P, not just three
+    samples: circumradius3's first/middle/last picks a shallow arc's tiny sagitta out of whatever noise
+    sits at exactly those three points, which drifts far worse the longer and straighter (lower-curvature)
+    the piece -- measured on Presidio's C21 candidate, a compound curve of many points: circumradius3 gave
+    2192 ft, the full least-squares fit 1419 ft, for a curve whose record is 1380 ft. Used wherever a
+    stitch join's radius needs to survive a many-point whole curve (chain_curve_paths' wider bridge, leg9A
+    attempt 2), not for split_at's own per-piece candidates, which stay on circumradius3 as before. Falls
+    back to circumradius3/circle_center3 under 4 points, where a least-squares fit has no more information
+    than the three-point one anyway."""
+    if len(P) < 4:
+        return circle_center3(P), circumradius3(P)
+    x, y = P[:, 0], P[:, 1]
+    sol, *_ = np.linalg.lstsq(np.c_[2 * x, 2 * y, np.ones(len(x))], x ** 2 + y ** 2, rcond=None)
+    cx, cy, c = sol
+    r = math.sqrt(max(c + cx ** 2 + cy ** 2, 0))
+    return (np.array([cx, cy]), float(r)) if 0 < r < 1e7 else (None, float("inf"))
+
+
 def arcs_on_sheet(page):
     """Curved lines: runs of bezier items in a path, sampled; length and a circumradius estimate."""
     from overlay import bezier
@@ -550,6 +569,145 @@ def split_at(P, circles, chains, tol=2.0, ticks=()):
             pieces.append(np.array(pts[start:i + 1]))  # one facet is still an arc: C18 is 6 ft on R=1470
             start = i
     return pieces
+
+
+STITCH_GAP = 1.0        # pt: curve paths whose ends meet this close are one drawn curve, not two
+STITCH_TANGENT_DEG = 3.0  # deg: end tangents must agree this closely across the join
+STITCH_RADIUS_FRAC = 0.02  # fraction: fitted (three-point) radii must agree this closely across the join
+STITCH_ON_CIRCLE = 1.0  # pt: a bridged join's far point must land this close to the near path's own
+# fitted circle (leg9A attempt 2: a gap wider than STITCH_GAP needs its own evidence that the arc
+# actually continues through the gap, not just that the two paths happen to point the same way)
+
+
+def _end_tangent(P, end, k=4):
+    """Unit heading at P's start (end=0, direction of travel leaving p0) or finish (end=1, direction of
+    travel arriving at p1), k points in from the tip (capped to what the piece has)."""
+    k = min(k, len(P) - 1)
+    v = (P[k] - P[0]) if end == 0 else (P[-1] - P[-1 - k])
+    n = np.hypot(*v)
+    return v / n if n > 1e-9 else v
+
+
+STITCH_END_SPAN = 40  # points: a join test needs the curvature AT the end that's joining, not the whole
+# raw path's own overall fit -- a "curve" that is itself several record arcs plus a near-straight tangent
+# stretch end to end (Presidio's own C21 candidate: one 134-point raw chain whose middle third fits a
+# 15,900 ft "radius", essentially straight) fits nothing sensible as one circle, even though the specific
+# end actually joining a neighbour is a clean, consistent arc on its own
+
+
+def _end_circle(P, end, span=STITCH_END_SPAN):
+    """(centre, radius) fit to just the `span` points nearest this end (all of them, short of that): the
+    LOCAL curvature at the end that would do the joining, immune to whatever the rest of a long or
+    compound raw path does elsewhere."""
+    return circle_fit_lsq(P[:span] if end == 0 else P[-span:])
+
+
+def chain_curve_paths(raws, bridge=0.0):
+    """Loop9 leg A rule 1: chain curve paths (bezier or polyline, build_pool's own raw whole-curve
+    candidates, before split_at ever cuts one) whose ends meet within STITCH_GAP (or within `bridge` --
+    a text wipeout or a crossing callout leader can blank a thin alignment curve for a few glyph heights,
+    same reasoning as dash_trains' own bridge), whose end tangents agree within STITCH_TANGENT_DEG (the
+    two paths' headings run continuously through the shared point, whichever end of each meets) and
+    whose fitted three-point-circle radii (circumradius3) agree within STITCH_RADIUS_FRAC, into one
+    parent -- a compound record curve some drafters draw as several separate PDF paths end to end
+    (Presidio's C21: R=1380.00', L=876.88', measured as 449.84 because the parent used to be whichever
+    single path the label's own piece happened to fall on). A join past STITCH_GAP additionally needs the
+    far path's start to land within STITCH_ON_CIRCLE of the near path's own fitted circle (attempt 2):
+    two paths can point the same way and share a radius by coincidence at a wider reach, but only a join
+    where the far point actually sits ON the near arc's circle is evidence the SAME arc continues through
+    the gap, not just that some other similar-radius curve happens to sit nearby pointing the same way.
+    `raws`: [{"pts": Nx2 array, "width": float, "ticks_ok": bool, "source": "bezier"|"poly"}], each one
+    of build_pool's existing raw curve candidates (unchanged). Returns groups in the same shape plus
+    "n_merged" (paths joined into this one, 1 = untouched) and, for a merged group, "source" dropped
+    (mixed-source groups are legitimate: a bezier facet meeting a polyline one is still one drawn curve).
+    A singleton group carries its original dict back unchanged (by value), so nothing about an unmerged
+    curve's downstream treatment can drift from before this rule existed."""
+    n = len(raws)
+    info = []
+    for r in raws:
+        P = r["pts"]
+        # the ORIGINAL, tight-join test (gap <= STITCH_GAP) keeps circumradius3's own whole-path fit,
+        # byte-for-byte as the first version of this rule -- proven safe (leg9A bench: no tag pass lost
+        # anywhere) before the wider bridge ever existed. Only a join past STITCH_GAP falls back to the
+        # local end fit; touching the tight join's own radius source regressed a passing tag on
+        # r10434_3 (C33) even with bridge=0, from nothing but the different fitting method
+        info.append({"p0": P[0], "p1": P[-1], "h0": _end_tangent(P, 0), "h1": _end_tangent(P, 1),
+                     "radius": circumradius3(P) if len(P) >= 3 else float("nan"),
+                     "ends": [_end_circle(P, 0), _end_circle(P, 1)] if len(P) >= 3 else [(None, float("nan"))] * 2})
+    uf = list(range(n))
+
+    def find(x):
+        while uf[x] != x:
+            uf[x] = uf[uf[x]]
+            x = uf[x]
+        return x
+
+    reach = max(STITCH_GAP, bridge)
+    pairs = []
+    for i in range(n):
+        for j in range(i + 1, n):
+            for ei, pi in ((0, info[i]["p0"]), (1, info[i]["p1"])):
+                for ej, pj in ((0, info[j]["p0"]), (1, info[j]["p1"])):
+                    gap = float(np.hypot(*(pi - pj)))
+                    if gap > reach:
+                        continue
+                    if gap <= STITCH_GAP:
+                        ri, rj = info[i]["radius"], info[j]["radius"]
+                        if not (math.isfinite(ri) and math.isfinite(rj)) or abs(ri - rj) > STITCH_RADIUS_FRAC * max(ri, rj):
+                            continue
+                    else:
+                        ci, ri = info[i]["ends"][ei]
+                        cj, rj = info[j]["ends"][ej]
+                        if not (math.isfinite(ri) and math.isfinite(rj)) or abs(ri - rj) > STITCH_RADIUS_FRAC * max(ri, rj):
+                            continue  # the curvature AT this end, not the raw path's overall (possibly
+                            # compound) fit -- see _end_circle
+                        on_i = ci is None or abs(float(np.hypot(*(pj - ci))) - ri) < STITCH_ON_CIRCLE
+                        on_j = cj is None or abs(float(np.hypot(*(pi - cj))) - rj) < STITCH_ON_CIRCLE
+                        if not (on_i and on_j):
+                            continue
+                    hi = info[i]["h0"] if ei == 0 else info[i]["h1"]
+                    hj = info[j]["h0"] if ej == 0 else info[j]["h1"]
+                    # one path arrives where the other leaves (ei=1,ej=0 or ei=0,ej=1): headings must
+                    # point the SAME way through the join; two paths meeting end-to-end or start-to-start
+                    # are drawn in opposite directions, so one heading must be reversed to compare
+                    same_dir = (ei == 1 and ej == 0) or (ei == 0 and ej == 1)
+                    agree = (hi @ hj) if same_dir else -(hi @ hj)
+                    ang = math.degrees(math.acos(np.clip(agree, -1.0, 1.0)))
+                    if ang <= STITCH_TANGENT_DEG:
+                        pairs.append((gap, i, ei, j, ej))
+    pairs.sort(key=lambda t: t[0])
+    used_end, join_map = set(), {}
+    for gap, i, ei, j, ej in pairs:
+        if (i, ei) in used_end or (j, ej) in used_end or find(i) == find(j):
+            continue  # an endpoint joins at most one other path; a path never chains into its own group twice
+        used_end.add((i, ei)); used_end.add((j, ej))
+        join_map[(i, ei)] = (j, ej); join_map[(j, ej)] = (i, ei)
+        ri, rj = find(i), find(j)
+        uf[ri] = rj
+    comps = {}
+    for i in range(n):
+        comps.setdefault(find(i), []).append(i)
+    groups = []
+    for members in comps.values():
+        if len(members) == 1:
+            groups.append({**raws[members[0]], "n_merged": 1})
+            continue
+        free = [(i, e) for i in members for e in (0, 1) if (i, e) not in join_map]
+        cur_i, enter_e = free[0] if free else (members[0], 0)  # a closed loop (shouldn't happen for a
+        # drawn boundary curve) falls back to an arbitrary start rather than walking forever
+        pts_out, visited = [], set()
+        while True:
+            visited.add(cur_i)
+            P = raws[cur_i]["pts"]
+            seg = P if enter_e == 0 else P[::-1]
+            pts_out.extend(seg.tolist() if not pts_out else seg[1:].tolist())
+            nxt = join_map.get((cur_i, 1 - enter_e))
+            if nxt is None or nxt[0] in visited:
+                break
+            cur_i, enter_e = nxt
+        groups.append({"pts": np.array(pts_out), "width": raws[members[0]]["width"],
+                       "ticks_ok": any(raws[i]["ticks_ok"] for i in members), "n_merged": len(members)})
+    return groups
 
 
 CHORD_REJECTS = [0]  # module-level counter: candidate spans dropped by chord_ok below, for the bench report
@@ -900,6 +1058,7 @@ def build_pool(page, blocks):
     pool checks.py itself measured against (leg6A_crops.py), so a diagnostic never silently drifts from
     what the checker actually saw."""
     chains, circles, paths, segs = sheet_lines(page, blocks)
+    glyph_h_med = float(np.median([b["glyph_h"] for b in blocks])) if blocks else 6.0
     # curves on this sheet are mostly polylines (Civil 3D export), a few are beziers; a drawn curve runs
     # through several record arcs, so it is cut where lines meet it and at vertex circles
     junction_lines = [c for c in chains if c["len_pt"] >= 9]
@@ -927,21 +1086,50 @@ def build_pool(page, blocks):
     # enough to splice unrelated curves' pieces into one "parent" (measured on r10434_1: an 869 ft curve's
     # group pulled in an 800 ft piece from a different curve entirely) -- a strictly incrementing int
     # can't collide.
+    # loop9 leg A rule 1: a compound record curve some drafters draw as several separate PDF paths end to
+    # end (not merely several record arcs along one path, which split_at already handles) is chained into
+    # ONE raw candidate here, before any of them are cut -- so a window search can cross the join. Only
+    # the raw whole-curve candidates feed this (bezier objects, polyline curved chains); a merged group's
+    # own three-point-circle radius/width stand in for the whole run's, same as a single bezier path's
+    # always did. Untouched (n_merged == 1) curves replay byte-for-byte identical to before this rule.
+    bez_raw = [{"pts": x["pts"], "len_pt": x["len_pt"], "radius_pt": x["radius_pt"], "width": x["width"],
+                "ticks_ok": x["width"] < 0.8, "source": "bezier"}
+               for x in arcs_on_sheet(page) if max(x["color"]) < 0.2 and np.hypot(*(x["pts"][0] - x["pts"][-1])) > 2]
+    poly_raw = [{"pts": c["pts"], "len_pt": c["len_pt"], "radius_pt": c["radius_pt"], "width": c["width"],
+                 "ticks_ok": c["width"] < 0.8, "source": "poly"}
+                for c in lines_on_sheet(segs, circles, max_turn_deg=20.0) if c["n"] >= 3 and c["len_pt"] > 12]
+    # leg9A attempt 2: tried a 6-glyph-height bridge (join across a wipeout/crossing-leader gap, gated
+    # on end tangent + radius + the far point landing on the near arc's own fitted circle -- see
+    # chain_curve_paths). Measured, not kept: C21's own nearest candidate at that reach (10.65 pt away)
+    # fails all three gates at once (tangent off 8.4 deg, radius off 9.3%, on-circle residual 2.4 pt) --
+    # a genuinely different curve, not C21 obscured by a wipeout -- so the bridge gains C21 nothing, and
+    # it cost a real regression elsewhere: r10434_3's C33 (radius pass at 2884' record / 2879.66' measured,
+    # -0.15%) re-parents under the wider reach to a piece measuring 2925.48' (+1.44%), crossing tables.py's
+    # 1% RADIUS_TOL and losing a pass. Bridge back to 0 (the original, proven-safe tight join only); the
+    # widened form stays in chain_curve_paths (bridge=<pt>) for the record and for re-measuring later.
+    curve_groups = chain_curve_paths(bez_raw + poly_raw, bridge=0.0)
+    stitch_merges = sum(1 for g in curve_groups if g["n_merged"] > 1)
+    stitch_paths = sum(g["n_merged"] for g in curve_groups if g["n_merged"] > 1)
     parent_id = itertools.count()
     arcs = []
-    for x in arcs_on_sheet(page):
-        if max(x["color"]) < 0.2 and np.hypot(*(x["pts"][0] - x["pts"][-1])) > 2:
-            parent = next(parent_id)
-            arcs.append({"pts": x["pts"], "len_pt": x["len_pt"], "radius_pt": x["radius_pt"], "width": x["width"], "parent": parent})  # the whole, unsplit: no "seq" (never itself part of a sum-group)
-            pieces = split_at(x["pts"], circles, junction_lines, ticks=ticks if x["width"] < 0.8 else ())
-            if len(pieces) > 1:
-                for i, P in enumerate(pieces):
-                    arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": x["radius_pt"], "width": x["width"], "parent": parent, "seq": i})
-    for c in lines_on_sheet(segs, circles, max_turn_deg=20.0):
-        if c["n"] >= 3 and c["len_pt"] > 12:
-            parent = next(parent_id)
-            for i, P in enumerate(split_at(c["pts"], circles, junction_lines, ticks=ticks if c["width"] < 0.8 else ())):
-                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": c["radius_pt"], "width": c["width"], "parent": parent, "seq": i})
+    for g in curve_groups:
+        parent = next(parent_id)
+        merged = g["n_merged"] > 1
+        radius_pt = circle_fit_lsq(g["pts"])[1] if merged else g["radius_pt"]  # a merged group's own fit
+        # (least-squares over every point -- circumradius3's 3-point sample is unreliable this long, same
+        # reasoning as chain_curve_paths' own join test); an untouched path keeps exactly the value it
+        # always carried (real for a bezier, NaN for a polyline)
+        if merged or g["source"] == "bezier":
+            arcs.append({"pts": g["pts"], "len_pt": float(np.sum(np.hypot(*np.diff(g["pts"], axis=0).T))),
+                         "radius_pt": radius_pt, "width": g["width"], "parent": parent})  # the whole, unsplit: no "seq" (never itself part of a sum-group)
+        pieces = split_at(g["pts"], circles, junction_lines, ticks=ticks if g["ticks_ok"] else ())
+        # a merged group, like a polyline curve always did, is checkable piece by piece even where
+        # split_at found no internal cut at all (a single-piece "run of 1"); an untouched bezier path
+        # keeps its old rule -- only add pieces when it's actually cut, since its whole entry above
+        # already covers the uncut case and a duplicate identical candidate would just be noise
+        if merged or g["source"] == "poly" or len(pieces) > 1:
+            for i, P in enumerate(pieces):
+                arcs.append({"pts": P, "len_pt": float(np.sum(np.hypot(*np.diff(P, axis=0).T))), "radius_pt": radius_pt, "width": g["width"], "parent": parent, "seq": i})
     # the dashed easement/parcel line (leg B, widened leg 5b): each dash is its own path, so nothing
     # above sees it; chained into trains (dashes.py) and split at the same circles/junctions as the
     # solid curves, so a train spanning several record segments (compound curve) becomes one arc per
@@ -952,15 +1140,25 @@ def build_pool(page, blocks):
     # candidate either way -- it can win "nearest" over the real, longer curve/line by sheer proximity
     # (loop3 leg5 attempt 1: a stray 12 ft dash piece beat the correct 573 ft arc for an unrelated
     # label) -- so every piece is held to the same 5-glyph-height floor the standalone-L arc search uses.
-    from dashes import collect_dashes, dash_trains
-    glyph_h_med = float(np.median([b["glyph_h"] for b in blocks])) if blocks else 6.0
+    from dashes import collect_dashes, dash_trains, dashdot_trains
     dash_floor = 5.0 * glyph_h_med
     RESID_TOL = 2.0  # pt: a fitted line's max perpendicular residual, for a bridged train whose raw
     # heading spread reads >2 deg even though it is straight -- the spread test measures dash-to-dash
     # turn one step at a time and a few tenths of a degree of chaining noise compounds over many dashes,
     # while the fit sees the whole run at once; still twice SIDE_TOL (the per-step lateral tolerance
     # chaining itself already enforces), so a run that is genuinely curved (not noisy-straight) still fails
-    for t in dash_trains(collect_dashes(page), bridge=6.0 * glyph_h_med):
+    # loop9 leg A rule 2: a dash-dot boundary (Presidio's C20) chains into a train the same way, joining
+    # the same candidate pool -- split at the same circles/junctions, held to the same floor, admitted as
+    # a straight chain the same way a train that turns out not to be curved already is
+    dd_trains = dashdot_trains(page, blocks, bridge=6.0 * glyph_h_med)
+    # each piece from a dash-dot train (not a plain single-pattern dash) is marked "dashdot": True -- a
+    # dash-dot pattern this generic ("any layer", loop9 leg A rule 2's own docstring) is far more likely
+    # to be a road-alignment centerline than the specific record boundary a nearby unrelated small curve's
+    # table row names (measured on r10434_3: C6/C32/C9/C33 all picked up the SAME wide alignment
+    # centerline train as their nearest "beside" candidate, none of them actually its record). tables.py's
+    # own no-leader "beside" curve search excludes this marker; a leader landing squarely on the piece
+    # (Presidio's C20) is a much stronger signal and still uses it.
+    for t, is_dashdot in [(t, False) for t in dash_trains(collect_dashes(page), bridge=6.0 * glyph_h_med)] + [(t, True) for t in dd_trains]:
         if len(t["pts"]) < 3:
             continue
         parent = next(parent_id)
@@ -968,7 +1166,7 @@ def build_pool(page, blocks):
             L = float(np.sum(np.hypot(*np.diff(P, axis=0).T)))
             if L <= dash_floor:
                 continue
-            arcs.append({"pts": P, "len_pt": L, "radius_pt": t["radius_pt"], "width": 0.84, "parent": parent, "seq": i})
+            arcs.append({"pts": P, "len_pt": L, "radius_pt": t["radius_pt"], "width": 0.84, "parent": parent, "seq": i, "dashdot": is_dashdot})
             seg = np.diff(P, axis=0)
             headings = np.degrees(np.arctan2(seg[:, 1], seg[:, 0]))
             ref = headings[0]
@@ -999,7 +1197,8 @@ def build_pool(page, blocks):
         arcs = [x for x in arcs if np.mean([_inside_nts(p) for p in x["pts"]]) < 0.8]
     return {"chains": chains, "circles": circles, "paths": paths, "segs": segs, "arcs": arcs, "tips": tips,
             "FURNITURE": FURNITURE, "NTS": NTS, "NTS_REPORT": NTS_REPORT, "junction_lines": junction_lines,
-            "ticks": ticks, "glyph_h_med": glyph_h_med}
+            "ticks": ticks, "glyph_h_med": glyph_h_med, "dashdot_trains": dd_trains,
+            "stitch_merges": stitch_merges, "stitch_paths": stitch_paths}
 
 
 def main():
@@ -1503,6 +1702,9 @@ def main():
         print(f"  {k:16} checked {n:3}  pass {ok:3}  fail {n - ok:3}" if k != "bearing (R)" else f"  {k:16} {n:3} radial bearings, not checked against a line")
     print(f"  exceptions (fails + unmatched labels): {len(exceptions)}")
     print(f"  chord-sanity rejections (span chord > printed length): {CHORD_REJECTS[0]}")
+    print(f"  leg9A rule 1: {pool['stitch_merges']} parent(s) stitched from {pool['stitch_paths']} curve paths")
+    dd = pool["dashdot_trains"]
+    print(f"  leg9A rule 2: {len(dd)} dash-dot train(s)" + ("" if not dd else ": " + ", ".join(f"{t['len_pt'] * scale:.1f} ft" for t in sorted(dd, key=lambda t: -t['len_pt']))))
     for e in exceptions[:12]:
         print("   ", e)
 
