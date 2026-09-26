@@ -132,7 +132,6 @@ bearing (R),"S11°37'35""E(R)",,,radial: not checked
 arc length,L=269.94',269.82,-0.12,pass
 bearing,"S3°55'39""E","S3°58'18""E",2.7',pass
 distance,44.49',44.45,-0.04,pass
-distance,1991.35,552.90,-1438.45,FAIL
 arc length,L=171.66',530.45,+358.79,FAIL
 curve L=R*delta,R=305.0 Δ=20.5381° L=109.33,109.33,-0.00,pass
 curve L=R*delta,R=15.0 Δ=50.7039° L=13.27,13.27,+0.00,pass

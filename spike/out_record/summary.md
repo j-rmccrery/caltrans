@@ -35,10 +35,9 @@
 - Part B: 7 station labels on the drawing, 7 within 15 pt of a drawn segment.
   - along-line distance (straight-line proxy) vs station diff, 5 consecutive pairs: median |diff| 364.8 ft, max 615.8 ft
   - line_dist is straight-line ft between the two labels' nearest-segment points, not arc-traced along curves, and 'nearest segment' can pick the wrong parallel line (same ambiguity STATE.md's Known Traps already documents for this codebase)
-- Part C: 38 curve rows (L=R*delta fails: 0), 33 line rows (bad cell count: 12).
+- Part C: 38 curve rows (L=R*delta fails: 0), 45 line rows (bad cell count: 0).
   - chord check: no chord column printed in this sheet's curve tables (cells are always R, delta, L)
-  - tangency (info): 28 tags have traced geometry; adjacent-endpoint pairs found {'line-line': 6, 'line-curve': 0, 'curve-curve': 0}; 0/0 direct line-curve-line joins match printed delta within tolerance
-  - crops rendered for classification: L34, L35, L36, L37, L38, L39, L40, L41, L42, L43, L44, L45
+  - tangency (info): 32 tags have traced geometry; adjacent-endpoint pairs found {'line-line': 6, 'line-curve': 0, 'curve-curve': 0}; 0/0 direct line-curve-line joins match printed delta within tolerance
 
 ## R-10741.1
 - Part A: no ALIGNMENT DATA table (no STATION/NORTHING/EASTING header) on this sheet.

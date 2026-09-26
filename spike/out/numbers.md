@@ -8,13 +8,13 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 ## Printed vs drawn (labels on the drawing)
 | check | checked | pass |
 |---|---|---|
-| distance | 49 | 41 |
+| distance | 48 | 41 |
 | bearing | 43 | 41 |
 | arc length | 16 | 13 |
 | curve L=R*delta | 10 | 10 |
 
 - Where a label passes, printed vs drawn agrees to 0.03 ft median (max 0.24) and 1.0′ median bearing.
-- Exception queue: 43 items = 1 genuine disagreements, 12 where the reader measured a different line, 25 labels with no line found, 5 lines leaving the sheet.
+- Exception queue: 41 items = 1 genuine disagreements, 11 where the reader measured a different line, 25 labels with no line found, 4 lines leaving the sheet.
 
 ## Table tags (L#, C#) read from the glyph paths, no OCR
 - 32 of 44 table rows found on the drawing (32 distinct), 14 partial reads queued, 25 associated (21 by leader arrowhead), 31 queue items.

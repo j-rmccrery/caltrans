@@ -9,7 +9,7 @@
  },
  "checks": {
   "distance": {
-   "checked": 49,
+   "checked": 48,
    "pass": 41
   },
   "bearing": {
@@ -34,11 +34,11 @@
   }
  },
  "exceptions": {
-  "total": 43,
+  "total": 41,
   "unmatched": 25,
-  "matchline": 5,
+  "matchline": 4,
   "disagree_small": 1,
-  "wrong_line": 12
+  "wrong_line": 11
  },
  "tags": {
   "table_rows": 44,

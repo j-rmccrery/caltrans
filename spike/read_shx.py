@@ -278,11 +278,17 @@ def build_tables(ann):
             cols.append((letter0, col, pitch or 14))
 
     # cap how far right a row reaches at the next column's own x, so a row never picks up a
-    # neighbouring table's cells (curve1 and curve2 sit only ~200pt apart on this sheet)
-    anchors = sorted(min(c[1] for c in col) for _, col, _ in cols)
+    # neighbouring table's cells (curve1 and curve2 sit only ~200pt apart on this sheet) -- but
+    # only a column whose y-range actually overlaps this one's is a same-row neighbour; a same-
+    # lettered column elsewhere on the sheet (three curve tables all starting near x 718-721, one
+    # 700+pt below a line table) is a different table and must never cap this one (checks.py's
+    # line_curve_table_regions found this: it capped R-10434.3's L34-45 distance column short, at
+    # x 707 instead of its own cell at x 724, silently dropping every DISTANCE cell in that table).
+    col_extents = [(min(c[1] for c in col), min(c[2] for c in col), max(c[2] for c in col)) for _, col, _ in cols]
 
-    def x_max(x0):
-        nxt = min((a for a in anchors if a > x0 + 5), default=None)
+    def x_max(x0, y0, y1):
+        nxt = min((ox0 for ox0, oy0, oy1 in col_extents
+                    if ox0 > x0 + 5 and oy0 <= y1 + 10 and oy1 >= y0 - 10), default=None)
         return x0 + (min(250, nxt - 10 - x0) if nxt else 250)
 
     rows, out_regions = {}, []
@@ -291,7 +297,7 @@ def build_tables(ann):
         n_expected = 2 if kind == "line" else 3
         band = max(6.0, 0.6 * pitch)
         reach = []
-        xcap = x_max(min(c[1] for c in col))
+        xcap = x_max(min(c[1] for c in col), min(c[2] for c in col), max(c[2] for c in col))
         for _, cx0, cy0, num in col:
             row = [(t, cx, x1) for t, cx, cy, x1 in items if not NO_RE.match(t) and cx > cx0 and cx < xcap and abs(cy - cy0) < band]
             row.sort(key=lambda z: z[1])

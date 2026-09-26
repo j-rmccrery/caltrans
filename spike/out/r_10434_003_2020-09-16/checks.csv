@@ -172,7 +172,6 @@ bearing,"N86°41'46""W","N86°41'29""W",0.3',pass
 arc length,324.13',192.91 (R=nan),-131.22,FAIL
 bearing,"S81°06'31""W","S81°04'28""W",2.1',pass
 distance,713.71',779.25,+65.54,FAIL
-distance,1991.35,552.95,-1438.40,FAIL
 bearing (R),"N51°11'39""W(R)",,,radial: not checked
 bearing (R),"N53°46'01""E(R)",,,radial: not checked
 bearing (R),"N53°46'19""E(R)",,,radial: not checked

@@ -62,6 +62,9 @@ STATION = re.compile(r"\d\+\d|\bSTA\b", re.I)  # a block naming a station: the n
 AREA_CTX = re.compile(r"SQ\.?\s?FT|ACRES?\b|\bAC\.|±", re.I)  # a parcel-area figure, in a bubble, an acreage
 # table ("*28.31 AC.") or a legend: not a distance; "AC." (the abbreviation) is as common on this sheet as
 # the spelled-out word and was not being caught -- an acreage table read as four false distance labels
+NOTES_CTX = re.compile(r"\bEPOCH\b|\bDATUM\b", re.I)  # the coordinate-basis notes paragraph ("...CCS83
+# Zone 3, EPOCH 1991.35...") a plain float inside it is never a line length; kept to the note's own
+# vocabulary (EPOCH, DATUM) so a real distance elsewhere on the sheet is never touched
 DETAIL_RE = re.compile(r"\bDETAIL\b", re.I)
 _NTS_TOKEN = r"(?<![A-Za-z])(?:N\.?T\.?S\.?|NOT\s+TO\s+SCALE)(?![A-Za-z])"  # "N.T.S." or the spelled-out
 # "NOT TO SCALE" as its own token: a bare substring match (no letter boundary) would also fire inside
@@ -1546,8 +1549,8 @@ def main():
             elif DIST.match(part):
                 m = DIST.match(part)
                 num_str, is_total = dist_num(m)
-                if is_total or curve_data or STATION.search(b["text"]) or AREA_CTX.search(b["text"]):
-                    continue  # (T) totals, curve data (R=, Δ, L=), a station number, or a parcel-area figure: not a line length
+                if is_total or curve_data or STATION.search(b["text"]) or AREA_CTX.search(b["text"]) or NOTES_CTX.search(b["text"]):
+                    continue  # (T) totals, curve data (R=, Δ, L=), a station number, a parcel-area figure, or a coordinate-basis note: not a line length
                 want = float(num_str)
                 baz = next((azimuth(t) for t in parts if BEAR.match(t) and not BEAR.match(t)[6]), None)  # the bearing printed with it
                 led, ln = at_tip(bi, "line", want, want_az=baz)

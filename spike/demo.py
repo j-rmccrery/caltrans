@@ -32,6 +32,7 @@ STEPS = [
     ("segment tags", ["tags.py"]),
     ("table checks via tags", ["tables.py"]),
     ("record twin (traverse)", ["traverse.py"]),
+    ("record self-checks", ["record_checks.py"]),  # alignment tables vs fit, table L=R*Delta, cell counts (all six sheets)
     ("LiDAR features", ["lidar/extract.py"]),
     ("encroachment", ["encroach.py"]),
     ("rasters for QGIS", ["export_rasters.py"]),

@@ -1232,27 +1232,6 @@
   "closed": false,
   "n_edges": 1,
   "full_record": 0,
-  "misfit_max_ft": 1438.45,
-  "misfit_end_ft": 1438.45,
-  "edges": [
-   {
-    "edge": "1991.35",
-    "kind": "line",
-    "az": 89.4638,
-    "ft": 1991.35,
-    "misfit_ft": 1438.45,
-    "flags": [
-     "bearing from drawing"
-    ],
-    "E": 5996947.12,
-    "N": 2119588.78
-   }
-  ]
- },
- {
-  "closed": false,
-  "n_edges": 1,
-  "full_record": 0,
   "misfit_max_ft": 0.0,
   "misfit_end_ft": 0.0,
   "edges": [

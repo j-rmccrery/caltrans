@@ -4,10 +4,10 @@ currently only masked as noise by checks.alignment_table_regions) against statio
 against the georef.py fit; (2) the L#/C# line/curve tables' own internal consistency (L = R*delta,
 tangency, chord), currently only spot-checked by hand in gt.py for one sheet.
 
-Reads ONLY from the frozen snapshot (--snap) plus the read-only sheet PDFs under Sample Data/.
-Never touches spike/out (another agent owns it).
+Reads ONLY from a snapshot (--snap, default spike/out) plus the read-only sheet PDFs under
+Sample Data/. Never writes into it.
 
-usage: python spike/record_checks.py --snap <dir>
+usage: python spike/record_checks.py [--snap <dir>]
 outputs: spike/out_record/<sheet>_record_checks.json, spike/out_record/summary.md, crops for
 failing table self-checks in spike/out_record/crops/
 """
@@ -570,7 +570,7 @@ def summarize(results):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--snap", required=True)
+    ap.add_argument("--snap", default=str(Path(__file__).parent / "out"))
     args = ap.parse_args()
     snap_root = Path(args.snap)
     results = [run_sheet(snap_root, label, subdir, pdf_rel) for label, subdir, pdf_rel in SHEETS]

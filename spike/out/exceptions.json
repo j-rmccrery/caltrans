@@ -575,28 +575,6 @@
   ]
  },
  {
-  "kind": "distance",
-  "text": "1991.35",
-  "drawn_ft": 552.9,
-  "off_ft": -1438.45,
-  "region": [
-   1874,
-   1217,
-   1955,
-   1237
-  ],
-  "line": [
-   [
-    1621.5,
-    1208.8
-   ],
-   [
-    2019.6,
-    1208.8
-   ]
-  ]
- },
- {
   "kind": "bearing",
   "text": "S21°34'50\"E",
   "issue": "piece too short to carry a bearing (4.9 pt)",
@@ -638,17 +616,6 @@
    516,
    2398,
    531
-  ]
- },
- {
-  "kind": "distance",
-  "text": "1991.35",
-  "issue": "line runs to the sheet edge (matchline); not checkable on this sheet",
-  "region": [
-   256,
-   83,
-   597,
-   99
   ]
  },
  {

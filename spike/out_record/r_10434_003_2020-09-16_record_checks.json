@@ -573,7 +573,7 @@
  "part_c": {
   "found": true,
   "n_curve_rows": 38,
-  "n_line_rows": 33,
+  "n_line_rows": 45,
   "curve_self_check": [
    {
     "tag": "C6",
@@ -918,108 +918,11 @@
     "pass": true
    }
   ],
-  "fails": [
-   {
-    "tag": "L34",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "N72\u00b053'52\"W"
-    ]
-   },
-   {
-    "tag": "L35",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "S5\u00b049'27\"E"
-    ]
-   },
-   {
-    "tag": "L36",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "N72\u00b024'02\"E"
-    ]
-   },
-   {
-    "tag": "L37",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "N72\u00b019'10\"E"
-    ]
-   },
-   {
-    "tag": "L38",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "N34\u00b055'48\"W"
-    ]
-   },
-   {
-    "tag": "L39",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "S79\u00b016'27\"W"
-    ]
-   },
-   {
-    "tag": "L40",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "N47\u00b048'52\"W"
-    ]
-   },
-   {
-    "tag": "L41",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "N40\u00b058'19\"W"
-    ]
-   },
-   {
-    "tag": "L42",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "S79\u00b055'23\"W"
-    ]
-   },
-   {
-    "tag": "L43",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "S89\u00b015'37\"W"
-    ]
-   },
-   {
-    "tag": "L44",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "N47\u00b048'51\"W"
-    ]
-   },
-   {
-    "tag": "L45",
-    "check": "line row",
-    "reason": "only 1 cells read (expected bearing+distance)",
-    "cells": [
-     "N38\u00b033'50\"W"
-    ]
-   }
-  ],
+  "fails": [],
   "chord_note": "no chord column printed in this sheet's curve tables (cells are always R, delta, L)",
   "tangency": {
    "available": true,
-   "n_tags_traced": 28,
+   "n_tags_traced": 32,
    "adjacency": {
     "line-line": 6,
     "line-curve": 0,
@@ -1030,55 +933,6 @@
    "detail": [],
    "note": "info only, and only a direct line-curve-line join is checked (a curve bracketed by two more curves -- a compound-curve chain or a corner where several pieces meet, both common here per STATE.md/loop notes on curve stitching -- is not chained through); a non-tangent join is legal record either way, not a fail"
   },
-  "crops": [
-   {
-    "tag": "L34",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L34.png"
-   },
-   {
-    "tag": "L35",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L35.png"
-   },
-   {
-    "tag": "L36",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L36.png"
-   },
-   {
-    "tag": "L37",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L37.png"
-   },
-   {
-    "tag": "L38",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L38.png"
-   },
-   {
-    "tag": "L39",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L39.png"
-   },
-   {
-    "tag": "L40",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L40.png"
-   },
-   {
-    "tag": "L41",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L41.png"
-   },
-   {
-    "tag": "L42",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L42.png"
-   },
-   {
-    "tag": "L43",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L43.png"
-   },
-   {
-    "tag": "L44",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L44.png"
-   },
-   {
-    "tag": "L45",
-    "png": "C:\\Users\\johnr\\projects\\caltrans\\spike\\out_record\\crops\\r_10434_003_2020-09-16_L45.png"
-   }
-  ]
+  "crops": []
  }
 }

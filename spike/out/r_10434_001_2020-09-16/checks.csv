@@ -90,7 +90,6 @@ distance,10.36',10.01,-0.35,FAIL
 distance,7.65',7.65,+0.00,pass
 bearing,"S2°05'55""W","S2°02'08""W",3.8',pass
 bearing,"S2°05'55""W","S2°01'47""W",4.1',pass
-distance,1991.35,552.95,-1438.40,FAIL
 bearing (R),"N76°26'09""W(R)",,,radial: not checked
 bearing (R),"N77°17'41""E(R)",,,radial: not checked
 distance,131.94',74.96,-56.98,FAIL
