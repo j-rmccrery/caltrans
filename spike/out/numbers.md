@@ -17,12 +17,12 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 - Exception queue: 43 items = 1 genuine disagreements, 12 where the reader measured a different line, 25 labels with no line found, 5 lines leaving the sheet.
 
 ## Table tags (L#, C#) read from the glyph paths, no OCR
-- 32 of 44 table rows found on the drawing (32 distinct), 14 partial reads queued, 24 associated (20 by leader arrowhead), 31 queue items.
+- 32 of 44 table rows found on the drawing (32 distinct), 14 partial reads queued, 25 associated (21 by leader arrowhead), 31 queue items.
 | check | checked | pass |
 |---|---|---|
 | bearing | 12 | 11 |
 | distance | 11 | 10 |
-| radius | 7 | 5 |
+| radius | 8 | 5 |
 | arc length | 11 | 6 |
 
 ## Parcels
@@ -37,11 +37,11 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 
 ## Record twin, 2026-09-23 loop 2
 
-Pass counts from `spike/out/bench.csv` (rows labelled `loop8-final`):
+Pass counts from `spike/out/bench.csv` (rows labelled `loop9-final`):
 
 | sheet | distance | bearing | arc length | tags associated | faces named |
 |---|---|---|---|---|---|
-| R-10434.2 Presidio | 41/49 | 41/43 | 16/19 | 24 | 9 |
+| R-10434.2 Presidio | 41/49 | 41/43 | 16/19 | 25 | 9 |
 | R-10434.1 | 26/37 | 21/23 | 12/24 | 14 | 5 |
 | R-10434.3 | 42/59 | 41/42 | 26/39 | 28 | 12 |
 | R-10741.1 | 14/18 | 13/13 | 1/2 | 0 | 0 |

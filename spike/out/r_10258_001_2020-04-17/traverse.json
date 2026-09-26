@@ -94,8 +94,8 @@
   "closed": false,
   "n_edges": 2,
   "full_record": 1,
-  "misfit_max_ft": 14.32,
-  "misfit_end_ft": 14.32,
+  "misfit_max_ft": 0.57,
+  "misfit_end_ft": 0.57,
   "edges": [
    {
     "edge": "183.744 + 19.572",
@@ -111,14 +111,14 @@
     "N": 596073.06
    },
    {
-    "edge": "N37°11'39\"E + 152.039 + N37°11'39\"E + 137.160",
+    "edge": "N37°11'39\"E + N37°11'39\"E + 137.160",
     "kind": "line",
     "az": 37.1942,
-    "ft": 152.04,
-    "misfit_ft": 14.32,
+    "ft": 137.16,
+    "misfit_ft": 0.57,
     "flags": [],
-    "E": 1875238.05,
-    "N": 596194.18
+    "E": 1875229.05,
+    "N": 596182.32
    }
   ]
  },
@@ -407,22 +407,41 @@
   "closed": false,
   "n_edges": 1,
   "full_record": 0,
-  "misfit_max_ft": 0.0,
-  "misfit_end_ft": 0.0,
+  "misfit_max_ft": 7.96,
+  "misfit_end_ft": 7.96,
+  "edges": [
+   {
+    "edge": "152.039",
+    "kind": "line",
+    "az": 37.1958,
+    "ft": 152.04,
+    "misfit_ft": 7.96,
+    "flags": [
+     "bearing from drawing"
+    ],
+    "E": 1875234.21,
+    "N": 596189.12
+   }
+  ]
+ },
+ {
+  "closed": false,
+  "n_edges": 1,
+  "full_record": 0,
+  "misfit_max_ft": 15.25,
+  "misfit_end_ft": 15.25,
   "edges": [
    {
     "edge": "12.133",
-    "kind": "arc",
-    "az": 37.1954,
-    "ft": 32.18,
-    "misfit_ft": 0.0,
+    "kind": "line",
+    "az": 217.2124,
+    "ft": 12.13,
+    "misfit_ft": 15.25,
     "flags": [
-     "L 12.13 ft shorter than the drawn chord: impossible match, dropped from the graph",
-     "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "bearing from drawing"
     ],
-    "E": 1875248.89,
-    "N": 596208.47
+    "E": 1875238.62,
+    "N": 596194.93
    }
   ]
  },
@@ -444,6 +463,27 @@
     ],
     "E": 1875242.84,
     "N": 596218.98
+   }
+  ]
+ },
+ {
+  "closed": false,
+  "n_edges": 1,
+  "full_record": 0,
+  "misfit_max_ft": 0.0,
+  "misfit_end_ft": 0.0,
+  "edges": [
+   {
+    "edge": "N38°05'28\"E",
+    "kind": "line",
+    "az": 38.0911,
+    "ft": 13.48,
+    "misfit_ft": 0.0,
+    "flags": [
+     "distance from drawing"
+    ],
+    "E": 1875146.05,
+    "N": 595999.39
    }
   ]
  },

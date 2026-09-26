@@ -6,9 +6,10 @@ arc length,183.744,138.82 (R=nan),-44.92,FAIL
 arc length,19.572,138.82 (R=nan),+119.25,FAIL
 distance,19.572,13.83,-5.74,FAIL
 distance,137.732,1.59,-136.15,FAIL
-distance,152.039,137.73,-14.31,FAIL
-arc length,12.133,32.19 (R=nan),+20.06,FAIL
+distance,152.039,144.07,-7.96,FAIL
+distance,12.133,27.38,+15.25,FAIL
 distance,12.133,17.02,+4.89,FAIL
+bearing,"N38°05'28""E","N38°05'00""E",0.5',pass
 bearing,"N29°55'49""W","N29°55'47""W",0.0',pass
 arc length,45.289,5.75 (R=150.1),-39.54,FAIL
 distance,13.232,20.00,+6.77,FAIL

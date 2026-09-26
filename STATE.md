@@ -3,7 +3,34 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-25 17:00 after loop 8; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-25 20:00 after loop 9; plan and status in `spike/LOOP.md`)
+
+**Loop 9 (stitch drawn curves, dash-dot trains, consecutive rows; one leg, two attempts).** Curve paths whose ends meet
+are one parent now (`checks.chain_curve_paths`, 1 pt / 3 deg / 2 %); dash-dot patterns chain into trains
+(`dashes.dashdot_trains`) but their pieces are kept out of the no-leader proximity search (by proximity they gave six
+fake fails on R-10434.3, all the alignment centreline); consecutive table rows around a failing tag are checked as a run
+against the drawn run between the marks that exist, untagged rows included (`tables.row_run`): Presidio C15 passes as a
+run of C15 + C16 + C18. Presidio row checks 33 / 9 -> 34 / 10 (C20 now reaches a check and fails honestly); nothing else
+moved on any sheet. C21 stays a real fail: its stitched parent is 706.79 ft of the record's 876.88, and the 10.65 pt gap
+beyond it holds a different curve (tangent 8.4 deg off, radius 9.3 % off). Bench row `loop9-final`.
+
+Note (JR, 2026-09-25 16:50): pull in the new SAM information. Which SAM is unconfirmed.
+
+Do this, in order:
+
+1. **Scan text-line detection on the binarised page** (replace the OCR detector's boxes); if "SAM" is Segment Anything,
+   it is a candidate detector; gate: the 32 keyed boxes landing on their text (24 today).
+2. **Row segmentation of multi-line blocks on 2012-era sheets**: the north reads.
+3. **C21 and C20 class**: the record cites a long thin curve the drawing carries in pieces with other curves between
+   them, or a centreline the leader crosses. Trace by eye where the record's 876.88 ft actually runs on the sheet before
+   writing any rule; the stitched parent and the dash-dot trains are in place to measure against.
+4. **South bearings and arcs, what is left**: bearings 2/2/1 fails; inline arcs 3/12/13.
+5. **R-71.70's 1.29 deg**; **mosaic south + gap**; **1950s scans on the north tile** through their packages.
+6. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze by 10-03.
+
+## Next as of loop 8 (2026-09-25 17:00), kept for the record
+
+### Next (logged 2026-09-25 17:00 after loop 8; plan and status in `spike/LOOP.md`)
 
 **Loop 8 (table tags by parent curve, one leg).** `tables.py` now takes curve arcs from `checks.build_pool` (every piece
 carries its parent curve and sequence) and a curve tag tries its own piece, then a contiguous window of its own curve

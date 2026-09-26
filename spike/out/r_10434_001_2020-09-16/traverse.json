@@ -744,7 +744,7 @@
   "misfit_end_ft": 17.66,
   "edges": [
    {
-    "edge": "L=16.95' + L=23.48'",
+    "edge": "L=16.95'",
     "kind": "arc",
     "az": 154.5396,
     "ft": 17.02,
@@ -1075,6 +1075,29 @@
     ],
     "E": 5991670.48,
     "N": 2120918.27
+   }
+  ]
+ },
+ {
+  "closed": false,
+  "n_edges": 1,
+  "full_record": 0,
+  "misfit_max_ft": 0.0,
+  "misfit_end_ft": 0.0,
+  "edges": [
+   {
+    "edge": "L=23.48'",
+    "kind": "arc",
+    "az": 153.3402,
+    "ft": 40.44,
+    "misfit_ft": 0.0,
+    "flags": [
+     "L 23.48 ft shorter than the drawn chord: impossible match, dropped from the graph",
+     "chord direction from drawing",
+     "chord from drawing (no radius)"
+    ],
+    "E": 5992603.2,
+    "N": 2120617.03
    }
   ]
  },

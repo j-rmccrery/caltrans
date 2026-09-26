@@ -45,8 +45,8 @@
   "read": 32,
   "distinct": 32,
   "partial_queued": 14,
-  "associated": 24,
-  "by_leader": 20,
+  "associated": 25,
+  "by_leader": 21,
   "queued": 31,
   "distance": {
    "checked": 11,
@@ -57,7 +57,7 @@
    "pass": 11
   },
   "radius": {
-   "checked": 7,
+   "checked": 8,
    "pass": 5
   },
   "arc length": {
