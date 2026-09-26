@@ -267,3 +267,22 @@ per-label pass sets and the tag columns (`--tables --tags`).
 | A | pass by orchestrator override (+2 of +4, no loss, two fake fails gone) | 1 | Arc pool shared (parent + seq); `parent_window` shared; tags try own piece, then own-curve window, then same-parent run. Presidio C16 pass as run of 2 (521.73 vs 521.76), C19 arc pass (60.43 vs 60.41) and radius no longer a false fail, C21 on the right piece (449.84 vs 876.88, real fail), C13/C14 pass on own pieces (26.50, 21.61). C15 unfixable alone: its piece is C15 + C18's share; the total 573.93 (T) passes. `leg8A-check`: presidio tags 24 / 33 / 9 queued 31 (was 31 / 12 / 34); .1 and .3 tag rows identical (no same-parent partner exists for any remaining curve fail); inline columns and north identical. Crop viewed: blue run is C16's curve | leg8A |
 
 Dispatches used: 1 of 16. Started 11:10, agent ran 15:55-16:45, closed 17:15 PDT. `loop8-final` (nine sheets, canonical): presidio tags 24 / 33 / 9, every other column equal to loop6-final.
+
+---
+
+# Loop 9: stitch drawn curves, consecutive rows (started 2026-09-25 17:40 PDT, JR: "Go")
+
+One leg. Baseline `loop8-final`: presidio 41/49 41/43 16/19 wl 12, tags 24 / 33 / 9; .1 26/37 21/23 12/24 wl 21, tags 14 / 23 / 5;
+.3 42/59 41/42 26/39 wl 27, tags 28 / 26 / 28; north unchanged. Gate = canonical bench with tag columns, per-label and
+per-tag pass sets. Finding behind it (crop `docs/presidio_c21_crop.png`): C21's record (R=1380, L=876.88) is the thin
+alignment curve drawn as several PDF paths end to end; our parent is one path, so the window search measured one path
+(449.84). C20's record is the dash-dot boundary under the band, which no pool chains. C15's piece is C15 + untagged C18.
+
+| # | Leg | Gate |
+|---|---|---|
+| A | (1) Curve paths whose ends meet (within 1 pt) and whose tangents and fitted radii agree are chained into one parent before splitting, so windows can cross path joins; (2) dash-dot patterns chained into trains like dashes and admitted as curve candidates; (3) consecutive table rows (C15, C16, C18) checked as a run against the drawn run between the marks that exist, even when a row has no tag on the drawing | Presidio: C21 passes or reports an honest run, C20 reaches a check, C15 passes as a run of consecutive rows; tag passes +3 or more summed over the south, none lost; inline distance/bearing/arc passes not down; wrong-line not up; Presidio's easement dash trains identical; 6 crops viewed |
+
+## Status
+
+| leg | state | dispatches | gate result | commit |
+|---|---|---|---|---|
