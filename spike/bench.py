@@ -240,9 +240,16 @@ def run(key, steps):
         res["coverage"] = f"{passes}/{parsed}" if parsed else ""
     except (ValueError, KeyError):
         res["coverage"] = ""
-    if key == "presidio" and "tags" in steps:
+    import coverage_attrib  # honest coverage where the attribution knows the sheet: drawing-label passes (arcs
+    if key in coverage_attrib.SHEETS:  # included) over labels a check could address (no table cells, notes,
+        coverage_attrib.SNAP = str(OUT)  # areas, radials, duplicates)
+        items, _ = coverage_attrib.classify(key)
+        EXCLUDE = {"a-table", "c-table-tag", "a-titleblock", "a-notes", "a-area", "a-radial", "a-station", "b-duplicate"}
+        addressable = [i for i in items if i["bucket"] not in EXCLUDE]
+        res["coverage"] = f"{sum(1 for i in addressable if i['bucket'].startswith('d-pass'))}/{len(addressable)}"
+    if "tags" in steps and (ROOT / "spike" / "gold" / f"{key}_assoc.json").exists():
         import gold_assoc
-        g = gold_assoc.current(o)
+        g = gold_assoc.current(o, key)
         res["gold"] = f"{g['right']}/{g['wrong']}/{g['unkeyed']}"
     res["secs"] = round(time.time() - t)  # includes any optional steps
     return res

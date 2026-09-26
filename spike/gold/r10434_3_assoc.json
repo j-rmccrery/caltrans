@@ -1,0 +1,1610 @@
+[
+ {
+  "id": "label:0",
+  "kind": "arc",
+  "printed": "L=577.57'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:1",
+  "kind": "distance",
+  "printed": "5.24'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:2",
+  "kind": "distance",
+  "printed": "3.25'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:3",
+  "kind": "distance",
+  "printed": "3.63'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:4",
+  "kind": "bearing",
+  "printed": "S72°10'10\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:5",
+  "kind": "distance",
+  "printed": "97.14'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:6",
+  "kind": "arc",
+  "printed": "5.27'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "distance box (5.27') sits over a nearly-illegible clipped value; code measured the adjacent long bearing line below (computed ~75ft) instead of a short tick near the label"
+ },
+ {
+  "id": "label:7",
+  "kind": "bearing",
+  "printed": "S71°08'19\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:8",
+  "kind": "distance",
+  "printed": "75.17'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:9",
+  "kind": "bearing",
+  "printed": "S19°33'49\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:10",
+  "kind": "distance",
+  "printed": "21.00'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:11",
+  "kind": "bearing",
+  "printed": "N70°53'03\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:12",
+  "kind": "distance",
+  "printed": "121.73'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:13",
+  "kind": "arc",
+  "printed": "L=169.26'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:14",
+  "kind": "bearing",
+  "printed": "N72°19'10\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:15",
+  "kind": "distance",
+  "printed": "127.88'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:16",
+  "kind": "arc",
+  "printed": "44.74'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "unsure",
+  "note": "leader arrow's own curved stroke may be contaminating the traced arc (computed ~67.6ft vs printed 44.74ft); can't confirm the true curve extent by eye"
+ },
+ {
+  "id": "label:17",
+  "kind": "distance",
+  "printed": "54.90'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:18",
+  "kind": "distance",
+  "printed": "40.86'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:19",
+  "kind": "distance",
+  "printed": "87.86'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "line is a near-zero-length point at the vertex, not the diagonal S74°34'40\"W run above it (computed 5.9ft vs printed 87.86ft)"
+ },
+ {
+  "id": "label:20",
+  "kind": "bearing",
+  "printed": "S81°06'31\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:21",
+  "kind": "distance",
+  "printed": "370.00'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:22",
+  "kind": "chord bearing",
+  "printed": "S87°48'20\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:23",
+  "kind": "bearing",
+  "printed": "S79°12'32\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:24",
+  "kind": "distance",
+  "printed": "262.20'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:25",
+  "kind": "bearing",
+  "printed": "S87°05'53\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:26",
+  "kind": "distance",
+  "printed": "97.03'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:27",
+  "kind": "arc",
+  "printed": "L=39.86'(T)",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:28",
+  "kind": "arc",
+  "printed": "L=145.57'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:29",
+  "kind": "bearing",
+  "printed": "S86°10'51\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:30",
+  "kind": "arc",
+  "printed": "L=137.00'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:31",
+  "kind": "distance",
+  "printed": "11.05'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:32",
+  "kind": "distance",
+  "printed": "54.68'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:33",
+  "kind": "bearing",
+  "printed": "S82°02'18\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:34",
+  "kind": "distance",
+  "printed": "11.97'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:35",
+  "kind": "bearing",
+  "printed": "S81°06'31\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:36",
+  "kind": "distance",
+  "printed": "36.00'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:37",
+  "kind": "bearing",
+  "printed": "S8°53'29\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:38",
+  "kind": "distance",
+  "printed": "30.46'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:39",
+  "kind": "bearing",
+  "printed": "N86°41'46\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:40",
+  "kind": "distance",
+  "printed": "202.20'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:41",
+  "kind": "distance",
+  "printed": "45.11'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same line as label 40 (202.20', correct there); this label's 45.11' has no line of its own here"
+ },
+ {
+  "id": "label:42",
+  "kind": "distance",
+  "printed": "14.11'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:43",
+  "kind": "arc",
+  "printed": "117.64'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:44",
+  "kind": "distance",
+  "printed": "23.77'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:45",
+  "kind": "bearing",
+  "printed": "N78°52'33\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:46",
+  "kind": "distance",
+  "printed": "24.98'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:47",
+  "kind": "arc",
+  "printed": "69.31'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "line is the whole merged PRESIDIO PKWY tangent chain (computed ~448ft), not isolated to this label's 69.31' sub-segment"
+ },
+ {
+  "id": "label:48",
+  "kind": "bearing",
+  "printed": "N31°39'57\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:49",
+  "kind": "distance",
+  "printed": "62.69'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:50",
+  "kind": "arc",
+  "printed": "L=132.42'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:51",
+  "kind": "distance",
+  "printed": "11.12'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:52",
+  "kind": "bearing",
+  "printed": "S88°06'40\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:53",
+  "kind": "distance",
+  "printed": "52.66'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:54",
+  "kind": "distance",
+  "printed": "25.36'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:55",
+  "kind": "bearing",
+  "printed": "S82°04'24\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:56",
+  "kind": "distance",
+  "printed": "140.02'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:57",
+  "kind": "arc",
+  "printed": "L=161.89'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:58",
+  "kind": "arc",
+  "printed": "L=191.66'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:59",
+  "kind": "arc",
+  "printed": "163.72'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "no line touches the box at all; the printed curve is elsewhere (under the C36 arrow), code grabbed an unrelated tick near the STA 46+11 label"
+ },
+ {
+  "id": "label:60",
+  "kind": "bearing",
+  "printed": "S31°58'57\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:61",
+  "kind": "distance",
+  "printed": "108.30'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:62",
+  "kind": "arc",
+  "printed": "L=34.05'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:63",
+  "kind": "bearing",
+  "printed": "N30°02'36\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:64",
+  "kind": "distance",
+  "printed": "50.60'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:65",
+  "kind": "bearing",
+  "printed": "S34°12'31\"W",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same line as label 63 (N30°02'36\"E, correct there); this label's S34°12'31\"W has no line of its own here"
+ },
+ {
+  "id": "label:66",
+  "kind": "distance",
+  "printed": "42.44'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same line as label 64 (50.60', correct there); this label's 42.44' has no line of its own here"
+ },
+ {
+  "id": "label:67",
+  "kind": "arc",
+  "printed": "L=57.63'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:68",
+  "kind": "bearing",
+  "printed": "N27°00'46\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:69",
+  "kind": "distance",
+  "printed": "57.38'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:70",
+  "kind": "arc",
+  "printed": "L=58.07'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:71",
+  "kind": "arc",
+  "printed": "L=129.96'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:72",
+  "kind": "arc",
+  "printed": "L=344.50'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:73",
+  "kind": "arc",
+  "printed": "L=415.25'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:74",
+  "kind": "bearing",
+  "printed": "S42°29'20\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:75",
+  "kind": "bearing",
+  "printed": "S43°06'49\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:76",
+  "kind": "distance",
+  "printed": "86.53'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:77",
+  "kind": "bearing",
+  "printed": "N34°04'28\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:78",
+  "kind": "distance",
+  "printed": "79.49'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:79",
+  "kind": "bearing",
+  "printed": "N38°49'53\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:80",
+  "kind": "distance",
+  "printed": "177.91'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:81",
+  "kind": "bearing",
+  "printed": "S69°28'24\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:82",
+  "kind": "distance",
+  "printed": "120.80'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:83",
+  "kind": "arc",
+  "printed": "L=15.71'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:84",
+  "kind": "chord bearing",
+  "printed": "S69°16'16\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:85",
+  "kind": "arc",
+  "printed": "123.62'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "grabbed the adjacent 147.28' tangent (label 94's line) instead of this label's own 123.62'(T) tangent"
+ },
+ {
+  "id": "label:86",
+  "kind": "arc",
+  "printed": "L=211.83'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:87",
+  "kind": "bearing",
+  "printed": "S72°36'26\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:88",
+  "kind": "distance",
+  "printed": "128.29'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:89",
+  "kind": "arc",
+  "printed": "L=179.40'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:90",
+  "kind": "arc",
+  "printed": "L=84.19'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:91",
+  "kind": "bearing",
+  "printed": "N42°16'23\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:92",
+  "kind": "distance",
+  "printed": "150.95'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same line as label 109 (130.33', correct there); this label's 150.95' has no line of its own here"
+ },
+ {
+  "id": "label:93",
+  "kind": "bearing",
+  "printed": "S5°49'27\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:94",
+  "kind": "distance",
+  "printed": "147.28'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "own 147.28' segment is the black line directly below the box; code picked an unrelated tiny tick near the '9' circle above instead"
+ },
+ {
+  "id": "label:95",
+  "kind": "arc",
+  "printed": "L=124.05'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": "orchestrator re-key: leader arrow lands on the tick-marked R=1873 curve (measured polyline is an arc), not on the S69 28 24 W 120.80 course above it"
+ },
+ {
+  "id": "label:96",
+  "kind": "arc",
+  "printed": "L=38.33'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:97",
+  "kind": "arc",
+  "printed": "L=181.54'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:98",
+  "kind": "arc",
+  "printed": "94.76'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:99",
+  "kind": "bearing",
+  "printed": "N47°49'26\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:100",
+  "kind": "distance",
+  "printed": "198.23'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:101",
+  "kind": "bearing",
+  "printed": "N35°15'31\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:102",
+  "kind": "distance",
+  "printed": "198.23'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:103",
+  "kind": "arc",
+  "printed": "L=126.97'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:104",
+  "kind": "arc",
+  "printed": "L=52.20'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:105",
+  "kind": "bearing",
+  "printed": "S48°59'54\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:106",
+  "kind": "arc",
+  "printed": "58.60'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:107",
+  "kind": "arc",
+  "printed": "29.14'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:108",
+  "kind": "bearing",
+  "printed": "S42°23'16\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:109",
+  "kind": "distance",
+  "printed": "130.33'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:110",
+  "kind": "distance",
+  "printed": "5.91'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:111",
+  "kind": "arc",
+  "printed": "223.03'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "no line near the box; the only nearby drawn line belongs to label 98's 94.76' segment further down"
+ },
+ {
+  "id": "label:112",
+  "kind": "distance",
+  "printed": "81.11'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:113",
+  "kind": "distance",
+  "printed": "2.70'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:114",
+  "kind": "distance",
+  "printed": "152.49'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same shared line as labels 40/41 (computed ~193-196ft); doesn't match this label's 152.49'"
+ },
+ {
+  "id": "label:115",
+  "kind": "distance",
+  "printed": "429.80'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:116",
+  "kind": "distance",
+  "printed": "31.60'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:117",
+  "kind": "distance",
+  "printed": "5.76'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:118",
+  "kind": "bearing",
+  "printed": "N11°38'50\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:119",
+  "kind": "distance",
+  "printed": "206.97'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:120",
+  "kind": "bearing",
+  "printed": "S5°49'27\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:121",
+  "kind": "distance",
+  "printed": "35.66'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:122",
+  "kind": "distance",
+  "printed": "198.22'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:123",
+  "kind": "arc",
+  "printed": "L=18.55'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:124",
+  "kind": "bearing",
+  "printed": "N49°10'10\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:125",
+  "kind": "bearing",
+  "printed": "N42°57'59\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:126",
+  "kind": "distance",
+  "printed": "98.83'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:127",
+  "kind": "bearing",
+  "printed": "N11°38'49\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:128",
+  "kind": "distance",
+  "printed": "788.34'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:129",
+  "kind": "bearing",
+  "printed": "N86°41'46\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:130",
+  "kind": "arc",
+  "printed": "324.13'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same shared line as labels 40/41/114 (computed ~193ft); doesn't match this label's 324.13'"
+ },
+ {
+  "id": "label:131",
+  "kind": "bearing",
+  "printed": "S81°06'31\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:132",
+  "kind": "distance",
+  "printed": "713.71'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:133",
+  "kind": "distance",
+  "printed": "803.00'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "radial-line-table row (R=803.00'); code picked an unrelated table gridline tick, not a drawn line"
+ },
+ {
+  "id": "label:134",
+  "kind": "distance",
+  "printed": "1843.17'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "radial-line-table row (R=1843.17'); same unrelated table gridline as label 133"
+ },
+ {
+  "id": "label:135",
+  "kind": "arc",
+  "printed": "L=409.98'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "chain spans well past this curve, merging into MAIN LINE 2's continuation (computed ~608ft vs printed 409.98')"
+ },
+ {
+  "id": "label:136",
+  "kind": "arc",
+  "printed": "L=349.23'(T)",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "grabbed the adjacent R=1765' curve (label 86's 211.83' line) instead of its own tangent near 692.50'(T)"
+ },
+ {
+  "id": "label:137",
+  "kind": "arc",
+  "printed": "L=107.68'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "box is beside the near-straight R=1692' Δ=11°49'20\" curve; code traced the adjacent big-sweep R=200' curve (C23) instead"
+ },
+ {
+  "id": "label:138",
+  "kind": "arc",
+  "printed": "R=611.95' L=537.96'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L2:bearing",
+  "kind": "tag bearing",
+  "printed": "N19°09'55\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L2:distance",
+  "kind": "tag distance",
+  "printed": "5.75",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L3:bearing",
+  "kind": "tag bearing",
+  "printed": "N18°18'55\"W",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "tag position is actually the 'STATION' header of the Alignment Data table (tag misdetection), not a real L3 leader"
+ },
+ {
+  "id": "tag:L3:distance",
+  "kind": "tag distance",
+  "printed": "7.61",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same misdetected tag position as the bearing check"
+ },
+ {
+  "id": "tag:L4:bearing",
+  "kind": "tag bearing",
+  "printed": "N18°10'06\"W",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "line runs ~72° (matches the nearby N72°19'10\"E line); this tag's own bearing is ~N18°W, an unrelated line was picked"
+ },
+ {
+  "id": "tag:L4:distance",
+  "kind": "tag distance",
+  "printed": "70.02",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same wrong line as the bearing check"
+ },
+ {
+  "id": "tag:L5:bearing",
+  "kind": "tag bearing",
+  "printed": "S21°34'50\"E",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "tag position lands on the R=1590' curve's own bearing text (N54°31'04\"W(R)), not a real L5 leader"
+ },
+ {
+  "id": "tag:L5:distance",
+  "kind": "tag distance",
+  "printed": "8.17",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same misplaced tag position as the bearing check"
+ },
+ {
+  "id": "tag:L7:bearing",
+  "kind": "tag bearing",
+  "printed": "S81°06'21\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L7:distance",
+  "kind": "tag distance",
+  "printed": "52.78",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L9:bearing",
+  "kind": "tag bearing",
+  "printed": "S4°07'18\"W",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same line as tag L10 (correct there); L9's own segment (toward L8) was not measured"
+ },
+ {
+  "id": "tag:L9:distance",
+  "kind": "tag distance",
+  "printed": "10.37",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same wrong line as the bearing check"
+ },
+ {
+  "id": "tag:L10:bearing",
+  "kind": "tag bearing",
+  "printed": "S80°19'49\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L10:distance",
+  "kind": "tag distance",
+  "printed": "36.84",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L11:bearing",
+  "kind": "tag bearing",
+  "printed": "N5°22'41\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L11:distance",
+  "kind": "tag distance",
+  "printed": "13.88",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L13:bearing",
+  "kind": "tag bearing",
+  "printed": "S81°06'21\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L13:distance",
+  "kind": "tag distance",
+  "printed": "48.92",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L15:bearing",
+  "kind": "tag bearing",
+  "printed": "S81°06'31\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L15:distance",
+  "kind": "tag distance",
+  "printed": "10.60",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L16:bearing",
+  "kind": "tag bearing",
+  "printed": "N8°53'29\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L16:distance",
+  "kind": "tag distance",
+  "printed": "9.40",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L19:bearing",
+  "kind": "tag bearing",
+  "printed": "S37°12'30\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L19:distance",
+  "kind": "tag distance",
+  "printed": "28.42",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L20:bearing",
+  "kind": "tag bearing",
+  "printed": "N7°28'36\"E",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "measured bearing off by 72° from printed; wrong line"
+ },
+ {
+  "id": "tag:L20:distance",
+  "kind": "tag distance",
+  "printed": "53.79",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same wrong line as the bearing check"
+ },
+ {
+  "id": "tag:L25:bearing",
+  "kind": "tag bearing",
+  "printed": "N47°53'12\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L25:distance",
+  "kind": "tag distance",
+  "printed": "27.57",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L29:bearing",
+  "kind": "tag bearing",
+  "printed": "N34°46'20\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L29:distance",
+  "kind": "tag distance",
+  "printed": "13.35",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L31:bearing",
+  "kind": "tag bearing",
+  "printed": "N36°09'18\"W",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "tag box sits on the neighboring 'L30' text, not a real L31 leader; bearing off by 89°"
+ },
+ {
+  "id": "tag:L31:distance",
+  "kind": "tag distance",
+  "printed": "33.75",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same misplaced tag position as the bearing check"
+ },
+ {
+  "id": "tag:L36:bearing",
+  "kind": "tag bearing",
+  "printed": "N72°24'02\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L36:distance",
+  "kind": "tag distance",
+  "printed": "110.55",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L37:bearing",
+  "kind": "tag bearing",
+  "printed": "N72°19'10\"E",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L37:distance",
+  "kind": "tag distance",
+  "printed": "134.15",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L38:bearing",
+  "kind": "tag bearing",
+  "printed": "N34°55'48\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L38:distance",
+  "kind": "tag distance",
+  "printed": "167.07",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L39:bearing",
+  "kind": "tag bearing",
+  "printed": "S79°16'27\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:L39:distance",
+  "kind": "tag distance",
+  "printed": "373.80",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C5:radius",
+  "kind": "tag radius",
+  "printed": "46.74",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C5:arc length",
+  "kind": "tag arc length",
+  "printed": "29.82",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C7:radius",
+  "kind": "tag radius",
+  "printed": "508.00",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "measured line is the shared straight segment behind labels 26/40/41 (drawn R=2412.81' vs printed 508.00')"
+ },
+ {
+  "id": "tag:C7:arc length",
+  "kind": "tag arc length",
+  "printed": "61.27",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same wrong (straight) line as the radius check"
+ },
+ {
+  "id": "tag:C8:radius",
+  "kind": "tag radius",
+  "printed": "508.00",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "drawn R=870.19' vs printed 508.00'; wrong line"
+ },
+ {
+  "id": "tag:C8:arc length",
+  "kind": "tag arc length",
+  "printed": "35.00(T)",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same wrong line as the radius check"
+ },
+ {
+  "id": "tag:C9:arc length",
+  "kind": "tag arc length",
+  "printed": "1.53",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "drawn 33.53' vs printed 1.53' (22x over); wrong line at a cluttered line crossing"
+ },
+ {
+  "id": "tag:C38:radius",
+  "kind": "tag radius",
+  "printed": "15.00",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "drawn R=1618.43' vs printed 15.00' (+10689%); wrong line, same chain as tag C12"
+ },
+ {
+  "id": "tag:C38:arc length",
+  "kind": "tag arc length",
+  "printed": "6.39",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same wrong line as the radius check"
+ },
+ {
+  "id": "tag:C12:arc length",
+  "kind": "tag arc length",
+  "printed": "3.79",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "drawn 160.21' vs printed 3.79' (42x over), identical to tag C38's wrong line; picked a long unrelated chain at a cluttered crossing"
+ },
+ {
+  "id": "tag:C19:radius",
+  "kind": "tag radius",
+  "printed": "65.00",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "drawn R=18.02' vs printed 65.00' (-72%); wrong line"
+ },
+ {
+  "id": "tag:C19:arc length",
+  "kind": "tag arc length",
+  "printed": "93.18",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "same wrong line as the radius check"
+ },
+ {
+  "id": "tag:C22:radius",
+  "kind": "tag radius",
+  "printed": "100.14",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C22:arc length",
+  "kind": "tag arc length",
+  "printed": "93.89",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C25:radius",
+  "kind": "tag radius",
+  "printed": "2040.00",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C25:arc length",
+  "kind": "tag arc length",
+  "printed": "270.67",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C26:radius",
+  "kind": "tag radius",
+  "printed": "1312.00",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C26:arc length",
+  "kind": "tag arc length",
+  "printed": "328.02",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C29:radius",
+  "kind": "tag radius",
+  "printed": "825.00",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C29:arc length",
+  "kind": "tag arc length",
+  "printed": "470.62",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C33:radius",
+  "kind": "tag radius",
+  "printed": "2884.00",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "tag:C33:arc length",
+  "kind": "tag arc length",
+  "printed": "1049.90",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "line is the same over-long merged chain as label 135 (~608ft); doesn't isolate this curve's own 1049.90' arc"
+ }
+]
