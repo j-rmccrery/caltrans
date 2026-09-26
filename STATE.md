@@ -5,6 +5,10 @@ Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run every
 
 ## Next (logged 2026-09-26 04:40 after loop 11; plan and status in `spike/LOOP.md`)
 
+**Session close 2026-09-26 04:50.** Loops 3-11 committed on `caltrans-spike` (cd8b498..0fd9117, 66 commits), nothing pushed.
+Status page version 13; field guide `docs/record-twin-how-it-works.html`. Memory index for the session:
+`caltrans-session-2026-09-23-to-26`.
+
 **Loop 11 (the road as one surface).** Purple in the renders was the vendor's class-17 deck only. Now: `extract.py --audit`
 prints each tile's class histogram (ground is class 2 everywhere; class 17 present on all three tiles); deck grows from
 class-17 seeds into dark, flat cells >= 2 m above the ground DTM; the 3DEP gap tile's pavement (190 fragments under the
