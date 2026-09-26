@@ -3,7 +3,34 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Next (logged 2026-09-25 20:00 after loop 9; plan and status in `spike/LOOP.md`)
+## Next (logged 2026-09-26 03:10 after loop 10; plan and status in `spike/LOOP.md`)
+
+**Loop 10 (C21 traced by eye; one leg, two attempts, no code shipped).** `spike/c21_trace.py` found C21 whole on the
+sheet: a tangent, then five pieces of one thin line across the C9/C10 fillet (255.91 + 193.93 + 86.86 + 278.14 + 62.04 =
+876.88) ending where three straight lines start along the curve's tangent at [1931, 660], a point of tangency. Two
+defects named and measured: the join across the fillet compares a blended whole-piece radius (production has no cut
+inside p104, so it fits R 1418.75 against p97/1's 1382), and `split_at` has no point-of-tangency cut. Both fixes were
+tried and rejected on the gate: 40 ft end-fit windows are numerically unstable at 2-decimal precision (R swings 1535 ->
+1382 between 40 ft and the whole tail; ~100 ft is the floor), and a sheet-wide PT cut fragments other curves (R-10434.3
+loses C33 and C25 radius passes, R-10741.1 a distance pass). Diff kept at `spike/out/loop10_legA.patch`. `loop9-final`
+stands as the baseline.
+
+Note (JR, 2026-09-25 16:50): pull in the new SAM information. Which SAM is unconfirmed.
+
+Do this, in order:
+
+1. **C21 (and the PT class), scoped**: radius fits on windows of at least 100 ft; the PT cut applied only inside the
+   parent of a tag whose own window search failed, never sheet-wide; then re-run the trace script to confirm the five
+   pieces sum. Gate as loop 10's.
+2. **Scan text-line detection on the binarised page**; if "SAM" is Segment Anything, it is a candidate detector.
+3. **Row segmentation of multi-line blocks on 2012-era sheets**: the north reads.
+4. **South bearings and arcs, what is left**: bearings 2/2/1 fails; inline arcs 3/12/13.
+5. **R-71.70's 1.29 deg**; **mosaic south + gap**; **1950s scans on the north tile**.
+6. Slides, Q&A sheet, recorded fallback (roadmap day 11); two rehearsals; freeze by 10-03.
+
+## Next as of loop 9 (2026-09-25 20:00), kept for the record
+
+### Next (logged 2026-09-25 20:00 after loop 9; plan and status in `spike/LOOP.md`)
 
 **Loop 9 (stitch drawn curves, dash-dot trains, consecutive rows; one leg, two attempts).** Curve paths whose ends meet
 are one parent now (`checks.chain_curve_paths`, 1 pt / 3 deg / 2 %); dash-dot patterns chain into trains
