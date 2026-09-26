@@ -36,7 +36,10 @@ CELL = 1.0
 
 
 def grids():
-    """Per 1 m cell: ground-return count, mean ground intensity, bridge-deck count, building count and max z."""
+    """Per 1 m cell: ground-return count/intensity/z, bridge-deck count, building count/max z, water count,
+    and two tile-wide (any classification) fields the deck-by-geometry rule needs: top-return elevation
+    (ztop, for flatness and height-above-DTM off the structure's own surface, not the ground class) and
+    mean intensity of all returns (i_all, since a bridge deck has no class-2 points to read intensity from)."""
     p = CACHE / "extract_grids.npz"
     if p.exists():
         return dict(np.load(p))
@@ -46,6 +49,7 @@ def grids():
         W, H = int(np.ceil(h.maxs[0] - x0)) + 1, int(np.ceil(h.maxs[1] - y0)) + 1
         n = W * H
         g_cnt = np.zeros(n); g_int = np.zeros(n); b17 = np.zeros(n); b6 = np.zeros(n); z6 = np.full(n, -1e9); z2 = np.zeros(n); w9 = np.zeros(n)
+        ztop = np.full(n, -1e9); i_sum = np.zeros(n); i_cnt = np.zeros(n)
         for pts in f.chunk_iterator(3_000_000):
             ix = ((pts.x - x0) / CELL).astype(int); iy = ((pts.y - y0) / CELL).astype(int)
             flat = iy * W + ix
@@ -59,10 +63,31 @@ def grids():
             w9 += np.bincount(flat[c == 9], minlength=n)
             m6 = c == 6
             np.maximum.at(z6, flat[m6], np.asarray(pts.z)[m6])
+            z_all = np.asarray(pts.z); i_all_pts = np.asarray(pts.intensity).astype(float)
+            np.maximum.at(ztop, flat, z_all)
+            i_sum += np.bincount(flat, weights=i_all_pts, minlength=n)
+            i_cnt += np.bincount(flat, minlength=n)
         out = dict(x0=x0, y0=y0, W=W, H=H, g_cnt=g_cnt.reshape(H, W), g_int=(g_int / np.maximum(g_cnt, 1)).reshape(H, W),
-                   g_z=(z2 / np.maximum(g_cnt, 1)).reshape(H, W), b17=b17.reshape(H, W), b6=b6.reshape(H, W), z6=z6.reshape(H, W), w9=w9.reshape(H, W))
+                   g_z=(z2 / np.maximum(g_cnt, 1)).reshape(H, W), b17=b17.reshape(H, W), b6=b6.reshape(H, W), z6=z6.reshape(H, W), w9=w9.reshape(H, W),
+                   ztop=ztop.reshape(H, W), i_all=(i_sum / np.maximum(i_cnt, 1)).reshape(H, W))
         np.savez(p, **out)
         return out
+
+
+def dtm_grid(T, W, H):
+    """Ground DTM (output.tin.tif) resampled onto the extract grid's cell centers, nearest-neighbour,
+    by plain affine arithmetic (no per-cell rasterio call -- this grid can be tens of millions of cells)."""
+    with rasterio.open(DEM) as ds:
+        dem = ds.read(1).astype(np.float32)
+        if ds.nodata is not None:
+            dem = np.where(dem == ds.nodata, np.nan, dem)
+        row, col = np.mgrid[0:H, 0:W]
+        xs = T.c + (col + 0.5) * T.a + (row + 0.5) * T.b
+        ys = T.f + (col + 0.5) * T.d + (row + 0.5) * T.e
+        inv = ~ds.transform
+        dc = np.clip((inv.a * xs + inv.b * ys + inv.c).astype(int), 0, dem.shape[1] - 1)
+        dr = np.clip((inv.d * xs + inv.e * ys + inv.f).astype(int), 0, dem.shape[0] - 1)
+        return dem[dr, dc]
 
 
 def polygons(mask, transform, min_cells, to_ll, kind, **props):
@@ -100,18 +125,11 @@ def main():
     m0 = np.cumsum(p * mids) / np.maximum(w0, 1e-9); m1 = (np.sum(p * mids) - np.cumsum(p * mids)) / np.maximum(w1, 1e-9)
     thr = mids[np.argmax(w0 * w1 * (m0 - m1) ** 2)]
     water = ndimage.binary_dilation(flip(G["w9"]) > 0, iterations=25)  # the Bay and the lagoon are dark and flat too
-    pave = (g_cnt >= 3) & (g_int < thr) & (slope < 6) & ~water
-    pave = ndimage.binary_opening(pave, iterations=1)
-    pave = ndimage.binary_closing(pave, iterations=2)
-    print(f"ground intensity Otsu threshold {thr:.0f}; dark flat dry ground {pave.sum():,} m²")
-
-    deck = flip(G["b17"]) >= 2
-    deck = ndimage.binary_closing(deck, iterations=1)
     b6, z6 = flip(G["b6"]), flip(G["z6"])
     bld = b6 >= 3
     bld = ndimage.binary_opening(bld, iterations=1)
 
-    # only pavement connected to the state highway corridor is this sheet's business
+    # right-of-way faces, needed before pavement (corridor connectivity) and deck (fallback seed, R/W report)
     h = json.loads((HERE / "htdp.json").read_text())  # same epoch shift for both tiles: 2 km apart, drift negligible over that distance
     to_utm = Transformer.from_crs("EPSG:6318", "EPSG:6339", always_xy=True)
     faces = []
@@ -123,10 +141,62 @@ def main():
         faces.append(shape({"type": "Polygon", "coordinates": [list(zip(np.asarray(x) + h["dE_m"], np.asarray(y) + h["dN_m"]))]}).buffer(0))
     corridor = unary_union(faces)
     cmask = features.rasterize([(mapping(corridor.buffer(30)), 1)], out_shape=(H, W), transform=T).astype(bool)
-    lab, n = ndimage.label(pave, structure=np.ones((3, 3)))
-    touching = np.unique(lab[cmask & pave]); touching = touching[touching > 0]
-    pave = np.isin(lab, touching)
-    print(f"pavement connected to the corridor: {pave.sum():,} m² in {len(touching)} components")
+    face_mask = features.rasterize([(mapping(corridor), 1)], out_shape=(H, W), transform=T).astype(bool)
+
+    def pave_mask(closing_iters):
+        pv = (g_cnt >= 3) & (g_int < thr) & (slope < 6) & ~water
+        pv = ndimage.binary_opening(pv, iterations=1)
+        return ndimage.binary_closing(pv, iterations=closing_iters)
+
+    def connect(pv):
+        lab, n = ndimage.label(pv, structure=np.ones((3, 3)))
+        touching = np.unique(lab[cmask & pv]); touching = touching[touching > 0]
+        pv2 = np.isin(lab, touching)
+        lab2, _ = ndimage.label(pv2, structure=np.ones((3, 3)))
+        sizes = np.bincount(lab2.ravel())[1:]
+        return pv2, len(touching), bool(len(sizes) and (sizes >= 400).any())
+
+    pave = pave_mask(2)
+    print(f"ground intensity Otsu threshold {thr:.0f}; dark flat dry ground {pave.sum():,} m²")
+    pave_before, n_touch, usable = connect(pave)  # "before": the rule as it always ran (2-cell closing)
+    if not usable and pave.sum() > 0:
+        # a real but fragmented signal (small ground-class blobs, none reaching the 400 m2 polygon floor):
+        # widen the closing radius instead of discarding it -- same rule, wider gap-bridge, not a different class
+        print(f"pavement connected to the corridor: {pave_before.sum():,} m² in {n_touch} components, "
+              f"all under the 400 m² polygon floor; widening pavement closing 2 -> 10 cells")
+        pave, n_touch, usable = connect(pave_mask(10))
+    else:
+        pave = pave_before
+    print(f"pavement connected to the corridor: {pave.sum():,} m² in {n_touch} components")
+
+    # deck by geometry: grow from class-17 seeds (or, where a tile has none, from height-above-DTM cells
+    # inside the drawn R/W faces) into cells that are dark, flat over 3 m, within 3 m of existing deck and
+    # >= 2 m above the ground DTM -- up to 30 m, so it bridges parapet/joint/shadow gaps but not at-grade pavement.
+    deck17 = flip(G["b17"]) >= 2
+    deck_before = ndimage.binary_closing(deck17, iterations=1)  # what the class-17-only rule gives (baseline)
+    ztop, i_all = flip(G["ztop"]), flip(G["i_all"])
+    has_return = ztop > -1e8
+    dtm = dtm_grid(T, W, H)
+    height = ztop - dtm
+    gy3, gx3 = np.gradient(np.where(has_return, ztop, np.nan), 3)  # slope of the top surface over a 3 m baseline
+    slope3 = np.degrees(np.arctan(np.hypot(np.nan_to_num(gx3), np.nan_to_num(gy3))))
+    candidate = has_return & (i_all < thr) & (slope3 < 3) & (height >= 2) & ~pave
+    if deck17.sum() == 0:
+        print("no class-17 (bridge-deck) returns on this tile: seeding deck growth from height-above-DTM cells inside the drawn R/W faces")
+        seed = has_return & (height >= 2) & face_mask
+    else:
+        seed = deck_before
+    deck = seed.copy()
+    for _ in range(10):  # 10 x 3 m dilation = up to 30 m from the seed
+        grow = ndimage.binary_dilation(deck, iterations=3) & candidate & ~deck
+        if not grow.any():
+            break
+        deck |= grow
+    deck = ndimage.binary_closing(deck, iterations=1)
+    deck_before_total, deck_before_inside = int(deck_before.sum()), int((deck_before & face_mask).sum())
+    deck_after_total, deck_after_inside = int(deck.sum()), int((deck & face_mask).sum())
+    print(f"viaduct deck before (class-17 only): {deck_before_total:,} m² total, {deck_before_inside:,} m² inside the drawn R/W faces")
+    print(f"viaduct deck after (height-above-DTM growth): {deck_after_total:,} m² total, {deck_after_inside:,} m² inside the drawn R/W faces")
 
     feats = []
     feats += polygons(pave, T, 400, to_ll, "pavement", rule=f"ground class, intensity < {thr:.0f} (Otsu), slope < 6 deg, >= 3 returns, not water, connected to the R/W corridor")
@@ -202,5 +272,22 @@ def render(pave, deck, bld, T, corridor):
     cv2.imwrite(str(OUT / "extracted_features.png"), im)
 
 
+def audit_classes():
+    """Classification histogram straight off this tile's LAZ: which classes exist, and whether 2/6/9/17 do."""
+    counts, total = {}, 0
+    with laspy.open(LAZ) as f:
+        for pts in f.chunk_iterator(3_000_000):
+            u, cnt = np.unique(np.asarray(pts.classification), return_counts=True)
+            for uu, cc in zip(u, cnt):
+                counts[int(uu)] = counts.get(int(uu), 0) + int(cc)
+            total += len(pts)
+    print(f"tile {TILE['name']} ({LAZ}): {total:,} pts")
+    for k in sorted(counts):
+        flag = "  <- ground/building/water/deck" if k in (2, 6, 9, 17) else ""
+        print(f"  class {k:3} {counts[k]:12,}  ({counts[k] / total:.2%}){flag}")
+    for want in (2, 6, 9, 17):
+        print(f"  has class {want}: {want in counts}")
+
+
 if __name__ == "__main__":
-    main()
+    audit_classes() if "--audit" in sys.argv else main()

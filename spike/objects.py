@@ -64,7 +64,7 @@ def main():
                               status=st, rule="label matched to the parallel adjacent line; length x scale and azimuth from the fit; curves L=R*delta"))
     if (OUT / "exceptions.json").exists():
         for e in json.loads((OUT / "exceptions.json").read_text(encoding="utf-8")):
-            feats.append(feat(None, kind="check", check=e["kind"], printed=e["text"], measured=e.get("drawn") or e.get("drawn_ft") or e.get("calc_L"),
+            feats.append(feat(None, kind="check", check=e["kind"], printed=e.get("text", e.get("printed", "")), measured=e.get("drawn") or e.get("drawn_ft") or e.get("calc_L"),
                               residual=e.get("off_ft") or e.get("off_arcmin"), region=e["region"], status="queued", reason=e.get("issue", "value mismatch"),
                               rule="same as checks; unmatched or failed"))
 

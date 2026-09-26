@@ -13,9 +13,9 @@ from pathlib import Path
 import numpy as np
 from qgis.core import (QgsApplication, QgsCategorizedSymbolRenderer, QgsContrastEnhancement, QgsCoordinateReferenceSystem,
                        QgsMapRendererSequentialJob, QgsMapSettings, QgsPalLayerSettings, QgsProject, QgsRasterLayer,
-                       QgsRendererCategory, QgsSimpleMarkerSymbolLayerBase, QgsSingleBandGrayRenderer, QgsSingleSymbolRenderer, QgsSymbol, QgsTextBufferSettings,
+                       QgsRendererCategory, QgsRuleBasedRenderer, QgsSimpleMarkerSymbolLayerBase, QgsSingleBandGrayRenderer, QgsSymbol, QgsTextBufferSettings,
                        QgsTextFormat, QgsUnitTypes, QgsVectorLayer, QgsVectorLayerSimpleLabeling, QgsWkbTypes)
-from qgis.PyQt.QtCore import QSize
+from qgis.PyQt.QtCore import QSize, Qt
 from qgis.PyQt.QtGui import QColor, QFont
 
 OUT = Path(__file__).resolve().parent / "out"
@@ -43,12 +43,27 @@ def symbol(geom, color, width=None, outline=None, size=None, shape=None, style=N
     if shape is not None:
         sl.setShape(shape)
     if style is not None:
-        sl.setPenStyle(style)
+        (sl.setPenStyle if geom == QgsWkbTypes.LineGeometry else sl.setStrokeStyle)(style)
     return s
 
 
 def categorized(attr, cats):
     return QgsCategorizedSymbolRenderer(attr, [QgsRendererCategory(v, s, l) for v, l, s in cats])
+
+
+def parcel_renderer():
+    """Parcels: normal fill, except a tunnel easement face (parcel name contains 61985-*) drawn as
+    "record only, below ground" -- no fill, dashed (hatched) outline."""
+    root = QgsRuleBasedRenderer.Rule(None)
+    tunnel = QgsRuleBasedRenderer.Rule(symbol(QgsWkbTypes.PolygonGeometry, col("#000000", 0), outline="#5a5a5a", width=0.6, style=Qt.DashLine))
+    tunnel.setFilterExpression("\"parcel\" LIKE '%61985%'")
+    tunnel.setLabel("tunnel easement (record only, below ground)")
+    other = QgsRuleBasedRenderer.Rule(symbol(QgsWkbTypes.PolygonGeometry, col("#1e5ac8", 25), outline="#1e5ac8", width=0.8))
+    other.setFilterExpression("\"parcel\" IS NULL OR \"parcel\" NOT LIKE '%61985%'")
+    other.setLabel("parcel")
+    root.appendChild(tunnel)
+    root.appendChild(other)
+    return QgsRuleBasedRenderer(root)
 
 
 def maptip(fields):
@@ -123,7 +138,7 @@ def sheet_layers(base, label, strict=True):
                               ("viaduct deck", "viaduct deck", symbol(F, col("#783cb4", 110), outline="#5a288c", width=0.3)),
                               ("building", "building footprint", symbol(F, col("#f09628", 90), outline="#c86e00", width=0.35))]),
          maptip(["kind", "verdict", "area_m2", "height_m", "flat_top", "rule"]), None),
-        ("Parcels from the sheet", "parcels.geojson", QgsSingleSymbolRenderer(symbol(F, col("#1e5ac8", 25), outline="#1e5ac8", width=0.8)),
+        ("Parcels from the sheet", "parcels.geojson", parcel_renderer(),
          maptip(["parcel", "area_sqft", "table_area_sqft", "diff_pct", "labels_inside"]), labels("parcel", "#143ca0")),
         (f"Sheet linework {label}", "sheet_linework.geojson",
          categorized("weight", [("heavy", "heavy (R/W, parcel lines)", symbol(L, "black", width=0.7)), ("light", "light", symbol(L, col("#5a5a5a", 160), width=0.2))]), None, None),
@@ -134,6 +149,19 @@ def sheet_layers(base, label, strict=True):
         if l is not None:
             out.append(l)
     return out
+
+
+def highway_surface_layer(tile_name):
+    """The merged per-tile pavement+deck surface (spike/lidar/surface.py), R/W-clipped, no sheet seams.
+    structure = current viaduct-deck purple, at grade = mid grey, both at 60% opacity."""
+    base = OUT / "tiles" / tile_name
+    if not (base / "highway_surface.geojson").exists():
+        print(f"    skip Highway surface: no {base / 'highway_surface.geojson'}"); return None
+    renderer = categorized("kind", [
+        ("structure", "highway surface: structure (viaduct)", symbol(QgsWkbTypes.PolygonGeometry, col("#783cb4", 153), outline="#5a288c", width=0.3)),
+        ("at grade", "highway surface: at grade", symbol(QgsWkbTypes.PolygonGeometry, col("#909090", 153), outline="#6e6e6e", width=0.3)),
+    ])
+    return vector("Highway surface (merged, R/W-clipped)", "highway_surface.geojson", renderer, maptip(["kind", "area_m2"]), base=base, strict=False)
 
 
 R65 = [("R-65.1", "r_00065_001_1969-09-01_sn-02047"), ("R-65.2", "r_00065_002_1969-09-01_sn-02048"),
@@ -196,6 +224,11 @@ def build_group(root, p, title, sheets, tile_name, r65=False):
     then the tile's own intensity + hillshade rasters. Returns the flat list of layers added."""
     grp = root.addGroup(title)
     added = []
+    hl = highway_surface_layer(tile_name)  # above every per-sheet layer, incl. the per-kind LiDAR features
+    if hl is not None:
+        p.addMapLayer(hl, False)
+        grp.addLayer(hl)
+        added.append(hl)
     for label, base in sheets:
         print(f"  {label}:")
         sub = grp.addGroup(label)

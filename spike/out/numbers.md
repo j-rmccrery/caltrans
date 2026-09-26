@@ -30,7 +30,7 @@ All from `spike/out/` after `python spike/demo.py`. Re-run before quoting.
 
 ## LiDAR (2025 flight)
 - Epoch: sheet 1991.35 → LiDAR 2010.0 frame, HTDP shift 0.668 m toward 327° (dN 0.561 m, dE -0.362 m), applied to the sheet before overlay.
-- Features: 35 pavement (132,757 m²), 11 viaduct deck (29,292 m²), 281 building (132,129 m²); 175 buildings pass the roof-flatness test.
+- Features: 35 pavement (132,757 m²), 13 viaduct deck (29,402 m²), 281 building (132,129 m²); 175 buildings pass the roof-flatness test.
 - Encroachment screen: 94 building-class clusters inside parcel faces, 15 with a building verdict, 10 in named parcels (61806-2, 61806-4|61985-2, 61806|61806-4|61806-5|61806-9|63269, 61806|61985|61985-1|61985-2|61985-3|61985-4).
 - Tunnel easements, ground over them: 61985-1 595 m, 20.1–71.7 m; 61985-2 595 m, 16.3–71.7 m; 61985-3 595 m, 20.1–71.7 m; 61985-4 595 m, 20.1–71.7 m (`tunnel_profile.png`).
 - Caveat: the easement faces come from the polygonised linework, not a closed traverse; where a face's area is far from the parcel table (63269 -100 %, 61806-2 -38 %, 61806-5 -99 %, 61985-1|61985-2|61985-3|61985-4 -32 %) the profile runs along the wrong figure. Say so on the slide.
