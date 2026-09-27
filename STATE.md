@@ -3,6 +3,14 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
+## Loop 14 (2026-09-26 17:30): fails are claims about the record
+
+A result far beyond any keyed real disagreement is queued as "wrong line likely" (checks.wrong_line_likely; cuts in commit
+ba144e9); tags resolved by SHX/record and bare (T) totals may only add passes. Fails Presidio 26 -> 16 (gold 13 real / 2 wrong
+/ 1 unkeyed), R-10434.1 31 -> 21, R-10434.3 72 -> 44 (19 / 24 / 1). Passes identical. Bench row `legI` is the baseline;
+demo 160 s cold. Cuts tuned on the two keyed sheets; wrong-line arc fails on R-10434.3 mostly remain (no safe cut).
+Status page version 14 separates pass rate, pass precision, fail quality and coverage (JR read coverage as a drop).
+
 ## Next (logged 2026-09-26 15:15 after loop 13; plan and status in `spike/LOOP.md`)
 
 **Loop 13 (precision on a second sheet, then coverage).** Bench row `legH2` (second of the two) is the baseline.
