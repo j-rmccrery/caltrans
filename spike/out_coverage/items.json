@@ -987,8 +987,8 @@
    "cy": 496.0,
    "w": 43.524,
    "h": 7.02,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "no line found beside label"
   },
   {
    "sheet": "presidio",
@@ -1060,7 +1060,7 @@
    "w": 55.28554873905062,
    "h": 14.376703715033095,
    "bucket": "f-queued",
-   "reason": "leader points at no line"
+   "reason": "association unproven: measured 648.14 vs printed 235.42 ft (T)"
   },
   {
    "sheet": "presidio",
@@ -2391,8 +2391,8 @@
    "cy": 585.9277277582453,
    "w": 46.64879999999995,
    "h": 10.997363812814106,
-   "bucket": "e-fail",
-   "reason": "checked as bearing (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured N80\u00b040'13\"W vs printed N21\u00b034'50\"W (3545.4' off)"
   },
   {
    "sheet": "presidio",
@@ -2409,8 +2409,8 @@
    "cy": 585.9277277582453,
    "w": 46.64879999999995,
    "h": 10.997363812814106,
-   "bucket": "e-fail",
-   "reason": "checked as distance (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 64.20 vs printed 5.50 ft"
   },
   {
    "sheet": "presidio",
@@ -2463,8 +2463,8 @@
    "cy": 658.9854287094856,
    "w": 59.89200000000021,
    "h": 16.256629862500848,
-   "bucket": "a-radial",
-   "reason": "radial bearing (R): checks.py logs it, never checks it"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 118.60 vs printed 5.67 ft"
   },
   {
    "sheet": "presidio",
@@ -2481,8 +2481,8 @@
    "cy": 658.9854287094856,
    "w": 59.89200000000021,
    "h": 16.256629862500848,
-   "bucket": "e-fail",
-   "reason": "checked as distance (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 118.60 vs printed 5.67 ft"
   },
   {
    "sheet": "presidio",
@@ -2733,8 +2733,8 @@
    "cy": 452.0,
    "w": 42.594,
    "h": 6.87,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "line runs to the sheet edge (matchline); not checkable on this sheet"
   },
   {
    "sheet": "presidio",
@@ -2859,8 +2859,8 @@
    "cy": 550.5,
    "w": 35.153999999999996,
    "h": 6.3,
-   "bucket": "e-fail",
-   "reason": "checked as arc (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 530.45 vs printed 171.66 ft"
   },
   {
    "sheet": "presidio",
@@ -2949,8 +2949,8 @@
    "cy": 645.5,
    "w": 41.664,
    "h": 6.72,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "association unproven: measured 648.13 vs printed 241.32 ft (T)"
   },
   {
    "sheet": "presidio",
@@ -4047,8 +4047,8 @@
    "cy": 843.0,
    "w": 64.0,
    "h": 16.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L1 (bearing): FAIL"
+   "bucket": "a-table",
+   "reason": "radial-bearing column of the curve table; tags_checks.csv has no radial-bearing check"
   },
   {
    "sheet": "presidio",
@@ -4065,8 +4065,8 @@
    "cy": 842.0,
    "w": 20.274,
    "h": 6.54,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L1 (distance): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "presidio",
@@ -4947,8 +4947,8 @@
    "cy": 1028.0,
    "w": 52.0,
    "h": 14.0,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag L14 (bearing): pass"
   },
   {
    "sheet": "presidio",
@@ -5200,7 +5200,7 @@
    "w": 58.653785680364805,
    "h": 18.439094251470664,
    "bucket": "f-queued",
-   "reason": "piece too short to carry a bearing (7.4 pt)"
+   "reason": "line runs to the sheet edge (matchline); not checkable on this sheet"
   },
   {
    "sheet": "presidio",
@@ -5307,8 +5307,8 @@
    "cy": 1113.0,
    "w": 53.0,
    "h": 14.0,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag L20 (bearing): pass"
   },
   {
    "sheet": "presidio",
@@ -5343,8 +5343,8 @@
    "cy": 1127.0,
    "w": 52.0,
    "h": 14.0,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag L21 (bearing): pass"
   },
   {
    "sheet": "presidio",
@@ -5993,8 +5993,8 @@
    "cy": 471.79795830454725,
    "w": 73.00684899377579,
    "h": 21.510525122324324,
-   "bucket": "a-radial",
-   "reason": "radial bearing (R): checks.py logs it, never checks it"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 187.05 vs printed 9.95 ft"
   },
   {
    "sheet": "r10434_1",
@@ -6011,8 +6011,8 @@
    "cy": 471.79795830454725,
    "w": 73.00684899377579,
    "h": 21.510525122324324,
-   "bucket": "e-fail",
-   "reason": "checked as distance (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 187.05 vs printed 9.95 ft"
   },
   {
    "sheet": "r10434_1",
@@ -6245,8 +6245,8 @@
    "cy": 1079.0,
    "w": 26.784,
    "h": 7.2,
-   "bucket": "e-fail",
-   "reason": "checked as arc (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 308.19 vs printed 31.80 ft"
   },
   {
    "sheet": "r10434_1",
@@ -6281,8 +6281,8 @@
    "cy": 1033.5,
    "w": 40.176,
    "h": 7.2,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "d-pass",
+   "reason": "checked as distance (leader)"
   },
   {
    "sheet": "r10434_1",
@@ -6605,8 +6605,8 @@
    "cy": 442.0,
    "w": 97.18499999999999,
    "h": 6.27,
-   "bucket": "a-radial",
-   "reason": "radial bearing (R): checks.py logs it, never checks it"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 197.35 vs printed 2509.63 ft"
   },
   {
    "sheet": "r10434_1",
@@ -6623,8 +6623,8 @@
    "cy": 442.0,
    "w": 97.18499999999999,
    "h": 6.27,
-   "bucket": "e-fail",
-   "reason": "checked as distance (beside)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 197.35 vs printed 2509.63 ft"
   },
   {
    "sheet": "r10434_1",
@@ -7649,8 +7649,8 @@
    "cy": 1114.0,
    "w": 61.0,
    "h": 28.0,
-   "bucket": "e-fail",
-   "reason": "checked as bearing (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured S1\u00b036'16\"E vs printed N88\u00b028'28\"W (5212.2' off)"
   },
   {
    "sheet": "r10434_1",
@@ -7667,8 +7667,8 @@
    "cy": 1114.0,
    "w": 61.0,
    "h": 28.0,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "leader points at no line"
   },
   {
    "sheet": "r10434_1",
@@ -7721,8 +7721,8 @@
    "cy": 1028.0,
    "w": 43.152,
    "h": 6.96,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "association unproven: measured 89.87 vs printed 222.86 ft (T)"
   },
   {
    "sheet": "r10434_1",
@@ -7775,8 +7775,8 @@
    "cy": 1075.5,
    "w": 25.928399999999996,
    "h": 6.97,
-   "bucket": "e-fail",
-   "reason": "checked as distance (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 597.37 vs printed 34.05 ft"
   },
   {
    "sheet": "r10434_1",
@@ -7811,8 +7811,8 @@
    "cy": 1203.5,
    "w": 44.64,
    "h": 7.2,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "no line found beside label"
   },
   {
    "sheet": "r10434_1",
@@ -7829,8 +7829,8 @@
    "cy": 1153.0,
    "w": 30.163,
    "h": 6.95,
-   "bucket": "e-fail",
-   "reason": "checked as distance (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 597.37 vs printed 131.94 ft"
   },
   {
    "sheet": "r10434_1",
@@ -8351,8 +8351,8 @@
    "cy": 588.5,
    "w": 34.224,
    "h": 5.52,
-   "bucket": "e-fail",
-   "reason": "checked as arc (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 58.71 vs printed 1804.98 ft"
   },
   {
    "sheet": "r10434_1",
@@ -8765,8 +8765,8 @@
    "cy": 704.5,
    "w": 44.64,
    "h": 7.2,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "association unproven: measured 76.80 vs printed 134.03 ft (T)"
   },
   {
    "sheet": "r10434_1",
@@ -11017,8 +11017,8 @@
    "cy": 750.0,
    "w": 40.734,
    "h": 6.57,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "no line found beside label"
   },
   {
    "sheet": "r10434_3",
@@ -11071,8 +11071,8 @@
    "cy": 636.0,
    "w": 51.708,
    "h": 8.34,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "no line found beside label"
   },
   {
    "sheet": "r10434_3",
@@ -11233,8 +11233,8 @@
    "cy": 460.0,
    "w": 42.78,
    "h": 6.9,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "association unproven: measured 514.57 vs printed 494.26 ft (T)"
   },
   {
    "sheet": "r10434_3",
@@ -11287,8 +11287,8 @@
    "cy": 605.5,
    "w": 51.708,
    "h": 8.34,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "d-pass",
+   "reason": "checked as distance (beside)"
   },
   {
    "sheet": "r10434_3",
@@ -11449,8 +11449,8 @@
    "cy": 341.5,
    "w": 51.894,
    "h": 8.37,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "no line found beside label"
   },
   {
    "sheet": "r10434_3",
@@ -11521,8 +11521,8 @@
    "cy": 322.0,
    "w": 59.0,
    "h": 26.0,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "d-pass",
+   "reason": "checked as distance (leader)"
   },
   {
    "sheet": "r10434_3",
@@ -11665,8 +11665,8 @@
    "cy": 534.0,
    "w": 59.0,
    "h": 26.0,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "d-pass",
+   "reason": "checked as distance (leader)"
   },
   {
    "sheet": "r10434_3",
@@ -11701,8 +11701,8 @@
    "cy": 526.0,
    "w": 27.007199999999997,
    "h": 7.26,
-   "bucket": "e-fail",
-   "reason": "checked as distance (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 195.85 vs printed 45.11 ft"
   },
   {
    "sheet": "r10434_3",
@@ -11773,8 +11773,8 @@
    "cy": 496.5,
    "w": 43.152,
    "h": 6.96,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "leader points at no line"
   },
   {
    "sheet": "r10434_3",
@@ -11917,8 +11917,8 @@
    "cy": 425.0,
    "w": 25.444799999999997,
    "h": 6.84,
-   "bucket": "e-fail",
-   "reason": "checked as arc (beside)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 448.40 vs printed 69.31 ft"
   },
   {
    "sheet": "r10434_3",
@@ -12187,8 +12187,8 @@
    "cy": 425.5,
    "w": 46.7046,
    "h": 8.37,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "f-queued",
+   "reason": "association unproven: measured 132.42 vs printed 31.57 ft (T)"
   },
   {
    "sheet": "r10434_3",
@@ -12709,8 +12709,8 @@
    "cy": 772.0,
    "w": 58.0,
    "h": 24.0,
-   "bucket": "e-fail",
-   "reason": "checked as bearing (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured N30\u00b002'24\"E vs printed S34\u00b012'31\"W (250.1' off)"
   },
   {
    "sheet": "r10434_3",
@@ -14131,8 +14131,8 @@
    "cy": 1097.5,
    "w": 38.998000000000005,
    "h": 6.29,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "d-pass",
+   "reason": "checked as distance (beside)"
   },
   {
    "sheet": "r10434_3",
@@ -14185,8 +14185,8 @@
    "cy": 906.0,
    "w": 84.0,
    "h": 44.0,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "d-pass",
+   "reason": "checked as distance (leader)"
   },
   {
    "sheet": "r10434_3",
@@ -14365,8 +14365,8 @@
    "cy": 1092.5,
    "w": 31.031,
    "h": 7.15,
-   "bucket": "e-fail",
-   "reason": "checked as arc (leader)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 12.41 vs printed 223.03 ft"
   },
   {
    "sheet": "r10434_3",
@@ -15409,8 +15409,8 @@
    "cy": 861.0,
    "w": 58.0,
    "h": 14.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L3 (bearing): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -15427,8 +15427,8 @@
    "cy": 860.5,
    "w": 22.506,
    "h": 7.26,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L3 (distance): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -15445,8 +15445,8 @@
    "cy": 875.5,
    "w": 58.0,
    "h": 15.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L4 (bearing): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -15481,8 +15481,8 @@
    "cy": 889.5,
    "w": 56.0,
    "h": 15.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L5 (bearing): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -15499,8 +15499,8 @@
    "cy": 890.0,
    "w": 22.506,
    "h": 7.26,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L5 (distance): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -15517,8 +15517,8 @@
    "cy": 905.0,
    "w": 58.0,
    "h": 14.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L3 (bearing): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -15770,7 +15770,7 @@
    "w": 31.508399999999998,
    "h": 7.26,
    "bucket": "c-table-tag",
-   "reason": "table cell for tag C7 (radius): FAIL"
+   "reason": "table cell for tag C8 (radius): FAIL"
   },
   {
    "sheet": "r10434_3",
@@ -15806,7 +15806,7 @@
    "w": 31.508399999999998,
    "h": 7.26,
    "bucket": "c-table-tag",
-   "reason": "table cell for tag C7 (radius): FAIL"
+   "reason": "table cell for tag C8 (radius): FAIL"
   },
   {
    "sheet": "r10434_3",
@@ -15913,8 +15913,8 @@
    "cy": 950.0,
    "w": 52.0,
    "h": 14.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L9 (bearing): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -15931,8 +15931,8 @@
    "cy": 949.0,
    "w": 27.007199999999997,
    "h": 7.26,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L9 (distance): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -16237,8 +16237,8 @@
    "cy": 942.0,
    "w": 31.508399999999998,
    "h": 7.26,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag C11 (radius): arc too flat to measure a radius (sagitta 0.29 pt); not checked"
   },
   {
    "sheet": "r10434_3",
@@ -16273,8 +16273,8 @@
    "cy": 959.0,
    "w": 31.508399999999998,
    "h": 7.26,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag C11 (radius): arc too flat to measure a radius (sagitta 0.29 pt); not checked"
   },
   {
    "sheet": "r10434_3",
@@ -16346,7 +16346,7 @@
    "w": 31.508399999999998,
    "h": 7.26,
    "bucket": "c-table-tag",
-   "reason": "table cell for tag C7 (radius): FAIL"
+   "reason": "table cell for tag C8 (radius): FAIL"
   },
   {
    "sheet": "r10434_3",
@@ -16903,8 +16903,8 @@
    "cy": 765.0,
    "w": 51.894,
    "h": 8.37,
-   "bucket": "a-runtotal",
-   "reason": "bare '(T)' run total (no L= prefix): distance branch's is_total guard drops it outright, no run-sum fallback"
+   "bucket": "d-pass",
+   "reason": "checked as distance (leader)"
   },
   {
    "sheet": "r10434_3",
@@ -17155,8 +17155,8 @@
    "cy": 129.0,
    "w": 59.0,
    "h": 14.0,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag L34 (bearing): pass"
   },
   {
    "sheet": "r10434_3",
@@ -17173,8 +17173,8 @@
    "cy": 129.0,
    "w": 27.007199999999997,
    "h": 7.26,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag L34 (distance): pass"
   },
   {
    "sheet": "r10434_3",
@@ -17227,8 +17227,8 @@
    "cy": 1223.5,
    "w": 102.672,
    "h": 6.9,
-   "bucket": "a-radial",
-   "reason": "radial bearing (R): checks.py logs it, never checks it"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 48.00 vs printed 803.00 ft"
   },
   {
    "sheet": "r10434_3",
@@ -17245,8 +17245,8 @@
    "cy": 1223.5,
    "w": 102.672,
    "h": 6.9,
-   "bucket": "e-fail",
-   "reason": "checked as distance (beside)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 48.00 vs printed 803.00 ft"
   },
   {
    "sheet": "r10434_3",
@@ -17263,8 +17263,8 @@
    "cy": 1234.0,
    "w": 106.95,
    "h": 6.9,
-   "bucket": "a-radial",
-   "reason": "radial bearing (R): checks.py logs it, never checks it"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 48.00 vs printed 1843.17 ft"
   },
   {
    "sheet": "r10434_3",
@@ -17281,8 +17281,8 @@
    "cy": 1234.0,
    "w": 106.95,
    "h": 6.9,
-   "bucket": "e-fail",
-   "reason": "checked as distance (beside)"
+   "bucket": "f-queued",
+   "reason": "wrong line likely: measured 48.00 vs printed 1843.17 ft"
   },
   {
    "sheet": "r10434_3",
@@ -18163,8 +18163,8 @@
    "cy": 264.5,
    "w": 58.0,
    "h": 15.0,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag L43 (bearing): pass"
   },
   {
    "sheet": "r10434_3",
@@ -18235,8 +18235,8 @@
    "cy": 820.5,
    "w": 59.0,
    "h": 15.0,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag L18 (bearing): pass"
   },
   {
    "sheet": "r10434_3",
@@ -18253,8 +18253,8 @@
    "cy": 821.0,
    "w": 27.007199999999997,
    "h": 7.26,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag L18 (distance): pass"
   },
   {
    "sheet": "r10434_3",
@@ -18307,8 +18307,8 @@
    "cy": 849.5,
    "w": 52.0,
    "h": 15.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L20 (bearing): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -18703,8 +18703,8 @@
    "cy": 1014.5,
    "w": 59.0,
    "h": 15.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag L31 (bearing): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
@@ -18955,8 +18955,8 @@
    "cy": 957.5,
    "w": 37.0,
    "h": 15.0,
-   "bucket": "a-table",
-   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
+   "bucket": "c-table-tag",
+   "reason": "table cell for tag C35 (radius): pass"
   },
   {
    "sheet": "r10434_3",
@@ -19027,8 +19027,8 @@
    "cy": 997.5,
    "w": 30.0,
    "h": 15.0,
-   "bucket": "c-table-tag",
-   "reason": "table cell for tag C38 (radius): FAIL"
+   "bucket": "a-table",
+   "reason": "table cell, no matching row in tags_checks.csv (tag's own row never checked)"
   },
   {
    "sheet": "r10434_3",
