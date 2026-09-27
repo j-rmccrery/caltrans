@@ -9,9 +9,7 @@ L4,bearing,"S75°10'18""W","S75°06'24""W",3.9',pass,leader
 L4,distance,9.32,9.30,-0.02,pass,leader
 L5,bearing,"N90°00'00""W","N89°57'45""W",2.2',pass,leader
 L5,distance,12.01,12.04,+0.03,pass,leader
-L6,bearing,"S75°10'18""W","N26°03'39""W",4726.0',FAIL,leader
 L6,distance,6.92,18.22,+11.30,FAIL,leader
-L8,bearing,"S75°44'54""E","S26°03'39""E",2981.2',FAIL,leader
 L8,distance,14.33,18.22,+3.89,FAIL,leader
 L9,bearing,"S60°50'50""E","S60°49'36""E",1.2',pass,leader
 L9,distance,22.35,22.32,-0.03,pass,leader

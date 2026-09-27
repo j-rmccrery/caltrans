@@ -167,8 +167,7 @@
  {
   "kind": "arc length",
   "text": "235.42'(T)",
-  "drawn_ft": 648.14,
-  "off_ft": 412.72,
+  "issue": "association unproven: measured 648.14 vs printed 235.42 ft (T)",
   "region": [
    888,
    505,
@@ -544,9 +543,7 @@
  {
   "kind": "bearing",
   "text": "N21°34'50\"W",
-  "drawn": "N80°40'13\"W",
-  "off_arcmin": 3545.4,
-  "tol_arcmin": 30.0,
+  "issue": "wrong line likely: measured N80°40'13\"W vs printed N21°34'50\"W (3545.4' off)",
   "region": [
    2162,
    576,
@@ -567,8 +564,7 @@
  {
   "kind": "distance",
   "text": "5.50'",
-  "drawn_ft": 64.2,
-  "off_ft": 58.7,
+  "issue": "wrong line likely: measured 64.20 vs printed 5.50 ft",
   "region": [
    2162,
    576,
@@ -589,8 +585,7 @@
  {
   "kind": "distance",
   "text": "5.67'",
-  "drawn_ft": 118.6,
-  "off_ft": 112.93,
+  "issue": "wrong line likely: measured 118.60 vs printed 5.67 ft",
   "region": [
    1969,
    647,
@@ -666,8 +661,7 @@
  {
   "kind": "distance",
   "text": "241.32'(T)",
-  "drawn_ft": 648.13,
-  "off_ft": 406.81,
+  "issue": "association unproven: measured 648.13 vs printed 241.32 ft (T)",
   "region": [
    1162,
    638,
@@ -754,8 +748,7 @@
  {
   "kind": "arc length",
   "text": "L=171.66'",
-  "drawn_ft": 530.45,
-  "off_ft": 358.79,
+  "issue": "wrong line likely: measured 530.45 vs printed 171.66 ft",
   "region": [
    1733,
    543,

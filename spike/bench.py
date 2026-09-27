@@ -50,7 +50,8 @@ TRAVERSE_COLS = ["chains", "closed"]
 TABLES_COLS = ["table_rows", "rows_clean"]
 READ_COLS = ["frame", "blocks_read", "bearings_parsed", "distances_parsed"]
 # coverage: distance+bearing passes over every parsed distance/bearing token (a rate over checked values alone
-# rises when labels are queued); gold: presidio passes scored against spike/gold (right/wrong/unkeyed)
+# rises when labels are queued); gold: passes/fails scored against spike/gold, right/wrong/unkeyed for
+# passes then fail_real/fail_wrong/fail_unkeyed for FAILs (loop 14)
 QUALITY_COLS = ["coverage", "gold"]
 FIELDS = ["label", "sheet", "distance", "bearing", "arc length", "exceptions", "wrong_line", "no_line", "secs"] + TAGS_COLS + PARCELS_COLS + TRAVERSE_COLS + TABLES_COLS + READ_COLS + QUALITY_COLS
 
@@ -250,7 +251,7 @@ def run(key, steps):
     if "tags" in steps and (ROOT / "spike" / "gold" / f"{key}_assoc.json").exists():
         import gold_assoc
         g = gold_assoc.current(o, key)
-        res["gold"] = f"{g['right']}/{g['wrong']}/{g['unkeyed']}"
+        res["gold"] = f"{g['right']}/{g['wrong']}/{g['unkeyed']}|{g['fail_real']}/{g['fail_wrong']}/{g['fail_unkeyed']}"
     res["secs"] = round(time.time() - t)  # includes any optional steps
     return res
 

@@ -9,15 +9,15 @@
  },
  "checks": {
   "distance": {
-   "checked": 49,
+   "checked": 46,
    "pass": 41
   },
   "bearing": {
-   "checked": 43,
+   "checked": 42,
    "pass": 41
   },
   "arc length": {
-   "checked": 17,
+   "checked": 15,
    "pass": 13
   },
   "curve L=R*delta": {
@@ -35,25 +35,25 @@
  },
  "exceptions": {
   "total": 46,
-  "unmatched": 26,
+  "unmatched": 32,
   "matchline": 6,
   "disagree_small": 1,
-  "wrong_line": 13
+  "wrong_line": 7
  },
  "tags": {
   "table_rows": 44,
   "read": 32,
   "distinct": 32,
   "partial_queued": 14,
-  "associated": 28,
-  "by_leader": 21,
+  "associated": 27,
+  "by_leader": 20,
   "queued": 30,
   "distance": {
-   "checked": 13,
+   "checked": 10,
    "pass": 10
   },
   "bearing": {
-   "checked": 15,
+   "checked": 14,
    "pass": 14
   },
   "radius": {

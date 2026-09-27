@@ -117,6 +117,25 @@ def bearing_tol_deg(len_pt):
     return min(max(BEAR_TOL, math.degrees(math.atan2(LINEWORK_W, max(len_pt, 1e-6)))), BEAR_TOL_CAP)
 
 
+def wrong_line_likely(kind, off, printed=None):
+    """True when a FAIL's own size looks like the checker measured the wrong line/arc rather than the
+    record really disagreeing -- loop 14. Cuts calibrated on the keyed FAILs in spike/gold/presidio_assoc.json
+    and spike/gold/r10434_3_assoc.json (measure.py, not kept): chosen to keep every keyed real
+    disagreement a FAIL, not to catch every wrong-line one -- the two distributions overlap throughout
+    (bearing: keyed real max 54.6', next wrong 250.1'; distance: keyed real max 330.77 ft / 128.8% of
+    printed; arc length: no (ft, %) pair split cleanly, so both conditions must hold; radius: keyed real
+    max 94.0%). A fail beyond the cut is queued, not failed -- see wrong_line_likely's callers."""
+    pct = abs(off) / abs(printed) * 100 if printed else None
+    if kind == "bearing":
+        return abs(off) > 180              # arcmin
+    if kind == "distance":
+        return abs(off) > 400 or (pct is not None and pct > 200)
+    if kind == "arc length":
+        return abs(off) > 175 and pct is not None and pct > 90
+    if kind == "radius":
+        return abs(off) > 110              # off is already a percent
+
+
 def dms(d, m, s):
     return int(d) + int(m) / 60 + int(s) / 3600
 
@@ -1559,6 +1578,8 @@ def main():
                             continue
                 if ln is None:
                     exceptions.append({"kind": "bearing", "text": part, "issue": "leader points at no line" if led else "no line found beside label", "region": region(b)}); continue
+                if not ok and wrong_line_likely("bearing", diff * 60):
+                    exceptions.append({"kind": "bearing", "text": part, "issue": f"wrong line likely: measured {fmt_bearing(az)} vs printed {part} ({diff * 60:.1f}' off)", "region": region(b), "line": shape(ln)}); continue
                 rows.append(["bearing", part, fmt_bearing(az if abs((az - want + 180) % 360 - 180) < 90 else az + 180), f"{diff * 60:.1f}'", "pass" if ok else "FAIL"])
                 labels.append({"kind": "bearing", "printed": part, "az": want, "line": shape(ln), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
                 if not ok:
@@ -1630,6 +1651,11 @@ def main():
                     if arc is not None and (ln is None or abs(arc["len_pt"] * scale - want) < abs(ln["len_pt"] * scale - want)):
                         drawn = arc["len_pt"] * scale
                         ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                        if not ok and is_total:  # a bare (T) run total was only ever meant to accept a
+                            # pass on this fallback too, whichever kind (line or arc) it lands on
+                            exceptions.append({"kind": "arc length", "text": part, "issue": f"association unproven: measured {drawn:.2f} vs printed {want:.2f} ft (T)", "region": region(b), "line": shape(arc)}); continue
+                        if not ok and wrong_line_likely("arc length", drawn - want, want):
+                            exceptions.append({"kind": "arc length", "text": part, "issue": f"wrong line likely: measured {drawn:.2f} vs printed {want:.2f} ft", "region": region(b), "line": shape(arc)}); continue
                         rows.append(["arc length", part, f"{drawn:.2f} (R={arc['radius_pt'] * scale:.1f})", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])
                         labels.append({"kind": "arc", "printed": part, "ft": want, "line": shape(arc), "ok": ok, "how": "leader" if led else "beside", "region": region(b)})
                         if not ok:
@@ -1642,6 +1668,14 @@ def main():
                     exceptions.append({"kind": "distance", "text": part, "issue": "line runs to the sheet edge (matchline); not checkable on this sheet", "region": region(b)}); continue
                 drawn = ln["len_pt"] * scale
                 ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                if not ok:
+                    # a bare "NNN.NN'(T)" run total (leg H2) is only ever meant to accept a pass -- any
+                    # fail on it is unproven association, not evidence of a real disagreement, whatever
+                    # its size; every other distance keeps the ordinary gold-calibrated cut (loop 14)
+                    if is_total:
+                        exceptions.append({"kind": "distance", "text": part, "issue": f"association unproven: measured {drawn:.2f} vs printed {want:.2f} ft (T)", "region": region(b), "line": shape(ln)}); continue
+                    if wrong_line_likely("distance", drawn - want, want):
+                        exceptions.append({"kind": "distance", "text": part, "issue": f"wrong line likely: measured {drawn:.2f} vs printed {want:.2f} ft", "region": region(b), "line": shape(ln)}); continue
                 result = "pass" if ok else "FAIL"
                 if is_total and ok and ln.get("joined", 1) > 1:
                     result = f"pass as a run of {ln['joined']}: the boundary between these segments is not drawn"
@@ -1661,6 +1695,8 @@ def main():
         for p in group:  # a (T) total names this whole run itself, not a share of it: check it directly
             if p["total"]:
                 ok = abs(drawn - p["want"]) <= DIST_TOL + 0.0005 * p["want"]
+                if not ok and wrong_line_likely("arc length", drawn - p["want"], p["want"]):
+                    exceptions.append({"kind": "arc length", "text": p["text"], "issue": f"wrong line likely: measured {drawn:.2f} vs printed {p['want']:.2f} ft", "region": p["region"], "line": shape(arc)}); continue
                 rows.append(["arc length", p["text"], f"{drawn:.2f}", f"{drawn - p['want']:+.2f}", "pass" if ok else "FAIL"])
                 labels.append({"kind": "arc", "printed": p["text"], "ft": p["want"], "line": shape(arc), "ok": ok, "how": "leader" if p["led"] else "beside", "region": p["region"]})
                 if not ok:
@@ -1672,6 +1708,8 @@ def main():
             # a standalone L= with no neighbour sharing its run stays as it is: a plain FAIL, same as
             # before this leg (nothing to sum it with)
             for p in piece:
+                if wrong_line_likely("arc length", drawn - p["want"], p["want"]):
+                    exceptions.append({"kind": "arc length", "text": p["text"], "issue": f"wrong line likely: measured {drawn:.2f} vs printed {p['want']:.2f} ft", "region": p["region"], "line": shape(arc)}); continue
                 rows.append(["arc length", p["text"], f"{drawn:.2f}", f"{drawn - p['want']:+.2f}", "FAIL"])
                 labels.append({"kind": "arc", "printed": p["text"], "ft": p["want"], "line": shape(arc), "ok": False, "how": "leader" if p["led"] else "beside", "region": p["region"]})
                 exceptions.append({"kind": "arc length", "text": p["text"], "drawn_ft": round(drawn, 2), "off_ft": round(drawn - p["want"], 2), "region": p["region"], "line": shape(arc)})
@@ -1681,7 +1719,9 @@ def main():
                 rows.append(["arc length", p["text"], sum_str, f"{drawn - total:+.2f}",
                              f"pass as a run of {len(piece)}: the boundary between these arcs is not drawn"])
                 labels.append({"kind": "arc", "printed": p["text"], "ft": p["want"], "line": shape(arc), "ok": True, "how": "leader" if p["led"] else "beside", "region": p["region"]})
-        else:  # the run doesn't match the sum either: fail once against the sum, not once per label
+        elif wrong_line_likely("arc length", drawn - total, total):  # the run doesn't match the sum either
+            exceptions.append({"kind": "arc length", "text": " + ".join(p["text"] for p in piece), "issue": f"wrong line likely: measured {drawn:.2f} vs printed total {total:.2f} ft", "region": piece[0]["region"], "line": shape(arc)})
+        else:  # fail once against the sum, not once per label
             texts = " + ".join(p["text"] for p in piece)
             rows.append(["arc length", texts, f"{drawn:.2f}", f"{drawn - total:+.2f}", "FAIL"])
             for p in piece:
@@ -1777,12 +1817,15 @@ def main():
                 lens_ft = [x["len_pt"] * scale for x in pieces]
                 drawn = sum(lens_ft)
                 ok2 = abs(drawn - L) <= DIST_TOL + 0.0005 * L
-                sumtxt = f"{drawn:.2f}" if len(pieces) == 1 else f"{drawn:.2f} = " + " + ".join(f"{v:.2f}" for v in lens_ft)
                 printed = f"R={R}' L={L}'"
-                rows.append(["arc length", printed, sumtxt, f"{drawn - L:+.2f}", "pass" if ok2 else "FAIL"])
-                labels.append({"kind": "arc", "printed": printed, "ft": L, "line": shape(pieces[0]), "ok": ok2, "how": "leader" if tip else "beside", "region": region(len_block)})
-                if not ok2:
-                    exceptions.append({"kind": "arc length", "text": printed, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - L, 2), "region": region(len_block), "line": shape(pieces[0])})
+                if not ok2 and wrong_line_likely("arc length", drawn - L, L):
+                    exceptions.append({"kind": "arc length", "text": printed, "issue": f"wrong line likely: measured {drawn:.2f} vs printed {L:.2f} ft", "region": region(len_block), "line": shape(pieces[0])})
+                else:
+                    sumtxt = f"{drawn:.2f}" if len(pieces) == 1 else f"{drawn:.2f} = " + " + ".join(f"{v:.2f}" for v in lens_ft)
+                    rows.append(["arc length", printed, sumtxt, f"{drawn - L:+.2f}", "pass" if ok2 else "FAIL"])
+                    labels.append({"kind": "arc", "printed": printed, "ft": L, "line": shape(pieces[0]), "ok": ok2, "how": "leader" if tip else "beside", "region": region(len_block)})
+                    if not ok2:
+                        exceptions.append({"kind": "arc length", "text": printed, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - L, 2), "region": region(len_block), "line": shape(pieces[0])})
 
     (OUT / "labels.json").write_text(json.dumps(labels, ensure_ascii=False), encoding="utf-8")
     with open(OUT / "checks.csv", "w", newline="", encoding="utf-8") as f:

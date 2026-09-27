@@ -183,16 +183,28 @@ def current(run_out, key="presidio"):
     bench tracks precision as code changes. Labels rejoin by (kind, region); tags by (tag, check).
     right  = passes now on the line the gold set says is correct
     wrong  = passes now on a line the gold set says is wrong, or on a different line than the keyed correct one
-    unkeyed = passes now with no gold entry, or keyed unsure: look at these before trusting a gain."""
+    unkeyed = passes now with no gold entry, or keyed unsure: look at these before trusting a gain.
+    fail_real/fail_wrong/fail_unkeyed = the same rejoin for CURRENT FAILs (loop 14): a fail keyed
+    correct_line true is a real disagreement, false is the checker measuring the wrong line, missing/
+    unsure is fail_unkeyed."""
     import csv
     gold = {g["id"]: g for g in json.loads(gold_file(key).read_text(encoding="utf-8"))}
     man = {(m["kind"], tuple(m["region"])): m for m in json.loads((crop_dir(key) / "_manifest.json").read_text(encoding="utf-8")) if m.get("region") and m["id"].startswith("label:")}
     right = wrong = unkeyed = 0
+    fail_real = fail_wrong = fail_unkeyed = 0
     for lab in json.loads((Path(run_out) / "labels.json").read_text(encoding="utf-8")):
-        if not lab.get("ok"):
-            continue
         m = man.get((lab["kind"], tuple(lab["region"])))
         g = gold.get(m["id"]) if m else None
+        if lab.get("ok") is False:
+            if g is None or str(g["correct_line"]) == "unsure":
+                fail_unkeyed += 1
+            elif str(g["correct_line"]).lower() == "true":
+                fail_real += 1
+            else:
+                fail_wrong += 1
+            continue
+        if not lab.get("ok"):
+            continue
         if g is None or str(g["correct_line"]) == "unsure":
             unkeyed += 1
         elif str(g["correct_line"]).lower() == "true" and m.get("line") and _same_line(lab["line"], m["line"]):
@@ -202,16 +214,25 @@ def current(run_out, key="presidio"):
         else:
             wrong += 1
     for r in csv.DictReader(open(Path(run_out) / "tags_checks.csv", encoding="utf-8")):
+        g = gold.get(f"tag:{r['tag']}:{r['check']}")
+        if r["result"] == "FAIL":
+            if g is None or str(g["correct_line"]) == "unsure":
+                fail_unkeyed += 1
+            elif str(g["correct_line"]).lower() == "true":
+                fail_real += 1
+            else:
+                fail_wrong += 1
+            continue
         if not r["result"].startswith("pass"):
             continue
-        g = gold.get(f"tag:{r['tag']}:{r['check']}")
         if g is None or str(g["correct_line"]) == "unsure":
             unkeyed += 1
         elif str(g["correct_line"]).lower() == "true":
             right += 1
         else:
             wrong += 1
-    return {"right": right, "wrong": wrong, "unkeyed": unkeyed}
+    return {"right": right, "wrong": wrong, "unkeyed": unkeyed,
+            "fail_real": fail_real, "fail_wrong": fail_wrong, "fail_unkeyed": fail_unkeyed}
 
 
 def main():

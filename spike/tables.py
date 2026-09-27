@@ -22,7 +22,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, azimuth, build_pool, fmt_bearing, leaders, lines_on_sheet, linework_segments, parent_window, poly_dist, run_sum, seg_dist, span_for, split_chains, tag_leaders  # noqa: E402
+from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, azimuth, build_pool, fmt_bearing, leaders, lines_on_sheet, linework_segments, parent_window, poly_dist, run_sum, seg_dist, span_for, split_chains, tag_leaders, wrong_line_likely  # noqa: E402
 from georef import OUT, PDF, READS, real_text_blocks, segments  # noqa: E402
 from gt import TABLES  # noqa: E402
 
@@ -408,6 +408,10 @@ def main():
             seg = span_for(seg, row["dist"], scale, chains)
         if how_note:
             how = f"{how}; {how_note}"
+        # loop 14: a tag resolved from a partly-read glyph string by SHX text or by the record (loop 13,
+        # how_note above) was only ever meant to accept a pass -- any fail on it is unproven association,
+        # not evidence of a real disagreement, whatever its size (never the gold-calibrated cut below)
+        forced_unproven = bool(how_note)
         placed.append({"tag": t["tag"], "kind": kind, **{k: row[k] for k in ("az", "dist", "total", "R", "L", "delta") if k in row}, "line": shape(seg), "how": how})
         if kind == "line":
             drawn = seg["len_pt"] * scale
@@ -416,16 +420,22 @@ def main():
             az = math.degrees(math.atan2(gx, gy)) % 360
             dbrg = min(abs((az - row["az"] + 180) % 360 - 180), abs((az + 180 - row["az"] + 180) % 360 - 180))
             ok_b = dbrg <= max(BEAR_TOL, math.degrees(math.atan2(0.10, row["dist"])))  # a 6 ft line: 0.1 ft sideways is 1 deg
-            out.append([t["tag"], "bearing", row["bearing"], fmt_bearing(az if abs((az - row["az"] + 180) % 360 - 180) < 90 else az + 180), f"{dbrg * 60:.1f}'", "pass" if ok_b else "FAIL", how])
+            queued_b = not ok_b and (forced_unproven or wrong_line_likely("bearing", dbrg * 60))
+            if not queued_b:
+                out.append([t["tag"], "bearing", row["bearing"], fmt_bearing(az if abs((az - row["az"] + 180) % 360 - 180) < 90 else az + 180), f"{dbrg * 60:.1f}'", "pass" if ok_b else "FAIL", how])
+            if not ok_b:
+                reason = ("association unproven: " if forced_unproven else "wrong line likely: " if queued_b else "") + f"drawn bearing off by {dbrg * 60:.1f} arcmin"
+                queue.append({"tag": t["tag"], "issue": reason, "region": region, "line": shape(seg)})
             if row["total"]:
                 out.append([t["tag"], "distance", f"{row['dist']:.2f}(T)", f"{drawn:.2f}", "", "total over several segments; not checked", how])
             else:
                 ok_d = abs(drawn - row["dist"]) <= DIST_TOL + 0.0005 * row["dist"]
-                out.append([t["tag"], "distance", f"{row['dist']:.2f}", f"{drawn:.2f}", f"{drawn - row['dist']:+.2f}", "pass" if ok_d else "FAIL", how])
+                queued_d = not ok_d and (forced_unproven or wrong_line_likely("distance", drawn - row["dist"], row["dist"]))
+                if not queued_d:
+                    out.append([t["tag"], "distance", f"{row['dist']:.2f}", f"{drawn:.2f}", f"{drawn - row['dist']:+.2f}", "pass" if ok_d else "FAIL", how])
                 if not ok_d:
-                    queue.append({"tag": t["tag"], "issue": f"drawn {drawn:.2f} ft vs table {row['dist']:.2f} ft", "region": region, "line": shape(seg)})
-            if not ok_b:
-                queue.append({"tag": t["tag"], "issue": f"drawn bearing off by {dbrg * 60:.1f} arcmin", "region": region, "line": shape(seg)})
+                    reason = ("association unproven: " if forced_unproven else "wrong line likely: " if queued_d else "") + f"drawn {drawn:.2f} ft vs table {row['dist']:.2f} ft"
+                    queue.append({"tag": t["tag"], "issue": reason, "region": region, "line": shape(seg)})
         else:
             curve_hits.append((t, row, seg, how, region))
 
@@ -449,6 +459,7 @@ def main():
         nonlocal group_fires, row_run_fires
         if len(sub) < 2:
             for t, row, seg, how, region in sub:
+                forced = "resolved-by" in how
                 rr = row_run(t["tag"], seg, rows, tag_by_num, arcs, scale)
                 if rr is not None:
                     keys, untagged, rdrawn, Ls, total, by_sum, span_pieces = rr
@@ -459,12 +470,18 @@ def main():
                                     f"pass as a run of {len(keys)} ({label}): the boundary between these arcs is not drawn", how])
                         row_run_fires += 1
                     else:
-                        out.append([t["tag"], "arc length", f"{row['L']:.2f}", sum_str, f"{rdrawn - total:+.2f}", "FAIL", how])
-                        queue.append({"tag": t["tag"], "issue": f"drawn run {rdrawn:.2f} ft vs row-run table total {total:.2f} ft ({label})", "region": region, "line": shape(span_pieces[-1])})
+                        queued = forced or wrong_line_likely("arc length", rdrawn - total, total)
+                        if not queued:
+                            out.append([t["tag"], "arc length", f"{row['L']:.2f}", sum_str, f"{rdrawn - total:+.2f}", "FAIL", how])
+                        prefix = "association unproven: " if forced else "wrong line likely: " if queued else ""
+                        queue.append({"tag": t["tag"], "issue": prefix + f"drawn run {rdrawn:.2f} ft vs row-run table total {total:.2f} ft ({label})", "region": region, "line": shape(span_pieces[-1])})
                     continue
                 d = seg["len_pt"] * scale
-                out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{d:.2f}", f"{d - row['L']:+.2f}", "FAIL", how])
-                queue.append({"tag": t["tag"], "issue": f"drawn {d:.2f} ft vs table {row['L']:.2f} ft", "region": region, "line": shape(seg)})
+                queued = forced or wrong_line_likely("arc length", d - row["L"], row["L"])
+                if not queued:
+                    out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{d:.2f}", f"{d - row['L']:+.2f}", "FAIL", how])
+                prefix = "association unproven: " if forced else "wrong line likely: " if queued else ""
+                queue.append({"tag": t["tag"], "issue": prefix + f"drawn {d:.2f} ft vs table {row['L']:.2f} ft", "region": region, "line": shape(seg)})
             return
         Ls = [row["L"] for t, row, seg, how, region in sub]
         total, by_sum = run_sum(drawn, Ls)
@@ -474,8 +491,12 @@ def main():
                             f"pass as a run of {len(Ls)}: the boundary between these arcs is not drawn", how])
                 group_fires += 1
             else:
-                out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "FAIL", how])
-                queue.append({"tag": t["tag"], "issue": f"drawn run {drawn:.2f} ft vs table {row['L']:.2f} ft (run holds {len(Ls)} tags summing {total:.2f})", "region": region, "line": shape(ref_seg)})
+                forced = "resolved-by" in how
+                queued = forced or wrong_line_likely("arc length", drawn - row["L"], row["L"])
+                if not queued:
+                    out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "FAIL", how])
+                prefix = "association unproven: " if forced else "wrong line likely: " if queued else ""
+                queue.append({"tag": t["tag"], "issue": prefix + f"drawn run {drawn:.2f} ft vs table {row['L']:.2f} ft (run holds {len(Ls)} tags summing {total:.2f})", "region": region, "line": shape(ref_seg)})
 
     row_run_fires = 0  # leg9A: tags that only passed as a run of consecutive table rows (some untagged)
     by_parent = {}
@@ -484,6 +505,7 @@ def main():
     for group_hits in by_parent.values():
         remaining = []
         for t, row, seg, how, region in group_hits:
+            forced = "resolved-by" in how
             drawn = seg["len_pt"] * scale
             sagitta = seg["len_pt"] ** 2 / (8 * row["R"] / scale)  # pt; a 46 ft arc on R=1470 bulges 0.1 pt: no radius in that
             ok_r = True
@@ -492,14 +514,21 @@ def main():
             else:
                 R = fit_radius(seg["pts"]) * scale
                 ok_r = abs(R - row["R"]) <= RADIUS_TOL * row["R"]
-                out.append([t["tag"], "radius", f"{row['R']:.2f}", f"{R:.2f}", f"{(R - row['R']) / row['R'] * 100:+.2f}%", "pass" if ok_r else "FAIL", how])
-            if not ok_r:
-                queue.append({"tag": t["tag"], "issue": f"fitted radius {R:.1f} ft vs table {row['R']:.2f} ft", "region": region, "line": shape(seg)})
+                pct_r = (R - row["R"]) / row["R"] * 100
+                queued_r = not ok_r and (forced or wrong_line_likely("radius", pct_r))
+                if not queued_r:
+                    out.append([t["tag"], "radius", f"{row['R']:.2f}", f"{R:.2f}", f"{pct_r:+.2f}%", "pass" if ok_r else "FAIL", how])
+                if not ok_r:
+                    prefix = "association unproven: " if forced else "wrong line likely: " if queued_r else ""
+                    queue.append({"tag": t["tag"], "issue": prefix + f"fitted radius {R:.1f} ft vs table {row['R']:.2f} ft", "region": region, "line": shape(seg)})
             if row["total"]:  # a (T) total names this whole run itself, not a share of it: never grouped
                 ok_t = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
-                out.append([t["tag"], "arc length", f"{row['L']:.2f}(T)", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "pass" if ok_t else "FAIL", how])
+                queued_t = not ok_t and (forced or wrong_line_likely("arc length", drawn - row["L"], row["L"]))
+                if not queued_t:
+                    out.append([t["tag"], "arc length", f"{row['L']:.2f}(T)", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "pass" if ok_t else "FAIL", how])
                 if not ok_t:
-                    queue.append({"tag": t["tag"], "issue": f"drawn run {drawn:.2f} ft vs table total {row['L']:.2f} ft", "region": region, "line": shape(seg)})
+                    prefix = "association unproven: " if forced else "wrong line likely: " if queued_t else ""
+                    queue.append({"tag": t["tag"], "issue": prefix + f"drawn run {drawn:.2f} ft vs table total {row['L']:.2f} ft", "region": region, "line": shape(seg)})
                 continue
             ok_l = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
             if ok_l:

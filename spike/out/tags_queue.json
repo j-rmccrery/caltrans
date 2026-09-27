@@ -51,7 +51,7 @@
  },
  {
   "tag": "L20",
-  "issue": "drawn 82.13 ft vs table 609.42 ft",
+  "issue": "association unproven: drawn 82.13 ft vs table 609.42 ft",
   "region": [
    2244,
    517,
@@ -71,7 +71,7 @@
  },
  {
   "tag": "L21",
-  "issue": "drawn 74.26 ft vs table 1529.50 ft",
+  "issue": "association unproven: drawn 74.26 ft vs table 1529.50 ft",
   "region": [
    537,
    457,
@@ -171,7 +171,7 @@
  },
  {
   "tag": "L1",
-  "issue": "drawn 40.16 ft vs table 1.86 ft",
+  "issue": "wrong line likely: drawn bearing off by 5237.7 arcmin",
   "region": [
    1082,
    554,
@@ -191,7 +191,7 @@
  },
  {
   "tag": "L1",
-  "issue": "drawn bearing off by 5237.7 arcmin",
+  "issue": "wrong line likely: drawn 40.16 ft vs table 1.86 ft",
   "region": [
    1082,
    554,

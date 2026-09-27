@@ -14,13 +14,11 @@ distance,50.25',50.27,+0.02,pass
 bearing,"S50°55'26""W","S50°54'38""W",0.8',pass
 distance,26.47',26.44,-0.03,pass
 bearing (R),"S39°48'02""W(R)",,,radial: not checked
-distance,9.95',187.05,+177.10,FAIL
 distance,322.30',322.28,-0.02,pass
 bearing,"S54°13'49""E","S54°12'07""E",1.7',pass
 distance,63.64',63.63,-0.01,pass
 bearing,"S59°14'48""E","S59°15'17""E",0.5',pass
 distance,99.11',99.13,+0.02,pass
-arc length,31.80',308.19 (R=nan),+276.39,FAIL
 distance,176.33',176.29,-0.04,pass
 distance,57.52'(T),57.51,-0.01,pass as a run of 2: the boundary between these segments is not drawn
 bearing,"S2°05'55""W","S2°05'43""W",0.2',pass
@@ -36,7 +34,6 @@ arc length,L=290.13',290.12,-0.01,pass
 bearing (R),"S10°05'08""E(R)",,,radial: not checked
 arc length,8.72',26.53 (R=nan),+17.81,FAIL
 bearing (R),"S46°25'28""W(R)",,,radial: not checked
-distance,2509.63',197.35,-2312.28,FAIL
 bearing (R),"N80°08'50""W(R)",,,radial: not checked
 distance,6.64',6.64,-0.00,pass
 arc length,L=121.66',121.67,+0.01,pass
@@ -75,12 +72,8 @@ distance,273.59',273.58,-0.01,pass
 bearing (R),"N58°02'27""W(R)",,,radial: not checked
 arc length,L=37.50',37.48,-0.02,pass
 distance,50.70',49.93,-0.77,FAIL
-bearing,"N88°28'28""W","N1°36'16""W",5212.2',FAIL
-distance,222.86'(T),89.87,-132.99,FAIL
 arc length,14.73',10.24 (R=7.7),-4.49,FAIL
-distance,34.05',597.37,+563.32,FAIL
 distance,447.55',447.57,+0.02,pass
-distance,131.94',597.37,+465.43,FAIL
 arc length,79.99',43.04 (R=nan),-36.95,FAIL
 arc length,16.72',38.56 (R=nan),+21.84,FAIL
 distance,43.30',43.28,-0.02,pass
@@ -95,14 +88,12 @@ bearing,"S2°05'55""W","S2°01'47""W",4.1',pass
 bearing (R),"N76°26'09""W(R)",,,radial: not checked
 bearing (R),"N77°17'41""E(R)",,,radial: not checked
 distance,131.94',74.96,-56.98,FAIL
-distance,134.03'(T),76.80,-57.23,FAIL
 bearing,"N38°07'02""W","N38°06'58""W",0.1',pass
 arc length,536.09',183.47 (R=nan),-352.62,FAIL
 bearing,"N38°07'02""W","N38°06'58""W",0.1',pass
 arc length,572.05',183.47 (R=nan),-388.58,FAIL
 arc length,L=23.48',40.45,+16.97,FAIL
 arc length,L=303.85',196.07,-107.78,FAIL
-arc length,L=1804.98',58.71,-1746.27,FAIL
 arc length,L=5.57',6.38,+0.81,FAIL
 curve L=R*delta,R=8.72 Δ=109.9383° L=16.73,16.73,+0.00,pass
 curve L=R*delta,R=438.0 Δ=6.0433° L=46.2,46.20,-0.00,pass
