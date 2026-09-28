@@ -49,15 +49,24 @@ Definitions (loop16 leg A, retry):
   Removal order is frame -> tables -> matchline -> leader_wedge -> edge_column (a segment already
   claimed by an earlier class is not reconsidered, so overlapping regions attribute to the first
   class that touches them, not double-counted).
-- reconstructed edge: a traverse.json row with kind == "line", flags == [] and misfit_ft <= 0.5.
-  Every curve carries the flag "chord direction from drawing" (traverse.py always derives a curve's
-  chord direction from the drawing, never the record), so flags == [] never holds for a curve: no
-  curve ever qualifies. That is intended -- a stretch counts only when walked by the record alone.
+- reconstructed edge: a traverse.json row with kind in ("line", "arc"), flags == [] and misfit_ft <=
+  0.5. A curve used to always carry the flag "chord direction from drawing" (traverse.py used to
+  always derive a curve's chord direction from the drawing, never the record), so flags == [] never
+  held for one; loop16 leg E gives a curve its chord direction from the record where the record
+  determines it (a printed chord bearing, or a record line meeting it tangentially at a shared node --
+  see traverse.complete_curve_chords()), so a curve with a record radius/delta and a record-sourced
+  chord direction can be a reconstructed edge too, exactly like a line. A curve still missing R/delta,
+  or one whose only candidate record tangents disagree, keeps its flag and does not qualify.
 - covered boundary: drawn-boundary length that lies within BUFFER_FT of a reconstructed edge's own
   drawn geometry (traverse.py's additive "pts" field) AND whose local direction is within
   PARALLEL_TOL_DEG of that edge's azimuth, mod 180 (so a crossing line, or a second line drawn
-  parallel a few feet off, does not count). Each boundary foot is counted once even when two edges'
-  buffers overlap it (segments are classified "covered" or not, not summed per edge).
+  parallel a few feet off, does not count). For a line the "geometry" and its one azimuth are the
+  whole edge (chord IS the edge); for an arc (loop16 leg E) coverage follows the CURVE, not the chord:
+  rec_segments() breaks the row's own drawn "pts" into consecutive small pieces, each compared by its
+  own LOCAL direction (mod 180) -- a single overall chord azimuth would only agree with the drawing
+  near an arc's own midpoint and miss the rest of a real curve. Each boundary foot is counted once
+  even when two edges' buffers overlap it (segments are classified "covered" or not, not summed per
+  edge).
 - dimensioned boundary: the boundary the record actually describes -- (i) the sheet's heaviest
   *substantial* weight-class linework (R/W lines: on Presidio that is the 1.98 pt class; heavy_lines()
   already folds R/W and the 0.84 pt parcel/easement class together, so recon.py re-derives the
@@ -442,11 +451,17 @@ def region_hit(region, mid):
     return shapely.contains_xy(region, mid[:, 0], mid[:, 1])
 
 
-def face_pieces(ring, rec_P, rec_Q, rec_az, buffer_ft, tol_deg, densify_ft):
-    """Per-original-vertex ring segment: (edge index or None, p, q), plus the fraction of the ring's
-    own length that some reconstructed edge covers. An edge is assigned to a ring segment only when
-    it accounts for >= half that segment's own (densified) covered length -- a majority vote, so one
-    stray sub-point near a different edge cannot hijack a whole drawn piece."""
+def face_pieces(ring, rec_P, rec_Q, rec_az, rec_parent, buffer_ft, tol_deg, densify_ft):
+    """Per-original-vertex ring segment: (rec_edges index or None, p, q), plus the fraction of the
+    ring's own length that some reconstructed edge covers. An edge is assigned to a ring segment only
+    when it accounts for >= half that segment's own (densified) covered length -- a majority vote, so
+    one stray sub-point near a different edge cannot hijack a whole drawn piece.
+    rec_P/rec_Q/rec_az (loop16 leg E: rec_segments()) may carry several small sub-segments per curve
+    (the arc's own local direction, piece by piece, not one long chord); rec_parent maps each one back
+    to its single parent rec_edges entry (a line's own single segment maps to itself, rec_parent[i]==i)
+    so the majority vote -- and face_closure()'s own record walk after it -- always resolves to ONE
+    edge per ring piece, its record chord vector, never a stray local sub-segment's own az/whole-length
+    mismatched against each other."""
     pieces, covered_len, total_len = [], 0.0, 0.0
     for i in range(len(ring) - 1):
         p, q = ring[i], ring[i + 1]
@@ -461,7 +476,8 @@ def face_pieces(ring, rec_P, rec_Q, rec_az, buffer_ft, tol_deg, densify_ft):
         any_match, best = covered_mask(sub_mid, seg_az, rec_P, rec_Q, rec_az, buffer_ft, tol_deg)
         covered_len += any_match.mean() * L
         if any_match.mean() >= 0.5:
-            vals, counts = np.unique(best[any_match], return_counts=True)
+            parent_best = rec_parent[best[any_match]]
+            vals, counts = np.unique(parent_best, return_counts=True)
             k = int(vals[np.argmax(counts)])
         else:
             k = None
@@ -473,7 +489,12 @@ def face_pieces(ring, rec_P, rec_Q, rec_az, buffer_ft, tol_deg, densify_ft):
 def face_closure(pieces, rec_edges):
     """Walk the ring by record where a piece has a reconstructed edge (bearing flipped 180 deg when
     it opposes the ring's own walk direction, as traverse.py's own per-figure walk does), by the
-    drawn vector otherwise. closure = |sum of vectors| back to the start."""
+    drawn vector otherwise. closure = |sum of vectors| back to the start.
+    An arc piece (loop16 leg E) walks the same way, by its own record CHORD vector, not the drawing:
+    rec_edges' own "ft"/"az" for an arc entry are already the row's CHORD length/direction (traverse.py's
+    own walk() -- 2*R*sin(delta/2) at the record chord az, never a local sub-segment's), so no
+    kind-specific branch is needed here; face_pieces()'s own rec_parent already resolved k to that one
+    parent entry, whichever local sub-segment matched."""
     pos = np.array(pieces[0][1], float)
     total = np.zeros(2)
     for k, p, q in pieces:
@@ -510,20 +531,52 @@ def load_faces(gj):
 
 
 def load_rec_edges(trav):
+    """A clean traverse.json row (flags==[], misfit<=0.5) as a reconstructed edge. kind=="line" as
+    before; kind=="arc" now qualifies too (loop16 leg E: once traverse.py's own chord-direction
+    completion clears "chord direction from drawing", an arc row can be flag-free the same as a
+    line). An arc entry additionally carries its own full drawn "pts" polyline (ground ft, the curve
+    itself) -- see rec_segments(), which is what actually follows it for coverage; "p"/"q"/"az"/"ft"
+    here stay the row's own CHORD endpoints/direction/length, used by face_closure()'s record walk."""
     rec = []
     n_rows = 0
     for chain in trav:
         for row in chain["edges"]:
             n_rows += 1
-            if row["kind"] != "line" or row["flags"] or row["misfit_ft"] > 0.5:
+            if row["kind"] not in ("line", "arc") or row["flags"] or row["misfit_ft"] > 0.5:
                 continue
             pts = row.get("pts")
             if not pts or len(pts) < 2:
                 continue
             pts = np.array(pts, float)
-            rec.append({"name": row["edge"], "az": row["az"], "ft": row["ft"], "misfit_ft": row["misfit_ft"],
-                        "p": pts[0], "q": pts[-1]})
+            e = {"name": row["edge"], "az": row["az"], "ft": row["ft"], "misfit_ft": row["misfit_ft"],
+                 "p": pts[0], "q": pts[-1], "kind": row["kind"]}
+            if row["kind"] == "arc":
+                e["pts"] = pts
+            rec.append(e)
     return rec, n_rows
+
+
+def rec_segments(rec_edges):
+    """Flat (P, Q, az, parent_idx) arrays for covered_mask()/face_pieces(): a line contributes its own
+    single p/q/az (unchanged); an arc contributes every consecutive pair of its OWN drawn "pts" (loop16
+    leg E: coverage follows the curve's own local direction, piece by piece, not one long chord az that
+    only agrees with the drawing at the arc's midpoint), each tagged with the SAME parent index so a
+    match on any one sub-segment still resolves back to one rec_edges entry."""
+    P, Q, az, parent = [], [], [], []
+    for i, e in enumerate(rec_edges):
+        if e["kind"] == "arc":
+            pts = e["pts"]
+            for j in range(len(pts) - 1):
+                p, q = pts[j], pts[j + 1]
+                if np.hypot(*(q - p)) < 1e-9:
+                    continue
+                P.append(p); Q.append(q); az.append(float(azimuth_arr((q - p)[None, :])[0])); parent.append(i)
+        else:
+            P.append(e["p"]); Q.append(e["q"]); az.append(e["az"]); parent.append(i)
+    if not P:
+        z = np.zeros((0, 2))
+        return z, z, np.zeros(0), np.zeros(0, int)
+    return np.array(P), np.array(Q), np.array(az), np.array(parent, int)
 
 
 def densest_cluster_center(rec_edges):
@@ -591,9 +644,7 @@ def run(sheet_name, return_internals=False):
 
     trav = json.loads((OUT / "traverse.json").read_text())
     rec_edges, n_rows = load_rec_edges(trav)
-    rec_P = np.array([e["p"] for e in rec_edges]) if rec_edges else np.zeros((0, 2))
-    rec_Q = np.array([e["q"] for e in rec_edges]) if rec_edges else np.zeros((0, 2))
-    rec_az = np.array([e["az"] for e in rec_edges]) if rec_edges else np.zeros(0)
+    rec_P, rec_Q, rec_az, rec_parent = rec_segments(rec_edges)
     rec_lines_union = unary_union([LineString([p, q]) for p, q in zip(rec_P, rec_Q)]) if len(rec_P) else None
 
     # --- table/furniture debris faces (defect 2, "tables" class): unnamed faces isolated from both the
@@ -774,7 +825,7 @@ def run(sheet_name, return_internals=False):
             per_face.append({"parcel": f["parcel"], "named": f["named"], "touches_frame": True,
                               "pct_covered": None, "closure_ft": None, "counts": False})
             continue
-        pieces, pct, total_len = face_pieces(f["ring"], rec_P, rec_Q, rec_az, buffer_ft, PARALLEL_TOL_DEG, DENSIFY_FT)
+        pieces, pct, total_len = face_pieces(f["ring"], rec_P, rec_Q, rec_az, rec_parent, buffer_ft, PARALLEL_TOL_DEG, DENSIFY_FT)
         counts = False
         closure = None
         if pct >= CLOSE_PCT and total_len > 0:
@@ -837,7 +888,7 @@ def run(sheet_name, return_internals=False):
             "page": page, "inv": inv, "ground": ground, "scale": scale, "buffer_ft": buffer_ft,
             "P": P, "Q": Q, "mid": mid, "seg_len": seg_len, "seg_az": seg_az, "remaining": remaining,
             "cov_mask_full": cov_mask_full, "dim_mask_full": dim_mask_full,
-            "rec_edges": rec_edges, "rec_P": rec_P, "rec_Q": rec_Q, "rec_az": rec_az,
+            "rec_edges": rec_edges, "rec_P": rec_P, "rec_Q": rec_Q, "rec_az": rec_az, "rec_parent": rec_parent,
             "kept_faces": kept_faces, "blocks": blocks,
         }
         return result, internals
@@ -935,12 +986,12 @@ def selftest():
     for i in range(4):
         p, q = sq[i], sq[i + 1]
         az = azimuth_arr(q - p)
-        rec_edges.append({"name": f"e{i}", "az": float(az), "ft": float(np.hypot(*(q - p))), "misfit_ft": 0.1, "p": p, "q": q})
-    rec_P = np.array([e["p"] for e in rec_edges]); rec_Q = np.array([e["q"] for e in rec_edges]); rec_az = np.array([e["az"] for e in rec_edges])
+        rec_edges.append({"name": f"e{i}", "az": float(az), "ft": float(np.hypot(*(q - p))), "misfit_ft": 0.1, "p": p, "q": q, "kind": "line"})
+    rec_P, rec_Q, rec_az, rec_parent = rec_segments(rec_edges)
 
     # 1. the square itself: fully covered, closes at 0
     ring = sq
-    pieces, pct, total_len = face_pieces(ring, rec_P, rec_Q, rec_az, buffer_ft, PARALLEL_TOL_DEG, DENSIFY_FT)
+    pieces, pct, total_len = face_pieces(ring, rec_P, rec_Q, rec_az, rec_parent, buffer_ft, PARALLEL_TOL_DEG, DENSIFY_FT)
     assert pct >= 0.999, f"square should be ~100% covered, got {pct:.3f}"
     closure = face_closure(pieces, rec_edges)
     assert closure < 0.01, f"square record walk should close at 0, got {closure}"
@@ -1009,7 +1060,33 @@ def selftest():
     _, _, _, _, _, (mask_k,) = dedupe_segments(Pc, Qc, midc, seg_lenc, seg_azc, dup_tol_ft, PARALLEL_TOL_DEG, [mask_b_only])
     assert mask_k.all(), "a duplicate segment's own mask flag must be OR'd into the surviving keeper"
 
+    # 8. loop16 leg E: an arc's own coverage buffer follows its drawn CURVE, not its chord --
+    # rec_segments() emits one small sub-segment per pair of the row's own drawn "pts", each with its
+    # own local direction, so a point ON the curve is covered but the straight chord between its ends
+    # (which bows well away from a real arc) is not.
+    R_arc, delta_arc = 100.0, 90.0
+    tt = np.linspace(0.0, 1.0, 21)
+    ang = np.radians(180.0 - delta_arc * tt)
+    ctr = np.array([R_arc, 0.0])
+    arc_pts = ctr + R_arc * np.c_[np.cos(ang), np.sin(ang)]
+    chord_ft = 2 * R_arc * math.sin(math.radians(delta_arc) / 2)
+    chord_az = float(azimuth_arr(arc_pts[-1] - arc_pts[0]))
+    arc_rec_edges = [{"name": "C-test", "az": chord_az, "ft": chord_ft, "misfit_ft": 0.1,
+                       "p": arc_pts[0], "q": arc_pts[-1], "kind": "arc", "pts": arc_pts}]
+    arc_rec_P, arc_rec_Q, arc_rec_az, _ = rec_segments(arc_rec_edges)
+
+    on_curve_mid = np.array([(arc_pts[10] + arc_pts[11]) / 2])
+    on_curve_az = azimuth_arr(np.array([arc_pts[11] - arc_pts[10]]))
+    on_curve_match, _ = covered_mask(on_curve_mid, on_curve_az, arc_rec_P, arc_rec_Q, arc_rec_az, buffer_ft, PARALLEL_TOL_DEG)
+    assert on_curve_match[0], "a point on the arc's own drawn curve must be covered"
+
+    chord_mid = np.array([(arc_pts[0] + arc_pts[-1]) / 2])
+    chord_seg_az = azimuth_arr(np.array([arc_pts[-1] - arc_pts[0]]))
+    chord_match, _ = covered_mask(chord_mid, chord_seg_az, arc_rec_P, arc_rec_Q, arc_rec_az, buffer_ft, PARALLEL_TOL_DEG)
+    assert not chord_match[0], "the straight chord between the arc's own ends must NOT be covered by its curve-following buffer"
+
     print("selftest OK: full square closes and counts; 3 pt offset line not covered; 1 pt offset covered; "
+          "an arc's own curve is covered but its chord is not; "
           "un-faced R/W linework still enters the denominator; RW class rule rejects a stray heavier class; "
           "a grown table region catches its own frame stroke; dedupe collapses 0.5 pt duplicates but keeps "
           "10 pt-apart strokes separate, and OR's a collapsed copy's mask flag into its keeper")

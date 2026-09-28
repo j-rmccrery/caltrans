@@ -5,9 +5,12 @@ Method: recon.py already classifies every drawn-boundary segment covered/dimensi
 adds one more classification on top, for the dimensioned-but-not-covered segments only -- which
 traverse.json row (of ANY kind/flags, not just recon.py's clean-line rec_edges) sits nearest within
 recon.py's own buffer_ft/PARALLEL_TOL_DEG. That row's kind/flags pick the bucket, in priority order:
-  1. curve              - nearest row kind == "arc" (a curve always carries "chord direction from
-                           drawing"; recon.py's clean-line filter can never include one, so it can
-                           never be "covered", however tight the record).
+  1. curve               - nearest row kind == "arc" that is STILL flagged (loop16 leg E: a curve
+                           whose record gives a chord direction -- CB or a tangent record line -- and
+                           R/delta can be a clean rec_edge like a line now; such a curve's own covered
+                           stretch is never "uncovered" to begin with, so classify_row's arc branch is
+                           only ever reached here for a curve still missing that -- no record radius/
+                           delta, or no record chord direction found).
   2. bearing_from_drawing- nearest row flagged "bearing from drawing" (record gave distance only).
   3. distance_from_drawing-nearest row flagged "distance from drawing" (record gave bearing only).
   4. other_flag          - nearest row carries some other flag (dropped-impossible-curve, no record,
@@ -21,12 +24,14 @@ recon.py's own buffer_ft/PARALLEL_TOL_DEG. That row's kind/flags pick the bucket
   7. residual_contamination - reclassified OUT of no_traverse_edge by hand, with a crop as evidence,
                            for segments recon.py's own leader/wedge removal did not catch (see
                            PRESIDIO_CONTAM_PT below).
-A segment can only be dimensioned-but-uncovered because SOME clean-line row failed to match it within
-buffer+tolerance -- so if the nearest ANY-kind row found here were itself a clean (flags==[],
-misfit<=0.5) line within that same buffer+tolerance, recon.py's own cov_mask_full would already have
-marked the segment covered (same covered_mask() call, same buffer/tol, and rec_edges is a strict
-subset of the all-rows set searched here). That contradiction is asserted (bucket "anomaly": expected
-empty) rather than assumed.
+A segment can only be dimensioned-but-uncovered because SOME clean row (line or, since loop16 leg E,
+arc) failed to match it within buffer+tolerance -- so if the nearest ANY-kind row found here were
+itself a clean (flags==[], misfit<=0.5) row within that same buffer+tolerance, recon.py's own
+cov_mask_full would already have marked the segment covered (same covered_mask() call, same
+buffer/tol/per-segment decomposition -- row_segments() below splits an arc row into its own local
+sub-segments exactly as recon.rec_segments() does -- and rec_edges is a strict subset of the all-rows
+set searched here). That contradiction is asserted (bucket "anomaly": expected empty) rather than
+assumed.
 
 usage: [SHEET=<pdf>] python spike/recon_attrib.py      (per sheet, after recon.py's own prerequisites
                                                           -- parcels.py, traverse.py)
@@ -128,7 +133,8 @@ def run_sheet(sheet_name):
     seg_az_f = internals["seg_az"][remaining]
     cov_f = internals["cov_mask_full"][remaining]
     dim_f = internals["dim_mask_full"][remaining]
-    rec_edges, rec_P, rec_Q, rec_az = internals["rec_edges"], internals["rec_P"], internals["rec_Q"], internals["rec_az"]
+    rec_edges, rec_P, rec_Q, rec_az, rec_parent = (internals["rec_edges"], internals["rec_P"], internals["rec_Q"],
+                                                    internals["rec_az"], internals["rec_parent"])
     kept_faces, blocks = internals["kept_faces"], internals["blocks"]
 
     denom_ft = float(seg_len_f[dim_f].sum())
@@ -194,7 +200,7 @@ def run_sheet(sheet_name):
     for f, rf in zip(kept_faces, result["faces"]):
         if not f["named"] or rf["touches_frame"]:
             continue
-        pieces, pct, total_len = face_pieces(f["ring"], rec_P, rec_Q, rec_az, buffer_ft, PARALLEL_TOL_DEG, DENSIFY_FT)
+        pieces, pct, total_len = face_pieces(f["ring"], rec_P, rec_Q, rec_az, rec_parent, buffer_ft, PARALLEL_TOL_DEG, DENSIFY_FT)
         uncovered_pieces = [(p, q) for k, p, q in pieces if k is None]
         piece_buckets = {}
         for p, q in uncovered_pieces:
@@ -327,9 +333,10 @@ def report():
             if m:
                 lines.append(f"- misfit_ft distribution: n={len(m)} min={m[0]:.2f} median={m[len(m)//2]:.2f} max={m[-1]:.2f}")
         if k == "curve":
-            lines.append("- inherent to recon.py's own definition, not a defect: every curve row carries "
-                          "\"chord direction from drawing\" (traverse.py never has a record chord bearing), "
-                          "so a curve can never be a clean rec_edge, however tight R/L match the drawing.")
+            lines.append("- loop16 leg E: a curve can be a clean rec_edge now (CB, or a tangent record "
+                          "line, gives its chord direction; see traverse.py's complete_curve_chords). "
+                          "What remains here is a curve still missing a record radius/delta, or one "
+                          "whose only candidate record tangents disagree (refused, not guessed).")
         if k.startswith("no_traverse_edge"):
             lines.append("- the record simply never reached this stretch -- no traverse.json row of any "
                           "kind (line, curve, flagged or not) sits within recon.py's own buffer+direction "

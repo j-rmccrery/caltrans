@@ -39,7 +39,7 @@ no_traverse_edge splits unlabelled/labelled and residual_contamination (7) is ca
 ### curve (6,356 ft, 19.5%)
 - L=660.20' (r_10741_001_2017-02-10): 614.6 ft
 - L=577.57' (r_10434_003_2020-09-16): 447.6 ft
-- inherent to recon.py's own definition, not a defect: every curve row carries "chord direction from drawing" (traverse.py never has a record chord bearing), so a curve can never be a clean rec_edge, however tight R/L match the drawing.
+- loop16 leg E: a curve can be a clean rec_edge now (CB, or a tangent record line, gives its chord direction; see traverse.py's complete_curve_chords). What remains here is a curve still missing a record radius/delta, or one whose only candidate record tangents disagree (refused, not guessed).
 
 ### bearing_from_drawing (4,485 ft, 13.8%)
 - 598.06' (r_10741_003_2017-02-10): 598.4 ft
