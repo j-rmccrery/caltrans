@@ -4,7 +4,6 @@ L18,distance,89.17,89.17,+0.00,pass,leader; resolved-by-record
 L43,bearing,"S89°15'37""W","S89°15'53""W",0.3',pass,leader; resolved-by-shx
 L2,bearing,"N19°09'55""W","N19°16'23""W",6.5',pass,leader
 L2,distance,5.75,13.01,+7.26,FAIL,leader
-L4,distance,70.02,54.90,-15.12,FAIL,leader
 L7,bearing,"S81°06'21""W","S81°06'37""W",0.3',pass,beside
 L7,distance,52.78,52.77,-0.01,pass,beside
 L10,bearing,"S80°19'49""W","S80°21'13""W",1.4',pass,beside
@@ -19,12 +18,10 @@ L16,bearing,"N8°53'29""W","N8°57'11""W",3.7',pass,leader
 L16,distance,9.40,9.39,-0.01,pass,leader
 L19,bearing,"S37°12'30""W","S37°15'30""W",3.0',pass,leader
 L19,distance,28.42,28.42,-0.00,pass,leader
-L20,distance,53.79,98.52,+44.73,FAIL,leader
 L25,bearing,"N47°53'12""E","N47°53'44""E",0.5',pass,beside
 L25,distance,27.57,27.57,-0.00,pass,beside
 L29,bearing,"N34°46'20""W","N34°43'17""W",3.1',pass,leader
 L29,distance,13.35,13.35,-0.00,pass,leader
-L31,distance,33.75,30.69,-3.06,FAIL,leader
 L34,bearing,"N72°53'52""W","N72°54'32""W",0.7',pass,beside; resolved-by-shx
 L34,distance,50.46,50.44,-0.02,pass,beside; resolved-by-shx
 L36,bearing,"N72°24'02""E","N72°23'45""E",0.3',pass,beside
@@ -40,19 +37,11 @@ C33,radius,2884.00,2879.66,-0.15%,pass,leader
 C33,arc length,1049.90,607.70,-442.20,FAIL,leader
 C5,radius,46.74,46.71,-0.06%,pass,leader
 C5,arc length,29.82,70.50 = 86.37 + 29.82,-45.69,FAIL,leader
-C7,arc length,61.27,96.18,+34.91,FAIL,beside
-C8,radius,508.00,870.19,+71.30%,FAIL,beside
-C8,arc length,35.00(T),60.08,+25.08,FAIL,beside
 C9,radius,508.00,,,arc too flat to measure a radius (sagitta 0.20 pt); not checked,leader
-C9,arc length,1.53,33.53,+32.00,FAIL,leader
 C11,radius,500.00,,,arc too flat to measure a radius (sagitta 0.29 pt); not checked,leader; resolved-by-shx
 C12,radius,50.31,,,arc too flat to measure a radius (sagitta 0.26 pt); not checked,leader
-C38,arc length,6.39,160.21,+153.82,FAIL,leader
-C12,arc length,3.79,160.21,+156.42,FAIL,leader
-C19,radius,65.00,18.02,-72.28%,FAIL,beside
-C19,arc length,93.18,34.08,-59.10,FAIL,beside
-C22,radius,100.14,100.14,+0.00%,pass,beside
-C22,arc length,93.89,93.88,-0.01,pass,beside
+C22,radius,100.14,100.14,+0.00%,pass,beside; beside too far
+C22,arc length,93.89,93.88,-0.01,pass,beside; beside too far
 C25,radius,2040.00,2048.43,+0.41%,pass,beside
 C25,arc length,270.67,280.30,+9.63,FAIL,beside
 C26,radius,1312.00,1312.91,+0.07%,pass,beside

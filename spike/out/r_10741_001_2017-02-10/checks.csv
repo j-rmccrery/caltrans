@@ -30,5 +30,4 @@ distance,165.86',165.82,-0.04,pass
 bearing,"S16°20'26""E","S16°21'26""E",1.0',pass
 distance,176.73',175.09,-1.64,FAIL
 bearing,"S11°47'37""E","S11°47'18""E",0.3',pass
-arc length,705.06',660.13 (R=1169.9),-44.93,FAIL
 distance,176.77',175.09,-1.68,FAIL

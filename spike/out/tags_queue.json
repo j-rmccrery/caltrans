@@ -191,7 +191,7 @@
  },
  {
   "tag": "L1",
-  "issue": "wrong line likely: drawn 40.16 ft vs table 1.86 ft",
+  "issue": "association unproven: drawn 40.16 ft vs table 1.86 ft",
   "region": [
    1082,
    554,

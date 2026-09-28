@@ -108,6 +108,8 @@ BEAR_TOL_CAP = 0.5    # deg (30 arcmin): leg C follow-up -- the scaled tolerance
 # on a short piece that it swallows a genuine disagreement as a pass
 MIN_BEARING_LEN_PT = 10.0  # pt: below this a straight piece's own azimuth is too uncertain to check a
 # bearing against at all (leg C follow-up) -- queued, never passed or failed
+ARC_TOUCH_PT = 1.0  # pt: "touch" for at_tip's arc-kind proximity fallback means within this of the tip
+ARC_TOUCH_CLEAR_PT = 2.0  # pt: a second candidate this close (or closer) makes the nearest one a tie, not a touch (loop15b)
 
 
 def bearing_tol_deg(len_pt):
@@ -1306,10 +1308,13 @@ def main():
         length is even looked at, since a sibling piece's length can match the printed distance by sheer
         coincidence (measured: R-10434.3's 11.05' stub, wrong direction, beat its own 10.95' by chance).
         Only once bearing has picked (or had nothing to say) does length, then nearest, apply. Returns
-        (led, segment); led False = no leader, or the leader belongs to another value in the same block:
-        fall back to 'beside'."""
+        (led, segment, proven); led False = no leader, or the leader belongs to another value in the
+        same block: fall back to 'beside'. proven (loop15, arc kind only -- always True for a line, out
+        of this leg's scope) is False when the pick came from bare proximity (no length match) and the
+        tip's own reach holds more than one candidate: a guess among several, not a leader landing on
+        the one thing it points at."""
         if bi not in tips:
-            return False, None
+            return False, None, False
         tip, _, hsize = tips[bi]
         # a line's tip test stays a fixed 4 pt; an arc's tangent curves away under the arrowhead, so a
         # bigger drawn arrowhead can leave a bigger real gap between the tip corner and the curve -- still
@@ -1320,13 +1325,13 @@ def main():
         else:
             cands = [(poly_dist(tip, x["pts"]), x) for x in arcs if poly_dist(tip, x["pts"]) < reach]
         if not cands:
-            return True, None
+            return True, None, False
         if want is not None:
             close = [t for t in cands if abs(t[1]["len_pt"] * scale - want) < 1.0]
             if close:
-                return True, min(close, key=lambda t: t[0])[1]
+                return True, min(close, key=lambda t: t[0])[1], True  # length-verified: proven
             if sum(1 for t in blocks[bi]["text"].replace(" ", "").split("|") if DIST.match(t)) > 1:
-                return False, None  # two dimensions in one block, the leader is the other one's
+                return False, None, False  # two dimensions in one block, the leader is the other one's
         if kind == "line" and want_az is not None and len(cands) > 1:
             # busy vertex: several record lines end at the identical arrowhead, and no length match
             # settled it above -- prefer the piece(s) whose own endpoint IS the tip (not one merely
@@ -1337,8 +1342,18 @@ def main():
             landing = [t for t in cands if min(np.hypot(*(t[1]["p0"] - tip)), np.hypot(*(t[1]["p1"] - tip))) < reach] or cands
             fit = [t for t in landing if az_diff(az_of(t[1]), want_az) < max(AZ_FILTER, math.degrees(math.atan2(0.3, t[1]["len_pt"] * scale)))]
             if fit:
-                return True, min(fit, key=lambda t: t[0])[1]
-        return True, min(cands, key=lambda t: t[0])[1]  # proximity: fallback only
+                return True, min(fit, key=lambda t: t[0])[1], True
+        # proximity: fallback only -- proven (arc kind) when the nearest candidate touches the tip
+        # (<= ARC_TOUCH_PT) and no other candidate also touches (every other is > ARC_TOUCH_CLEAR_PT):
+        # a real leader lands ON its piece; a tie of two or more touching pieces is a guess among them
+        # (loop15b: candidate count alone wrongly queued R-10434.3's 29.14', whose only other candidate
+        # sits 3.4 pt out -- not a tie -- while the genuinely wrong picks tie at <= 0.5 pt or land > 2 pt
+        # out entirely)
+        ordered = sorted(cands, key=lambda t: t[0])
+        # loop15 close: a lone candidate in reach is proven whatever its gap (the leader has nothing else to name;
+        # Presidio's keyed-real 59.06' lands 2.7 pt off its only candidate); several are proven only by a clear touch
+        proven = kind != "arc" or len(ordered) == 1 or (ordered[0][0] <= ARC_TOUCH_PT and ordered[1][0] > ARC_TOUCH_CLEAR_PT)
+        return True, ordered[0][1], proven
 
     def region(b):
         return [round(b["cx"] - b["w"] / 2 - 4), round(b["cy"] - b["h"] / 2 - 4), round(b["cx"] + b["w"] / 2 + 4), round(b["cy"] + b["h"] / 2 + 4)]
@@ -1388,7 +1403,7 @@ def main():
             # (T) used to be skipped here ("a run total over several tags, not a single arc"), but a
             # standalone (T) is just this one annotation's own drawn run between its vertex circles --
             # STATE.md measured that run against the printed (T) to 0.02 ft -- so it checks the same way
-            led, arc = at_tip(bi, "arc", want)
+            led, arc, arc_proven = at_tip(bi, "arc", want)
             near = far = None
             if arc is None and not led:
                 near = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 5.0 * b["glyph_h"]]
@@ -1403,7 +1418,9 @@ def main():
                 # fall to close's own order (arcs' get_drawings()/split_at build order, not the geometry).
                 # Tie-break on point count (prefer the specific piece over the whole path) then the
                 # candidate's own start coordinate, both properties of the candidate, not of list position
-                arc = min(close, key=lambda x: (abs(x["len_pt"] * scale - want), len(x["pts"]), float(x["pts"][0][0]), float(x["pts"][0][1]))) if close else None
+                found = min(close, key=lambda x: (abs(x["len_pt"] * scale - want), len(x["pts"]), float(x["pts"][0][0]), float(x["pts"][0][1]))) if close else None
+                if found is not None:
+                    arc, arc_proven = found, True  # length-verified: proven
             if arc is not None:
                 drawn = arc["len_pt"] * scale
                 ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
@@ -1479,6 +1496,12 @@ def main():
             # is scanned.
             if arc is None:
                 exceptions.append({"kind": "arc length", "text": lines[0], "issue": "leader points at no arc" if led else "no arc within 5 glyph heights matches the printed length", "region": region(b)})
+            elif not arc_proven:
+                # loop15: the leader touches more than one arc and nothing (length, a contiguous window)
+                # settled which one -- a fail measured against this pick would be a claim about the wrong
+                # curve, not evidence the record disagrees
+                exceptions.append({"kind": "arc length", "text": lines[0], "issue": f"association unproven: measured {arc['len_pt'] * scale:.2f} vs printed {want:.2f} ft", "region": region(b), "line": shape(arc)})
+                len_checked.add(id(b))
             else:
                 len_pending.append({"text": lines[0], "want": want, "total": is_total, "arc": arc, "led": led, "region": region(b)})
                 len_checked.add(id(b))  # a candidate WAS found here (just the wrong length): the fillet
@@ -1543,7 +1566,7 @@ def main():
                 rows.append(["bearing (R)", part, "", "", "radial: not checked"]); continue
             if BEAR.match(part):
                 mate = next((float(dist_num(DIST.match(t))[0]) for t in parts if DIST.match(t)), None)
-                led, ln = at_tip(bi, "line", mate, want_az=azimuth(part))
+                led, ln, _ = at_tip(bi, "line", mate, want_az=azimuth(part))
                 if not led:
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], mate, scale, want_az=azimuth(part), az_of=az_of)
                 if ln is not None:
@@ -1606,7 +1629,7 @@ def main():
                 baz = next((azimuth(t) for t in parts if BEAR.match(t) and not BEAR.match(t)[6]), None)  # the bearing printed with it
                 if baz is None and is_total:
                     baz = paired_bearing(b)  # leg H2: the bearing can sit in its OWN adjacent block
-                led, ln = at_tip(bi, "line", want, want_az=baz)
+                led, ln, _ = at_tip(bi, "line", want, want_az=baz)
                 if not led:
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale, want_az=baz, az_of=az_of)
                 if ln is not None:
@@ -1647,13 +1670,18 @@ def main():
                     # tol_deg stays nearest_arc's own default (8): measured, a 15 deg allowance (as
                     # first tried) let a genuinely unrelated label 30+ ft from any real match through --
                     # every true arc match seen while tuning this sits under 6 deg, so 8 loses nothing
-                    arc = at_tip(bi, "arc", want)[1] if led else nearest_arc(b, arcs, 1.5 * b["glyph_h"])
+                    # loop15: a leader's own touch (arc_proven) is real proof; "beside" here has none --
+                    # nearest_arc picks by position and tangent alone, never by length, so a FAIL built on
+                    # it is a claim about whichever curve happened to be nearest, not a measured one
+                    arc, arc_proven = at_tip(bi, "arc", want)[1:3] if led else (nearest_arc(b, arcs, 1.5 * b["glyph_h"]), False)
                     if arc is not None and (ln is None or abs(arc["len_pt"] * scale - want) < abs(ln["len_pt"] * scale - want)):
                         drawn = arc["len_pt"] * scale
                         ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
                         if not ok and is_total:  # a bare (T) run total was only ever meant to accept a
                             # pass on this fallback too, whichever kind (line or arc) it lands on
                             exceptions.append({"kind": "arc length", "text": part, "issue": f"association unproven: measured {drawn:.2f} vs printed {want:.2f} ft (T)", "region": region(b), "line": shape(arc)}); continue
+                        if not ok and not arc_proven:
+                            exceptions.append({"kind": "arc length", "text": part, "issue": f"association unproven: measured {drawn:.2f} vs printed {want:.2f} ft", "region": region(b), "line": shape(arc)}); continue
                         if not ok and wrong_line_likely("arc length", drawn - want, want):
                             exceptions.append({"kind": "arc length", "text": part, "issue": f"wrong line likely: measured {drawn:.2f} vs printed {want:.2f} ft", "region": region(b), "line": shape(arc)}); continue
                         rows.append(["arc length", part, f"{drawn:.2f} (R={arc['radius_pt'] * scale:.1f})", f"{drawn - want:+.2f}", "pass" if ok else "FAIL"])

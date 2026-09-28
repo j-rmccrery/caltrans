@@ -5,7 +5,6 @@ distance,3.25',3.25,-0.00,pass
 distance,3.63',3.64,+0.01,pass
 bearing,"S72°10'10""W","S72°10'19""W",0.1',pass
 distance,97.14',97.14,-0.00,pass
-arc length,5.27',75.18 (R=nan),+69.91,FAIL
 bearing,"S71°08'19""W","S71°08'60""W",0.7',pass
 distance,75.17',75.18,+0.01,pass
 bearing (R),"N2°48'29""E(R)",,,radial: not checked
@@ -74,7 +73,6 @@ distance,140.02',139.99,-0.03,pass
 arc length,L=161.89',161.91,+0.02,pass
 bearing (R),"S32°15'53""E(R)",,,radial: not checked
 arc length,L=191.66',191.63,-0.03,pass
-arc length,163.72',56.09 (R=nan),-107.63,FAIL
 bearing,"S31°58'57""W","S31°58'28""W",0.5',pass
 distance,108.30',108.30,+0.00,pass
 arc length,L=34.05',34.08,+0.03,pass
@@ -109,7 +107,6 @@ bearing,"S69°28'24""W","S69°15'07""W",13.3',pass
 distance,120.80',123.61,+2.81,FAIL
 arc length,L=15.71',15.74,+0.03,pass
 chord bearing,"S69°16'16""W","S69°26'43""W",10.4',pass
-arc length,123.62',147.27 (R=nan),+23.65,FAIL
 bearing (R),"N24°16'09""W(R)",,,radial: not checked
 arc length,L=211.83',211.84,+0.01,pass
 bearing,"S72°36'26""W","S72°36'04""W",0.4',pass
@@ -188,9 +185,6 @@ bearing (R),"N39°10'26""W(R)",,,radial: not checked
 bearing (R),"N32°23'25""W(R)",,,radial: not checked
 bearing (R),"S50°55'26""E(R)",,,radial: not checked
 bearing (R),"N29°27'31""E(R)",,,radial: not checked
-arc length,L=409.98',607.70,+197.72,FAIL
-arc length,L=349.23'(T),211.84,-137.39,FAIL
-arc length,L=107.68',266.03,+158.35,FAIL
 curve L=R*delta,R=945.0 Δ=8.8261° L=145.57,145.57,+0.00,pass
 curve L=R*delta,R=725.0 Δ=10.4647° L=132.42,132.42,-0.00,pass
 curve L=R*delta,R=200.0 Δ=46.3794° L=161.89,161.89,+0.00,pass

@@ -203,10 +203,10 @@
  },
  {
   "closed": false,
-  "n_edges": 2,
+  "n_edges": 1,
   "full_record": 0,
   "misfit_max_ft": 0.46,
-  "misfit_end_ft": 0.05,
+  "misfit_end_ft": 0.46,
   "edges": [
    {
     "edge": "S41°08'37\"E",
@@ -219,19 +219,6 @@
     ],
     "E": 5989601.79,
     "N": 2131837.03
-   },
-   {
-    "edge": "447.66'",
-    "kind": "arc",
-    "az": 318.837,
-    "ft": 136.53,
-    "misfit_ft": 0.05,
-    "flags": [
-     "chord direction from drawing",
-     "chord from drawing (no radius)"
-    ],
-    "E": 5989511.92,
-    "N": 2131939.82
    }
   ]
  },

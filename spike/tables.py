@@ -430,13 +430,23 @@ def main():
                 out.append([t["tag"], "distance", f"{row['dist']:.2f}(T)", f"{drawn:.2f}", "", "total over several segments; not checked", how])
             else:
                 ok_d = abs(drawn - row["dist"]) <= DIST_TOL + 0.0005 * row["dist"]
-                queued_d = not ok_d and (forced_unproven or wrong_line_likely("distance", drawn - row["dist"], row["dist"]))
+                # loop15: this same segment's own bearing already disagreed enough to be queued (queued_b)
+                # -- direct evidence it is the wrong line, not a second independent disagreement, extended
+                # from the arc-length/radius rule since it is the identical "same segment already
+                # disproven" case (measured on R-10434.3's L4/L20/L31: each queued_b off by 72-89 deg)
+                queued_d = not ok_d and (forced_unproven or queued_b or wrong_line_likely("distance", drawn - row["dist"], row["dist"]))
                 if not queued_d:
                     out.append([t["tag"], "distance", f"{row['dist']:.2f}", f"{drawn:.2f}", f"{drawn - row['dist']:+.2f}", "pass" if ok_d else "FAIL", how])
                 if not ok_d:
-                    reason = ("association unproven: " if forced_unproven else "wrong line likely: " if queued_d else "") + f"drawn {drawn:.2f} ft vs table {row['dist']:.2f} ft"
+                    reason = ("association unproven: " if (forced_unproven or queued_b) else "wrong line likely: " if queued_d else "") + f"drawn {drawn:.2f} ft vs table {row['dist']:.2f} ft"
                     queue.append({"tag": t["tag"], "issue": reason, "region": region, "line": shape(seg)})
         else:
+            # loop15: a "beside" curve association (no leader) that only landed this far from the tag is
+            # not proof of which curve it names -- the two real, keyed fails found this way sit within
+            # 5.8 pt (BESIDE's own search just narrows candidates, it never confirms one); every wrong one
+            # measured sits past 11.6 pt. A FAIL built on this placement is unproven, not a disagreement.
+            if how == "beside" and cands[0][0] > 8.0:
+                how += "; beside too far"
             curve_hits.append((t, row, seg, how, region))
 
     # loop9 leg A rule 3: NO.-int -> the resolved (t, row, seg, how, region) hit for every curve tag that
@@ -459,7 +469,7 @@ def main():
         nonlocal group_fires, row_run_fires
         if len(sub) < 2:
             for t, row, seg, how, region in sub:
-                forced = "resolved-by" in how
+                forced = "resolved-by" in how or "beside too far" in how or "radius unproven" in how
                 rr = row_run(t["tag"], seg, rows, tag_by_num, arcs, scale)
                 if rr is not None:
                     keys, untagged, rdrawn, Ls, total, by_sum, span_pieces = rr
@@ -491,7 +501,7 @@ def main():
                             f"pass as a run of {len(Ls)}: the boundary between these arcs is not drawn", how])
                 group_fires += 1
             else:
-                forced = "resolved-by" in how
+                forced = "resolved-by" in how or "beside too far" in how or "radius unproven" in how
                 queued = forced or wrong_line_likely("arc length", drawn - row["L"], row["L"])
                 if not queued:
                     out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "FAIL", how])
@@ -505,12 +515,16 @@ def main():
     for group_hits in by_parent.values():
         remaining = []
         for t, row, seg, how, region in group_hits:
-            forced = "resolved-by" in how
+            forced = "resolved-by" in how or "beside too far" in how
             drawn = seg["len_pt"] * scale
             sagitta = seg["len_pt"] ** 2 / (8 * row["R"] / scale)  # pt; a 46 ft arc on R=1470 bulges 0.1 pt: no radius in that
             ok_r = True
             if sagitta < 0.5:
                 out.append([t["tag"], "radius", f"{row['R']:.2f}", "", "", f"arc too flat to measure a radius (sagitta {sagitta:.2f} pt); not checked", how])
+                # loop15: too flat to fit a radius is no evidence either way for which curve this is --
+                # an arc-length FAIL on this same segment is unproven, not measured, association
+                forced = True
+                how = f"{how}; radius unproven"
             else:
                 R = fit_radius(seg["pts"]) * scale
                 ok_r = abs(R - row["R"]) <= RADIUS_TOL * row["R"]
@@ -521,6 +535,14 @@ def main():
                 if not ok_r:
                     prefix = "association unproven: " if forced else "wrong line likely: " if queued_r else ""
                     queue.append({"tag": t["tag"], "issue": prefix + f"fitted radius {R:.1f} ft vs table {row['R']:.2f} ft", "region": region, "line": shape(seg)})
+                    # loop15: a radius miss big enough to be wrong-line-likely on its own already disproves
+                    # this segment's identity -- an arc-length FAIL measured on it is a claim about the
+                    # wrong curve, not a second disagreement. A small miss (e.g. C21's 2.8%) is not: kept at
+                    # the calibrated cut, not a new threshold, so a real small radius/length mismatch on
+                    # the right curve (C20/C21/C22, Presidio) stays a kept FAIL, not queued
+                    if wrong_line_likely("radius", pct_r):
+                        forced = True
+                        how = f"{how}; radius unproven"
             if row["total"]:  # a (T) total names this whole run itself, not a share of it: never grouped
                 ok_t = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
                 queued_t = not ok_t and (forced or wrong_line_likely("arc length", drawn - row["L"], row["L"]))
