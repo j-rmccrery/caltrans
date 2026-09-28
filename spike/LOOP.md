@@ -400,3 +400,43 @@ The fail-unkeyed shift on R-10434.1 (1 -> 2) mid-leg-2 came from a leftover inte
 Dispatches: 6 of 10 (legs 5, 3, 1, 1-retry, 2, 2-retry), all sonnet. Nothing stashed.
 
 Lessons: a proof rule must be checked against keyed-real fails on every keyed sheet, not only the sheet it targets: the touch spec fixed R-10434.3 and broke Presidio. A subagent's cause taxonomy from the brief can be wrong: leg 2's real cause was a third one, found only by cropping. Two of fourteen new passes were on the wrong line; the gold wrong-pass count could not catch them because new passes are unkeyed. Viewing every new-pass crop is the gate, not a formality.
+
+# Loop 16: accuracy = reconstructable from the record (2026-09-27 23:05 to 2026-09-28 14:30, orchestrated, sonnet implementers)
+
+JR's definition: a foot of drawn boundary counts when a record course (bearing + distance, or a curve with a record chord
+direction) walks it unflagged within 0.5 ft; a parcel counts when every edge is walked by record and it closes within
+1 ft. `spike/recon.py` measures it (bench columns `recon_all`, `recon_dim`, `recon_parcels`); `spike/recon_attrib.py`
+gives every lost foot one cause (`spike/out_recon/attribution.md`). Paused overnight by an auto-mode classifier outage;
+resumed 2026-09-28 (manual permission mode after a second outage).
+
+| leg | work | gate (re-measured by orchestrator) | result | dispatches | commit |
+|---|---|---|---|---|---|
+| A | recon.py metric | non-recon columns = integ3; R/W class right; denominators clean on figures; covered never removed | Attempt 1 failed (frames/tables/leaders in denominator, R-10741.1 0 ft, R/W by max(), faint figure). Orchestrator found the R-10741.1 cause: its record edges lie on 1.68 pt R/W linework that is in no face. Attempt 2 fixed R-10741, still tables/leaders on the south family: stashed `spike/out/loop16_legA.patch`. Attempt 3 (JR-approved): POINT/NORTHING/EASTING and R-# radial tables had no region, `_regions` too snug (grown 30 pt), long label leaders removed. Passed with a logged residual (a few Presidio leader legs, understates only) | 3 | c79f686 |
+| C | dedupe boundary | covered / clean record ft <= 1.10 per sheet | Found by orchestrator while checking B: near-coincident copies (R/W stroke + face edges, median 0.36 pt apart) counted up to 3x (598.06' row under 1,788 ft). Collapse copies within 1.0 pt; ratio now 0.81-1.01. c79f686's numbers were inflated | 1 | a075fad |
+| B | loss attribution | buckets sum to lost ft on six sheets | Exact. Ranking drove D and E | 1 | a075fad |
+| D | half courses from record | every completed row cited; crops hand-checked | Collinear record-bearing inheritance, 10 rows filled, 7 count. Orchestrator hand-check found one fake (R-10434.1 "S87°54'05"E\|10.36'": distance on the wrong stub, then inherited a bearing): own-label-bearing guard added (D2). Matchline bearings: 0 half-missing pairs; coordinate-table distances need a table value reader (none exists) | 1 (+1 follow-up) | 2e8b7b0 |
+| E | curve chord from record tangency | completed curves cited, crops | Machinery built (CB, tangent line within 1.0 deg), recon admits clean arcs. Zero curves qualify: curve data never reaches traverse. Caught a pre-existing endpoint merge (L=34.05' into C19) via a delta/L consistency guard | 1 | 3417768 |
+| F | curve data upstream | as E; check columns unchanged unless proven | Radials (were dropped) to radials.json as a third source; curly quotes normalised; R/delta stored on joined curve labels; record chord length only with a record chord direction (R-10434.3 chain was off 18.41 ft: +95 ft); delta/L tolerance 0.1 deg. Still zero curves complete. Presidio non-tangent joins confirmed real on crops. R-10741.1 new arc fail "L=319.73'" -4.52 ft UNVERIFIED | 1 | f366d65 |
+
+Final bench row `loop16-final` (identical to loop16-F; every non-recon column = integ3 except R-10741.1 arc length
+1/1 -> 1/2, exceptions 8 -> 9, closed 0 -> 1, from leg F):
+
+| sheet | recon_all (ft) | recon_dim (ft) | parcels |
+|---|---|---|---|
+| Presidio | 2,981 / 10,882 (27.4 %) | 2,981 / 10,350 | 0/61 |
+| R-10434.1 | 1,757 / 9,982 (17.6 %) | 1,757 / 8,459 | 0/52 |
+| R-10434.3 | 2,751 / 16,700 (16.5 %) | 2,542 / 12,924 | 0/96 |
+| R-10741.1 | 4,302 / 10,394 (41.4 %) | 4,302 / 6,227 | 0/5 |
+| R-10741.2 | 5,772 / 12,390 (46.6 %) | 5,772 / 8,745 | 0/6 |
+| R-10741.3 | 3,313 / 10,313 (32.1 %) | 3,313 / 6,391 | 0/4 |
+| all six | 20,876 / 70,661 (29.5 %) | 20,667 / 53,096 (38.9 %) | 0/224 |
+
+Lost ft by cause (attribution.md, after F): no traverse edge 48 % (unlabelled 35 %), curve 19.3 %, bearing from drawing
+13.8 %, distance from drawing 12.4 %, misfit 6.2 %. `demo.py --fast` 163 s (caches not cleared, not a cold run).
+
+Dispatches: 9 of 10 (A x3, C, B, D, E, F; plus one SendMessage follow-up on D), all sonnet. Stashed: leg A attempt 2 patch.
+
+Lessons: check an attribution's biggest single example against its own row length (a 598 ft row blamed for 1,788 ft
+exposed triple counting the leg A gate missed). Subagents hand back before their bench ends: read bench.csv rows
+yourself. Machinery that completes nothing is still worth a leg only when it exposes the upstream blocker; E and F did,
+but curves still gain nothing until the R-10741 R= reader miss and busy-vertex tangency are solved.

@@ -3,45 +3,30 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Resume here (2026-09-27 23:50): loop 16 PAUSED, uncommitted
+## Resume here (2026-09-28 14:30): loop 16 closed
 
-**Accuracy now means how much of the survey is reconstructable** (JR, 2026-09-27): a foot of drawn boundary counts when
-a record course (bearing+distance or curve) walks it, unflagged, within 0.5 ft of the drawing; a parcel counts when every
-edge is walked by record and it closes within 1 ft. First hand measure (record ft summed over clean traverse edges, all drawn
-parcel boundary as denominator): start of day 10.2 % (20,176 / 197,765 ft), now 10.5 % (20,820 ft); parcels 0 of 359.
-Pass precision, fail quality and label coverage are supporting measures from here on.
+**Accuracy = how much of the survey is reconstructable from the record** (JR, 2026-09-27; `spike/recon.py`, bench
+columns recon_all / recon_dim / recon_parcels). Six bench sheets, bench row `loop16-final`: **29.5 % of drawn boundary
+(20,876 / 70,661 ft), 38.9 % of the dimensioned boundary (20,667 / 53,096 ft); whole parcels 0 of 224.** Per sheet:
+Presidio 27.4 %, R-10434.1 17.6, .3 16.5, R-10741.1 41.4, .2 46.6, .3 32.1. Pass precision, fail quality and label
+coverage are supporting measures. Earlier hand figures (10.5 %, 0/359) used a different denominator; don't compare.
 
-Evening commits: a0b2447 (scan v5 default for scan_readers; batch.py scan route; matchline and highway surface in demo, gap
-tile grouped as tiles.py routes it; bench `integ3` = `loop15-final` on every column; demo --fast 169 s, full 209 s),
-b0a7df5 (scan_consensus stays on rapid boxes: v5 13/1/18 vs rapid 17/1/14 right/wrong/queued).
+Lost feet by cause (`spike/out_recon/attribution.md`): record never reaches the line 48 % (unlabelled 35 %), curves
+19.3 %, distance-only rows 13.8 %, bearing-only rows 12.4 %, misfit 6.2 %.
 
-**Loop 16 (reconstructability metric) was stopped by an auto-mode classifier outage. Nothing from it is committed.**
-- Working tree (uncommitted): new `spike/recon.py` (`--selftest`), `spike/bench.py` (columns recon_all, recon_dim,
-  recon_parcels), `spike/traverse.py` (additive `pts` per walked row, EPSG:2227 ft), regenerated `spike/out/traverse.json`,
-  figures in `spike/out_recon/`, bench row `loop16-A`. The leg A retry agent was killed mid-edit, so the tree may hold a
-  partial retry: read `git diff` before anything else.
-- Leg A attempt 1 failed its gate: denominators include table/title/notes frames, sheet-edge column lines, leader wedges
-  and matchlines; R-10741.1 covers 0 ft though its record edges sit on the drawn R/W (cause not found); the R/W weight is
-  picked by max() (should be the heaviest class with >= ~1000 ft: 1.68 north, 1.98 south); figure grey too faint. Its
-  8.2 % draft figure is not valid. Existing bench columns were identical to `integ3`; no other drafter sheet changed.
-- Early findings: every curve edge in traverse.json is flagged "chord direction from drawing", so no curve and no
-  curve-bounded parcel can count (leg C candidate: chord direction from record tangency, never from the drawing).
-  Presidio face 61806-9 is walked 6/6 by record, unflagged, and misses closure by 138 ft (a record value likely on the
-  wrong edge).
+Loop 16 commits: c79f686 (metric), a075fad (dedupe + attribution), 2e8b7b0 (collinear bearing inheritance), 3417768
+(curve chord from record; zero curves qualify), f366d65 (radials, inline R/delta, chord-length fix). Details and
+lessons: `spike/LOOP.md` loop 16.
 
-Resume, in order:
-1. `git status` / `git diff` on the three files; decide whether the partial retry is usable.
-2. Leg A retry (its last attempt): fix the four defects above, zoomed crop per sheet, bench `loop16-A2` with
-   `bench.py <label> --tags --parcels --traverse --tables presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3`
-   (never unscoped). Re-measure, hand-check two edges and one uncovered stretch on two sheets; commit by name, else stash
-   `spike/out/loop16_legA.patch`.
-3. Leg B: every lost foot of the dimensioned boundary gets one cause (`spike/out_recon/attribution.md`).
-4. Legs C/D by leg B's ranking (curve chord direction from record tangency is the leading candidate).
-5. Close-out: `loop16-final`, demo --fast < 180 s cold, LOOP.md section, STATE.md leading with reconstructability.
-
-Other levers for reconstructability, unranked until leg B measures them: pair passed bearings and distances into
-complete courses and chain them; use the record's alignment coordinate tables as fixed vertices (loop 12: they land
-0.02-0.07 ft on the fit); close parcels one or two edges short; walk lines across matchlines (pairs agree <= 0.17 ft).
+Next, ranked by lost feet:
+1. Curves (19.3 %): machinery is in; blockers are data. R-10741.1 "R=189.90'" is never read (OCR miss); Presidio
+   curves meet their adjoining record lines 12-89 deg off tangent at busy vertices (confirmed on crops), so a chord
+   direction needs a radial or CB there.
+2. Bearing-only rows (12.4 %): a coordinate/alignment table value reader (point id -> N/E) would give distances from
+   record coordinates; none exists (`TABLES` in georef.py is hand-keyed for Presidio only).
+3. Unlabelled lines (35 %): measure how much is boundary the record never dimensions (ceiling) before building.
+4. Open checks: R-10741.1 arc fail "L=319.73'" -4.52 ft (leg F, unverified, possibly wrong part of a compound curve);
+   residual Presidio leader legs in the denominator (~700 ft attributed); face_pieces() skips contamination removal.
 
 ## Loop 15 (2026-09-27): a fail needs proof, a no-line cause found, a third gold set
 
