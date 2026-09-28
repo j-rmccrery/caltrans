@@ -4,6 +4,7 @@ usage: python spike/scan_readers.py [--vlm]
 """
 import base64
 import json
+import os
 import sys
 import urllib.request
 from pathlib import Path
@@ -13,11 +14,13 @@ import numpy as np
 import pymupdf
 
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent / "det"))
 from gt_scan import TRUTH, digits  # noqa: E402
 
 STEM = "r_00065_002_1969-09-01_sn-02048"
 OUT = Path(__file__).parent / "out" / STEM
 PDF = next((Path(__file__).parent.parent / "Sample Data").rglob(STEM + ".pdf"))
+READS = os.environ.get("READS", "read_rapid.json")  # READS=read_v5.json scores the new detector's boxes instead
 PROMPT = ("This is a small crop of a hand-lettered land survey map. Transcribe the text exactly as written, "
           "character for character, including any letter prefix, decimal point, degree, minute and second marks. "
           "Reply with the transcription only.")
@@ -42,7 +45,13 @@ def vlm(png):
 
 
 def main():
-    reads = {b["id"]: b for b in json.load(open(OUT / "read_rapid.json", encoding="utf-8"))}
+    dets = json.load(open(OUT / READS, encoding="utf-8"))
+    if READS == "read_rapid.json":
+        reads = {b["id"]: b for b in dets}  # truth keys ARE this file's own ids
+    else:
+        from det_score import match_truth  # different detector: ids differ, map by best overlap
+        matches = match_truth(dets)
+        reads = {k: dets[i] for k, (i, cov) in matches.items() if i is not None}
     page = pymupdf.open(PDF)[0]
     z = 300 / 72
     pix = page.get_pixmap(matrix=pymupdf.Matrix(z, z), colorspace=pymupdf.csGRAY, alpha=False)
@@ -50,6 +59,8 @@ def main():
     ok_r = ok_v = 0
     rows = []
     for k, v in TRUTH.items():
+        if k not in reads:
+            print(f"  {k:4} truth {v!r:24} -- no matching box in {READS}"); continue
         b = reads[k]
         r_hit = digits(b["text"]) == digits(v)
         v_txt = ""

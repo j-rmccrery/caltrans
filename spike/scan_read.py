@@ -25,7 +25,11 @@ def repair(t):
     """Hand-lettered coordinates are written N.10018.76; the recogniser often drops the dots.
     A letter-prefixed run of 6-8 digits with no decimal point gets one before its last two digits."""
     import re
-    m = re.fullmatch(r"([NE])[.:]?(\d{6,8})", t.replace(" ", "").upper())
+    t = t.replace(" ", "").upper()
+    # a hand-lettered 8 is sometimes read as the letter B (loop16 finding, id 165 'N.10010.B9'):
+    # swap only where it sits against a digit or the decimal dot, so a genuine B elsewhere is untouched
+    t = re.sub(r"(?<=[\d.])B(?=[\d.])", "8", t)
+    m = re.fullmatch(r"([NE])[.:]?(\d{6,8})", t)
     return f"{m[1]}{m[2][:-2]}.{m[2][-2:]}" if m else t
 
 

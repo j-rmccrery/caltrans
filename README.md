@@ -45,7 +45,7 @@ Python 3.12. Data is not in the repo; place the sample files under `Sample Data/
 
 ```
 python -m venv .venv
-.venv/Scripts/python -m pip install pymupdf opencv-python-headless rapidocr-onnxruntime numpy scipy matplotlib "laspy[lazrs]" rasterio pyproj
+.venv/Scripts/python -m pip install pymupdf opencv-python-headless rapidocr-onnxruntime "rapidocr==3.9.2" numpy scipy matplotlib "laspy[lazrs]" rasterio pyproj
 .venv/Scripts/python spike/blocks.py
 .venv/Scripts/python spike/ocr.py rapid
 .venv/Scripts/python spike/lidar/q2_terrain_check.py   # builds the intensity image cache used by overlay.py

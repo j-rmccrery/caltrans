@@ -13,6 +13,7 @@ where truth exists.
 usage: SHEET=<scan.pdf> python spike/scan_consensus.py [--vlm]   (--vlm fills the cache; slow)
 """
 import json
+import os
 import re
 import sys
 from pathlib import Path
@@ -22,8 +23,11 @@ import numpy as np
 import pymupdf
 
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent / "det"))
 from georef import OUT, PDF  # noqa: E402
 from scan_readers import crop_of, vlm  # noqa: E402
+
+READS = os.environ.get("READS", "read_rapid.json")  # READS=read_v5.json runs consensus on the new detector's boxes
 
 ANGLE = re.compile(r"(\d{1,3})\D{0,2}(\d{2})\D{0,2}(\d{2})\D*$")
 NUM = re.compile(r"(\d{1,6})[.,]?(\d{2})$")
@@ -44,6 +48,34 @@ def kind(text):
     if re.match(r"^L[=:\-]?\d", t) or re.match(r"^\d{1,4}\.\d{2}'?$", t) or re.match(r"^\d{3,6}$", t):
         return "distance"
     return "label"
+
+
+def valid_for_kind(text, k):
+    """Structural check only (loop16 send-back item 4): does `text` look like a well-formed
+    read for its OWN apparent kind -- no ground truth involved. Used to arbitrate between two
+    independent reads of the same box location (e.g. an old and a new detector's own reads)."""
+    t = text.replace(" ", "").upper()
+    if k == "coordinate":
+        return bool(re.match(r"^[NE][.:]?\d{4,6}(\.\d{1,2})?$", t))  # incl. round border labels like E.14000
+    if k == "angle":
+        return bool(re.search(r"\d{1,3}\D{0,2}\d{2}\D{0,2}\d{2}", t)) and len(digits(t)) >= 5
+    if k == "radius":
+        return bool(re.match(r"^R[=:\-]?\d{2,5}", t))
+    if k == "distance":
+        return bool(re.match(r"^[LR]?[=:\-]?\d{1,5}\.\d{2}", t)) or bool(re.match(r"^\d{3,6}$", t))
+    return False
+
+
+def pick_reader(text_a, conf_a, text_b, conf_b):
+    """Vote between two independent reads of the same keyed location: prefer whichever parses
+    validly for its own apparent kind, else the higher-confidence read. No truth consulted."""
+    va = valid_for_kind(text_a, kind(text_a))
+    vb = valid_for_kind(text_b, kind(text_b))
+    if va and not vb:
+        return text_a, "a"
+    if vb and not va:
+        return text_b, "b"
+    return (text_a, "a") if conf_a >= conf_b else (text_b, "b")
 
 
 def grid_range(reads):
@@ -94,7 +126,7 @@ def render(digits_, k, rapid, vis):
 
 
 def main():
-    reads = json.loads((OUT / "read_rapid.json").read_text(encoding="utf-8"))
+    reads = json.loads((OUT / READS).read_text(encoding="utf-8"))
     cache = OUT / "read_vlm.json"
     vis = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
     if "--vlm" in sys.argv:
@@ -121,20 +153,29 @@ def main():
         status, d = consensus(b["text"], v, k, grid)
         counts[status] += 1
         out.append({**b, "kind": k, "rapid": b["text"], "vision": v, "status": status, "text": render(d, k, b["text"], v) if d else "", "conf": 1.0 if status != "queue" else 0.0})
-    (OUT / "read_scan.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+    out_name = "read_scan.json" if READS == "read_rapid.json" else "read_scan_" + READS.removeprefix("read_").removesuffix(".json") + ".json"
+    (OUT / out_name).write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"{len(out)} boxes: {counts}; vision reads cached {len(vis)}; grid range {grid}")
     try:
         from gt_scan import TRUTH
+        if READS == "read_rapid.json":
+            id_to_truth = {o["id"]: TRUTH[o["id"]] for o in out if o["id"] in TRUTH}
+        else:
+            # this detector's ids don't line up with TRUTH's (RapidOCR-1.4.4) ids -- map by
+            # best overlap against read_rapid.json instead of a hard-coded id lookup
+            from det_score import match_truth
+            matches = match_truth(out)
+            id_to_truth = {out[i]["id"]: TRUTH[k] for k, (i, cov) in matches.items() if i is not None}
         right = wrong = queued = 0
         for o in out:
-            if o["id"] in TRUTH:
+            if o["id"] in id_to_truth:
                 if o["status"] == "queue":
                     queued += 1
-                elif digits(o["text"]) == digits(TRUTH[o["id"]]):
+                elif digits(o["text"]) == digits(id_to_truth[o["id"]]):
                     right += 1
                 else:
-                    wrong += 1; print("   WRONG accepted:", o["id"], o["status"], o["text"], "truth", TRUTH[o["id"]])
-        print(f"vs truth ({len(TRUTH)} boxes): accepted right {right}, accepted wrong {wrong}, queued {queued}")
+                    wrong += 1; print("   WRONG accepted:", o["id"], o["status"], o["text"], "truth", id_to_truth[o["id"]])
+        print(f"vs truth ({len(id_to_truth)} boxes): accepted right {right}, accepted wrong {wrong}, queued {queued}")
     except ImportError:
         pass
 
