@@ -19,7 +19,7 @@ Loop 16 commits: c79f686 (metric), a075fad (dedupe + attribution), 2e8b7b0 (coll
 lessons: `spike/LOOP.md` loop 16.
 
 Next, ranked by lost feet:
-1. Curves (19.3 %): machinery is in; blockers are data. R-10741.1 "R=189.90'" is never read (OCR miss); Presidio
+1. Curves (19.3 %): machinery is in; blockers are data. R-10741.1's "R=1169.90'" is read but bound only to the adjacent compound-curve piece (loop 17 leg C; an earlier "R=189.90'" note was an orchestrator misread); Presidio
    curves meet their adjoining record lines 12-89 deg off tangent at busy vertices (confirmed on crops), so a chord
    direction needs a radial or CB there.
 2. Bearing-only rows (12.4 %): a coordinate/alignment table value reader (point id -> N/E) would give distances from

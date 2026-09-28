@@ -453,5 +453,5 @@ legs that run the bench go one at a time. Budget 10 dispatches.
 |---|---|---|---|
 | A | misfit rows; Presidio 61806-9 closes 138 ft off | 2,021 | every row turned clean cited + crop; gold wrong-pass 0; check columns unchanged unless proven |
 | B | labelled but never a traverse row (association) | 3,422 | as A; label coverage up; every new pass crop viewed |
-| C | curve data: PP-OCRv5 detector on R-10741 (R=189.90' never read), radials/CB | 6,274 | completed curves cited + crops |
+| C | curve data: PP-OCRv5 detector on R-10741 (R=189.90' never read -- misread by orchestrator; printed value R=1169.90', read fine, association gap), radials/CB | 6,274 | completed curves cited + crops |
 | M | ceiling: how much unlabelled boundary no record on these sheets dimensions (read-only) | 11,520 | measurement only, no bench |
