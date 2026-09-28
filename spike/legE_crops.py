@@ -84,7 +84,7 @@ def build_graph():
             adj[lo] = adj.pop(lo) + adj.pop(hi)
 
     tv.inherit_bearings(edges, adj)
-    tv.complete_curve_chords(edges, adj, azimuth)
+    tv.complete_curve_chords(edges, adj, azimuth, tv.load_radials())
     return edges
 
 

@@ -10,7 +10,7 @@ bearing,"S10°26'37""E","S10°26'07""E",0.5',pass
 distance,461.55',461.56,+0.01,pass
 distance,349.97',349.92,-0.05,pass
 bearing,"S10°26'37""E","S10°26'20""E",0.3',pass
-distance,513.15,513.25,+0.10,pass
+distance,513.15',513.25,+0.10,pass
 bearing,"S79°33'23""W","S79°33'40""W",0.3',pass
 distance,213.40',213.44,+0.04,pass
 bearing,"S88°34'37""E","S88°35'09""E",0.5',pass
@@ -31,3 +31,5 @@ bearing,"S16°20'26""E","S16°21'26""E",1.0',pass
 distance,176.73',175.09,-1.64,FAIL
 bearing,"S11°47'37""E","S11°47'18""E",0.3',pass
 distance,176.77',175.09,-1.68,FAIL
+curve L=R*delta,R=1169.9 Δ=15.6586° L=319.73,319.73,-0.00,pass
+arc length,R=1169.9' L=319.73',315.21,-4.52,FAIL

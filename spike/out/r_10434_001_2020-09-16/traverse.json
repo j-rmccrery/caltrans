@@ -1235,7 +1235,7 @@
     "misfit_ft": 14.84,
     "flags": [
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5993047.14,
     "N": 2120584.76,
@@ -2485,20 +2485,21 @@
   "closed": false,
   "n_edges": 1,
   "full_record": 0,
-  "misfit_max_ft": 229.67,
-  "misfit_end_ft": 229.67,
+  "misfit_max_ft": 0.0,
+  "misfit_end_ft": 0.0,
   "edges": [
    {
     "edge": "C3",
     "kind": "arc",
     "az": 345.6271,
-    "ft": 316.27,
-    "misfit_ft": 229.67,
+    "ft": 86.6,
+    "misfit_ft": 0.0,
     "flags": [
-     "chord direction from drawing"
+     "chord direction from drawing",
+     "R/L printed, no record chord direction"
     ],
-    "E": 5992639.16,
-    "N": 2121186.06,
+    "E": 5992696.17,
+    "N": 2120963.58,
     "pts": [
      [
       5992717.67,

@@ -86,6 +86,25 @@ def dist_num(m):
     return (m[1] or m[3]).replace(",", ""), bool(m[2] or m[4])
 
 
+_QUOTE_SINGLE = re.compile(r"[’‘`′´]")
+_QUOTE_DOUBLE = re.compile(r"[”“″]")
+
+
+def normalize_quotes(blocks):
+    """Loop16 leg F: the scan OCR reader (RapidOCR, read_rapid.json -- R-10741's sheets have no vector
+    text, so this is the only source) sometimes recognises the seconds/inch mark as a typographic quote
+    (U+201D, U+2033...) instead of a straight ASCII '"', and the minutes mark as a typographic apostrophe
+    instead of a straight "'" -- every regex here (BEAR, ANG, ANG_TOK, ...) demands the straight form, so a
+    label with a curly mark silently matches nothing: R-10741.1's "A=15°39'31”|L=319.73'" joined
+    block (R=1169.90' printed alongside it) never produced a "curve L=R*delta" row, and its delta never
+    reached labels.json/traverse.py, though R, delta and L were all genuinely printed and OCR'd. Fixed once
+    here, at the one place every block's text enters this module's matching (see main()), rather than in
+    each of the several regexes that would otherwise all need the same fix. Vector-text sheets (read_shx.json)
+    measured clean of curly marks already; this is a no-op there. Mutates blocks in place."""
+    for b in blocks:
+        b["text"] = _QUOTE_DOUBLE.sub('"', _QUOTE_SINGLE.sub("'", b["text"]))
+
+
 def set_decimals(blocks):
     """A sheet prints its distances with two decimals (feet) or three (the metric sheets): take the
     majority and make DIST and TOKEN demand it, so the other form is not read as a distance."""
@@ -1321,6 +1340,7 @@ def main():
     scale = float(np.hypot(a, bb))
     rot = np.degrees(np.arctan2(bb, a))
     blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
+    normalize_quotes(blocks)
     set_decimals(blocks)
     pool = build_pool(page, blocks)
     chains, circles, paths, segs, arcs, tips = pool["chains"], pool["circles"], pool["paths"], pool["segs"], pool["arcs"], pool["tips"]
@@ -1338,6 +1358,9 @@ def main():
     rows, exceptions, labels, len_pending = [], [], [], []  # labels: every checked value with the line it
     # was measured on (sheet pt), for the traverse; len_pending: standalone L=/(T) labels whose own
     # length matched no drawn piece, resolved by run-sum grouping after every block is scanned (below)
+    radials = []  # loop16 leg F: printed radial ("(R)") bearings, real record data with no drawn line
+    # to check them against -- written to radials.json for traverse.py, never into labels.json (never
+    # touches an existing check result; see the "bearing (R)" branch below)
     len_checked = set()  # id() of every block the standalone L=/(T) branch (below) already matched to a
     # drawn piece and passed. The curve-data fillet check (further down) skips only these: a joined block
     # whose L= is ALSO its own separate single-line block would otherwise pass twice for the identical
@@ -1608,7 +1631,28 @@ def main():
 
         for part in parts:
             if BEAR.match(part) and BEAR.match(part)[6]:
-                rows.append(["bearing (R)", part, "", "", "radial: not checked"]); continue
+                rows.append(["bearing (R)", part, "", "", "radial: not checked"])
+                # loop16 leg F: still real record data (there is no drawn LINE to check a radial
+                # against -- it marks a curve's own end direction, not a course) -- checks.py used to
+                # drop it here outright, which is why traverse.py's own radial source (leg E's plan,
+                # never wired up) had no data to read. Written to radials.json instead: the curve
+                # nearest this label (leader tip if it has one, else chord_curve's own nearest_arc
+                # search, reused) and whichever of its two drawn ends sits closer to the label is the
+                # end this radial names. This is only ever a geometric PAIRING, not a claim about
+                # direction -- traverse.complete_curve_chords() still separately confirms the printed
+                # radial's own +/-90 deg tangent candidate agrees with that end's drawn tangent
+                # (arc_end_tangent_az, the same TANGENT_TOL_DEG discipline the tangent-line source
+                # already uses) before ever using it, so a wrong pairing here can misdirect that later
+                # check but never bypass it into a guess.
+                led_r, arc_r, _ = at_tip(bi, "arc")
+                curve = arc_r if led_r and arc_r is not None else nearest_arc(b, arcs, 1.5 * b["glyph_h"])
+                if curve is not None and len(curve["pts"]) >= 2:
+                    p0, p1 = curve["pts"][0], curve["pts"][-1]
+                    lp = np.array([b["cx"], b["cy"]])
+                    end_pt = p0 if np.hypot(*(p0 - lp)) <= np.hypot(*(p1 - lp)) else p1
+                    radials.append({"printed": part, "az": azimuth(part), "region": region(b),
+                                     "point": [round(float(end_pt[0]), 1), round(float(end_pt[1]), 1)]})
+                continue
             if BEAR.match(part):
                 mate = next((float(dist_num(DIST.match(t))[0]) for t in parts if DIST.match(t)), None)
                 led, ln, _ = at_tip(bi, "line", mate, want_az=azimuth(part))
@@ -1907,11 +1951,16 @@ def main():
                 else:
                     sumtxt = f"{drawn:.2f}" if len(pieces) == 1 else f"{drawn:.2f} = " + " + ".join(f"{v:.2f}" for v in lens_ft)
                     rows.append(["arc length", printed, sumtxt, f"{drawn - L:+.2f}", "pass" if ok2 else "FAIL"])
-                    labels.append({"kind": "arc", "printed": printed, "ft": L, "line": shape(pieces[0]), "ok": ok2, "how": "leader" if tip else "beside", "region": region(len_block)})
+                    # loop16 leg F: R and delta were computed and checked (L=R*delta above) but never
+                    # left this function -- only "ft" (L) reached labels.json, so traverse.py's build_edges
+                    # (which reads an "arc"-kind label's own "R"/"delta" the same way it already reads a
+                    # tag_labels table curve's) had nothing to place a chord on. Carried through now.
+                    labels.append({"kind": "arc", "printed": printed, "ft": L, "R": R, "delta": D, "line": shape(pieces[0]), "ok": ok2, "how": "leader" if tip else "beside", "region": region(len_block)})
                     if not ok2:
                         exceptions.append({"kind": "arc length", "text": printed, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - L, 2), "region": region(len_block), "line": shape(pieces[0])})
 
     (OUT / "labels.json").write_text(json.dumps(labels, ensure_ascii=False), encoding="utf-8")
+    (OUT / "radials.json").write_text(json.dumps(radials, ensure_ascii=False), encoding="utf-8")
     with open(OUT / "checks.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["check", "printed", "drawn", "difference", "result"]); w.writerows(rows)
     (OUT / "exceptions.json").write_text(json.dumps(exceptions, indent=1, ensure_ascii=False), encoding="utf-8")

@@ -189,7 +189,7 @@
     ]
    },
    {
-    "edge": "S09°09'47\"E + 513.79 + 513.77",
+    "edge": "S09°09'47\"E + 513.79' + 513.77",
     "kind": "line",
     "az": 170.8369,
     "ft": 513.79,
@@ -385,7 +385,7 @@
     "misfit_ft": 3.0,
     "flags": [
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5987893.2,
     "N": 2134482.03,

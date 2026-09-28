@@ -1,6 +1,6 @@
 # recon attribution: every dimensioned-uncovered foot, one cause
 
-total lost across 6 sheets: 32,513.4 ft
+total lost across 6 sheets: 32,430.9 ft
 
 ## per-sheet bucket table (ft)
 
@@ -8,7 +8,7 @@ total lost across 6 sheets: 32,513.4 ft
 |---|---|---|---|---|---|---|---|---|
 | presidio | 7369 | 2194 | 1171 | 514 | 776 | 1244 | 804 | 666 |
 | r_10434_001_2020-09-16 | 6702 | 3563 | 1524 | 240 | 670 | 527 | 179 | 0 |
-| r_10434_003_2020-09-16 | 10465 | 3068 | 2829 | 529 | 1752 | 1605 | 681 | 0 |
+| r_10434_003_2020-09-16 | 10383 | 3068 | 2748 | 529 | 1752 | 1605 | 680 | 0 |
 | r_10741_001_2017-02-10 | 1926 | 11 | 615 | 944 | 0 | 0 | 357 | 0 |
 | r_10741_002_2017-02-10 | 2973 | 1585 | 217 | 854 | 280 | 36 | 0 | 0 |
 | r_10741_003_2017-02-10 | 3079 | 1099 | 0 | 1405 | 565 | 9 | 0 | 0 |
@@ -17,27 +17,27 @@ total lost across 6 sheets: 32,513.4 ft
 
 | bucket | ft | % of total lost |
 |---|---|---|
-| no_traverse_edge_unlabelled | 11,520.0 | 35.4% |
-| curve | 6,355.7 | 19.5% |
+| no_traverse_edge_unlabelled | 11,520.0 | 35.5% |
+| curve | 6,274.2 | 19.3% |
 | bearing_from_drawing | 4,485.3 | 13.8% |
-| distance_from_drawing | 4,043.6 | 12.4% |
-| no_traverse_edge_labelled | 3,422.0 | 10.5% |
-| misfit | 2,020.7 | 6.2% |
-| residual_contamination | 666.1 | 2.0% |
+| distance_from_drawing | 4,043.6 | 12.5% |
+| no_traverse_edge_labelled | 3,422.0 | 10.6% |
+| misfit | 2,019.7 | 6.2% |
+| residual_contamination | 666.1 | 2.1% |
 | other_flag | 0.0 | 0.0% (never the nearest row) |
 | anomaly | 0.0 | 0.0% (never the nearest row) |
 
-no_traverse_edge splits unlabelled/labelled and residual_contamination (7) is carved out of it by hand -- together they are one cause ("the record never reached this line"): 48.0% combined, the largest single cause by a wide margin over any one flag/misfit/curve bucket.
+no_traverse_edge splits unlabelled/labelled and residual_contamination (7) is carved out of it by hand -- together they are one cause ("the record never reached this line"): 48.1% combined, the largest single cause by a wide margin over any one flag/misfit/curve bucket.
 
 ## top 3 buckets: notes and examples
 
-### no_traverse_edge_unlabelled (11,520 ft, 35.4%)
+### no_traverse_edge_unlabelled (11,520 ft, 35.5%)
 - 46825|61806|61806-1|61806-2|63269 vicinity (r_10434_001_2020-09-16): 3201.6 ft
 - 46825-5 vicinity (r_10741_002_2017-02-10): 1584.6 ft
 - the record simply never reached this stretch -- no traverse.json row of any kind (line, curve, flagged or not) sits within recon.py's own buffer+direction tolerance. "labelled" means a bearing/distance-shaped text block sits within 40 pt on the sheet but never became an edge (an association miss, not a missing record); "unlabelled" means no such text sits nearby either.
 
-### curve (6,356 ft, 19.5%)
-- L=660.20' (r_10741_001_2017-02-10): 614.6 ft
+### curve (6,274 ft, 19.3%)
+- L=660.20' (r_10741_001_2017-02-10): 598.7 ft
 - L=577.57' (r_10434_003_2020-09-16): 447.6 ft
 - loop16 leg E: a curve can be a clean rec_edge now (CB, or a tangent record line, gives its chord direction; see traverse.py's complete_curve_chords). What remains here is a curve still missing a record radius/delta, or one whose only candidate record tangents disagree (refused, not guessed).
 
