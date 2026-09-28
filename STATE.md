@@ -15,9 +15,23 @@ Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run every
 - Bench row `loop15-final` is the baseline: coverage 102/171, 62/171, 121/248; gold wrong-pass 0 on all three keyed sheets. Demo 161 s cold.
 - Commits 3f632a5, 56facb5, 0b99c00, e9a5f46. Plan and status in `spike/LOOP.md`.
 
+## Scan detector (2026-09-27 evening): PP-OCRv5 server det in the scan path
+
+Bake-off on the 32 keyed boxes of the 1969 scan R-65.2 (`spike/det/det_score.py`; key 166 moved to box 165, commit 1c7a63a).
+- PP-OCRv5 server det 30-32/32 landed; Surya 24/32 (fuses R=/Delta/L stacks); qwen2.5vl:7b 1/32, and at chance as an
+  association second opinion (0.31 / 0.55 vs always-yes 0.69). Stock v5 recogniser worse than RapidOCR (13 vs 20).
+- Scale decides it (`spike/det/sweep_scale.py`): 31/32 plateau at long side 3500-4500; 5000 = 19/32, 5500+ = 0/32 (the
+  probability map fires on underlines, not glyph strokes). Best: PDF rendered at long side 4000, no CLAHE = 32/32. Tiling no gain.
+- Wired in, opt-in (commit bafd95a): `spike/scan_read_v5.py` writes `read_v5.json`; `read_rapid.json` stays the default.
+  rapidocr 3.9.2 det (two hidden downscale clamps disabled, unclip 1.15), RapidOCR 1.4.4 rec with flipped crops for vertical
+  boxes and a tighter-height crop, `repair()` B->8, `scan_consensus` votes old vs new by format validity. Det 31/32; digits
+  exact old 21 / new 21 / voted 23. Vector bench row `det-v5` = `loop15-final`; demo 160 s.
+- Trial outputs in `spike/det/out/` (734 MB) stay untracked; venvs in the session scratchpad are disposable.
+
 ## Next (logged 2026-09-27 after loop 15; plan and status in `spike/LOOP.md`)
 
-A scan-detector trial is running separately in `spike/det/` (untracked, not part of any loop). Leave it alone unless JR says otherwise.
+Scan path (after the detector section above): run the alphabet reader and the VLM vote on the `read_v5.json` boxes; eight keyed
+labels still misread (133 I-for-1; 184, 186, 234, 253 lose digits; 206 fused; 111 L-100.127; 15's key sits on R=584).
 
 1. Demo prep: slides, Q&A sheet, recorded fallback; two rehearsals; freeze 10-03.
 2. **Wrong-line fails still standing:** 7 on R-10434.3 (distance labels 147.28/150.95/152.49/42.44/87.86, arc 324.13', tag C33), 6 on R-10434.1, 2 on Presidio.
