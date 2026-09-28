@@ -4,8 +4,12 @@ distance,24.23',24.27,+0.04,pass
 bearing,"N77°39'22""E","N77°38'59""E",0.4',pass
 bearing,"N70°00'26""E","N69°59'58""E",0.5',pass
 distance,86.50',86.53,+0.03,pass
+bearing,"N68°11'17""E","N68°12'04""E",0.8',pass
+distance,120.19',120.18,-0.01,pass
 bearing,"N22°47'32""W","N22°50'33""W",3.0',pass
 distance,21.03',21.05,+0.02,pass
+bearing,"N68°24'07""E","N68°24'45""E",0.6',pass
+distance,124.10',124.11,+0.01,pass
 bearing,"N68°25'10""E","N68°25'19""E",0.1',pass
 bearing,"S70°50'46""W","S70°51'09""W",0.4',pass
 distance,359.00',28.23,-330.77,FAIL

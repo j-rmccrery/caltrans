@@ -1,49 +1,5 @@
 [
  {
-  "kind": "bearing",
-  "text": "N68°11'17\"E",
-  "issue": "no line found beside label",
-  "region": [
-   2046,
-   685,
-   2102,
-   705
-  ]
- },
- {
-  "kind": "distance",
-  "text": "120.19'",
-  "issue": "no line found beside label",
-  "region": [
-   2046,
-   685,
-   2102,
-   705
-  ]
- },
- {
-  "kind": "bearing",
-  "text": "N68°24'07\"E",
-  "issue": "no line found beside label",
-  "region": [
-   2119,
-   639,
-   2173,
-   663
-  ]
- },
- {
-  "kind": "distance",
-  "text": "124.10'",
-  "issue": "no line found beside label",
-  "region": [
-   2119,
-   639,
-   2173,
-   663
-  ]
- },
- {
   "kind": "distance",
   "text": "359.00'",
   "drawn_ft": 28.23,

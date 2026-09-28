@@ -34,6 +34,7 @@ arc length,L=290.13',290.12,-0.01,pass
 bearing (R),"S10°05'08""E(R)",,,radial: not checked
 bearing (R),"S46°25'28""W(R)",,,radial: not checked
 bearing (R),"N80°08'50""W(R)",,,radial: not checked
+bearing,"N48°13'57""W","N48°14'53""W",0.9',pass
 distance,6.64',6.64,-0.00,pass
 arc length,L=121.66',121.67,+0.01,pass
 bearing (R),"S36°43'34""W(R)",,,radial: not checked
@@ -58,6 +59,7 @@ arc length,L=46.20',46.19,-0.01,pass
 bearing (R),"N68°41'41""E(R)",,,radial: not checked
 bearing,"N62°24'39""W","N62°21'42""W",3.0',pass
 bearing (R),"S26°21'46""W(R)",,,radial: not checked
+bearing,"N2°05'55""E","N2°05'57""E",0.0',pass
 distance,323.49',323.50,+0.01,pass
 bearing,"N5°43'06""W","N3°41'29""W",121.6',FAIL
 distance,88.69',15.02,-73.67,FAIL

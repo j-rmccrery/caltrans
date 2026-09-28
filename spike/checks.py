@@ -382,20 +382,53 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, wan
     c, u, n = frame(b)
     cands, anchored = [], []
     for ln in chains:
-        if abs(ln["dir"] @ n) > math.sin(math.radians(tol_deg)):
+        strict_ok = abs(ln["dir"] @ n) <= math.sin(math.radians(tol_deg))  # the label's own box rotation:
+        # a real signal only where no printed bearing exists to check against instead
+        if want_az is None:
+            if not strict_ok:
+                continue
+        elif az_diff(az_of(ln), want_az) > (BEAR_TOL if not strict_ok and want_ft is None else max(AZ_FILTER, math.degrees(math.atan2(0.3, ln["len_pt"] * scale)))):
+            # a short line drawn 0.3 ft off at one end is not a different bearing -- EXCEPT for a relaxed
+            # (box-misaligned) candidate with no printed distance to cross-check by length at all (loop15
+            # leg2, orchestrator review): the label's own box rotation already isn't backing this one up,
+            # so nothing but azimuth agreement says it's the right line, and the length-scaled window is
+            # wide enough on a long line to admit a genuinely different nearby record bearing (measured:
+            # r10434_3's S79-01-10W, 11.4 arcmin off, inside the 0.212 deg window a 262 ft candidate gets
+            # -- a real wrong-pass on review, its correctly-matched neighbour S79-12-32W' own printed
+            # bearing sitting just 11 arcmin off the wrong one's). Held to BEAR_TOL (3 arcmin, the
+            # tightest bearing tolerance this file already trusts for a well-determined long line)
+            # instead -- not a new magic number. Every relaxed pass with its own paired distance keeps
+            # the ordinary window (want_ft is not None): span_for's length match is real corroboration
+            # there; a relaxed bearing-only pick with none measured well inside this bound regardless
+            # (r10434_1's N48-13-57W: 1.2 arcmin).
             continue
-        if want_az is not None and az_diff(az_of(ln), want_az) > max(AZ_FILTER, math.degrees(math.atan2(0.3, ln["len_pt"] * scale))):  # a short line drawn 0.3 ft off at one end is not a different bearing
-            continue
+        # loop15 leg2: where a bearing IS printed, az_diff against the georeferenced grid azimuth already
+        # is the real "is this the label's line" test, tighter (<=~2 deg typically) and measured against
+        # the record, not the OCR/glyph reader's guess at the label box's own rotation -- strict_ok (the
+        # box-rotation test) is kept only to decide, below, whether admitting a box-misaligned candidate
+        # is a NEW find (never previously reachable, so it's marked "relaxed_angle" and may only ever
+        # surface as a pass or a queued "association unproven", not a FAIL) or one the old rule already
+        # picked (byte-identical, whenever a strict_ok candidate also passes az_diff). Measured: a stacked
+        # bearing+distance block's box angle can read 10-15 deg off the drawn line's true heading (this
+        # drafter's two-line blocks; loop15 leg2 crops) even though the printed bearing matches the line
+        # within 0.01 deg -- the old box-angle-only prefilter silently dropped that correct candidate.
         lo, hi = sorted(((ln["p0"] - c) @ u, (ln["p1"] - c) @ u))
         perp = abs((ln["p0"] - c) @ n)
         if not (hi < -b["w"] / 2 - 2 * b["glyph_h"] or lo > b["w"] / 2 + 2 * b["glyph_h"]) and perp < tol_perp:
-            cands.append((perp, ln))
+            cands.append((perp, ln, strict_ok))
             continue
         mid = (ln["p0"] + ln["p1"]) / 2
         mperp, malong = abs((mid - c) @ n), abs((mid - c) @ u)
         if mperp < 2.5 * b["glyph_h"] and malong < 0.6 * b["w"]:
-            anchored.append((mperp, ln))
+            anchored.append((mperp, ln, strict_ok))
     cands += anchored
+    if any(s for _, _, s in cands):
+        cands = [(p, ln) for p, ln, s in cands if s]  # a strict (old-rule) candidate survived: reproduce
+        # the pre-loop15-leg2 pool exactly, never let a looser admission change an already-resolvable pick
+        relaxed = False
+    else:
+        cands = [(p, ln) for p, ln, s in cands]
+        relaxed = bool(cands)  # every survivor here is new-only: tag the eventual pick below
     if want_az is not None and az_of is not None and len(cands) > 1:
         # a label often sits between two parallel candidates; the one whose OWN heading agrees with the
         # printed bearing (within its own length-scaled tolerance, loop6 leg C rule 1) wins over mere
@@ -407,20 +440,32 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, wan
         survivors = [(p, ln, d, t) for p, ln, d, t in scored if d <= 3 * t]
         if survivors:
             agree = [(p, ln) for p, ln, d, t in survivors if d <= t]
+            # loop15 leg2 (retry): a relaxed pick with no printed length to arbitrate by (want_ft is None,
+            # so nothing below can tell two same-direction candidates apart by size) must be the ONE
+            # candidate whose heading agrees -- several agreeing candidates beside a many-facet corridor
+            # (one long tessellated alignment, its parallel duplicate, or a neighbouring record line 11
+            # arcmin off) is direction alone failing to single out a piece, not a decided pick (a real
+            # wrong-pass on review: two nearly-parallel printed bearings 0.19 deg apart, only one drawn).
+            if relaxed and want_ft is None and len(agree) != 1:
+                return None
             cands = agree if agree else [(p, ln) for p, ln, d, t in survivors]
     if not cands:
         return None
     on = [(p, ln) for p, ln in cands if p < 0.35 * b["glyph_h"]]  # the label is written on the line itself (some drafters)
     if on:
         cands = on
+    result = None
     if want_ft is not None:
         close = [(p, ln) for p, ln in cands if abs(ln["len_pt"] * scale - want_ft) < 1.0]
         if close:
-            return min(close, key=lambda t: t[0])[1]
-        spanned = [(p, s) for p, ln in cands for s in [span_for(ln, want_ft, scale, chains)] if s is not ln]  # no piece is the right length: try the span on every candidate's run
-        if spanned:
-            return min(spanned, key=lambda t: t[0])[1]
-    return min(cands, key=lambda t: t[0])[1]
+            result = min(close, key=lambda t: t[0])[1]
+        else:
+            spanned = [(p, s) for p, ln in cands for s in [span_for(ln, want_ft, scale, chains)] if s is not ln]  # no piece is the right length: try the span on every candidate's run
+            if spanned:
+                result = min(spanned, key=lambda t: t[0])[1]
+    if result is None:
+        result = min(cands, key=lambda t: t[0])[1]
+    return {**result, "relaxed_angle": True} if relaxed else result
 
 
 def leaders(page, circles=()):
@@ -1601,6 +1646,12 @@ def main():
                             continue
                 if ln is None:
                     exceptions.append({"kind": "bearing", "text": part, "issue": "leader points at no line" if led else "no line found beside label", "region": region(b)}); continue
+                if not ok and ln.get("relaxed_angle"):
+                    # loop15 leg2: this candidate is reachable only because the label's own box rotation
+                    # (an OCR/glyph guess, not the record) was set aside in favour of the printed bearing --
+                    # a new association path may only ever add a pass, never a fail, so a disagreement here
+                    # is queued as unproven rather than asserted as a claim about the record
+                    exceptions.append({"kind": "bearing", "text": part, "issue": f"association unproven: measured {fmt_bearing(az)} vs printed {part} ({diff * 60:.1f}' off)", "region": region(b), "line": shape(ln)}); continue
                 if not ok and wrong_line_likely("bearing", diff * 60):
                     exceptions.append({"kind": "bearing", "text": part, "issue": f"wrong line likely: measured {fmt_bearing(az)} vs printed {part} ({diff * 60:.1f}' off)", "region": region(b), "line": shape(ln)}); continue
                 rows.append(["bearing", part, fmt_bearing(az if abs((az - want + 180) % 360 - 180) < 90 else az + 180), f"{diff * 60:.1f}'", "pass" if ok else "FAIL"])
@@ -1702,6 +1753,11 @@ def main():
                     # its size; every other distance keeps the ordinary gold-calibrated cut (loop 14)
                     if is_total:
                         exceptions.append({"kind": "distance", "text": part, "issue": f"association unproven: measured {drawn:.2f} vs printed {want:.2f} ft (T)", "region": region(b), "line": shape(ln)}); continue
+                    if ln.get("relaxed_angle"):
+                        # loop15 leg2: same rule as the bearing branch -- this candidate is reachable only
+                        # because the label's own box rotation was set aside for the printed bearing beside
+                        # it (baz); a new association path may only ever add a pass, never a fail
+                        exceptions.append({"kind": "distance", "text": part, "issue": f"association unproven: measured {drawn:.2f} vs printed {want:.2f} ft", "region": region(b), "line": shape(ln)}); continue
                     if wrong_line_likely("distance", drawn - want, want):
                         exceptions.append({"kind": "distance", "text": part, "issue": f"wrong line likely: measured {drawn:.2f} vs printed {want:.2f} ft", "region": region(b), "line": shape(ln)}); continue
                 result = "pass" if ok else "FAIL"
