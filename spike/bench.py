@@ -47,13 +47,14 @@ SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0, "chord distance": 
 TAGS_COLS = ["tags_assoc", "tags_pass", "tags_fail", "tags_queued"]
 PARCELS_COLS = ["faces", "faces_named"]
 TRAVERSE_COLS = ["chains", "closed"]
+RECON_COLS = ["recon_all", "recon_dim", "recon_parcels"]
 TABLES_COLS = ["table_rows", "rows_clean"]
 READ_COLS = ["frame", "blocks_read", "bearings_parsed", "distances_parsed"]
 # coverage: distance+bearing passes over every parsed distance/bearing token (a rate over checked values alone
 # rises when labels are queued); gold: passes/fails scored against spike/gold, right/wrong/unkeyed for
 # passes then fail_real/fail_wrong/fail_unkeyed for FAILs (loop 14)
 QUALITY_COLS = ["coverage", "gold"]
-FIELDS = ["label", "sheet", "distance", "bearing", "arc length", "exceptions", "wrong_line", "no_line", "secs"] + TAGS_COLS + PARCELS_COLS + TRAVERSE_COLS + TABLES_COLS + READ_COLS + QUALITY_COLS
+FIELDS = ["label", "sheet", "distance", "bearing", "arc length", "exceptions", "wrong_line", "no_line", "secs"] + TAGS_COLS + PARCELS_COLS + TRAVERSE_COLS + TABLES_COLS + READ_COLS + QUALITY_COLS + RECON_COLS
 
 
 def env_for(pdf):
@@ -152,6 +153,25 @@ def traverse_cols(pdf):
         return {k: "err" for k in TRAVERSE_COLS}
 
 
+def recon_cols(pdf):
+    """recon.py: run only after --parcels and --traverse have both written their outputs (loop16 leg A)."""
+    ok, err = run_step("recon.py", pdf)
+    if not ok:
+        print(f"recon.py failed: {err}")
+        return {k: "err" for k in RECON_COLS}
+    o = out_dir(pdf)
+    try:
+        r = json.loads((o / "recon.json").read_text(encoding="utf-8"))
+        return {
+            "recon_all": f"{int(r['recon_all_covered_ft'])}/{int(r['recon_all_denom_ft'])}",
+            "recon_dim": f"{int(r['recon_dim_covered_ft'])}/{int(r['recon_dim_denom_ft'])}",
+            "recon_parcels": f"{r['parcels_all']['n']}/{r['parcels_all']['of']}|{r['parcels_dim']['n']}/{r['parcels_dim']['of']}",
+        }
+    except Exception as e:
+        print(f"recon read failed: {type(e).__name__} {e}")
+        return {k: "err" for k in RECON_COLS}
+
+
 def reads_path(o):
     """Mirror georef.py's READS choice for out dir o: read_shx.json when it carries text, else
     read_glyph.json, else read_rapid.json."""
@@ -234,6 +254,8 @@ def run(key, steps):
         res.update(parcels_cols(pdf))
     if "traverse" in steps:
         res.update(traverse_cols(pdf))
+    if "parcels" in steps and "traverse" in steps:
+        res.update(recon_cols(pdf))
     res.update(tables)
     try:
         passes = sum(int(str(res[k]).split("/")[0]) for k in ("distance", "bearing"))

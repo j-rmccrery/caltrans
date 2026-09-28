@@ -1,0 +1,769 @@
+{
+ "sheet": "presidio",
+ "scale_ft_per_pt": 1.38885347759105,
+ "buffer_pt": 1.5,
+ "buffer_ft": 2.0832802163865747,
+ "parallel_tol_deg": 20.0,
+ "rw_tol_ft": 4.166560432773149,
+ "named_tol_ft": 1.0,
+ "frame_tol_ft": 1.38885347759105,
+ "rw_added_ft": 6441.4,
+ "dropped_faces": {
+  "n": 0,
+  "ft": 0.0
+ },
+ "removed_ft": {
+  "frame": 7383.1,
+  "tables": 4826.4,
+  "matchline": 7299.8,
+  "leader_wedge": 4956.5,
+  "edge_column": 0.0
+ },
+ "protected_from_removal_ft": {
+  "leader_wedge": 1191.5
+ },
+ "covered_invariance": {
+  "baseline_raw_ft": 4305.1,
+  "pre_removal_ft": 4305.1,
+  "final_ft": 4305.1,
+  "diff_vs_pre_removal_ft": 0.0,
+  "diff_vs_raw_ft": 0.0
+ },
+ "drawn_boundary_ft": 15899.2,
+ "reconstructed_edges": 33,
+ "traverse_rows": 97,
+ "recon_all_covered_ft": 4305.1,
+ "recon_all_denom_ft": 15899.2,
+ "recon_dim_covered_ft": 4305.1,
+ "recon_dim_denom_ft": 15366.3,
+ "weight_classes": {
+  "1.98": {
+   "count": 11,
+   "length_ft": 6441.4
+  },
+  "1.44": {
+   "count": 8,
+   "length_ft": 1027.5
+  },
+  "1.14": {
+   "count": 9,
+   "length_ft": 776.8
+  },
+  "1.02": {
+   "count": 59,
+   "length_ft": 7129.2
+  },
+  "0.84": {
+   "count": 170,
+   "length_ft": 18980.4
+  },
+  "0.36": {
+   "count": 16,
+   "length_ft": 10880.6
+  }
+ },
+ "rw_weight": 1.98,
+ "buffer_sensitivity_ft": {
+  "1.0pt": 4273.0,
+  "1.5pt": 4305.1,
+  "2.5pt": 4330.0
+ },
+ "parcels_all": {
+  "n": 0,
+  "of": 61
+ },
+ "parcels_dim": {
+  "n": 0,
+  "of": 9
+ },
+ "faces": [
+  {
+   "parcel": "63269",
+   "named": true,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "61806|61806-4|61806-5|61806-9|63269",
+   "named": true,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "61806-4|61985-2",
+   "named": true,
+   "touches_frame": false,
+   "pct_covered": 14.98,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "61806-2",
+   "named": true,
+   "touches_frame": false,
+   "pct_covered": 40.17,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "61806-9",
+   "named": true,
+   "touches_frame": false,
+   "pct_covered": 98.06,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.94,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+   "named": true,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 52.82,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 11.29,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 22.11,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "61806-5",
+   "named": true,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "61806",
+   "named": true,
+   "touches_frame": false,
+   "pct_covered": 0.0,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "",
+   "named": false,
+   "touches_frame": true,
+   "pct_covered": null,
+   "closure_ft": null,
+   "counts": false
+  },
+  {
+   "parcel": "61985-1|61985-2|61985-3|61985-4",
+   "named": true,
+   "touches_frame": false,
+   "pct_covered": 6.72,
+   "closure_ft": null,
+   "counts": false
+  }
+ ],
+ "edges": [
+  {
+   "name": "N67Â°07'01\"W + 138.21'",
+   "az": 292.8831,
+   "ft": 138.21,
+   "misfit_ft": 0.07
+  },
+  {
+   "name": "L12",
+   "az": 241.1192,
+   "ft": 34.89,
+   "misfit_ft": 0.11
+  },
+  {
+   "name": "L11",
+   "az": 201.0711,
+   "ft": 21.9,
+   "misfit_ft": 0.07
+  },
+  {
+   "name": "N70Â°37'16\"W + 168.12'",
+   "az": 109.3789,
+   "ft": 168.12,
+   "misfit_ft": 0.1
+  },
+  {
+   "name": "L13",
+   "az": 10.3108,
+   "ft": 39.97,
+   "misfit_ft": 0.14
+  },
+  {
+   "name": "N67Â°37'21\"W + 50.48'",
+   "az": 292.3775,
+   "ft": 50.48,
+   "misfit_ft": 0.43
+  },
+  {
+   "name": "L8",
+   "az": 104.8089,
+   "ft": 139.9,
+   "misfit_ft": 0.19
+  },
+  {
+   "name": "L9",
+   "az": 103.0611,
+   "ft": 59.89,
+   "misfit_ft": 0.18
+  },
+  {
+   "name": "N68Â°24'07\"E + 124.10'",
+   "az": 248.4019,
+   "ft": 124.1,
+   "misfit_ft": 0.19
+  },
+  {
+   "name": "N22Â°47'32\"W + 21.03'",
+   "az": 157.2078,
+   "ft": 21.03,
+   "misfit_ft": 0.09
+  },
+  {
+   "name": "N68Â°11'17\"E + 120.19'",
+   "az": 248.1881,
+   "ft": 120.19,
+   "misfit_ft": 0.13
+  },
+  {
+   "name": "N70Â°00'26\"E + 86.50'",
+   "az": 250.0072,
+   "ft": 86.5,
+   "misfit_ft": 0.13
+  },
+  {
+   "name": "N21Â°05'32\"W + 27.48'",
+   "az": 158.9078,
+   "ft": 27.48,
+   "misfit_ft": 0.14
+  },
+  {
+   "name": "S3Â°55'39\"E + 44.49'",
+   "az": 356.0725,
+   "ft": 44.49,
+   "misfit_ft": 0.15
+  },
+  {
+   "name": "S52Â°28'06\"E + 110.52'",
+   "az": 307.5317,
+   "ft": 110.52,
+   "misfit_ft": 0.07
+  },
+  {
+   "name": "S79Â°17'24\"W + 16.99'",
+   "az": 79.29,
+   "ft": 16.99,
+   "misfit_ft": 0.05
+  },
+  {
+   "name": "S10Â°09'24\"W + 101.10'",
+   "az": 10.1567,
+   "ft": 101.1,
+   "misfit_ft": 0.15
+  },
+  {
+   "name": "S80Â°23'54\"E + 274.87'",
+   "az": 99.6017,
+   "ft": 274.87,
+   "misfit_ft": 0.09
+  },
+  {
+   "name": "S77Â°45'13\"E + 290.55'",
+   "az": 102.2464,
+   "ft": 290.55,
+   "misfit_ft": 0.06
+  },
+  {
+   "name": "156.89' + S75Â°11'28\"E",
+   "az": 104.8089,
+   "ft": 156.89,
+   "misfit_ft": 0.04
+  },
+  {
+   "name": "S14Â°48'32\"W + 17.60'",
+   "az": 194.8089,
+   "ft": 17.6,
+   "misfit_ft": 0.06
+  },
+  {
+   "name": "S75Â°11'08\"E + 208.34'",
+   "az": 104.8144,
+   "ft": 208.34,
+   "misfit_ft": 0.08
+  },
+  {
+   "name": "N15Â°16'05\"E + 82.72'",
+   "az": 195.2681,
+   "ft": 82.72,
+   "misfit_ft": 0.17
+  },
+  {
+   "name": "S75Â°07'35\"E + 46.37'",
+   "az": 104.8736,
+   "ft": 46.37,
+   "misfit_ft": 0.05
+  },
+  {
+   "name": "L3",
+   "az": 104.8089,
+   "ft": 96.27,
+   "misfit_ft": 0.15
+  },
+  {
+   "name": "S86Â°03'39\"W + 62.27'",
+   "az": 266.0608,
+   "ft": 62.27,
+   "misfit_ft": 0.2
+  },
+  {
+   "name": "N68Â°24'07\"E + 245.61'",
+   "az": 248.4019,
+   "ft": 245.61,
+   "misfit_ft": 0.08
+  },
+  {
+   "name": "N86Â°55'35\"E + 24.23'",
+   "az": 86.9264,
+   "ft": 24.23,
+   "misfit_ft": 0.11
+  },
+  {
+   "name": "L6",
+   "az": 109.8056,
+   "ft": 6.29,
+   "misfit_ft": 0.07
+  },
+  {
+   "name": "L7",
+   "az": 105.2958,
+   "ft": 39.52,
+   "misfit_ft": 0.06
+  },
+  {
+   "name": "S71Â°35'42\"W + 59.42'",
+   "az": 251.595,
+   "ft": 59.42,
+   "misfit_ft": 0.12
+  },
+  {
+   "name": "L4",
+   "az": 104.7994,
+   "ft": 48.55,
+   "misfit_ft": 0.08
+  },
+  {
+   "name": "L16",
+   "az": 91.9722,
+   "ft": 6.44,
+   "misfit_ft": 0.09
+  }
+ ]
+}

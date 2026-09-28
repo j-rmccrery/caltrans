@@ -243,7 +243,8 @@ def main():
             mis = float(np.hypot(*(pos - ground(q))))
             misfits.append(mis)
             rows.append({"edge": e["src"], "kind": e["kind"], "az": round(az, 4), "ft": round(d, 2), "misfit_ft": round(mis, 2), "flags": flags,
-                         "E": round(float(pos[0]), 2), "N": round(float(pos[1]), 2)})
+                         "E": round(float(pos[0]), 2), "N": round(float(pos[1]), 2),
+                         "pts": [[round(float(gp[0]), 2), round(float(gp[1]), 2)] for gp in (ground(pt) for pt in e["pts"])]})
         return rows, misfits
 
     out = []
