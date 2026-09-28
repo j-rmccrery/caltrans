@@ -3,6 +3,46 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
+## Resume here (2026-09-27 23:50): loop 16 PAUSED, uncommitted
+
+**Accuracy now means how much of the survey is reconstructable** (JR, 2026-09-27): a foot of drawn boundary counts when
+a record course (bearing+distance or curve) walks it, unflagged, within 0.5 ft of the drawing; a parcel counts when every
+edge is walked by record and it closes within 1 ft. First hand measure (record ft summed over clean traverse edges, all drawn
+parcel boundary as denominator): start of day 10.2 % (20,176 / 197,765 ft), now 10.5 % (20,820 ft); parcels 0 of 359.
+Pass precision, fail quality and label coverage are supporting measures from here on.
+
+Evening commits: a0b2447 (scan v5 default for scan_readers; batch.py scan route; matchline and highway surface in demo, gap
+tile grouped as tiles.py routes it; bench `integ3` = `loop15-final` on every column; demo --fast 169 s, full 209 s),
+b0a7df5 (scan_consensus stays on rapid boxes: v5 13/1/18 vs rapid 17/1/14 right/wrong/queued).
+
+**Loop 16 (reconstructability metric) was stopped by an auto-mode classifier outage. Nothing from it is committed.**
+- Working tree (uncommitted): new `spike/recon.py` (`--selftest`), `spike/bench.py` (columns recon_all, recon_dim,
+  recon_parcels), `spike/traverse.py` (additive `pts` per walked row, EPSG:2227 ft), regenerated `spike/out/traverse.json`,
+  figures in `spike/out_recon/`, bench row `loop16-A`. The leg A retry agent was killed mid-edit, so the tree may hold a
+  partial retry: read `git diff` before anything else.
+- Leg A attempt 1 failed its gate: denominators include table/title/notes frames, sheet-edge column lines, leader wedges
+  and matchlines; R-10741.1 covers 0 ft though its record edges sit on the drawn R/W (cause not found); the R/W weight is
+  picked by max() (should be the heaviest class with >= ~1000 ft: 1.68 north, 1.98 south); figure grey too faint. Its
+  8.2 % draft figure is not valid. Existing bench columns were identical to `integ3`; no other drafter sheet changed.
+- Early findings: every curve edge in traverse.json is flagged "chord direction from drawing", so no curve and no
+  curve-bounded parcel can count (leg C candidate: chord direction from record tangency, never from the drawing).
+  Presidio face 61806-9 is walked 6/6 by record, unflagged, and misses closure by 138 ft (a record value likely on the
+  wrong edge).
+
+Resume, in order:
+1. `git status` / `git diff` on the three files; decide whether the partial retry is usable.
+2. Leg A retry (its last attempt): fix the four defects above, zoomed crop per sheet, bench `loop16-A2` with
+   `bench.py <label> --tags --parcels --traverse --tables presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3`
+   (never unscoped). Re-measure, hand-check two edges and one uncovered stretch on two sheets; commit by name, else stash
+   `spike/out/loop16_legA.patch`.
+3. Leg B: every lost foot of the dimensioned boundary gets one cause (`spike/out_recon/attribution.md`).
+4. Legs C/D by leg B's ranking (curve chord direction from record tangency is the leading candidate).
+5. Close-out: `loop16-final`, demo --fast < 180 s cold, LOOP.md section, STATE.md leading with reconstructability.
+
+Other levers for reconstructability, unranked until leg B measures them: pair passed bearings and distances into
+complete courses and chain them; use the record's alignment coordinate tables as fixed vertices (loop 12: they land
+0.02-0.07 ft on the fit); close parcels one or two edges short; walk lines across matchlines (pairs agree <= 0.17 ft).
+
 ## Loop 15 (2026-09-27): a fail needs proof, a no-line cause found, a third gold set
 
 - **Arc fails need proof.** An arc fail stands only when its association is proven: a lone candidate in the leader's reach, a clear touch (<= 1 pt, others > 2 pt), or a tag whose radius and placement hold up. Otherwise it is queued as "association unproven" (`checks.at_tip`, `tables.py`).
