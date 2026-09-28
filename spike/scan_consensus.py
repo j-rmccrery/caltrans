@@ -27,7 +27,7 @@ sys.path.insert(0, str(Path(__file__).parent / "det"))
 from georef import OUT, PDF  # noqa: E402
 from scan_readers import crop_of, vlm  # noqa: E402
 
-READS_DEFAULT = "read_v5.json" if (OUT / "read_v5.json").exists() and (OUT / "read_vlm_v5.json").exists() else "read_rapid.json"  # v5 is the default once its boxes AND its vision-reader cache exist (the vote needs both readers); otherwise rapid, whose cache is filled
+READS_DEFAULT = "read_rapid.json"  # measured 2026-09-27: consensus right/wrong/queued 17/1/14 on rapid boxes vs 13/1/18 on v5 boxes (READS=read_v5.json), so rapid stays the consensus default; the v5 boxes win only in the digit vote (spike/det/vote_score.py 23 vs 21)
 READS = os.environ.get("READS", READS_DEFAULT)  # READS=read_rapid.json still works as the explicit fallback
 
 ANGLE = re.compile(r"(\d{1,3})\D{0,2}(\d{2})\D{0,2}(\d{2})\D*$")
