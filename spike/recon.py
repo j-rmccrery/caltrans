@@ -89,6 +89,7 @@ from pathlib import Path
 import numpy as np
 import pymupdf
 from pyproj import Transformer
+from scipy.spatial import cKDTree
 from shapely.geometry import LineString, Polygon
 from shapely.ops import unary_union
 import shapely
@@ -136,6 +137,18 @@ LEADER_REACH_MIN_PT = 100.0  # pt: how far beyond the label's own centre the str
                               # reach -- separates a real long leader/wedge from the label's own drawn box
                               # outline or character strokes (measured: Presidio's genuine wedges reach 160-300 pt
                               # from the label centre; its box-outline sides and glyph strokes never exceed ~80 pt)
+DUP_TOL_PT = 1.0         # pt-equivalent: how close two elementary segments' own midpoints (point-to-
+                          # segment) may sit and still count as the SAME physically-drawn line (loop16
+                          # leg C: an R/W stroke and a face edge, or two faces' own edges, drawn a hair
+                          # apart but not bit-identical, both survive unary_union and were each counted as
+                          # separate boundary feet -- see module docstring defect note). Measured directly:
+                          # for every elementary segment on all six sheets, the offset (point-to-segment,
+                          # pt-equivalent) to its nearest same-direction (PARALLEL_TOL_DEG) neighbour,
+                          # 190,883 matched segments total -- 99.96% (190,808) sit under 1.0 pt, median
+                          # 0.36 pt, essentially none between 0.5 and 1.0 pt (7 segments, 5 ft total across
+                          # all six sheets). 1.0 pt sits comfortably above the real duplicate cluster with
+                          # margin, short of where a genuinely separate parallel line (a second R/W edge a
+                          # few ft off) would start.
 DENSIFY_FT = 1.0         # ft: elementary-segment length for the covered/dimensioned classification
 CLOSE_PCT = 0.99
 CLOSURE_MAX_FT = 1.0
@@ -221,6 +234,74 @@ def covered_mask(mid, seg_az, rec_P, rec_Q, rec_az, buffer_ft, tol_deg):
     dm = np.where(match, d, np.inf)
     best = np.where(any_match, dm.argmin(1), -1)
     return any_match, best
+
+
+def dedupe_segments(P, Q, mid, seg_len, seg_az, dup_tol_ft, angle_tol_deg, extra_masks):
+    """Collapse near-coincident, near-parallel elementary segments -- the loop16 leg C fix: an R/W stroke
+    drawn a hair over a face edge, or two faces' own edges sharing a line, are not bit-identical geometry
+    so unary_union keeps both, and both got counted as separate boundary feet (defect: up to 3x on the
+    six sheets measured -- see module docstring). Fixed processing order (lexsort on midpoint x, then y,
+    then azimuth -- independent of shapely's own union/segmentize ordering, so the result does not depend
+    on run-to-run/version geometry ordering): each segment is visited once and either becomes a keeper (no
+    not-yet-decided segment near it yet) or is absorbed into the nearest not-yet-decided keeper within
+    dup_tol_ft PERPENDICULAR offset and angle_tol_deg of it (mod 180) -- a segment already claimed is
+    never reconsidered, same "claimed by the first thing that touches it" rule the contamination-removal
+    classes already use. One cKDTree query per keeper (not O(n^2)): 30k+ segments in well under a second.
+
+    Perpendicular offset, not point-to-segment distance: two consecutive elementary pieces of the SAME
+    drawn line are exactly collinear (perpendicular offset 0), so a plain point-to-segment distance calls
+    them "duplicates" too and collapses a whole straight line down to one point (caught by selftest #7
+    while writing this -- a 100 ft line came back 50 ft). The fix also requires the candidate's own
+    projected position (t, unclamped, ft along its own direction from its start) to fall within its own
+    span (+/- a small margin for the two lines' densify grids not landing on the same phase) -- true
+    duplicates sit at the SAME position along the corridor, only offset sideways; a same-line neighbour
+    one DENSIFY_FT further down the line does not.
+
+    Which copy survives is otherwise arbitrary (the two copies sit within dup_tol_ft of each other, so it
+    does not matter which one's exact coordinates are kept for length/figure purposes) -- what must not be
+    arbitrary is classification: extra_masks (cov_mask_full, dim_mask_full) are OR'd into the keeper from
+    every duplicate collapsed into it, computed on every copy before collapsing (by the caller, before this
+    call), so a keeper never loses a covered/dimensioned flag a collapsed copy alone carried.
+
+    Returns (P, Q, mid, seg_len, seg_az, [mask0, mask1, ...]) sliced to kept segments only."""
+    n = len(mid)
+    if n == 0:
+        return P, Q, mid, seg_len, seg_az, [m.copy() for m in extra_masks]
+    order = np.lexsort((seg_az, mid[:, 1], mid[:, 0]))
+    tree = cKDTree(mid)
+    cap_ft = dup_tol_ft * 1.5 + DENSIFY_FT  # loose ball-query radius; the perp/span test below is the exact one
+    span_margin_ft = 0.3 * DENSIFY_FT  # generous vs a duplicate's own densify-grid phase mismatch, tight
+                                        # vs an adjacent same-line neighbour a full DENSIFY_FT further along
+    processed = np.zeros(n, bool)
+    keep = np.ones(n, bool)
+    masks = [m.copy() for m in extra_masks]
+    for idx in order:
+        if processed[idx]:
+            continue
+        processed[idx] = True
+        cand = np.asarray(tree.query_ball_point(mid[idx], r=cap_ft), dtype=int)
+        cand = cand[~processed[cand]]
+        if len(cand) == 0:
+            continue
+        adiff = np.abs((seg_az[idx] - seg_az[cand] + 90) % 180 - 90)
+        cand = cand[adiff <= angle_tol_deg]
+        if len(cand) == 0:
+            continue
+        AB = Q[cand] - P[cand]
+        L = np.maximum(np.hypot(AB[:, 0], AB[:, 1]), 1e-9)
+        u = AB / L[:, None]
+        AP = mid[idx] - P[cand]
+        t = AP[:, 0] * u[:, 0] + AP[:, 1] * u[:, 1]              # ft along candidate's own direction, unclamped
+        perp = np.abs(AP[:, 0] * u[:, 1] - AP[:, 1] * u[:, 0])    # perpendicular ft offset
+        dup = cand[(t >= -span_margin_ft) & (t <= L + span_margin_ft) & (perp <= dup_tol_ft)]
+        if len(dup) == 0:
+            continue
+        processed[dup] = True
+        keep[dup] = False
+        for m in masks:
+            if m[dup].any():
+                m[idx] = True
+    return P[keep], Q[keep], mid[keep], seg_len[keep], seg_az[keep], [m[keep] for m in masks]
 
 
 def heavy_lines_weighted(page):
@@ -457,7 +538,7 @@ def densest_cluster_center(rec_edges):
     return (pts * w[:, None]).sum(0) / w.sum()
 
 
-def run(sheet_name):
+def run(sheet_name, return_internals=False):
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
     ground = ground_of(g["params"])
@@ -465,6 +546,7 @@ def run(sheet_name):
     scale = g["scale_ft_per_pt"]
     buffer_ft, rw_tol_ft, frame_tol_ft = BUFFER_PT * scale, RW_TOL_PT * scale, FRAME_TOL_PT * scale
     leader_tol_ft = LEADER_TOL_PT * scale
+    dup_tol_ft = DUP_TOL_PT * scale
 
     gj = json.loads((OUT / "parcels.geojson").read_text())
     faces = load_faces(gj)
@@ -548,10 +630,28 @@ def run(sheet_name):
 
     Pb, Qb, midb, seg_lenb, seg_azb = elementary_segments(drawn_baseline, DENSIFY_FT)
     cov_maskb, _ = covered_mask(midb, seg_azb, rec_P, rec_Q, rec_az, buffer_ft, PARALLEL_TOL_DEG)
+    # defect 6 fix (double/triple-counted boundary): dedupe the baseline too, the same way as the main
+    # boundary below -- see dedupe_segments(). Otherwise this invariance check compares a deduped final
+    # boundary against a still-inflated raw one and gets blown up by the very over-counting the fix
+    # removes, not by anything the face-drop/removal steps actually did.
+    Pb, Qb, midb, seg_lenb, seg_azb, (cov_maskb,) = dedupe_segments(
+        Pb, Qb, midb, seg_lenb, seg_azb, dup_tol_ft, PARALLEL_TOL_DEG, [cov_maskb])
     covered_ft_baseline = float(seg_lenb[cov_maskb].sum())
 
     P, Q, mid, seg_len, seg_az = elementary_segments(drawn_pre, DENSIFY_FT)
     cov_mask_full, _ = covered_mask(mid, seg_az, rec_P, rec_Q, rec_az, buffer_ft, PARALLEL_TOL_DEG)
+    # dimensioned classification (heaviest R/W weight class within rw_tol_ft, OR a named face's own
+    # boundary within NAMED_TOL_FT -- same formula as before, just moved up from its old spot near the end
+    # of run()) computed here, on the raw pre-dedup segment set, so a duplicate copy's own dim match is
+    # available to OR into its keeper next.
+    rw_dist = point_seg_dist(mid, rw_P, rw_Q).min(1) if len(mid) and len(rw_P) else np.full(len(mid), np.inf)
+    named_dist = point_seg_dist(mid, named_P, named_Q).min(1) if len(mid) and len(named_P) else np.full(len(mid), np.inf)
+    dim_mask_full = (rw_dist <= rw_tol_ft) | (named_dist <= NAMED_TOL_FT)
+    # defect 6 fix: collapse near-coincident parallel copies into one before any covered/dim/removal
+    # classification -- each keeper inherits cov_mask_full/dim_mask_full True if ANY collapsed copy had it
+    # (see dedupe_segments()).
+    P, Q, mid, seg_len, seg_az, (cov_mask_full, dim_mask_full) = dedupe_segments(
+        P, Q, mid, seg_len, seg_az, dup_tol_ft, PARALLEL_TOL_DEG, [cov_mask_full, dim_mask_full])
     covered_ft_pre_removal = float(seg_len[cov_mask_full].sum())
 
     x0, y0, x1, y1 = MAP_AREA
@@ -655,11 +755,9 @@ def run(sheet_name):
 
     drawn_ft = float(seg_len[remaining].sum())
 
-    # dimensioned boundary: heaviest weight class (R/W) + named-face boundaries, on the FINAL (cleaned)
-    # segment set. See module docstring for the RW class refinement.
-    rw_dist = point_seg_dist(mid, rw_P, rw_Q).min(1) if len(mid) and len(rw_P) else np.full(len(mid), np.inf)
-    named_dist = point_seg_dist(mid, named_P, named_Q).min(1) if len(mid) and len(named_P) else np.full(len(mid), np.inf)
-    dim_mask_full = (rw_dist <= rw_tol_ft) | (named_dist <= NAMED_TOL_FT)
+    # dimensioned boundary: dim_mask_full was computed earlier (before dedup, then OR'd through it -- see
+    # above module docstring section and the dedupe_segments() call). AND with remaining (post
+    # contamination-removal), same as before.
     dim_mask = dim_mask_full & remaining
     dim_ft = float(seg_len[dim_mask].sum())
     dim_covered_ft = float(seg_len[dim_mask & cov_mask_full].sum())
@@ -730,6 +828,19 @@ def run(sheet_name):
           f"recon_dim {dim_covered_ft:,.0f}/{dim_ft:,.0f} ft ({pct_dim:.1f}%) | "
           f"parcels {n_all}/{faces_all} n_dim {n_dim}/{faces_dim} | rw_weight {rw_w} | "
           f"removed_ft {removed_ft} | dropped_faces {len(dropped_faces)} ({dropped_face_ft:.0f} ft)")
+    if return_internals:
+        # loop16 leg B (recon_attrib.py): the same arrays run() already computed, handed back instead of
+        # recomputed -- no copy-paste of this function's own logic. Never touched by the normal call path
+        # (return_internals defaults False, main() below never passes it), so recon.json / the two figures
+        # this function writes are byte-identical to before this parameter existed.
+        internals = {
+            "page": page, "inv": inv, "ground": ground, "scale": scale, "buffer_ft": buffer_ft,
+            "P": P, "Q": Q, "mid": mid, "seg_len": seg_len, "seg_az": seg_az, "remaining": remaining,
+            "cov_mask_full": cov_mask_full, "dim_mask_full": dim_mask_full,
+            "rec_edges": rec_edges, "rec_P": rec_P, "rec_Q": rec_Q, "rec_az": rec_az,
+            "kept_faces": kept_faces, "blocks": blocks,
+        }
+        return result, internals
     return result
 
 
@@ -874,9 +985,34 @@ def selftest():
     assert not in_any_box(frame_rect.centroid.coords[0], [tbl_region]), "sanity: the un-grown region must miss the frame stroke"
     assert in_any_box(frame_rect.centroid.coords[0], grown), "a table frame stroke 15 pt outside its own region must fall inside once grown"
 
+    # 7. loop16 leg C: dedupe_segments() collapses two near-coincident parallel strokes into one count
+    # (0.5 pt apart, well under DUP_TOL_PT), but leaves two strokes 10 pt apart as two (well over it).
+    dup_tol_ft = DUP_TOL_PT * scale
+    line_a = LineString([[0.0, 0.0], [100.0, 0.0]])
+
+    off_close = 0.5 * scale
+    merged_close = unary_union([line_a, LineString([[0.0, off_close], [100.0, off_close]])])
+    Pc, Qc, midc, seg_lenc, seg_azc = elementary_segments(merged_close, DENSIFY_FT)
+    _, _, _, seg_lenk, _, _ = dedupe_segments(Pc, Qc, midc, seg_lenc, seg_azc, dup_tol_ft, PARALLEL_TOL_DEG, [])
+    assert abs(seg_lenk.sum() - 100.0) < 1.0, \
+        f"two strokes 0.5 pt apart should collapse to one ~100 ft line, got {seg_lenk.sum():.1f} ft"
+
+    off_far = 10.0 * scale
+    merged_far = unary_union([line_a, LineString([[0.0, off_far], [100.0, off_far]])])
+    Pf2, Qf2, midf2, seg_lenf2, seg_azf2 = elementary_segments(merged_far, DENSIFY_FT)
+    _, _, _, seg_lenk2, _, _ = dedupe_segments(Pf2, Qf2, midf2, seg_lenf2, seg_azf2, dup_tol_ft, PARALLEL_TOL_DEG, [])
+    assert abs(seg_lenk2.sum() - 200.0) < 1.0, \
+        f"two strokes 10 pt apart should stay two ~200 ft total, got {seg_lenk2.sum():.1f} ft"
+
+    # 7b. a collapsed duplicate's own mask flag must survive, OR'd into the keeper -- not silently dropped.
+    mask_b_only = midc[:, 1] > 0.01  # true only for the offset (line_b) copy's own segments
+    _, _, _, _, _, (mask_k,) = dedupe_segments(Pc, Qc, midc, seg_lenc, seg_azc, dup_tol_ft, PARALLEL_TOL_DEG, [mask_b_only])
+    assert mask_k.all(), "a duplicate segment's own mask flag must be OR'd into the surviving keeper"
+
     print("selftest OK: full square closes and counts; 3 pt offset line not covered; 1 pt offset covered; "
           "un-faced R/W linework still enters the denominator; RW class rule rejects a stray heavier class; "
-          "a grown table region catches its own frame stroke")
+          "a grown table region catches its own frame stroke; dedupe collapses 0.5 pt duplicates but keeps "
+          "10 pt-apart strokes separate, and OR's a collapsed copy's mask flag into its keeper")
 
 
 def main():

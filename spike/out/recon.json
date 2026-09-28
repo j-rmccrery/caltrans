@@ -13,29 +13,29 @@
   "ft": 0.0
  },
  "removed_ft": {
-  "frame": 7383.1,
+  "frame": 7382.1,
   "tables": 4826.4,
-  "matchline": 7299.8,
-  "leader_wedge": 4956.5,
+  "matchline": 7269.6,
+  "leader_wedge": 3692.1,
   "edge_column": 0.0
  },
  "protected_from_removal_ft": {
-  "leader_wedge": 1191.5
+  "leader_wedge": 666.9
  },
  "covered_invariance": {
-  "baseline_raw_ft": 4305.1,
-  "pre_removal_ft": 4305.1,
-  "final_ft": 4305.1,
+  "baseline_raw_ft": 2515.0,
+  "pre_removal_ft": 2515.0,
+  "final_ft": 2515.0,
   "diff_vs_pre_removal_ft": 0.0,
   "diff_vs_raw_ft": 0.0
  },
- "drawn_boundary_ft": 15899.2,
+ "drawn_boundary_ft": 10844.8,
  "reconstructed_edges": 33,
  "traverse_rows": 97,
- "recon_all_covered_ft": 4305.1,
- "recon_all_denom_ft": 15899.2,
- "recon_dim_covered_ft": 4305.1,
- "recon_dim_denom_ft": 15366.3,
+ "recon_all_covered_ft": 2515.0,
+ "recon_all_denom_ft": 10844.8,
+ "recon_dim_covered_ft": 2515.0,
+ "recon_dim_denom_ft": 10312.8,
  "weight_classes": {
   "1.98": {
    "count": 11,
@@ -64,9 +64,9 @@
  },
  "rw_weight": 1.98,
  "buffer_sensitivity_ft": {
-  "1.0pt": 4273.0,
-  "1.5pt": 4305.1,
-  "2.5pt": 4330.0
+  "1.0pt": 2496.9,
+  "1.5pt": 2512.1,
+  "2.5pt": 2530.3
  },
  "parcels_all": {
   "n": 0,
