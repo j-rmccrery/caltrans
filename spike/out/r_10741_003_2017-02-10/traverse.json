@@ -12,6 +12,7 @@
     "az": 122.6064,
     "ft": 297.64,
     "misfit_ft": 0.05,
+    "chain_misfit_ft": 0.05,
     "flags": [],
     "E": 5988909.58,
     "N": 2132629.51,
@@ -31,7 +32,8 @@
     "kind": "line",
     "az": 138.8564,
     "ft": 371.79,
-    "misfit_ft": 0.15,
+    "misfit_ft": 0.16,
+    "chain_misfit_ft": 0.15,
     "flags": [],
     "E": 5989154.2,
     "N": 2132349.52,
@@ -51,7 +53,8 @@
     "kind": "line",
     "az": 138.8564,
     "ft": 508.21,
-    "misfit_ft": 0.19,
+    "misfit_ft": 0.09,
+    "chain_misfit_ft": 0.19,
     "flags": [],
     "E": 5989488.57,
     "N": 2131966.81,
@@ -71,7 +74,8 @@
     "kind": "line",
     "az": 85.7283,
     "ft": 224.98,
-    "misfit_ft": 0.13,
+    "misfit_ft": 0.07,
+    "chain_misfit_ft": 0.13,
     "flags": [],
     "E": 5989712.93,
     "N": 2131983.57,
@@ -91,7 +95,8 @@
     "kind": "line",
     "az": 107.8671,
     "ft": 267.98,
-    "misfit_ft": 0.21,
+    "misfit_ft": 0.11,
+    "chain_misfit_ft": 0.21,
     "flags": [
      "bearing from drawing"
     ],
@@ -113,7 +118,8 @@
     "kind": "line",
     "az": 145.3952,
     "ft": 289.98,
-    "misfit_ft": 0.24,
+    "misfit_ft": 0.02,
+    "chain_misfit_ft": 0.24,
     "flags": [
      "bearing from drawing"
     ],
@@ -135,7 +141,8 @@
     "kind": "line",
     "az": 186.3628,
     "ft": 209.98,
-    "misfit_ft": 0.2,
+    "misfit_ft": 0.08,
+    "chain_misfit_ft": 0.2,
     "flags": [],
     "E": 5990109.4,
     "N": 2131453.98,
@@ -155,7 +162,8 @@
     "kind": "line",
     "az": 271.3231,
     "ft": 265.53,
-    "misfit_ft": 0.24,
+    "misfit_ft": 0.07,
+    "chain_misfit_ft": 0.24,
     "flags": [],
     "E": 5989843.94,
     "N": 2131460.11,
@@ -175,7 +183,8 @@
     "kind": "line",
     "az": 320.8498,
     "ft": 169.99,
-    "misfit_ft": 0.28,
+    "misfit_ft": 0.05,
+    "chain_misfit_ft": 0.28,
     "flags": [
      "bearing from drawing"
     ],
@@ -197,7 +206,8 @@
     "kind": "line",
     "az": 230.842,
     "ft": 219.99,
-    "misfit_ft": 0.16,
+    "misfit_ft": 0.12,
+    "chain_misfit_ft": 0.16,
     "flags": [
      "bearing from drawing"
     ],
@@ -219,7 +229,8 @@
     "kind": "line",
     "az": 328.9564,
     "ft": 177.36,
-    "misfit_ft": 0.29,
+    "misfit_ft": 0.18,
+    "chain_misfit_ft": 0.29,
     "flags": [],
     "E": 5989474.57,
     "N": 2131604.98,
@@ -239,7 +250,8 @@
     "kind": "line",
     "az": 307.3231,
     "ft": 517.07,
-    "misfit_ft": 0.18,
+    "misfit_ft": 0.15,
+    "chain_misfit_ft": 0.18,
     "flags": [],
     "E": 5989063.38,
     "N": 2131918.49,
@@ -259,7 +271,8 @@
     "kind": "line",
     "az": 304.5175,
     "ft": 598.06,
-    "misfit_ft": 0.27,
+    "misfit_ft": 0.02,
+    "chain_misfit_ft": 0.27,
     "flags": [
      "bearing from drawing"
     ],
@@ -291,6 +304,7 @@
     "az": 9.6397,
     "ft": 254.98,
     "misfit_ft": 0.0,
+    "chain_misfit_ft": 0.0,
     "flags": [
      "distance from drawing"
     ],
@@ -312,7 +326,8 @@
     "kind": "line",
     "az": 121.075,
     "ft": 399.52,
-    "misfit_ft": 0.19,
+    "misfit_ft": 0.1,
+    "chain_misfit_ft": 0.19,
     "flags": [
      "distance from drawing"
     ],
@@ -335,6 +350,7 @@
     "az": 191.1925,
     "ft": 230.0,
     "misfit_ft": 0.1,
+    "chain_misfit_ft": 0.1,
     "flags": [],
     "E": 5989072.4,
     "N": 2132856.66,
@@ -354,7 +370,8 @@
     "kind": "line",
     "az": 170.8369,
     "ft": 513.79,
-    "misfit_ft": 0.05,
+    "misfit_ft": 0.14,
+    "chain_misfit_ft": 0.05,
     "flags": [],
     "E": 5989154.22,
     "N": 2132349.43,
@@ -384,6 +401,7 @@
     "az": 138.8564,
     "ft": 136.53,
     "misfit_ft": 0.46,
+    "chain_misfit_ft": 0.46,
     "flags": [
      "distance from drawing"
     ],
@@ -415,6 +433,7 @@
     "az": 144.6672,
     "ft": 411.67,
     "misfit_ft": 0.12,
+    "chain_misfit_ft": 0.12,
     "flags": [
      "bearing from drawing"
     ],

@@ -351,6 +351,22 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
     return filled
 
 
+def record_vector_misfit(p, q, az, d):
+    """Loop17 leg A: one edge's own record vector (compass az, distance d) walked from ITS OWN drawn
+    start p, checked against its own drawn end q -- never a chain's carried position. walk() used to
+    accumulate a single running position across a whole chain and compare THAT to each node in turn,
+    so one bad upstream edge (a misread digit, a wrong association, a merged pair of pieces) put every
+    clean downstream edge's misfit at the same inflated number, even though each of those edges' own
+    record vector matches its own drawn piece exactly -- measured on R-10741.1: "165.86'" (no record
+    bearing, own error ~5.9 ft) sat upstream of two edges whose own bearing+distance match their own
+    drawn piece within 0.07/0.09 ft, yet the old cumulative misfit read 6.96/8.36 ft for them, landing
+    2,021 ft of otherwise-clean boundary in recon_attrib's "misfit" bucket as guilt by association.
+    Returns (end, misfit_ft) so a caller can still accumulate its own running position for a
+    whole-chain closure diagnostic (misfit_end_ft/misfit_max_ft) alongside this per-edge measure."""
+    end = p + d * np.array([math.sin(math.radians(az)), math.cos(math.radians(az))])
+    return end, float(np.hypot(*(end - q)))
+
+
 def selftest():
     """One runnable check for inherit_bearings: three collinear edges sharing nodes 0-1-2-3 along a
     line; edge0 carries the record bearing, edges 1 and 2 are distance-only and must inherit it
@@ -489,6 +505,28 @@ def selftest():
     print("traverse.selftest: complete_curve_chords OK (tangent chord az = tangent +/- delta/2 on a synthetic 90 deg curve; "
           "CB wins over tangent; disagreeing tangent donors refuse rather than guess; a radial fills the same way "
           "when no record line donates, and refuses when it doesn't match the drawn tangent)")
+
+    # loop17 leg A: record_vector_misfit re-anchors each edge's own misfit at its own drawn start, so
+    # a bad upstream edge cannot poison a clean downstream one. Synthetic chain along the record
+    # north: edge0 (0,0)->(0,100), record az=0 ft=100, exact match. edge1 (0,100)->(0,250), record
+    # az=0 but ft=140 -- 10 ft short of its own drawn piece (a misread/wrong-association/merge, the
+    # cause doesn't matter here, only that it is wrong). edge2 (0,250)->(0,400), record az=0 ft=150,
+    # exact match to ITS OWN drawn piece. Walking a single carried position (the old bug) would read
+    # edge2's misfit as ~10 ft, the same as edge1's own error; re-anchored, edge2 must read ~0.
+    p0, p1, p2, p3 = (np.array([0.0, 0.0]), np.array([0.0, 100.0]), np.array([0.0, 250.0]), np.array([0.0, 400.0]))
+    pos = p0.copy()
+    own = []
+    for p, q, az, d in [(p0, p1, 0.0, 100.0), (p1, p2, 0.0, 140.0), (p2, p3, 0.0, 150.0)]:
+        end, mis = record_vector_misfit(p, q, az, d)
+        own.append(mis)
+        pos = pos + (end - p)
+    assert own[0] < 0.01, own
+    assert abs(own[1] - 10.0) < 0.01, f"edge1 is the true introducer, expected ~10 ft, got {own}"
+    assert own[2] < 0.01, f"edge2 must be judged on its own drawn piece, not the chain's carried position: {own}"
+    chain_end_mis = float(np.hypot(*(pos - p3)))
+    assert abs(chain_end_mis - 10.0) < 0.01, "chain-level cumulative diagnostic (misfit_end_ft) must still show the carried error"
+    print("traverse.selftest: record_vector_misfit OK (edge2 unpoisoned by edge1's own 10 ft error; "
+          "chain-level closure diagnostic still shows it)")
 
 
 def sheet_glyph_h():
@@ -724,7 +762,11 @@ def main():
             chains.append({"edges": chain, "closed": n == start and len(chain) > 2, "end": n})
 
     def walk(chain):
-        """Positions by the record from the first drawn vertex; misfit vs the drawn vertex at each node."""
+        """Positions by the record from the first drawn vertex, for the chain-level closure diagnostic
+        (misfit_end_ft/misfit_max_ft: how far the whole record walk drifts from the drawing by the far
+        end). Each row's own misfit_ft (loop17 leg A, record_vector_misfit()) is judged separately,
+        re-anchored at THAT edge's own drawn start -- never the chain's carried position -- so one bad
+        upstream edge cannot poison every clean downstream edge's misfit (see record_vector_misfit)."""
         k0, f0 = chain["edges"][0]
         e0 = edges[k0]
         pos = ground(e0["p0"] if f0 else e0["p1"])
@@ -765,10 +807,12 @@ def main():
                     d = float(np.hypot(*(ground(q) - ground(p)))); flags.append("chord from drawing (no radius)")
                 else:
                     d = float(np.hypot(*(ground(q) - ground(p)))); flags.append("no record")
-            pos = pos + d * np.array([math.sin(math.radians(az)), math.cos(math.radians(az))])
-            mis = float(np.hypot(*(pos - ground(q))))
-            misfits.append(mis)
-            row = {"edge": e["src"], "kind": e["kind"], "az": round(az, 4), "ft": round(d, 2), "misfit_ft": round(mis, 2), "flags": flags,
+            own_end, own_mis = record_vector_misfit(ground(p), ground(q), az, d)
+            pos = pos + (own_end - ground(p))  # same displacement, chain's carried start (unchanged)
+            chain_mis = float(np.hypot(*(pos - ground(q))))
+            misfits.append(chain_mis)
+            row = {"edge": e["src"], "kind": e["kind"], "az": round(az, 4), "ft": round(d, 2), "misfit_ft": round(own_mis, 2),
+                   "chain_misfit_ft": round(chain_mis, 2), "flags": flags,
                    "E": round(float(pos[0]), 2), "N": round(float(pos[1]), 2),
                    "pts": [[round(float(gp[0]), 2), round(float(gp[1]), 2)] for gp in (ground(pt) for pt in e["pts"])]}
             if "bearing_source" in e:  # loop16-D: this edge's az came from a collinear record neighbour, not the drawing

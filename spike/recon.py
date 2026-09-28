@@ -50,7 +50,18 @@ Definitions (loop16 leg A, retry):
   claimed by an earlier class is not reconsidered, so overlapping regions attribute to the first
   class that touches them, not double-counted).
 - reconstructed edge: a traverse.json row with kind in ("line", "arc"), flags == [] and misfit_ft <=
-  0.5. A curve used to always carry the flag "chord direction from drawing" (traverse.py used to
+  0.5. misfit_ft (loop17 leg A, traverse.record_vector_misfit()) is this edge's OWN record vector
+  (bearing/chord az + distance) walked from ITS OWN drawn start and checked against its own drawn
+  end -- never a chain-cumulative position. traverse.py's walk() used to carry one running position
+  across a whole chain and compare that to each node, so a single bad upstream edge (misread digit,
+  wrong association, a merged pair of pieces) inflated every clean downstream edge's misfit too,
+  disqualifying otherwise-reconstructable boundary as guilt by association (2,021 ft of it, measured
+  on the six gate sheets before this leg). traverse.json also carries a chain-level chain_misfit_ft
+  per row and misfit_end_ft/misfit_max_ft per chain -- the old cumulative measure, kept only as a
+  whole-record closure diagnostic (how far the chain's own walk drifts from the drawing by its far
+  end); recon.py never reads either, by design: a parcel's own closure is measured independently by
+  face_closure() below, per named face, not by traverse.py's open-ended chain walk.
+  A curve used to always carry the flag "chord direction from drawing" (traverse.py used to
   always derive a curve's chord direction from the drawing, never the record), so flags == [] never
   held for one; loop16 leg E gives a curve its chord direction from the record where the record
   determines it (a printed chord bearing, or a record line meeting it tangentially at a shared node --
@@ -494,17 +505,35 @@ def face_closure(pieces, rec_edges):
     rec_edges' own "ft"/"az" for an arc entry are already the row's CHORD length/direction (traverse.py's
     own walk() -- 2*R*sin(delta/2) at the record chord az, never a local sub-segment's), so no
     kind-specific branch is needed here; face_pieces()'s own rec_parent already resolved k to that one
-    parent entry, whichever local sub-segment matched."""
+    parent entry, whichever local sub-segment matched.
+    Loop17 leg A: a single drawn record course can span more than one ORIGINAL ring vertex (a stray
+    digitizing kink -- a vertex pair a few pt apart -- splits face_pieces()'s per-vertex walk into
+    two-or-more pieces that all majority-vote to the SAME rec_edges entry k, possibly with a genuine
+    small no-record jog piece between them). Applying that edge's FULL record vector to every one of
+    those pieces overcounts it -- measured on Presidio's 61806-9 (98.1% covered, unflagged, unmisfit):
+    its own "N67 deg 07'01"W + 138.21'" record course sits on 2 ring pieces (24.70 + 113.34 = 138.04 ft
+    drawn, matching the record length), so the old code added a 138.21 ft vector TWICE and reported a
+    162 ft closure miss on a parcel that is, in fact, fully walked by record. Each piece sharing a k now
+    takes a fair SHARE of that edge's record length, by its own drawn-length fraction of every piece
+    sharing that k in this ring -- collinear fragments sum back to exactly one course's own vector,
+    applied once in total, not once per fragment."""
+    k_drawn_len = {}
+    for k, p, q in pieces:
+        if k is not None:
+            k_drawn_len[k] = k_drawn_len.get(k, 0.0) + float(np.hypot(*(np.array(q, float) - np.array(p, float))))
     pos = np.array(pieces[0][1], float)
     total = np.zeros(2)
     for k, p, q in pieces:
+        p, q = np.array(p, float), np.array(q, float)
         if k is None:
-            v = np.array(q, float) - np.array(p, float)
+            v = q - p
         else:
             e = rec_edges[k]
-            drawn_az = azimuth_arr(np.array(q, float) - np.array(p, float))
+            drawn_az = azimuth_arr(q - p)
             az = e["az"] if abs((e["az"] - drawn_az + 180) % 360 - 180) < 90 else (e["az"] + 180) % 360
-            v = e["ft"] * np.array([math.sin(math.radians(az)), math.cos(math.radians(az))])
+            piece_len = float(np.hypot(*(q - p)))
+            share = e["ft"] * (piece_len / k_drawn_len[k]) if k_drawn_len[k] > 0 else 0.0
+            v = share * np.array([math.sin(math.radians(az)), math.cos(math.radians(az))])
         total += v
     return float(np.hypot(*total))
 
@@ -996,6 +1025,17 @@ def selftest():
     closure = face_closure(pieces, rec_edges)
     assert closure < 0.01, f"square record walk should close at 0, got {closure}"
 
+    # 1b. loop17 leg A: a stray digitizing vertex splits ONE record edge's own covered stretch into
+    # two ring pieces (both majority-voting to the same rec_edges index) -- face_closure must not add
+    # that edge's full record vector twice (Presidio 61806-9: a real 138 ft course split this way read
+    # closure as 162 ft off a fully-record-walked parcel; the fix walks a repeat occurrence by its own
+    # drawn vector, not the record edge's length again).
+    kink_pieces = [(0, sq[0], sq[1]), (1, sq[1], sq[2]),
+                   (2, sq[2], np.array([50.0, 100.0])), (2, np.array([50.0, 100.0]), sq[3]),
+                   (3, sq[3], sq[4])]
+    kink_closure = face_closure(kink_pieces, rec_edges)
+    assert kink_closure < 0.01, f"a record edge split into two ring pieces by a stray vertex must not be double-counted, got {kink_closure}"
+
     # 2. a line offset 3 pt (~4.17 ft) parallel to the south edge: outside the buffer, not covered
     off = 3.0 * scale
     p, q = np.array([0.0, -off]), np.array([100.0, -off])
@@ -1085,7 +1125,8 @@ def selftest():
     chord_match, _ = covered_mask(chord_mid, chord_seg_az, arc_rec_P, arc_rec_Q, arc_rec_az, buffer_ft, PARALLEL_TOL_DEG)
     assert not chord_match[0], "the straight chord between the arc's own ends must NOT be covered by its curve-following buffer"
 
-    print("selftest OK: full square closes and counts; 3 pt offset line not covered; 1 pt offset covered; "
+    print("selftest OK: full square closes and counts; a record edge split by a stray vertex into two "
+          "ring pieces is not double-counted; 3 pt offset line not covered; 1 pt offset covered; "
           "an arc's own curve is covered but its chord is not; "
           "un-faced R/W linework still enters the denominator; RW class rule rejects a stray heavier class; "
           "a grown table region catches its own frame stroke; dedupe collapses 0.5 pt duplicates but keeps "

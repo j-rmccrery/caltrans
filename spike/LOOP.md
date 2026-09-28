@@ -440,3 +440,18 @@ Lessons: check an attribution's biggest single example against its own row lengt
 exposed triple counting the leg A gate missed). Subagents hand back before their bench ends: read bench.csv rows
 yourself. Machinery that completes nothing is still worth a leg only when it exposes the upstream blocker; E and F did,
 but curves still gain nothing until the R-10741 R= reader miss and busy-vertex tangency are solved.
+
+# Loop 17: more of the survey reconstructable (started 2026-09-28 ~14:45, JR: "do it")
+
+Goal: raise `recon_all` / `recon_dim` / `recon_parcels` (bench `loop16-final`: 29.5 %, 38.9 %, 0/224) using the ranked
+levers from loop 16's attribution. Rules as loop 16: sonnet implementers, orchestrator re-measures every gate and views
+crops, commit each passed leg on caltrans-spike (push only on JR's word), a leg that fails twice is stashed, canonical
+bench only (`bench.py <label> --tags --parcels --traverse --tables presidio r10434_1 r10434_3 r10741_1 r10741_2 r10741_3`),
+legs that run the bench go one at a time. Budget 10 dispatches.
+
+| leg | lever | lost ft at stake | gate |
+|---|---|---|---|
+| A | misfit rows; Presidio 61806-9 closes 138 ft off | 2,021 | every row turned clean cited + crop; gold wrong-pass 0; check columns unchanged unless proven |
+| B | labelled but never a traverse row (association) | 3,422 | as A; label coverage up; every new pass crop viewed |
+| C | curve data: PP-OCRv5 detector on R-10741 (R=189.90' never read), radials/CB | 6,274 | completed curves cited + crops |
+| M | ceiling: how much unlabelled boundary no record on these sheets dimensions (read-only) | 11,520 | measurement only, no bench |
