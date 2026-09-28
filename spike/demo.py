@@ -33,7 +33,9 @@ STEPS = [
     ("table checks via tags", ["tables.py"]),
     ("record twin (traverse)", ["traverse.py"]),
     ("record self-checks", ["record_checks.py"]),  # alignment tables vs fit, table L=R*Delta, cell counts (all six sheets)
+    ("matchline check", ["matchline.py"]),          # same-line agreement across adjacent sheets (all six, loop 12)
     ("LiDAR features", ["lidar/extract.py"]),
+    ("highway surface", ["lidar/surface.py"]),      # per-tile pavement+deck dissolve inside R/W (south/north/gap, loop 11)
     ("encroachment", ["encroach.py"]),
     ("rasters for QGIS", ["export_rasters.py"]),
     ("object record", ["objects.py"]),
@@ -74,7 +76,8 @@ def main():
         t = time.time()
         if args[0] in ("qgis_project.py", "figures.py") and not QGIS_PY.exists():
             print(f"{name:26} skipped (QGIS not installed)"); continue
-        r = subprocess.run([str(QGIS_PY) if args[0] in ("qgis_project.py", "figures.py") else PY, str(HERE / args[0]), *args[1:]], capture_output=True, text=True, encoding="utf-8", errors="replace",
+        run_args = args + ["--fast"] if (fast and args[0] == "lidar/surface.py") else args
+        r = subprocess.run([str(QGIS_PY) if args[0] in ("qgis_project.py", "figures.py") else PY, str(HERE / run_args[0]), *run_args[1:]], capture_output=True, text=True, encoding="utf-8", errors="replace",
                            env={**__import__("os").environ, "PYTHONIOENCODING": "utf-8"})
         last = [ln for ln in (r.stdout + r.stderr).splitlines() if ln.strip() and "Warning" not in ln][-1:]
         print(f"{name:26} {time.time() - t:6.1f}s  {'ok' if r.returncode == 0 else 'FAILED'}  {last[0][:90] if last else ''}")

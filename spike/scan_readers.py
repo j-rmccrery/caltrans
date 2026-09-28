@@ -20,7 +20,8 @@ from gt_scan import TRUTH, digits  # noqa: E402
 STEM = "r_00065_002_1969-09-01_sn-02048"
 OUT = Path(__file__).parent / "out" / STEM
 PDF = next((Path(__file__).parent.parent / "Sample Data").rglob(STEM + ".pdf"))
-READS = os.environ.get("READS", "read_rapid.json")  # READS=read_v5.json scores the new detector's boxes instead
+READS_DEFAULT = "read_v5.json" if (OUT / "read_v5.json").exists() else "read_rapid.json"  # v5 is the default now that it lands 31/32 det, 23/32 voted digits (STATE.md, 2026-09-27 evening); falls back to rapid when v5 was never run for this sheet
+READS = os.environ.get("READS", READS_DEFAULT)  # READS=read_rapid.json still works as the explicit fallback
 PROMPT = ("This is a small crop of a hand-lettered land survey map. Transcribe the text exactly as written, "
           "character for character, including any letter prefix, decimal point, degree, minute and second marks. "
           "Reply with the transcription only.")

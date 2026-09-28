@@ -174,12 +174,14 @@ def main():
     app = QgsApplication([], False)
     app.initQgis()
     layers = sheet_layers(OUT, "R-10434.2", strict=True)
+    hs = highway_surface_layer("south")
+    surface_layers = [hs] if hs is not None else []
     r65_layers = [raster(f"1969 record: {label}", f"r65/{stem}_on_tile.tif", 0.85) for label, stem in R65]
     bottom_layers = [
         raster("LiDAR intensity", "lidar_intensity.tif", 0.55),
         raster("LiDAR hillshade", "lidar_hillshade.tif", 1.0),
     ]
-    all_layers = layers + r65_layers + bottom_layers
+    all_layers = surface_layers + layers + r65_layers + bottom_layers
     p = QgsProject.instance()
     p.clear()
     p.setTitle("SWYFT Record Twin: Presidio sheet R-10434.2 on 2025 LiDAR")
@@ -188,6 +190,9 @@ def main():
     p.writeEntry("Paths", "/Absolute", False)
     p.setDistanceUnits(QgsUnitTypes.DistanceFeet); p.setAreaUnits(QgsUnitTypes.AreaSquareFeet)  # what a surveyor reads
     root = p.layerTreeRoot()
+    for l in surface_layers:  # highway surface: above every per-sheet layer, same as the --six groups
+        p.addMapLayer(l, False)
+        root.addLayer(l)
     for l in layers:
         p.addMapLayer(l, False)
         root.addLayer(l)
@@ -262,10 +267,14 @@ def main_six():
     p.writeEntry("Paths", "/Absolute", False)
     p.setDistanceUnits(QgsUnitTypes.DistanceFeet); p.setAreaUnits(QgsUnitTypes.AreaSquareFeet)
     root = p.layerTreeRoot()
-    SOUTH, NORTH = "South: Presidio tile", "North: Marin tile"
+    SOUTH, NORTH, GAP = "South: Presidio tile", "North: Marin tile", "Gap: 2018 3DEP infill tile"
     south_layers = build_group(root, p, SOUTH, SOUTH_SHEETS, "south", r65=True)
     north_layers = build_group(root, p, NORTH, NORTH_SHEETS, "north", r65=False)
-    total = len(south_layers) + len(north_layers)
+    # gap tile's own sheets (R-10434.3, R-10741.1) already show their linework under South/North above
+    # (per-sheet grouping there is by which sheet, not which LiDAR tile extracted its features); this
+    # group is just the gap tile's own highway surface + rasters, no sheets of its own.
+    gap_layers = build_group(root, p, GAP, [], "gap", r65=False)
+    total = len(south_layers) + len(north_layers) + len(gap_layers)
     assert p.write(), "project write failed"
 
     # proof: re-read and assert every added layer survives
@@ -274,10 +283,10 @@ def main_six():
     tree = [n.layer() for n in p.layerTreeRoot().findLayers()]
     assert all(l is not None and l.isValid() for l in tree) and len(tree) == total, "a layer did not survive the round trip"
 
-    for title, n in [(SOUTH, len(south_layers)), (NORTH, len(north_layers))]:
+    for title, n in [(SOUTH, len(south_layers)), (NORTH, len(north_layers)), (GAP, len(gap_layers))]:
         print(f"{title}: {n} layers")
 
-    for title, out_png in [(SOUTH, "six_render_south.png"), (NORTH, "six_render_north.png")]:
+    for title, out_png in [(SOUTH, "six_render_south.png"), (NORTH, "six_render_north.png"), (GAP, "six_render_gap.png")]:
         grp = p.layerTreeRoot().findGroup(title)
         grp_layers = [n.layer() for n in grp.findLayers()]
         hs = next(l for l in grp_layers if l.name() == "LiDAR hillshade")

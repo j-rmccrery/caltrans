@@ -6,6 +6,7 @@ same filter extract.py uses), both already in the sheet's own out dir. Run once 
 sheet on that tile has had lidar/extract.py run -- spike/demo.py --six does this.
 Output: spike/out/tiles/<tile>/highway_surface.geojson, kind = "at grade" | "structure".
 """
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -19,10 +20,27 @@ HERE = Path(__file__).parent
 ROOT = HERE.parent.parent
 OUT = ROOT / "spike" / "out"
 
+# Grouping mirrors tiles.py's own sheet->LiDAR-tile routing (GAP_STEMS): R-10434.3 and R-10741.1 sit
+# in the gap between the vendor's south/north tiles and are extracted against the 2018 3DEP "gap" tile
+# there, so their pavement/deck belong in their own highway-surface output, not folded into south/north
+# (loop 11 left the gap tile unwritten; this was the bug -- surface.py just had no "gap" group).
 TILE_SHEETS = {
-    "south": [OUT, OUT / "r_10434_001_2020-09-16", OUT / "r_10434_003_2020-09-16"],
-    "north": [OUT / "r_10741_001_2017-02-10", OUT / "r_10741_002_2017-02-10", OUT / "r_10741_003_2017-02-10"],
+    "south": [OUT, OUT / "r_10434_001_2020-09-16"],
+    "north": [OUT / "r_10741_002_2017-02-10", OUT / "r_10741_003_2017-02-10"],
+    "gap": [OUT / "r_10434_003_2020-09-16", OUT / "r_10741_001_2017-02-10"],
 }
+
+
+def inputs_mtime(dirs):
+    """Latest mtime across every input file this tile's dissolve reads, or None if none exist yet."""
+    m = None
+    for d in dirs:
+        for name in ("parcels.geojson", "extracted_features.geojson"):
+            p = d / name
+            if p.exists():
+                t = p.stat().st_mtime
+                m = t if m is None else max(m, t)
+    return m
 
 
 def faces_for(out_dir, to_utm, h):
@@ -59,10 +77,19 @@ def sheet_polys(out_dir, to_utm):
 
 
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--fast", action="store_true", help="skip a tile whose highway_surface.geojson is already newer than its inputs")
+    args = ap.parse_args()
     h = json.loads((HERE / "htdp.json").read_text())
     to_utm = Transformer.from_crs("EPSG:6318", "EPSG:6339", always_xy=True)
     to_ll = Transformer.from_crs("EPSG:6339", "EPSG:6318", always_xy=True)
     for tile_name, dirs in TILE_SHEETS.items():
+        out_path = OUT / "tiles" / tile_name / "highway_surface.geojson"
+        if args.fast and out_path.exists():
+            in_m = inputs_mtime(dirs)
+            if in_m is not None and out_path.stat().st_mtime >= in_m:
+                print(f"{tile_name}: skipped (--fast, highway_surface.geojson newer than its inputs)")
+                continue
         faces, polys = [], []
         for d in dirs:
             faces += faces_for(d, to_utm, h)

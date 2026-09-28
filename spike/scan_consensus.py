@@ -27,7 +27,8 @@ sys.path.insert(0, str(Path(__file__).parent / "det"))
 from georef import OUT, PDF  # noqa: E402
 from scan_readers import crop_of, vlm  # noqa: E402
 
-READS = os.environ.get("READS", "read_rapid.json")  # READS=read_v5.json runs consensus on the new detector's boxes
+READS_DEFAULT = "read_v5.json" if (OUT / "read_v5.json").exists() and (OUT / "read_vlm_v5.json").exists() else "read_rapid.json"  # v5 is the default once its boxes AND its vision-reader cache exist (the vote needs both readers); otherwise rapid, whose cache is filled
+READS = os.environ.get("READS", READS_DEFAULT)  # READS=read_rapid.json still works as the explicit fallback
 
 ANGLE = re.compile(r"(\d{1,3})\D{0,2}(\d{2})\D{0,2}(\d{2})\D*$")
 NUM = re.compile(r"(\d{1,6})[.,]?(\d{2})$")
@@ -127,7 +128,10 @@ def render(digits_, k, rapid, vis):
 
 def main():
     reads = json.loads((OUT / READS).read_text(encoding="utf-8"))
-    cache = OUT / "read_vlm.json"
+    # the VLM cache is keyed by box id WITHIN one detector's own box list (id spaces differ between
+    # read_rapid.json and read_v5.json -- different box counts/order), so it must be namespaced per
+    # detector; a shared filename would silently pair v5 boxes with rapid-era vlm reads (all "queue").
+    cache = OUT / ("read_vlm.json" if READS == "read_rapid.json" else "read_vlm_" + READS.removeprefix("read_").removesuffix(".json") + ".json")
     vis = json.loads(cache.read_text(encoding="utf-8")) if cache.exists() else {}
     if "--vlm" in sys.argv:
         page = pymupdf.open(PDF)[0]
@@ -153,7 +157,7 @@ def main():
         status, d = consensus(b["text"], v, k, grid)
         counts[status] += 1
         out.append({**b, "kind": k, "rapid": b["text"], "vision": v, "status": status, "text": render(d, k, b["text"], v) if d else "", "conf": 1.0 if status != "queue" else 0.0})
-    out_name = "read_scan.json" if READS == "read_rapid.json" else "read_scan_" + READS.removeprefix("read_").removesuffix(".json") + ".json"
+    out_name = "read_scan.json" if READS == READS_DEFAULT else "read_scan_" + READS.removeprefix("read_").removesuffix(".json") + ".json"
     (OUT / out_name).write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
     print(f"{len(out)} boxes: {counts}; vision reads cached {len(vis)}; grid range {grid}")
     try:

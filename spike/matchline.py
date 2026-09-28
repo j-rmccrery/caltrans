@@ -51,8 +51,8 @@ from pyproj import Transformer
 from shapely.geometry import LineString, Point, box as shpbox
 from shapely.ops import linemerge, unary_union
 
-SNAP = Path("C:/Users/johnr/AppData/Local/Temp/claude/C--Users-johnr-projects-caltrans"
-            "/0cd0437c-e2ad-4134-852b-23df11c6d733/scratchpad/snap/out")
+SNAP = Path(__file__).parent / "out"  # live pipeline output (demo step); the loop12 frozen scratchpad
+            # snapshot was only needed while another agent was rewriting spike/out concurrently.
 OUTDIR = Path(__file__).parent / "out_ground"
 OUTDIR.mkdir(exist_ok=True)
 
