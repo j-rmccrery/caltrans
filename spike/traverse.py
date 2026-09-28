@@ -351,6 +351,83 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
     return filled
 
 
+COCURVE_CENTER_TOL_FT = 5.0  # ft: how far apart two arc edges' own least-squares-fit centres may sit
+# and still count as the same physical drawn circle.
+COCURVE_RADIUS_TOL_FT = 2.0  # ft: same, for the fitted radii. Both must hold (a concentric-but-
+# different-radius pair -- two parallel R/W lines offset a fixed distance apart share a centre but are
+# NOT the same course) -- radius is the one that actually separates them. Measured (loop17 leg D):
+# R-10741.1's genuine compound-curve pair ("L=660.20'" the whole curve, "R=1169.90' L=319.73'" its own
+# printed sub-total, same drawn stroke) fits at 0.17 ft centre / 0.22 ft radius apart; Presidio's
+# "L=269.94'"/"C4" (already the same curve under two record names) at 0.05/0.03 ft. The nearest
+# different-curve pairs found scanning every arc on the 6 gate sheets: r10434_1 "L=132.85'"/"L=170.24'"
+# at 1.17/4.91 ft (radius already clears this cutoff 2.4x), r10434_3 "L=344.50'"/"L=415.25'" at a
+# deceptively close 0.20 ft centre (two DIFFERENT curves that happen to be concentric) but 9.85 ft
+# radius apart (4.9x clear). Radius tolerance carries the real margin; centre tolerance is generous
+# because no false pair measured needed it tighter.
+
+
+def share_curve_radius(edges, scale):
+    """Loop17 leg D: a compound curve is sometimes printed as more than one R/delta/L block along the
+    SAME drawn stroke -- the whole curve's own total (R, its full delta, its full L) and, beside it, a
+    sub-total for part of that same curve (delta and L only, no R printed a second time -- R-10741.1's
+    "R=1169.90' delta=32d20'00" L=660.20'" for the whole curve, "delta=15d39'31" L=319.73'" for its own
+    printed sub-total). complete_curve_chords() (and the L=R*theta identity generally) needs R on every
+    row; a row with delta or L but no R currently stays flagged "chord direction from drawing" forever,
+    however good its own delta/L record is, because nothing ever gave it a radius to pair them with.
+    checks.py/build_edges never join these two blocks (different printed blocks, not one annotation --
+    normalize_quotes/own_block_has_bearing's whole-block-region test does not apply to curve data), so
+    the only evidence that they are the same curve is geometric: their own drawn "pts" fit the same
+    circle (COCURVE_CENTER_TOL_FT/COCURVE_RADIUS_TOL_FT -- see those constants' own measured margins).
+    Never borrows across an ambiguous pair: if more than one candidate donor passes and their own R
+    values disagree by more than COCURVE_RADIUS_TOL_FT, the row is left alone (refused, not guessed) --
+    same discipline inherit_bearings/complete_curve_chords already use for a disagreeing neighbour.
+    Sets "R" and "R_source" (the donor's own src, for a crop script) on a completed row; mutates edges
+    in place. Returns the count filled. Must run before complete_curve_chords (which requires "R")."""
+    def fit(e):
+        pts = np.array(e["pts"], float)
+        if len(pts) < 3:
+            return None
+        try:
+            return fit_circle_lsq(pts)
+        except Exception:
+            return None
+
+    donors = []
+    for e in edges:
+        if e["kind"] == "arc" and "R" in e and not e.get("impossible"):
+            fitted = fit(e)
+            if fitted is not None:
+                donors.append((e, *fitted))
+
+    filled = 0
+    for e in edges:
+        if e["kind"] != "arc" or "R" in e or e.get("impossible") or ("delta" not in e and "L" not in e):
+            continue
+        fitted = fit(e)
+        if fitted is None:
+            continue
+        c, r = fitted
+        matches = []
+        for de, dc, dr in donors:
+            if de is e:
+                continue
+            cd = float(np.hypot(*(c - dc))) * scale
+            rd = abs(r - dr) * scale
+            if cd <= COCURVE_CENTER_TOL_FT and rd <= COCURVE_RADIUS_TOL_FT:
+                matches.append((cd, de))
+        if not matches:
+            continue
+        r_values = {round(de["R"], 2) for _, de in matches}
+        if len(r_values) > 1:
+            continue  # disagreeing donors: ambiguous, refused
+        _, donor = min(matches, key=lambda m: m[0])
+        e["R"] = donor["R"]
+        e["R_source"] = f"shared from co-curved {donor['src']}"
+        e["R_source_edge"] = donor
+        filled += 1
+    return filled
+
+
 def record_vector_misfit(p, q, az, d):
     """Loop17 leg A: one edge's own record vector (compass az, distance d) walked from ITS OWN drawn
     start p, checked against its own drawn end q -- never a chain's carried position. walk() used to
@@ -505,6 +582,36 @@ def selftest():
     print("traverse.selftest: complete_curve_chords OK (tangent chord az = tangent +/- delta/2 on a synthetic 90 deg curve; "
           "CB wins over tangent; disagreeing tangent donors refuse rather than guess; a radial fills the same way "
           "when no record line donates, and refuses when it doesn't match the drawn tangent)")
+
+    # loop17 leg D: share_curve_radius -- a sub-piece of the SAME drawn circle (quarter's own first
+    # half, t 0..0.5: still centred (100,0), R=100) printed with its own delta/L but no R must take R
+    # from the full-curve donor above; a sub-piece of a DIFFERENT circle must not, and two disagreeing
+    # donors must refuse rather than guess (same discipline as inherit_bearings/complete_curve_chords).
+    half = center + 100.0 * np.c_[np.cos(angle[:11]), np.sin(angle[:11])]  # t 0..0.5 of the same quarter
+    e_full = {"kind": "arc", "p0": quarter[0].copy(), "p1": quarter[-1].copy(), "pts": quarter.copy(), "R": 100.0,
+              "delta": 90.0, "flags": [], "impossible": False, "n0": 11, "n1": 12, "src": "whole curve"}
+    e_sub = {"kind": "arc", "p0": half[0].copy(), "p1": half[-1].copy(), "pts": half.copy(),
+             "delta": 45.0, "flags": [], "impossible": False, "n0": 11, "n1": 20, "src": "sub-total"}
+    n_shared = share_curve_radius([e_full, e_sub], scale=1.0)
+    assert n_shared == 1 and e_sub.get("R") == 100.0, f"sub-piece of the same circle must take R from the donor: {e_sub.get('R')}"
+    assert e_sub["R_source"] == "shared from co-curved whole curve"
+
+    # a differently-centred circle's own delta/L-only piece must not borrow a nearby-but-different R
+    other_center = np.array([100.0, 500.0])  # far enough that neither centre nor radius tolerance can reach
+    other = other_center + 40.0 * np.c_[np.cos(angle[:11]), np.sin(angle[:11])]
+    e_other = {"kind": "arc", "p0": other[0].copy(), "p1": other[-1].copy(), "pts": other.copy(),
+               "delta": 45.0, "flags": [], "impossible": False, "n0": 30, "n1": 31, "src": "unrelated"}
+    n_none = share_curve_radius([e_full, e_other], scale=1.0)
+    assert n_none == 0 and "R" not in e_other, "an unrelated circle's own piece must never borrow R by proximity alone"
+
+    # two donors that disagree on R: refused, not guessed
+    e_full2 = {**e_full, "R": 250.0, "src": "disagreeing whole curve"}
+    e_sub2 = {"kind": "arc", "p0": half[0].copy(), "p1": half[-1].copy(), "pts": half.copy(),
+              "delta": 45.0, "flags": [], "impossible": False, "n0": 11, "n1": 20, "src": "sub-total 2"}
+    n_amb2 = share_curve_radius([e_full, e_full2, e_sub2], scale=1.0)
+    assert n_amb2 == 0 and "R" not in e_sub2, "disagreeing co-curved donors must refuse, not average or guess"
+    print("traverse.selftest: share_curve_radius OK (a same-circle sub-piece takes R from its whole-curve "
+          "donor; an unrelated circle never borrows one; disagreeing donors refuse)")
 
     # loop17 leg A: record_vector_misfit re-anchors each edge's own misfit at its own drawn start, so
     # a bad upstream edge cannot poison a clean downstream one. Synthetic chain along the record
@@ -739,6 +846,10 @@ def main():
     n_inherited = inherit_bearings(edges, adj)
     if n_inherited:
         print(f"loop16-D collinear inheritance: {n_inherited} distance-only edge(s) took a record bearing from a collinear neighbour")
+
+    n_radius_shared = share_curve_radius(edges, scale)
+    if n_radius_shared:
+        print(f"loop17-D radius sharing: {n_radius_shared} curve edge(s) took their radius from a co-curved donor's own R")
 
     n_curve_chords = complete_curve_chords(edges, adj, azimuth, load_radials())
     if n_curve_chords:

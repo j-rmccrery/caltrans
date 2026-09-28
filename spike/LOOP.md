@@ -455,3 +455,8 @@ legs that run the bench go one at a time. Budget 10 dispatches.
 | B | labelled but never a traverse row (association) | 3,422 | as A; label coverage up; every new pass crop viewed |
 | C | curve data: PP-OCRv5 detector on R-10741 (R=189.90' never read -- misread by orchestrator; printed value R=1169.90', read fine, association gap), radials/CB | 6,274 | completed curves cited + crops |
 | M | ceiling: how much unlabelled boundary no record on these sheets dimensions (read-only) | 11,520 | measurement only, no bench |
+| D | bearings read but never attached (R-10741 keyed rows), compound-curve radius sharing | 4,479 | every gained bearing cites its own printed block + crop |
+| E | probe: does PDF draw order / grouping link a label to its line (read-only measurement) | (association) | measured on gold-keyed passes, no pipeline change |
+| F | inverse label-style placement: find a label's line by the drafter's label rules, calibrated on gold-confirmed passes only | (association) | gold wrong-pass 0; every new pass crop viewed |
+
+Parked: record-first traverse (docs/tickets/T-001-record-first-traverse.md).

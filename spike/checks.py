@@ -106,6 +106,32 @@ def normalize_quotes(blocks):
         b["text"] = _QUOTE_DOUBLE.sub('"', _QUOTE_SINGLE.sub("'", b["text"]))
 
 
+_LOOSE_BEARING = re.compile(r"([NSns])(\d{1,2})[°'*\"](\d{2})'(\d{2})\"([EWew])((?:\(R\))?)")
+
+
+def fix_bearing_symbols(blocks):
+    """Loop17 leg D: RapidOCR reads the degree glyph in a bearing as one of several other characters
+    almost as often as it reads it right -- prime, asterisk, or a second straight quote indistinguishable
+    from the seconds mark by character alone, only by position ("S72\"06'18\"E" for S72 deg 06'18"E,
+    degree misread as a second quote mark) -- and reads the compass letters in lower case about as often
+    as upper ("s15 deg 42'45\"w"). BEAR/TOKEN demand literal deg + uppercase N/S/E/W, so either miss is a
+    silent zero match: not a wrong bearing, no bearing at all -- checks.py never even queues the row as an
+    exception (own_block_has_bearing's bearing_regions never see it either), so it is invisible all the
+    way to attribution's "bearing_from_drawing" bucket. Measured (loop17 leg C): every one of 14 keyed
+    R-10741 dimensioned-boundary bearings reads correctly character-for-character; this was the reason
+    none of them reached a row anyway. A scan across every sheet's own OCR json (read_rapid/read_v5) that
+    already carries a genuine BEAR match elsewhere finds ~90 more near-miss bearings shaped exactly like
+    this, degree in {deg,',*,\"} or compass case flipped -- so the fix is general, not 14-row-specific.
+    Runs after normalize_quotes (curly marks already collapsed to '/\" here, so the loose match only has
+    to cover degree-slot confusion + case, not quote curliness too) and canonicalises in place: the
+    bearing's own text becomes exactly what BEAR/TOKEN already expect, so no downstream code (checks.py's
+    line search, build_edges, inherit_bearings) needs to know this ever happened -- same "fix once where
+    every consumer already reads" reasoning as normalize_quotes itself. Never touches ANG/RAD/LEN (no
+    compass letters in that shape, so this pattern cannot match a curve-data block). Mutates in place."""
+    for b in blocks:
+        b["text"] = _LOOSE_BEARING.sub(lambda m: f"{m[1].upper()}{m[2]}°{m[3]}'{m[4]}\"{m[5].upper()}{m[6]}", b["text"])
+
+
 def set_decimals(blocks):
     """A sheet prints its distances with two decimals (feet) or three (the metric sheets): take the
     majority and make DIST and TOKEN demand it, so the other form is not read as a distance."""
@@ -1358,6 +1384,25 @@ def selftest():
     # a small, real-looking disagreement on either side of 1.0x must never be flagged
     assert wrong_line_likely("distance", -21.62, 76.46) is False        # 28.3% undershoot
     assert wrong_line_likely("distance", 29.06, 22.56) is False         # 128.8% overshoot
+
+    # loop17 leg D: fix_bearing_symbols canonicalises every degree/case OCR variant seen on the archive
+    # (prime, asterisk, straight-quote-as-degree; lowercase compass letters) to exactly what BEAR/TOKEN
+    # already expect, and must never touch a block with no bearing-shaped text in it at all.
+    cases = [
+        {"text": "S15°42'45\"w"},          # r10741.1: correct degree, lowercase compass
+        {"text": "S42′35'48\"E"},          # r10741.1: prime as degree (curly, pre-normalize_quotes)
+        {"text": "S25*49'47\"E 214.92'"},  # r10741.1: asterisk as degree, joined with its own distance
+        {"text": "N18\"06'50\"E"},         # r10741: straight quote as degree (position, not char, tells it apart from the seconds mark)
+        {"text": "no bearing here 165.86'"},
+    ]
+    normalize_quotes(cases)
+    fix_bearing_symbols(cases)
+    assert cases[0]["text"] == "S15°42'45\"W", cases[0]["text"]
+    assert cases[1]["text"] == "S42°35'48\"E", cases[1]["text"]
+    assert cases[2]["text"] == "S25°49'47\"E 214.92'", cases[2]["text"]
+    assert cases[3]["text"] == "N18°06'50\"E", cases[3]["text"]
+    assert cases[4]["text"] == "no bearing here 165.86'", cases[4]["text"]
+    assert BEAR.match(TOKEN.findall(cases[0]["text"])[0])
     print("checks.py selftest: pass")
 
 
@@ -1369,6 +1414,7 @@ def main():
     rot = np.degrees(np.arctan2(bb, a))
     blocks = json.loads((READS).read_text(encoding="utf-8")) + real_text_blocks(page)
     normalize_quotes(blocks)
+    fix_bearing_symbols(blocks)
     set_decimals(blocks)
     pool = build_pool(page, blocks)
     chains, circles, paths, segs, arcs, tips = pool["chains"], pool["circles"], pool["paths"], pool["segs"], pool["arcs"], pool["tips"]
