@@ -468,7 +468,7 @@
  {
   "closed": false,
   "n_edges": 11,
-  "full_record": 4,
+  "full_record": 5,
   "misfit_max_ft": 231.55,
   "misfit_end_ft": 230.64,
   "edges": [
@@ -680,14 +680,12 @@
    {
     "edge": "54.68'",
     "kind": "line",
-    "az": 82.0021,
+    "az": 82.0383,
     "ft": 54.68,
-    "misfit_ft": 230.63,
-    "flags": [
-     "bearing from drawing"
-    ],
-    "E": 5997345.5,
-    "N": 2120896.25,
+    "misfit_ft": 230.64,
+    "flags": [],
+    "E": 5997345.51,
+    "N": 2120896.22,
     "pts": [
      [
       5997115.22,
@@ -697,19 +695,20 @@
       5997060.15,
       2120901.29
      ]
-    ]
+    ],
+    "bearing_source": "inherited from S82°02'18\"W + 74.43'(T)"
    },
    {
     "edge": "11.05'",
     "kind": "line",
     "az": 183.1321,
     "ft": 11.05,
-    "misfit_ft": 230.63,
+    "misfit_ft": 230.64,
     "flags": [
      "bearing from drawing"
     ],
     "E": 5997344.9,
-    "N": 2120885.22,
+    "N": 2120885.18,
     "pts": [
      [
       5997114.63,
@@ -731,7 +730,7 @@
      "bearing from drawing"
     ],
     "E": 5997339.21,
-    "N": 2120884.33,
+    "N": 2120884.3,
     "pts": [
      [
       5997114.38,
@@ -750,8 +749,8 @@
     "ft": 206.97,
     "misfit_ft": 230.64,
     "flags": [],
-    "E": 5997297.42,
-    "N": 2120681.62,
+    "E": 5997297.43,
+    "N": 2120681.59,
     "pts": [
      [
       5997066.98,
@@ -768,9 +767,9 @@
  {
   "closed": false,
   "n_edges": 9,
-  "full_record": 4,
-  "misfit_max_ft": 45.66,
-  "misfit_end_ft": 45.66,
+  "full_record": 5,
+  "misfit_max_ft": 45.32,
+  "misfit_end_ft": 45.32,
   "edges": [
    {
     "edge": "R=611.95' L=537.96'",
@@ -1012,14 +1011,12 @@
    {
     "edge": "198.23' + 198.22'",
     "kind": "line",
-    "az": 324.594,
+    "az": 324.7414,
     "ft": 198.23,
-    "misfit_ft": 1.65,
-    "flags": [
-     "bearing from drawing"
-    ],
-    "E": 5998403.23,
-    "N": 2120536.22,
+    "misfit_ft": 1.14,
+    "flags": [],
+    "E": 5998403.64,
+    "N": 2120536.51,
     "pts": [
      [
       5998519.42,
@@ -1029,20 +1026,21 @@
       5998404.57,
       2120537.18
      ]
-    ]
+    ],
+    "bearing_source": "inherited from N35°15'31\"W"
    },
    {
     "edge": "L=38.33'",
     "kind": "arc",
     "az": 345.4281,
     "ft": 38.37,
-    "misfit_ft": 0.46,
+    "misfit_ft": 0.05,
     "flags": [
      "chord direction from drawing",
      "chord from drawing (no radius)"
     ],
-    "E": 5998393.57,
-    "N": 2120573.35,
+    "E": 5998393.99,
+    "N": 2120573.65,
     "pts": [
      [
       5998393.95,
@@ -1115,10 +1113,10 @@
     "kind": "line",
     "az": 325.9256,
     "ft": 79.49,
-    "misfit_ft": 0.48,
+    "misfit_ft": 0.04,
     "flags": [],
-    "E": 5998349.04,
-    "N": 2120639.19,
+    "E": 5998349.45,
+    "N": 2120639.49,
     "pts": [
      [
       5998393.95,
@@ -1135,10 +1133,10 @@
     "kind": "line",
     "az": 143.845,
     "ft": 33.75,
-    "misfit_ft": 45.59,
+    "misfit_ft": 45.24,
     "flags": [],
-    "E": 5998368.95,
-    "N": 2120611.94,
+    "E": 5998369.37,
+    "N": 2120612.24,
     "pts": [
      [
       5998349.45,
@@ -1155,10 +1153,10 @@
     "kind": "line",
     "az": 325.2278,
     "ft": 13.35,
-    "misfit_ft": 45.66,
+    "misfit_ft": 45.32,
     "flags": [],
-    "E": 5998361.34,
-    "N": 2120622.91,
+    "E": 5998361.75,
+    "N": 2120623.21,
     "pts": [
      [
       5998374.56,
@@ -2541,21 +2539,19 @@
  {
   "closed": false,
   "n_edges": 2,
-  "full_record": 0,
+  "full_record": 1,
   "misfit_max_ft": 6.34,
   "misfit_end_ft": 6.34,
   "edges": [
    {
     "edge": "202.20'",
     "kind": "line",
-    "az": 273.3271,
+    "az": 273.3039,
     "ft": 202.2,
     "misfit_ft": 6.34,
-    "flags": [
-     "bearing from drawing"
-    ],
+    "flags": [],
     "E": 5997092.75,
-    "N": 2120704.38,
+    "N": 2120704.3,
     "pts": [
      [
       5997294.61,
@@ -2565,7 +2561,8 @@
       5997099.08,
       2120704.01
      ]
-    ]
+    ],
+    "bearing_source": "inherited from N86°41'46\"W + 247.31'(T)"
    },
    {
     "edge": "14.11'",
@@ -2577,7 +2574,7 @@
      "bearing from drawing"
     ],
     "E": 5997092.19,
-    "N": 2120690.28,
+    "N": 2120690.2,
     "pts": [
      [
       5997099.08,
@@ -3222,21 +3219,19 @@
  {
   "closed": false,
   "n_edges": 2,
-  "full_record": 0,
+  "full_record": 1,
   "misfit_max_ft": 0.06,
   "misfit_end_ft": 0.06,
   "edges": [
    {
     "edge": "195.48'(T)",
     "kind": "line",
-    "az": 273.8256,
+    "az": 273.8192,
     "ft": 195.48,
     "misfit_ft": 0.06,
-    "flags": [
-     "bearing from drawing"
-    ],
+    "flags": [],
     "E": 5997101.24,
-    "N": 2120689.73,
+    "N": 2120689.71,
     "pts": [
      [
       5997101.3,
@@ -3246,7 +3241,8 @@
       5997296.29,
       2120676.69
      ]
-    ]
+    ],
+    "bearing_source": "inherited from S86°10'51\"E + 152.49'"
    },
    {
     "edge": "324.13'",
@@ -3259,7 +3255,7 @@
      "chord from drawing (no radius)"
     ],
     "E": 5997293.59,
-    "N": 2120676.94,
+    "N": 2120676.92,
     "pts": [
      [
       5997101.3,

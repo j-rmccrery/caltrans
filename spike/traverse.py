@@ -8,8 +8,14 @@ chord from R and L per curve — and the walked position is compared with the dr
 that misfit is what the drawing and the record disagree by, in feet, per edge, with no reader in
 between. A closed figure also gets its record area against the parcel table. An edge with no record,
 or a curve whose chord direction had to come from the drawing, is flagged, not guessed.
+A distance-only line edge that meets a collinear record-bearing neighbour end to end, with no
+deflection, inherits that neighbour's own printed bearing (loop16 leg D, candidate 1 -- survey
+convention prints a course's bearing once and breaks it into several distance-only pieces; the
+drawing decides only WHICH neighbour's value applies, never supplies the value itself). Such a row
+loses its "bearing from drawing" flag and carries "bearing_source" instead. See inherit_bearings().
 Output: traverse.json (chains, edges, misfits, flags) and a printed summary.
 usage: [SHEET=<pdf>] python spike/traverse.py   (after checks.py, tables.py)
+       python spike/traverse.py --selftest        (inherit_bearings, no sheet needed)
 """
 import json
 import math
@@ -25,6 +31,150 @@ from georef import OUT, PDF, READS, real_text_blocks  # noqa: E402
 
 NODE = 3.0  # pt: two edge ends this close meet
 SAME = 1.5  # pt: a bearing's line and a distance's line this close are one line
+COLLINEAR_TOL_DEG = 0.05  # deg: drawn-bearing agreement (mod 180) at a shared vertex counted as "no deflection"
+
+
+def drawn_bearing180(e):
+    """Undirected drawn bearing (0-180 deg) of an edge's own drawn geometry: a line's compass course
+    does not care which end is called p0, so comparing mod 180 is the right collinearity test."""
+    d = e["p1"] - e["p0"]
+    return math.degrees(math.atan2(d[0], d[1])) % 180
+
+
+def own_block_has_bearing(region, bearing_regions):
+    """Loop16 leg D2, rule 1 (gate finding, r10434_1's "10.36'"): True when a bearing token was
+    printed in THIS distance's own annotation block -- checks.py's region(b) is computed per block
+    (a whole multi-line annotation, e.g. "S87 deg 54'05"E|10.36'" is ONE block), so an EXACT region
+    match means the same block, never merely a nearby one. Whether or not checks.py's own line
+    search for that bearing succeeded: a block's bearing token either (a) lands in labels.json as a
+    "bearing"/"chord bearing" row -- pass 1 above already merges that into one full edge by shared
+    region, so it never reaches inherit_bearings missing az -- or (b) when its own line search
+    failed (r10434_1's case: the candidate line was only 7.2 pt, "piece too short to carry a
+    bearing"), an exceptions.json "bearing" row with the SAME region. Either way the record printed
+    a bearing with this distance; a different, merely-collinear neighbour's bearing overriding it
+    would be wrong by definition, whatever checks.py's own (possibly mis-associated) drawn line for
+    the distance shows. `bearing_regions` is every such region (from both labels.json and
+    exceptions.json), gathered once per sheet by build_edges()."""
+    return region is not None and region in bearing_regions
+
+
+def inherit_bearings(edges, adj):
+    """Loop16 leg D, candidate 1 (collinear inheritance): a distance-only line edge (record ft, no
+    record az -- traverse's own 'bearing from drawing' flag) that meets, end to end with no
+    deflection, a neighbour line edge carrying a RECORD bearing inherits that neighbour's own
+    printed az -- never a bearing measured off the drawing. Survey convention: a course is often
+    printed once and then broken into several distance-only pieces (a stationed run, a piece cut at
+    a crossing or a table split) -- this recovers that printed bearing for every piece on the same
+    straight run. Iterated to a fixed point so a run of N such pieces under one printed bearing all
+    inherit it, hop by hop; each inherited edge can then itself seed its next-door neighbour (e.g.
+    R-10741's "S10 deg 26'37"E + 889.92'" printed once, the drawn run continuing past it in pieces
+    of distance alone). Ambiguous nodes -- two collinear neighbours disagreeing on their own record
+    az -- are left alone: flagged, not guessed. An edge flagged "own_bearing_nearby" (build_edges,
+    see own_block_has_bearing(): its own printed annotation block already carries a bearing token,
+    whether or not checks.py managed to associate it with a drawn line) never inherits either,
+    whatever the drawing says -- its own record already claims a bearing, so a collinear-but-
+    different neighbour's value would silently overrule the record instead of supplying it (loop16
+    leg D2, r10434_1's "10.36'" gate finding: its own block prints "S87 deg 54'05"E|10.36'", not the
+    "S2 deg 05'55"W" its mis-associated drawn line happened to touch). The drawing decides only
+    WHICH neighbour's value applies (collinearity); the value
+    itself always comes from that neighbour's own record, and never overrides a row's own.
+    Mutates edges in place (sets "az", "bearing_source", and "bearing_source_edge" -- a direct
+    reference to the donor edge object, for a consumer like a crop script that needs the exact
+    edge identity rather than a re-lookup by its possibly-ambiguous printed name); returns the
+    count filled."""
+    filled = 0
+    changed = True
+    while changed:
+        changed = False
+        for k, e in enumerate(edges):
+            if (e["kind"] != "line" or "az" in e or "ft" not in e or e.get("impossible")
+                    or e.get("own_bearing_nearby")):
+                continue
+            be = drawn_bearing180(e)
+            seen = {}  # record az (rounded) -> (diff, neighbour edge) -- collapses agreeing neighbours
+            for n in (e["n0"], e["n1"]):
+                for j in adj.get(n, []):
+                    if j == k:
+                        continue
+                    m = edges[j]
+                    if m["kind"] != "line" or "az" not in m or m.get("impossible"):
+                        continue
+                    diff = abs(be - drawn_bearing180(m)) % 180
+                    diff = min(diff, 180 - diff)
+                    if diff <= COLLINEAR_TOL_DEG:
+                        seen.setdefault(round(m["az"], 4), (diff, m))
+            if len(seen) == 1:
+                ((diff, m),) = seen.values()
+                e["az"] = m["az"]
+                e["bearing_source"] = f"inherited from {m['src']}"
+                e["bearing_source_edge"] = m
+                filled += 1
+                changed = True
+    return filled
+
+
+def selftest():
+    """One runnable check for inherit_bearings: three collinear edges sharing nodes 0-1-2-3 along a
+    line; edge0 carries the record bearing, edges 1 and 2 are distance-only and must inherit it
+    hop by hop. A fourth, non-collinear distance-only edge off node 3 must NOT inherit (no collinear
+    record neighbour). A fifth case: two collinear record neighbours that disagree must stay unfilled
+    (ambiguous, left flagged rather than guessed). A sixth case (loop16 leg D2, rule 1): a distance
+    edge flagged own_bearing_nearby (its own printed course already names a bearing, stacked beside
+    it per checks.paired_bearing) must NOT inherit even though it is geometrically collinear with,
+    and shares a node with, an unrelated record-bearing neighbour -- the r10434_1 "10.36'" gate
+    finding: a merely-collinear neighbour ("S2 deg 05'55"W", the R/W line it was mis-associated to)
+    must never override a course whose own record already prints a different bearing ("S87 deg
+    54'05"E"), even when the wrong-line association makes the two look adjacent. Also checks
+    stacked_bearing_nearby() directly against that real gate case's own label regions."""
+    def line(n0, n1, p0, p1, az=None, ft=None, src="e", own_bearing_nearby=False):
+        e = {"kind": "line", "p0": np.array(p0, float), "p1": np.array(p1, float), "flags": [],
+             "impossible": False, "n0": n0, "n1": n1, "src": src, "own_bearing_nearby": own_bearing_nearby}
+        if az is not None:
+            e["az"] = az
+        if ft is not None:
+            e["ft"] = ft
+        return e
+
+    edges = [
+        line(0, 1, (0, 0), (0, 100), az=0.0, ft=100.0, src="record 100.00'"),      # full record
+        line(1, 2, (0, 100), (0, 250), ft=150.0, src="piece B 150.00'"),           # distance-only, collinear
+        line(2, 3, (0, 250), (0, 400), ft=150.0, src="piece C 150.00'"),           # distance-only, collinear, 2 hops
+        line(3, 4, (0, 400), (100, 400), ft=50.0, src="piece D 50.00'"),           # distance-only, NOT collinear
+        line(5, 6, (500, 0), (500, 100), az=10.0, ft=100.0, src="record L"),       # ambiguous pair below
+        line(6, 7, (500, 100), (500, 200), az=20.0, ft=100.0, src="record R"),
+        line(6, 8, (500, 100), (500, 300), ft=200.0, src="piece amb"),             # collinear with BOTH 10 and 20
+        line(9, 10, (0, 1000), (0, 1100), az=45.0, ft=100.0, src="record M"),      # rule-1 case below
+        line(10, 11, (0, 1100), (0, 1250), ft=150.0, src="piece own-bearing", own_bearing_nearby=True),
+    ]
+    adj = {}
+    for k, e in enumerate(edges):
+        adj.setdefault(e["n0"], []).append(k)
+        adj.setdefault(e["n1"], []).append(k)
+    n = inherit_bearings(edges, adj)
+    assert edges[1]["az"] == 0.0 and edges[1]["bearing_source"] == "inherited from record 100.00'"
+    assert edges[1]["bearing_source_edge"] is edges[0], "bearing_source_edge must be the exact donor object, not a name re-lookup"
+    assert edges[2]["az"] == 0.0 and "inherited from" in edges[2]["bearing_source"]
+    assert "az" not in edges[3], "non-collinear neighbour must not donate a bearing"
+    assert "az" not in edges[6], "ambiguous (disagreeing) collinear neighbours must not donate a bearing"
+    assert "az" not in edges[8], "own_bearing_nearby must refuse inheritance even from a collinear, node-sharing neighbour"
+    assert n == 2, f"expected exactly 2 fills, got {n}"
+    print("traverse.selftest: inherit_bearings OK (2 filled; non-collinear, ambiguous, and own-bearing-nearby cases correctly refused)")
+
+    # own_block_has_bearing() against the real gate case (r10434_1, sheet pt): the "10.36'" block is
+    # "S87 deg 54'05"E|10.36'" -- ONE block, region (360,1018,417,1044) for both its distance (in
+    # labels.json, ok=False) and its bearing (in exceptions.json only: its own line search rejected
+    # the candidate as "piece too short to carry a bearing (7.2 pt)", so it never reached labels.json
+    # at all -- own_block_has_bearing must still catch it via exceptions.json's bearing regions). A
+    # same-printed-text bearing from a DIFFERENT block nearby ("S87 deg 54'05"E" paired with a
+    # different distance, "79.99'", region (344,1056,411,1089)) must NOT count -- different block,
+    # same text is not the same record.
+    dist_region = (360, 1018, 417, 1044)
+    own_bearing_region = (360, 1018, 417, 1044)       # same block: the bearing exception's own region
+    other_block_region = (344, 1056, 411, 1089)       # a different block, same printed bearing text
+    assert own_block_has_bearing(dist_region, {own_bearing_region}) is True
+    assert own_block_has_bearing(dist_region, {other_block_region}) is False
+    assert own_block_has_bearing(None, {own_bearing_region}) is False
+    print("traverse.selftest: own_block_has_bearing OK (r10434_1 10.36' block correctly separated from its neighbour's same-text block)")
 
 
 def sheet_glyph_h():
@@ -43,8 +193,14 @@ def build_edges():
     a distance describe the same line. Shared by traverse.py's own walk and other consumers (e.g. the
     tunnel-easement chains in leg5_61985.py) that need the same edge set without a full re-run."""
     # edges: one per placed record, merged where a bearing and a distance sit on the same line
+    labels = json.loads((OUT / "labels.json").read_text(encoding="utf-8")) if (OUT / "labels.json").exists() else []
+    exceptions = json.loads((OUT / "exceptions.json").read_text(encoding="utf-8")) if (OUT / "exceptions.json").exists() else []
+    # loop16 leg D2 rule 1: every block region that printed a bearing token, whether or not checks.py
+    # could associate it with a drawn line -- see own_block_has_bearing()
+    bearing_regions = {tuple(x["region"]) for x in labels if x["kind"] in ("bearing", "chord bearing") and x.get("region")}
+    bearing_regions |= {tuple(x["region"]) for x in exceptions if x.get("kind") == "bearing" and x.get("region")}
     edges = []
-    for x in json.loads((OUT / "labels.json").read_text(encoding="utf-8")) if (OUT / "labels.json").exists() else []:
+    for x in labels:
         P = np.array(x["line"], float)
         e = {"src": x["printed"], "kind": "arc" if x["kind"] == "arc" else "line", "p0": P[0], "p1": P[-1], "pts": P, "flags": [],
              "region": tuple(x["region"]) if x.get("region") else None}
@@ -52,6 +208,7 @@ def build_edges():
             e["az"] = x["az"]
         elif x["kind"] in ("distance", "chord distance"):
             e["ft"] = x["ft"]
+            e["own_bearing_nearby"] = own_block_has_bearing(e["region"], bearing_regions)
         else:
             e["L"] = x["ft"]
         edges.append(e)
@@ -82,6 +239,7 @@ def build_edges():
                 for k in ("az", "ft"):
                     if k in e and k not in m:
                         m[k] = e[k]
+                m["own_bearing_nearby"] = m.get("own_bearing_nearby", False) or e.get("own_bearing_nearby", False)
                 if e["src"] not in m["src"]:
                     m["src"] += " + " + e["src"]
         else:
@@ -98,6 +256,7 @@ def build_edges():
                 for k in ("az", "ft", "R", "L"):
                     if k in e and k not in m:
                         m[k] = e[k]
+                m["own_bearing_nearby"] = m.get("own_bearing_nearby", False) or e.get("own_bearing_nearby", False)
                 m["src"] += " + " + e["src"]
                 break
         else:
@@ -194,6 +353,10 @@ def main():
                     e["n1"] = lo
             adj[lo] = adj.pop(lo) + adj.pop(hi)
 
+    n_inherited = inherit_bearings(edges, adj)
+    if n_inherited:
+        print(f"loop16-D collinear inheritance: {n_inherited} distance-only edge(s) took a record bearing from a collinear neighbour")
+
     # chains: follow edges end to end while the way on is single
     used, chains = set(), []
     for start in sorted(adj, key=lambda n: len(adj[n])):  # loose ends first, so open chains start at their end
@@ -242,9 +405,12 @@ def main():
             pos = pos + d * np.array([math.sin(math.radians(az)), math.cos(math.radians(az))])
             mis = float(np.hypot(*(pos - ground(q))))
             misfits.append(mis)
-            rows.append({"edge": e["src"], "kind": e["kind"], "az": round(az, 4), "ft": round(d, 2), "misfit_ft": round(mis, 2), "flags": flags,
-                         "E": round(float(pos[0]), 2), "N": round(float(pos[1]), 2),
-                         "pts": [[round(float(gp[0]), 2), round(float(gp[1]), 2)] for gp in (ground(pt) for pt in e["pts"])]})
+            row = {"edge": e["src"], "kind": e["kind"], "az": round(az, 4), "ft": round(d, 2), "misfit_ft": round(mis, 2), "flags": flags,
+                   "E": round(float(pos[0]), 2), "N": round(float(pos[1]), 2),
+                   "pts": [[round(float(gp[0]), 2), round(float(gp[1]), 2)] for gp in (ground(pt) for pt in e["pts"])]}
+            if "bearing_source" in e:  # loop16-D: this edge's az came from a collinear record neighbour, not the drawing
+                row["bearing_source"] = e["bearing_source"]
+            rows.append(row)
         return rows, misfits
 
     out = []
@@ -326,4 +492,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--selftest" in sys.argv:
+        selftest()
+    else:
+        main()

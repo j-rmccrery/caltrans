@@ -1503,9 +1503,9 @@
  {
   "closed": false,
   "n_edges": 3,
-  "full_record": 2,
+  "full_record": 3,
   "misfit_max_ft": 0.12,
-  "misfit_end_ft": 0.02,
+  "misfit_end_ft": 0.08,
   "edges": [
    {
     "edge": "S46°58'51\"E + 58.70'",
@@ -1550,14 +1550,12 @@
    {
     "edge": "322.30'",
     "kind": "line",
-    "az": 126.4763,
+    "az": 126.4881,
     "ft": 322.3,
-    "misfit_ft": 0.02,
-    "flags": [
-     "bearing from drawing"
-    ],
-    "E": 5992241.93,
-    "N": 2120972.54,
+    "misfit_ft": 0.08,
+    "flags": [],
+    "E": 5992241.89,
+    "N": 2120972.48,
     "pts": [
      [
       5991982.83,
@@ -1567,7 +1565,8 @@
       5992241.94,
       2120972.54
      ]
-    ]
+    ],
+    "bearing_source": "inherited from S53°30'43\"E"
    }
   ]
  },
@@ -1643,7 +1642,7 @@
  {
   "closed": false,
   "n_edges": 2,
-  "full_record": 0,
+  "full_record": 1,
   "misfit_max_ft": 0.06,
   "misfit_end_ft": 0.06,
   "edges": [
@@ -1672,13 +1671,11 @@
    {
     "edge": "447.55'",
     "kind": "line",
-    "az": 2.0958,
+    "az": 2.0986,
     "ft": 447.55,
     "misfit_ft": 0.06,
-    "flags": [
-     "bearing from drawing"
-    ],
-    "E": 5992650.04,
+    "flags": [],
+    "E": 5992650.06,
     "N": 2120165.71,
     "pts": [
      [
@@ -1689,27 +1686,26 @@
       5992633.7,
       2119718.46
      ]
-    ]
+    ],
+    "bearing_source": "inherited from S2°05'55\"W"
    }
   ]
  },
  {
   "closed": false,
   "n_edges": 2,
-  "full_record": 0,
-  "misfit_max_ft": 0.04,
-  "misfit_end_ft": 0.04,
+  "full_record": 1,
+  "misfit_max_ft": 0.05,
+  "misfit_end_ft": 0.05,
   "edges": [
    {
     "edge": "323.49'",
     "kind": "line",
-    "az": 182.1017,
+    "az": 182.0986,
     "ft": 323.49,
-    "misfit_ft": 0.0,
-    "flags": [
-     "bearing from drawing"
-    ],
-    "E": 5992759.27,
+    "misfit_ft": 0.02,
+    "flags": [],
+    "E": 5992759.29,
     "N": 2120469.25,
     "pts": [
      [
@@ -1720,18 +1716,19 @@
       5992771.13,
       2120792.52
      ]
-    ]
+    ],
+    "bearing_source": "inherited from N2°05'55\"E"
    },
    {
     "edge": "273.59'",
     "kind": "line",
     "az": 186.9897,
     "ft": 273.59,
-    "misfit_ft": 0.04,
+    "misfit_ft": 0.05,
     "flags": [
      "bearing from drawing"
     ],
-    "E": 5992725.98,
+    "E": 5992725.99,
     "N": 2120197.69,
     "pts": [
      [
