@@ -369,3 +369,34 @@ Dispatches: 6 (A, B, C, D, D-retry, E), all sonnet. Lessons: a subagent's "all c
 | H | partly read tags, bare (T) totals | per-label diff vs HEAD, all new-pass crops viewed, gold wrong 0, demo < 180 s | 19 new, 1 wrong (195.48'(T) on a parallel line) sent back; rule: printed bearing must pass on the run. Final +16, 0 lost; demo 177 s cold | 7205909 |
 
 Dispatches: 3 + 1 retry, sonnet. Disagreements settled by crop: agent's label-95 "wrong" (right), agent's L20/L21 "wrong" (L21 right, L20 unsure).
+
+---
+
+# Loop 15: proof before a fail, a gold set on R-10434.1, the no-line queue (2026-09-27, orchestrated, sonnet implementers)
+
+Isolation: legs 1 and 2 both edit `checks.py` and both need the bench. A worktree was not cheap: `spike/out` is 1.4 GB, and `bench.py` hardcodes both OUT and `.venv`. So legs 1 and 2 ran one after the other on the main tree. Legs 3 and 5 read a frozen copy of the HEAD outputs (`spike/out/snap15`, which reproduces `legI` exactly) and ran alongside leg 1. Leg 2's baseline was a second frozen copy taken after leg 1 (`snap15b`). Gates are per-label diffs against those copies (`spike/out/l15/diff15.py`, untracked), with the gold class of every fail.
+
+| leg | work | gate (re-measured by orchestrator) | result | dispatches | commit |
+|---|---|---|---|---|---|
+| 5 | attribution regenerated | buckets sum to bench denominators; every a-runtotal token named | Stale file, not an incomplete fix: `a-runtotal` 0/0/0 (was 3/5/12); buckets give 98/171, 60/170, 115/248 and 307/255/497 exactly | 1 | 3f632a5 |
+| 3 | gold set R-10434.1 | every crop keyed; 5 random passes and every wrong key re-viewed | 103 keyed. Passes 83/0/0; fails 7 real / 9 wrong / 4 unsure. Two re-keys by orchestrator: label 70 (536.09') is the right line, a tick-cut piece; tag L6 distance is unsure (L6/L7/L8 knot) | 1 | 56facb5 |
+| 1 | arc fail needs a proven association | R-10434.3 keyed-wrong fails <= 8; passes identical; queued real fails only when genuinely unproven | Attempt 1 (single candidate in reach = proven) queued R-10434.3 29.14', whose leader touches at 0.2 pt with the other candidate at 3.4 pt: sent back. Attempt 2 (orchestrator's touch spec: <= 1 pt, others > 2 pt) queued Presidio 59.06' (only candidate, 2.7 pt): the spec was wrong. **Orchestrator's own one-line edit** combined the two measured rules: proven if single candidate, or a clear touch among several. R-10434.3 fails 44 -> 27, keyed wrong 24 -> 7, 19 real kept. R-10434.1 20 -> 12; the two keyed-real fails queued are true ties (536.09' on the MAIN LINE 1/2 double line at 0.0/1.4 pt; L=23.48' with three pieces at 0.0 pt), crops viewed. Presidio 16 unchanged. Passes identical on six sheets | 2 | 0b99c00 |
+| 2 | "no line found beside label" | +10 drawing-label passes (south three); nothing lost; wrong_line not up; gold wrong 0; every new-pass crop viewed | The cause was neither (a) nor (b) from the brief. It was nearest_line's box-rotation prefilter: stacked blocks read 10-15 deg off their line, so the right line was never a candidate. Attempt 1: +14, two of them wrong-line when viewed (R-10434.3 S79 deg 01'10"W on the piece past circle 12; N42 deg 16'23"W on the collinear next piece): sent back. Attempt 2: a relaxed bearing-only pick must agree within BEAR_TOL and be unique. +12 right passes (Presidio 4, .1 2, .3 6), 0 wrong, nothing lost, wrong_line 7/8/14 unchanged | 2 | e9a5f46 |
+
+Final bench row `loop15-final`:
+
+| sheet | distance | bearing | arc | wrong_line | coverage | gold (passes \| fails) |
+|---|---|---|---|---|---|---|
+| Presidio | 43/48 | 43/44 | 16/18 | 7 | 102/171 | 134/0/5 \| 13/2/1 |
+| R-10434.1 | 27/33 | 23/24 | 12/16 | 8 | 62/171 | 83/0/2 \| 5/6/1 |
+| R-10434.3 | 51/64 | 44/44 | 26/31 | 14 | 121/248 | 152/0/6 \| 19/7/1 |
+
+North sheets are unchanged except arcs: R-10741.1 1/2 -> 1/1 and R-10741.3 0/1 -> 0/0 (unproven fails queued). `demo.py --fast`: 161 s cold, pool caches cleared.
+
+Traverse side effect: traverse builds edges from labels.json. Leg 1's queued fails left it, so R-10434.1 went 74 -> 69 edges and R-10434.3 136 -> 132; leg 2's passes added edges back. Closures are unchanged (Presidio 2, others 0). This is not a measurement change.
+
+The fail-unkeyed shift on R-10434.1 (1 -> 2) mid-leg-2 came from a leftover intermediate `loop15-2` bench row. The final rows are unchanged.
+
+Dispatches: 6 of 10 (legs 5, 3, 1, 1-retry, 2, 2-retry), all sonnet. Nothing stashed.
+
+Lessons: a proof rule must be checked against keyed-real fails on every keyed sheet, not only the sheet it targets: the touch spec fixed R-10434.3 and broke Presidio. A subagent's cause taxonomy from the brief can be wrong: leg 2's real cause was a third one, found only by cropping. Two of fourteen new passes were on the wrong line; the gold wrong-pass count could not catch them because new passes are unkeyed. Viewing every new-pass crop is the gate, not a formality.

@@ -3,6 +3,34 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
+## Loop 15 (2026-09-27): a fail needs proof, a no-line cause found, a third gold set
+
+- **Arc fails need proof.** An arc fail stands only when its association is proven: a lone candidate in the leader's reach, a clear touch (<= 1 pt, others > 2 pt), or a tag whose radius and placement hold up. Otherwise it is queued as "association unproven" (`checks.at_tip`, `tables.py`).
+  - R-10434.3: fails 44 -> 27, gold wrong-line 24 -> 7, all 19 real kept.
+  - R-10434.1: 20 -> 12.
+  - Presidio: unchanged.
+- **The "no line found beside label" cause.** It was nearest_line's box-rotation prefilter: stacked blocks read 10-15 deg off their line. A candidate that agrees with the printed bearing is now admitted, and may only pass. +12 label passes, each crop viewed; two wrong-line passes in the first attempt were removed.
+- **Gold set on R-10434.1** (`spike/gold/r10434_1_assoc.json`): passes 83/0/0, fails 7 real / 9 wrong / 4 unsure.
+- **attribution.md regenerated:** `a-runtotal` 0/0/0; it was stale, not an incomplete fix.
+- Bench row `loop15-final` is the baseline: coverage 102/171, 62/171, 121/248; gold wrong-pass 0 on all three keyed sheets. Demo 161 s cold.
+- Commits 3f632a5, 56facb5, 0b99c00, e9a5f46. Plan and status in `spike/LOOP.md`.
+
+## Next (logged 2026-09-27 after loop 15; plan and status in `spike/LOOP.md`)
+
+A scan-detector trial is running separately in `spike/det/` (untracked, not part of any loop). Leave it alone unless JR says otherwise.
+
+1. Demo prep: slides, Q&A sheet, recorded fallback; two rehearsals; freeze 10-03.
+2. **Wrong-line fails still standing:** 7 on R-10434.3 (distance labels 147.28/150.95/152.49/42.44/87.86, arc 324.13', tag C33), 6 on R-10434.1, 2 on Presidio.
+   - A lone candidate the leader does not touch still counts as proven (324.13' lands 4.0 pt off).
+   - C33 lies on its tagged curve, with only a partial extent measured (607.70 of 1049.90). Re-key it in gold, or join its pieces.
+3. **Coverage:** 21 of 32 cropped no-line labels have no reachable candidate or are compound line+curve totals (`spike/out/leg2_crops/classes.md`).
+4. **Key the 12 new passes into gold** (Presidio 4, R-10434.1 2, R-10434.3 6; they show as unkeyed passes in `loop15-final`), so gold wrong-pass counts cover them.
+5. **Small fixes:**
+   - Rewrite `coverage_attrib.py`'s dead `a-runtotal` wording.
+   - Re-run `coverage_attrib.py` whenever `checks.py`/`tables.py` change.
+   - Delete loop 13's orphaned `g_*.png` crops.
+6. Carried from the loop 13 Next items 3-4 (`tags.py` time; loop 12 items 2-4).
+
 ## Loop 14 (2026-09-26 17:30): fails are claims about the record
 
 A result far beyond any keyed real disagreement is queued as "wrong line likely" (checks.wrong_line_likely; cuts in commit
@@ -11,7 +39,9 @@ ba144e9); tags resolved by SHX/record and bare (T) totals may only add passes. F
 demo 160 s cold. Cuts tuned on the two keyed sheets; wrong-line arc fails on R-10434.3 mostly remain (no safe cut).
 Status page version 14 separates pass rate, pass precision, fail quality and coverage (JR read coverage as a drop).
 
-## Next (logged 2026-09-26 15:15 after loop 13; plan and status in `spike/LOOP.md`)
+## Next as of loop 13, kept for the record
+
+### Next (logged 2026-09-26 15:15 after loop 13; plan and status in `spike/LOOP.md`)
 
 **Loop 13 (precision on a second sheet, then coverage).** Bench row `legH2` (second of the two) is the baseline.
 - Gold set on R-10434.3 (`gold_assoc.py --sheet r10434_3`): 152/0/0 after this loop; Presidio 134/0/1 (L20 unsure).

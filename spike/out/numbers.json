@@ -9,12 +9,12 @@
  },
  "checks": {
   "distance": {
-   "checked": 46,
-   "pass": 41
+   "checked": 48,
+   "pass": 43
   },
   "bearing": {
-   "checked": 42,
-   "pass": 41
+   "checked": 44,
+   "pass": 43
   },
   "arc length": {
    "checked": 15,
@@ -29,13 +29,13 @@
    "max": 0.24
   },
   "pass_residual_arcmin": {
-   "median": 1.0,
+   "median": 0.9,
    "max": 7.8
   }
  },
  "exceptions": {
-  "total": 46,
-  "unmatched": 32,
+  "total": 42,
+  "unmatched": 28,
   "matchline": 6,
   "disagree_small": 1,
   "wrong_line": 7
