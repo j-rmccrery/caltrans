@@ -31,7 +31,6 @@ L37,distance,134.15,104.71,-29.44,FAIL,leader
 L38,bearing,"N34°55'48""W","N34°55'30""W",0.3',pass,beside
 L38,distance,167.07,167.02,-0.05,pass,beside
 L39,bearing,"S79°16'27""W","S79°16'18""W",0.2',pass,beside
-L39,distance,373.80,100.00,-273.80,FAIL,beside
 C35,radius,759.00,759.15,+0.02%,pass,leader; resolved-by-shx
 C33,radius,2884.00,2879.66,-0.15%,pass,leader
 C33,arc length,1049.90,607.70,-442.20,FAIL,leader

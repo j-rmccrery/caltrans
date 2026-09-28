@@ -2,14 +2,15 @@
  {
   "parcel": "63269",
   "edges": 3,
-  "by_record": 2,
-  "closure_ft": 323.3,
-  "record_area_sqft": 253743876.2,
+  "by_record": 1,
+  "closure_ft": 83.5,
+  "record_area_sqft": 259663798.0,
   "flags": [
+   "partial record",
    "drawn"
   ],
   "table_area_sqft": 498761.99999999994,
-  "diff_pct": 50774.74
+  "diff_pct": 51961.66
  },
  {
   "parcel": "61806|61806-4|61806-5|61806-9|63269",

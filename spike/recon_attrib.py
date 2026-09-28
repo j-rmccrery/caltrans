@@ -120,7 +120,15 @@ def row_segments(rows):
 
 
 def label_positions(blocks):
-    pts = [(b["cx"], b["cy"]) for b in blocks if BEAR.match(b["text"].strip()) or DIST.match(b["text"].strip())]
+    """Every bearing/distance-shaped text block, for the "does an uncovered segment sit near a printed
+    record value" test -- EXCEPT a radial "(R)" bearing (loop17 leg B): checks.py's own summary already
+    calls these out as "not checked against a line" (they name a curve's radius direction to its centre,
+    not a boundary course), so a boundary segment sitting near one has no record edge to have missed --
+    counting it as "labelled" blamed an association miss that was never possible on some of the biggest
+    no_traverse_edge_labelled stretches (R-10434.3: 6 of its top 10, 796 of 1,605 ft, all radial
+    bearings; the segment is genuinely unlabelled, reclassified to no_traverse_edge_unlabelled)."""
+    pts = [(b["cx"], b["cy"]) for b in blocks
+           if (m := BEAR.match(b["text"].strip())) and not m[6] or DIST.match(b["text"].strip())]
     return np.array(pts) if pts else np.zeros((0, 2))
 
 

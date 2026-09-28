@@ -62,7 +62,6 @@ bearing (R),"S26°21'46""W(R)",,,radial: not checked
 bearing,"N2°05'55""E","N2°05'57""E",0.0',pass
 distance,323.49',323.50,+0.01,pass
 bearing,"N5°43'06""W","N3°41'29""W",121.6',FAIL
-distance,88.69',15.02,-73.67,FAIL
 arc length,L=170.24',170.20,-0.04,pass
 bearing (R),"N59°48'59""E(R)",,,radial: not checked
 bearing (R),"S87°48'34""W(R)",,,radial: not checked

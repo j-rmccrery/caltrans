@@ -2,8 +2,7 @@
  {
   "kind": "distance",
   "text": "359.00'",
-  "drawn_ft": 28.23,
-  "off_ft": -330.77,
+  "issue": "wrong line likely: measured 28.23 vs printed 359.00 ft",
   "region": [
    2285,
    412,
@@ -223,8 +222,7 @@
  {
   "kind": "distance",
   "text": "149.83'",
-  "drawn_ft": 18.37,
-  "off_ft": -131.46,
+  "issue": "wrong line likely: measured 18.37 vs printed 149.83 ft",
   "region": [
    1038,
    594,

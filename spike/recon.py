@@ -172,6 +172,16 @@ DUP_TOL_PT = 1.0         # pt-equivalent: how close two elementary segments' own
 DENSIFY_FT = 1.0         # ft: elementary-segment length for the covered/dimensioned classification
 CLOSE_PCT = 0.99
 CLOSURE_MAX_FT = 1.0
+KINK_BRIDGE_FT = 10.0    # ft: a run of consecutive uncovered ring pieces this short or shorter, with
+                          # the SAME reconstructed edge on both sides of it, is a stray digitizing kink
+                          # in that one edge's own drawn piece, not a separate record course (loop17 leg
+                          # B, face_closure()'s own docstring on loop17 leg A's split-course sharing:
+                          # measured on Presidio 61806-9, a 2-vertex out-and-back spike -- 3.99 + 4.00 ft,
+                          # returning within 0.2 ft of where it left -- sandwiched between the same
+                          # N67d07'01"W course's two pieces on both sides). Comfortably above the one
+                          # measured kink; the real guard is requiring the SAME edge on both sides, not
+                          # this length alone -- a genuine separate course between two DIFFERENT edges
+                          # is never bridged, whatever its length
 ZOOM_PT = 600.0           # pt: page-space window size (both axes) for the zoomed record-edge crop
 ZOOM_SCALE = 3.0          # raster scale for the zoom crop (>= 3x page pt so lines/text stay legible)
 COVERED_INVARIANCE_TOL_FT = 0.5  # a removal must not change covered ft by more than this (discretization slack)
@@ -493,6 +503,25 @@ def face_pieces(ring, rec_P, rec_Q, rec_az, rec_parent, buffer_ft, tol_deg, dens
         else:
             k = None
         pieces.append((k, p, q))
+    # loop17 leg B: bridge a short run of uncovered pieces flanked by the SAME reconstructed edge on
+    # both sides -- see KINK_BRIDGE_FT. Length-gated and only ever assigns an edge that already covers
+    # both neighbours, so it can only turn a stray kink into "covered by the edge already either side
+    # of it", never invent a new edge or extend one past a genuinely different or missing course.
+    i = 0
+    while i < len(pieces):
+        if pieces[i][0] is not None:
+            i += 1; continue
+        j = i
+        while j < len(pieces) and pieces[j][0] is None:
+            j += 1
+        if 0 < i and j < len(pieces) and pieces[i - 1][0] == pieces[j][0]:
+            run_len = sum(float(np.hypot(*(np.array(q) - np.array(p)))) for _, p, q in pieces[i:j])
+            if run_len <= KINK_BRIDGE_FT:
+                k = pieces[i - 1][0]
+                covered_len += run_len
+                for m in range(i, j):
+                    pieces[m] = (k, pieces[m][1], pieces[m][2])
+        i = j
     pct = covered_len / total_len if total_len else 0.0
     return pieces, pct, total_len
 
@@ -1036,6 +1065,21 @@ def selftest():
     kink_closure = face_closure(kink_pieces, rec_edges)
     assert kink_closure < 0.01, f"a record edge split into two ring pieces by a stray vertex must not be double-counted, got {kink_closure}"
 
+    # 1c. loop17 leg B: a short out-and-back spike (2 pieces, uncovered on their own -- not parallel to
+    # any record edge) sandwiched between two pieces of the SAME record edge is bridged to that edge
+    # (Presidio 61806-9: an 8 ft spike in the middle of a 138 ft record course read the parcel 98.06%
+    # covered, one edge under CLOSE_PCT; fixed to 100%, closes). A ring with a real vertex there (edge 0
+    # subdivided) plus a tiny 2 ft spike poking off it, both sides voting edge 0.
+    kink_ring = np.array([[0.0, 0.0], [40.0, 0.0], [40.0, -2.0], [42.0, -2.0], [42.0, 0.0], [100.0, 0.0],
+                           [100.0, 100.0], [0.0, 100.0], [0.0, 0.0]])
+    kpieces, kpct, _ = face_pieces(kink_ring, rec_P, rec_Q, rec_az, rec_parent, buffer_ft, PARALLEL_TOL_DEG, DENSIFY_FT)
+    assert kpct >= 0.999, f"a short spike flanked by the same edge on both sides must be bridged, got pct {kpct:.3f}"
+    assert all(k == 0 for k, p, q in kpieces[1:5]), f"the bridged spike pieces must carry the flanking edge's own index, got {[k for k, p, q in kpieces[1:5]]}"
+    # a spike between two DIFFERENT edges (edge 0 and edge 1) must never be bridged
+    diff_ring = np.array([[0.0, 0.0], [98.0, 0.0], [98.0, -2.0], [100.0, -2.0], [100.0, 0.0], [100.0, 100.0], [0.0, 100.0], [0.0, 0.0]])
+    dpieces, dpct, _ = face_pieces(diff_ring, rec_P, rec_Q, rec_az, rec_parent, buffer_ft, PARALLEL_TOL_DEG, DENSIFY_FT)
+    assert dpct < 0.999, "a spike between two different edges must not be bridged"
+
     # 2. a line offset 3 pt (~4.17 ft) parallel to the south edge: outside the buffer, not covered
     off = 3.0 * scale
     p, q = np.array([0.0, -off]), np.array([100.0, -off])
@@ -1126,7 +1170,9 @@ def selftest():
     assert not chord_match[0], "the straight chord between the arc's own ends must NOT be covered by its curve-following buffer"
 
     print("selftest OK: full square closes and counts; a record edge split by a stray vertex into two "
-          "ring pieces is not double-counted; 3 pt offset line not covered; 1 pt offset covered; "
+          "ring pieces is not double-counted; a short spike flanked by the same edge on both sides is "
+          "bridged to it, a spike between two different edges is not; "
+          "3 pt offset line not covered; 1 pt offset covered; "
           "an arc's own curve is covered but its chord is not; "
           "un-faced R/W linework still enters the denominator; RW class rule rejects a stray heavier class; "
           "a grown table region catches its own frame stroke; dedupe collapses 0.5 pt duplicates but keeps "

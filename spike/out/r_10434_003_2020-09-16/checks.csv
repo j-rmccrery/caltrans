@@ -23,7 +23,6 @@ distance,127.88',127.89,+0.01,pass
 arc length,44.74',67.56 (R=56.3),+22.82,FAIL
 distance,54.90',54.90,+0.00,pass
 distance,40.86',40.86,-0.00,pass
-distance,87.86',5.75,-82.11,FAIL
 bearing,"S81°06'31""W","S81°06'42""W",0.2',pass
 distance,370.00',370.00,+0.00,pass
 bearing (R),"N19°22'50""W(R)",,,radial: not checked
@@ -126,7 +125,6 @@ distance,150.95',130.32,-20.63,FAIL
 bearing (R),"N17°55'32""W(R)",,,radial: not checked
 bearing,"S5°49'27""E","S5°49'42""E",0.3',pass
 bearing (R),"N48°40'43""W(R)",,,radial: not checked
-distance,147.28',12.43,-134.85,FAIL
 arc length,L=124.05',124.02 = 98.97 + 25.05,-0.03,"pass as a run of 2: contiguous slivers of one curve, no leader/length seed"
 bearing (R),"N28°28'13""W(R)",,,radial: not checked
 arc length,L=38.33',38.37,+0.04,pass

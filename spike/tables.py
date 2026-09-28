@@ -412,7 +412,7 @@ def main():
         # how_note above) was only ever meant to accept a pass -- any fail on it is unproven association,
         # not evidence of a real disagreement, whatever its size (never the gold-calibrated cut below)
         forced_unproven = bool(how_note)
-        placed.append({"tag": t["tag"], "kind": kind, **{k: row[k] for k in ("az", "dist", "total", "R", "L", "delta") if k in row}, "line": shape(seg), "how": how})
+        entry = {"tag": t["tag"], "kind": kind, **{k: row[k] for k in ("az", "dist", "total", "R", "L", "delta") if k in row}, "line": shape(seg), "how": how}
         if kind == "line":
             drawn = seg["len_pt"] * scale
             dx, dy = seg["dir"][0], -seg["dir"][1]
@@ -426,6 +426,7 @@ def main():
             if not ok_b:
                 reason = ("association unproven: " if forced_unproven else "wrong line likely: " if queued_b else "") + f"drawn bearing off by {dbrg * 60:.1f} arcmin"
                 queue.append({"tag": t["tag"], "issue": reason, "region": region, "line": shape(seg)})
+            queued_d = False
             if row["total"]:
                 out.append([t["tag"], "distance", f"{row['dist']:.2f}(T)", f"{drawn:.2f}", "", "total over several segments; not checked", how])
             else:
@@ -440,6 +441,15 @@ def main():
                 if not ok_d:
                     reason = ("association unproven: " if (forced_unproven or queued_b) else "wrong line likely: " if queued_d else "") + f"drawn {drawn:.2f} ft vs table {row['dist']:.2f} ft"
                     queue.append({"tag": t["tag"], "issue": reason, "region": region, "line": shape(seg)})
+            # loop17 leg B: a queued tag (association unproven / wrong line likely, on either check)
+            # must never reach tag_labels.json -- traverse.py's build_edges() trusts every row there as
+            # a confirmed record edge with no queued-status check of its own, so a tag tables.py itself
+            # had already refused was still walked into the traverse and misfit-attributed as though it
+            # were a genuine record/drawing disagreement (R-10434.3 L3/L5/L20/L39: bearing off 57-75 deg
+            # or a drawn length under 27% of the printed one -- part of loop17-A's 1,021 ft "misfit"
+            # bucket, the rest being Presidio's own inline-label version of the same bug, see checks.py)
+            if not (queued_b or queued_d):
+                placed.append(entry)
         else:
             # loop15: a "beside" curve association (no leader) that only landed this far from the tag is
             # not proof of which curve it names -- the two real, keyed fails found this way sit within
@@ -448,6 +458,10 @@ def main():
             if how == "beside" and cands[0][0] > 8.0:
                 how += "; beside too far"
             curve_hits.append((t, row, seg, how, region))
+            # ponytail: a curve tag's pass/queue decision is finalized later (the row_run/group
+            # emission below), so it still gets placed unconditionally here, same as before this leg --
+            # no queued curve tag was found in evidence for target 1; revisit if one turns up
+            placed.append(entry)
 
     # loop9 leg A rule 3: NO.-int -> the resolved (t, row, seg, how, region) hit for every curve tag that
     # found ITS OWN geometry (pass or fail; a tag still queued for want of a candidate at all carries no

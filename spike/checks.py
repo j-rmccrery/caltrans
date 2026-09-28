@@ -8,6 +8,7 @@ Curve labels are checked for L = R * delta wherever R, delta and L are printed t
 Every failure or unmatched label becomes an exception with its sheet region. No OCR confidence is used:
 the exception queue is driven by geometry, which is the point.
 usage: [SHEET=<pdf>] python spike/checks.py   ->  spike/out[/<sheet>]/checks.csv, exceptions.json
+       python spike/checks.py --selftest      (wrong_line_likely; no sheet needed)
 """
 import csv
 import hashlib
@@ -150,7 +151,16 @@ def wrong_line_likely(kind, off, printed=None):
     if kind == "bearing":
         return abs(off) > 180              # arcmin
     if kind == "distance":
-        return abs(off) > 400 or (pct is not None and pct > 200)
+        # off/printed saturates at 100% as the drawn piece shrinks to 0, so it can only ever flag an
+        # OVERSHOOT (drawn several times printed) -- an undershoot (a wrong-line pick landing on a
+        # short stub/tick well under a long record distance) slipped past both cuts (loop17 leg B:
+        # Presidio 359.00' matched to a 28 ft tick, off 331 ft / 92% of printed, under 400 ft and
+        # under 200%). off/drawn is the same ratio the other way round -- identical to pct whenever
+        # drawn >= printed (an overshoot, where it's always <= pct), so no previously-kept overshoot
+        # FAIL changes; it only ever adds coverage on the undershoot side.
+        drawn = printed + off if printed is not None else None  # off = drawn - printed
+        pct_vs_drawn = abs(off) / abs(drawn) * 100 if drawn else None
+        return abs(off) > 400 or (pct is not None and pct > 200) or (pct_vs_drawn is not None and pct_vs_drawn > 200)
     if kind == "arc length":
         return abs(off) > 175 and pct is not None and pct > 90
     if kind == "radius":
@@ -1333,6 +1343,24 @@ def _build_pool_uncached(page, blocks):
             "stitch_merges": stitch_merges, "stitch_paths": stitch_paths}
 
 
+def selftest():
+    """Loop17 leg B: wrong_line_likely's distance rule must catch an undershoot (a wrong-line pick
+    whose drawn piece is a small fraction of a long printed record) exactly as readily as it already
+    catches the mirror-image overshoot -- and must never flag the calibrated real-disagreement example
+    its own docstring cites (330.77 ft off / 128.8% of printed, an overshoot, kept a FAIL on purpose)."""
+    # Presidio S70d50'46"W 359.00' matched to a 28 ft tick (loop17 leg B): off = drawn - printed
+    assert wrong_line_likely("distance", 28.23 - 359.00, 359.00) is True, "undershoot must be caught"
+    # symmetric mirror: the same ratio the other way round (a candidate ~12.7x too long) already was
+    off = 359.00 * 12.7 - 28.23
+    assert wrong_line_likely("distance", off, 28.23) is True, "overshoot side unchanged"
+    # the calibration example this cut must never flip (an overshoot inside the old 200% cut already)
+    assert wrong_line_likely("distance", 330.77, 256.75) is False, "calibrated real disagreement must stay a FAIL"
+    # a small, real-looking disagreement on either side of 1.0x must never be flagged
+    assert wrong_line_likely("distance", -21.62, 76.46) is False        # 28.3% undershoot
+    assert wrong_line_likely("distance", 29.06, 22.56) is False         # 128.8% overshoot
+    print("checks.py selftest: pass")
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
@@ -1980,4 +2008,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    if "--selftest" in sys.argv:
+        selftest()
+    else:
+        main()

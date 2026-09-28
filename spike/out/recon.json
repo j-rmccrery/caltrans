@@ -31,7 +31,7 @@
  },
  "drawn_boundary_ft": 11054.7,
  "reconstructed_edges": 45,
- "traverse_rows": 97,
+ "traverse_rows": 94,
  "recon_all_covered_ft": 3661.5,
  "recon_all_denom_ft": 11054.7,
  "recon_dim_covered_ft": 3649.1,
@@ -69,11 +69,11 @@
   "2.5pt": 3688.5
  },
  "parcels_all": {
-  "n": 0,
+  "n": 1,
   "of": 61
  },
  "parcels_dim": {
-  "n": 0,
+  "n": 1,
   "of": 9
  },
  "faces": [
@@ -153,9 +153,9 @@
    "parcel": "61806-9",
    "named": true,
    "touches_frame": false,
-   "pct_covered": 98.06,
-   "closure_ft": null,
-   "counts": false
+   "pct_covered": 100.0,
+   "closure_ft": 0.01,
+   "counts": true
   },
   {
    "parcel": "",
@@ -754,12 +754,6 @@
    "misfit_ft": 0.14
   },
   {
-   "name": "N71Â°52'13\"W + 182.62'",
-   "az": 288.1297,
-   "ft": 182.62,
-   "misfit_ft": 0.04
-  },
-  {
    "name": "N15Â°16'05\"E + 82.72'",
    "az": 195.2681,
    "ft": 82.72,
@@ -800,6 +794,12 @@
    "az": 105.0383,
    "ft": 113.39,
    "misfit_ft": 0.07
+  },
+  {
+   "name": "N71Â°52'13\"W + 182.62'",
+   "az": 288.1297,
+   "ft": 182.62,
+   "misfit_ft": 0.04
   },
   {
    "name": "L6",
