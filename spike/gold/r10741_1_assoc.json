@@ -1,0 +1,306 @@
+[
+ {
+  "id": "label:0",
+  "kind": "bearing",
+  "printed": "S19°33'41\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:1",
+  "kind": "distance",
+  "printed": "405.00'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:2",
+  "kind": "bearing",
+  "printed": "S10°26'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:3",
+  "kind": "distance",
+  "printed": "889.92'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:4",
+  "kind": "distance",
+  "printed": "206.68'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:5",
+  "kind": "bearing",
+  "printed": "S42°35'48\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:6",
+  "kind": "bearing",
+  "printed": "S19°39'12\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:7",
+  "kind": "distance",
+  "printed": "223.98'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:8",
+  "kind": "bearing",
+  "printed": "S10°26'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:9",
+  "kind": "distance",
+  "printed": "461.55'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:10",
+  "kind": "bearing",
+  "printed": "S47°23'07\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:11",
+  "kind": "distance",
+  "printed": "349.97'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:12",
+  "kind": "bearing",
+  "printed": "S10°26'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:13",
+  "kind": "distance",
+  "printed": "513.15'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:14",
+  "kind": "bearing",
+  "printed": "S79°33'23\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:15",
+  "kind": "distance",
+  "printed": "213.40'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:16",
+  "kind": "bearing",
+  "printed": "S88°34'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:17",
+  "kind": "distance",
+  "printed": "365.79'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:18",
+  "kind": "bearing",
+  "printed": "S16°48'23\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:19",
+  "kind": "distance",
+  "printed": "225.82'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:20",
+  "kind": "bearing",
+  "printed": "S10°30'18\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:21",
+  "kind": "distance",
+  "printed": "371.76'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": "genuine disagreement (known): S10°30'18\"E course, printed 371.76' vs drawn geometric length ~364.61'; right line -- the identical course on sheet r10741_2 (label:3/7) is drawn correctly there and passes."
+ },
+ {
+  "id": "label:22",
+  "kind": "distance",
+  "printed": "371.75'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": "same course/line as label:21 (the parenthetical check-distance 371.75' printed beside the record 371.76'); right line, same genuine record-vs-drawn disagreement."
+ },
+ {
+  "id": "label:23",
+  "kind": "bearing",
+  "printed": "S10°26'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:24",
+  "kind": "distance",
+  "printed": "765.16'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:25",
+  "kind": "bearing",
+  "printed": "S20°32'23\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:26",
+  "kind": "distance",
+  "printed": "462.09'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:27",
+  "kind": "bearing",
+  "printed": "S25°49'47\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:28",
+  "kind": "distance",
+  "printed": "214.92'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:29",
+  "kind": "bearing",
+  "printed": "N74°21'28\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:30",
+  "kind": "bearing",
+  "printed": "S15°42'45\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:31",
+  "kind": "arc",
+  "printed": "L=660.20'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:32",
+  "kind": "distance",
+  "printed": "165.86'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:33",
+  "kind": "bearing",
+  "printed": "S16°20'26\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:34",
+  "kind": "distance",
+  "printed": "176.73'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": "record 176.73' vs parenthetical check distance (176.77') on the same tangent (S16°20'26\"E, before curve L=660.20'); right line, small record/drawn length mismatch -- real disagreement."
+ },
+ {
+  "id": "label:35",
+  "kind": "bearing",
+  "printed": "S11°47'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:36",
+  "kind": "distance",
+  "printed": "176.77'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "true",
+  "note": "same line as label:34 (the parenthetical instance, 176.77', of the same tangent course); right line, real disagreement."
+ },
+ {
+  "id": "label:37",
+  "kind": "arc",
+  "printed": "R=1169.9' L=319.73'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "JR context: L=319.73' is a sub-total to found monument 9178-16 partway along one unbroken compound curve (R=1169.90'); the curve's full record length is L=660.20' (confirmed by the L=660.20' label passing on the identical drawn arc). The FAIL is a span-search artefact -- the checker measured the whole curve instead of stopping at the monument -- not a record error. Correct_line keyed false so it buckets as wrong-line/artefact, not as a real record/drawing disagreement."
+ }
+]

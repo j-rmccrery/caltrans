@@ -1,0 +1,298 @@
+[
+ {
+  "id": "label:0",
+  "kind": "bearing",
+  "printed": "S58°55'30\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:1",
+  "kind": "bearing",
+  "printed": "S11°11'33\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:2",
+  "kind": "distance",
+  "printed": "230.00'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:3",
+  "kind": "bearing",
+  "printed": "S34°36'18\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:4",
+  "kind": "distance",
+  "printed": "289.98'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:5",
+  "kind": "distance",
+  "printed": "267.98'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:6",
+  "kind": "bearing",
+  "printed": "N09°38'23\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:7",
+  "kind": "bearing",
+  "printed": "S06°21'46\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:8",
+  "kind": "distance",
+  "printed": "209.98'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:9",
+  "kind": "bearing",
+  "printed": "S72°06'18\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:10",
+  "kind": "bearing",
+  "printed": "S09°09'47\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:11",
+  "kind": "distance",
+  "printed": "224.98'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:12",
+  "kind": "distance",
+  "printed": "513.79'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:13",
+  "kind": "distance",
+  "printed": "513.77",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:14",
+  "kind": "bearing",
+  "printed": "N85°43'42\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:15",
+  "kind": "bearing",
+  "printed": "N88°40'37\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:16",
+  "kind": "distance",
+  "printed": "265.53'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:17",
+  "kind": "bearing",
+  "printed": "S41°08'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:18",
+  "kind": "bearing",
+  "printed": "S41°08'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:19",
+  "kind": "distance",
+  "printed": "508.21'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:20",
+  "kind": "bearing",
+  "printed": "S50°51'08\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:21",
+  "kind": "bearing",
+  "printed": "S41°08'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:22",
+  "kind": "distance",
+  "printed": "371.79'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:23",
+  "kind": "bearing",
+  "printed": "S57°23'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:24",
+  "kind": "distance",
+  "printed": "297.64'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:25",
+  "kind": "bearing",
+  "printed": "N39°08'52\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:26",
+  "kind": "distance",
+  "printed": "169.99'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:27",
+  "kind": "bearing",
+  "printed": "S50°51'08\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:28",
+  "kind": "distance",
+  "printed": "219.99'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:29",
+  "kind": "bearing",
+  "printed": "S31°02'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:30",
+  "kind": "distance",
+  "printed": "177.36'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:31",
+  "kind": "bearing",
+  "printed": "S52°40'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:32",
+  "kind": "distance",
+  "printed": "517.07'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:33",
+  "kind": "bearing",
+  "printed": "N35°19'38\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:34",
+  "kind": "distance",
+  "printed": "411.67'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:35",
+  "kind": "bearing",
+  "printed": "S55°29'00\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:36",
+  "kind": "distance",
+  "printed": "598.06'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ }
+]

@@ -1,0 +1,330 @@
+[
+ {
+  "id": "label:0",
+  "kind": "bearing",
+  "printed": "S16°48'23\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:1",
+  "kind": "distance",
+  "printed": "225.82'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:2",
+  "kind": "bearing",
+  "printed": "S10°30'18\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:3",
+  "kind": "distance",
+  "printed": "371.76'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:4",
+  "kind": "bearing",
+  "printed": "S58°55'30\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:5",
+  "kind": "distance",
+  "printed": "399.46'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:6",
+  "kind": "bearing",
+  "printed": "S11°11'33\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:7",
+  "kind": "distance",
+  "printed": "371.75'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:8",
+  "kind": "bearing",
+  "printed": "S37°04'23\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:9",
+  "kind": "distance",
+  "printed": "205.60'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:10",
+  "kind": "distance",
+  "printed": "230.00",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:11",
+  "kind": "bearing",
+  "printed": "N09°38'23\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:12",
+  "kind": "distance",
+  "printed": "255.00'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:13",
+  "kind": "bearing",
+  "printed": "S16°20'26\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:14",
+  "kind": "bearing",
+  "printed": "N06°13'13\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:15",
+  "kind": "distance",
+  "printed": "424.66'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:16",
+  "kind": "bearing",
+  "printed": "S09°09'47\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:17",
+  "kind": "distance",
+  "printed": "513.79'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:18",
+  "kind": "distance",
+  "printed": "513.77",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:19",
+  "kind": "bearing",
+  "printed": "N51°26'23\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:20",
+  "kind": "distance",
+  "printed": "150.08'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:21",
+  "kind": "bearing",
+  "printed": "N15°58'35\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:22",
+  "kind": "distance",
+  "printed": "272.10'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:23",
+  "kind": "bearing",
+  "printed": "S11°47'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:24",
+  "kind": "bearing",
+  "printed": "S41°08'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:25",
+  "kind": "distance",
+  "printed": "508.21'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:26",
+  "kind": "distance",
+  "printed": "705.06'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:27",
+  "kind": "bearing",
+  "printed": "S41°08'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:28",
+  "kind": "distance",
+  "printed": "371.79'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:29",
+  "kind": "bearing",
+  "printed": "S57°23'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:30",
+  "kind": "distance",
+  "printed": "297.64'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:31",
+  "kind": "bearing",
+  "printed": "S11°47'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:32",
+  "kind": "distance",
+  "printed": "705.06'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:33",
+  "kind": "bearing",
+  "printed": "S52°40'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:34",
+  "kind": "bearing",
+  "printed": "S35°19'37\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:35",
+  "kind": "distance",
+  "printed": "698.07'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:36",
+  "kind": "bearing",
+  "printed": "N35°19'38\"W",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:37",
+  "kind": "distance",
+  "printed": "411.67'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:38",
+  "kind": "bearing",
+  "printed": "S55°29'00\"E",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:39",
+  "kind": "distance",
+  "printed": "598.06'",
+  "verdict_by_code": "pass",
+  "correct_line": "true",
+  "note": ""
+ },
+ {
+  "id": "label:40",
+  "kind": "arc",
+  "printed": "R=1169.9' L=319.73'",
+  "verdict_by_code": "FAIL",
+  "correct_line": "false",
+  "note": "JR context: L=319.73' is a sub-total to found monument 9178-16 partway along one unbroken compound curve (R=1169.90'); the curve's full record length is L=660.20' (confirmed by the L=660.20' label passing on the identical drawn arc). The FAIL is a span-search artefact -- the checker measured the whole curve instead of stopping at the monument -- not a record error. Correct_line keyed false so it buckets as wrong-line/artefact, not as a real record/drawing disagreement. Same shared curve as r10741_1 label:37, reprinted at this sheet's matchline."
+ }
+]
