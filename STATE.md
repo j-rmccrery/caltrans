@@ -3,6 +3,20 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
+## Resume here (2026-09-29 01:45): loop 18 legs 1-5 done, loop 19 (coordinate-anchored rebuild) starting
+
+JR rulings 2026-09-28: headline counts each foot of ground once (spike/recon_set.py -> spike/out_recon/set_recon.json);
+parcels scored against the official AREAS tables (spike/parcel_score.py); a line between two printed coordinates is a
+record course in its own column; a "(T)" total counts for every piece of one straight line under one printed bearing.
+**Set headline (bench loop18-5d): 42.6 % of drawn boundary, 55.6 % of dimensioned boundary; parcels 1 of 19 in the
+AREAS tables** (61806-9). Loop 17 ended at 38.1 % on the old per-sheet basis (= 40.0 % on the set basis after leg 1).
+
+Loop 18 (plan from the Opus 5.5 + Fable 5.1 review; spike/LOOP.md): leg 1 set measure + AREAS parcels + L=660.20'
+(5ff8bbf); leg 2 coordinate inverses, 0 qualify (cc4e9f3); leg 3 (T) totals, 1 accept 860.77'(T) (90f92c4); leg 4
+radials 43 -> 98 with a record-circle residual test (13a419d); leg 5 curve merges, failed curves, printed radii (27285d4).
+Legs 6 (cross-sheet parcels, R-10741.2 DETAIL "A") and 7 (R-10741 gold) not started.
+Next: Loop 19 = the coordinate-anchored rebuild (T-001 cheap version), plan at the end of spike/LOOP.md.
+
 ## Resume here (2026-09-28 18:45): loop 17 closed
 
 **Accuracy = how much of the survey is reconstructable from the record** (JR, 2026-09-27; `spike/recon.py`, bench
