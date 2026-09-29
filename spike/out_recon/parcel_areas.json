@@ -1,6 +1,8 @@
 {
- "headline": "1/19",
- "parcels_reconstructed": 1,
+ "headline": "2/19",
+ "headline_before_leg4": "1/19",
+ "parcels_reconstructed": 2,
+ "parcels_reconstructed_before_leg4": 1,
  "parcels_in_areas_tables": 19,
  "parcels_with_a_face": 15,
  "parcels": [
@@ -65,6 +67,14 @@
     },
     {
      "sheet": "r10434_3",
+     "face": "46825",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_3",
      "face": "46825|61806|61806-5|61806-7|61806-8|63269",
      "counts": false,
      "pct_covered": null,
@@ -78,14 +88,6 @@
      "pct_covered": 1.9,
      "closure_ft": null,
      "touches_frame": false
-    },
-    {
-     "sheet": "r10434_3",
-     "face": "46825",
-     "counts": false,
-     "pct_covered": null,
-     "closure_ft": null,
-     "touches_frame": true
     }
    ],
    "area_agreement": [
@@ -109,7 +111,7 @@
      "sheet": "r10434_1",
      "face": "46825|61806-1|61806-2|63269",
      "merged": true,
-     "face_area_sqft": 5425.1,
+     "face_area_sqft": 5414.6,
      "record_area_sqft": null,
      "diff_pct": null
     },
@@ -125,7 +127,15 @@
      "sheet": "r10434_3",
      "face": "46825",
      "merged": false,
-     "face_area_sqft": 43776.2,
+     "face_area_sqft": 11101.9,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825",
+     "merged": false,
+     "face_area_sqft": 1433.7,
      "record_area_sqft": null,
      "diff_pct": null
     },
@@ -152,14 +162,6 @@
      "face_area_sqft": 414510.6,
      "record_area_sqft": null,
      "diff_pct": null
-    },
-    {
-     "sheet": "r10434_3",
-     "face": "46825",
-     "merged": false,
-     "face_area_sqft": 43776.2,
-     "record_area_sqft": null,
-     "diff_pct": null
     }
    ]
   },
@@ -183,7 +185,7 @@
    "record_area_sqft": null,
    "record_remarks": "",
    "has_face": true,
-   "reconstructed": false,
+   "reconstructed": true,
    "faces": [
     {
      "sheet": "r10741_2",
@@ -215,7 +217,7 @@
      "sheet": "r10741_2",
      "face": "46825-5",
      "merged": false,
-     "face_area_sqft": 2862960.9,
+     "face_area_sqft": 242582.2,
      "record_area_sqft": null,
      "diff_pct": null
     },
@@ -301,7 +303,7 @@
      "sheet": "r10434_1",
      "face": "46825|61806-1|61806-2|63269",
      "merged": true,
-     "face_area_sqft": 5425.1,
+     "face_area_sqft": 5414.6,
      "record_area_sqft": null,
      "diff_pct": null
     },
@@ -408,7 +410,7 @@
      "sheet": "r10434_1",
      "face": "46825|61806-1|61806-2|63269",
      "merged": true,
-     "face_area_sqft": 5425.1,
+     "face_area_sqft": 5414.6,
      "record_area_sqft": null,
      "diff_pct": null
     },
@@ -549,9 +551,9 @@
      "sheet": "r10434_3",
      "face": "61806-5",
      "merged": false,
-     "face_area_sqft": 6058.3,
+     "face_area_sqft": 1643.9,
      "record_area_sqft": 229561.19999999998,
-     "diff_pct": -97.36
+     "diff_pct": -99.28
     },
     {
      "sheet": "r10434_3",
@@ -695,9 +697,9 @@
      "sheet": "r10434_3",
      "face": "61806-8",
      "merged": false,
-     "face_area_sqft": 6053.3,
+     "face_area_sqft": 2050.9,
      "record_area_sqft": 320601.60000000003,
-     "diff_pct": -98.11
+     "diff_pct": -99.36
     },
     {
      "sheet": "r10434_3",
@@ -1093,7 +1095,7 @@
      "sheet": "r10434_1",
      "face": "46825|61806-1|61806-2|63269",
      "merged": true,
-     "face_area_sqft": 5425.1,
+     "face_area_sqft": 5414.6,
      "record_area_sqft": null,
      "diff_pct": null
     },
@@ -1164,5 +1166,51 @@
    "faces": [],
    "area_agreement": []
   }
- ]
+ ],
+ "joined_parcels": [
+  {
+   "parcel": "46825",
+   "pieces": [
+    {
+     "sheet": "r10434_1",
+     "face": "46825",
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825",
+     "touches_frame": true
+    }
+   ],
+   "joined": false,
+   "reason": "union is MultiPolygon, not one polygon -- pieces do not abut"
+  }
+ ],
+ "detail_a_46825_5": {
+  "status": "attached",
+  "reason": "",
+  "gap_len_ft": 167.09,
+  "courses_sum_ft": 166.97,
+  "len_diff_ft": 0.12,
+  "assigned_pieces": [
+   {
+    "piece": 4,
+    "course": "N51 deg26'23\"E",
+    "bearing_err_deg": 0.23,
+    "drawn_ft": 11.01
+   },
+   {
+    "piece": 5,
+    "course": "N19 deg41'37\"W",
+    "bearing_err_deg": 0.01,
+    "drawn_ft": 156.08
+   }
+  ],
+  "pct_covered_before": 93.08,
+  "pct_covered_after": 100.0,
+  "closure_ft": 0.01,
+  "closes": true,
+  "sheet": "r10741_2",
+  "face": "46825-5"
+ }
 }

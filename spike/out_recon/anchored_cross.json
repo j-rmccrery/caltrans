@@ -1,0 +1,254 @@
+{
+ "n_anchors": 66,
+ "anchor_pairs": [],
+ "edge_dups": [],
+ "n_edges": 139,
+ "n_nodes": 204,
+ "closed": [
+  {
+   "start": "presidio:CO1",
+   "end": "presidio:CO2",
+   "status": "closed",
+   "misclosure_ft": 0.007,
+   "length_ft": 419.29,
+   "n_courses": 4,
+   "courses": [
+    {
+     "name": "presidio:S52°28'06\"E + 110.52'",
+     "kind": "line",
+     "ft": 110.52,
+     "misfit_ft": 0.08
+    },
+    {
+     "name": "presidio:L=56.88'",
+     "kind": "arc",
+     "ft": 56.7,
+     "misfit_ft": 0.05
+    },
+    {
+     "name": "presidio:S79°17'24\"W + 16.99'",
+     "kind": "line",
+     "ft": 16.99,
+     "misfit_ft": 0.1
+    },
+    {
+     "name": "presidio:L=249.97'",
+     "kind": "arc",
+     "ft": 235.08,
+     "misfit_ft": 0.13
+    }
+   ],
+   "worst_course": "presidio:L=249.97'",
+   "worst_misfit_ft": 0.13
+  },
+  {
+   "start": "presidio:CO2",
+   "end": "presidio:T-5",
+   "status": "closed",
+   "misclosure_ft": 0.008,
+   "length_ft": 356.07,
+   "n_courses": 2,
+   "courses": [
+    {
+     "name": "presidio:S10°09'24\"W + 101.10'",
+     "kind": "line",
+     "ft": 101.1,
+     "misfit_ft": 0.04
+    },
+    {
+     "name": "presidio:L=269.94'",
+     "kind": "arc",
+     "ft": 254.97,
+     "misfit_ft": 0.16
+    }
+   ],
+   "worst_course": "presidio:L=269.94'",
+   "worst_misfit_ft": 0.16,
+   "branch_resolved": true
+  },
+  {
+   "start": "presidio:CO7",
+   "end": "presidio:T-1",
+   "status": "closed",
+   "misclosure_ft": 0.011,
+   "length_ft": 286.07,
+   "n_courses": 2,
+   "courses": [
+    {
+     "name": "presidio:L=236.35'",
+     "kind": "arc",
+     "ft": 235.93,
+     "misfit_ft": 0.15
+    },
+    {
+     "name": "presidio:S57°58'33\"W + 50.14'",
+     "kind": "line",
+     "ft": 50.14,
+     "misfit_ft": 0.06
+    }
+   ],
+   "worst_course": "presidio:L=236.35'",
+   "worst_misfit_ft": 0.15
+  },
+  {
+   "start": "presidio:CO8",
+   "end": "presidio:CO16",
+   "status": "closed",
+   "misclosure_ft": 0.008,
+   "length_ft": 145.13,
+   "n_courses": 2,
+   "courses": [
+    {
+     "name": "presidio:N68°24'07\"E + 124.10'",
+     "kind": "line",
+     "ft": 124.1,
+     "misfit_ft": 0.03
+    },
+    {
+     "name": "presidio:N22°47'32\"W + 21.03'",
+     "kind": "line",
+     "ft": 21.03,
+     "misfit_ft": 0.09
+    }
+   ],
+   "worst_course": "presidio:N22°47'32\"W + 21.03'",
+   "worst_misfit_ft": 0.09
+  },
+  {
+   "start": "presidio:CO15",
+   "end": "presidio:T-6",
+   "status": "closed",
+   "misclosure_ft": 0.007,
+   "length_ft": 225.94,
+   "n_courses": 2,
+   "courses": [
+    {
+     "name": "presidio:S14°48'32\"W + 17.60'",
+     "kind": "line",
+     "ft": 17.6,
+     "misfit_ft": 0.08
+    },
+    {
+     "name": "presidio:S75°11'08\"E + 208.34'",
+     "kind": "line",
+     "ft": 208.34,
+     "misfit_ft": 0.14
+    }
+   ],
+   "worst_course": "presidio:S75°11'08\"E + 208.34'",
+   "worst_misfit_ft": 0.14
+  },
+  {
+   "start": "presidio:CO18",
+   "end": "presidio:CO4",
+   "status": "closed",
+   "misclosure_ft": 0.014,
+   "length_ft": 360.8,
+   "n_courses": 3,
+   "courses": [
+    {
+     "name": "presidio:N67°07'01\"W + 138.21'",
+     "kind": "line",
+     "ft": 138.21,
+     "misfit_ft": 0.07
+    },
+    {
+     "name": "presidio:L13",
+     "kind": "line",
+     "ft": 39.97,
+     "misfit_ft": 0.05
+    },
+    {
+     "name": "presidio:N71°52'13\"W + 182.62'",
+     "kind": "line",
+     "ft": 182.62,
+     "misfit_ft": 0.04
+    }
+   ],
+   "worst_course": "presidio:N67°07'01\"W + 138.21'",
+   "worst_misfit_ft": 0.07,
+   "branch_resolved": true
+  },
+  {
+   "start": "presidio:CO18",
+   "end": "presidio:CO4",
+   "status": "closed",
+   "misclosure_ft": 0.005,
+   "length_ft": 407.53,
+   "n_courses": 4,
+   "courses": [
+    {
+     "name": "presidio:L12",
+     "kind": "line",
+     "ft": 34.89,
+     "misfit_ft": 0.04
+    },
+    {
+     "name": "presidio:L11",
+     "kind": "line",
+     "ft": 21.9,
+     "misfit_ft": 0.06
+    },
+    {
+     "name": "presidio:N70°37'16\"W + 168.12'",
+     "kind": "line",
+     "ft": 168.12,
+     "misfit_ft": 0.05
+    },
+    {
+     "name": "presidio:N71°52'13\"W + 182.62'",
+     "kind": "line",
+     "ft": 182.62,
+     "misfit_ft": 0.04
+    }
+   ],
+   "worst_course": "presidio:L11",
+   "worst_misfit_ft": 0.06,
+   "branch_resolved": true
+  },
+  {
+   "start": "r10434_1:CO9",
+   "end": "r10434_1:CO11",
+   "status": "closed",
+   "misclosure_ft": 0.01,
+   "length_ft": 558.09,
+   "n_courses": 4,
+   "courses": [
+    {
+     "name": "r10434_1:S38°30'14\"E + 114.06'",
+     "kind": "line",
+     "ft": 114.06,
+     "misfit_ft": 0.04
+    },
+    {
+     "name": "r10434_1:S54°13'49\"E + 63.64'",
+     "kind": "line",
+     "ft": 63.64,
+     "misfit_ft": 0.12
+    },
+    {
+     "name": "r10434_1:322.30'",
+     "kind": "line",
+     "ft": 322.3,
+     "misfit_ft": 0.08
+    },
+    {
+     "name": "r10434_1:S37°28'25\"E + 58.09'",
+     "kind": "line",
+     "ft": 58.09,
+     "misfit_ft": 0.08
+    }
+   ],
+   "worst_course": "r10434_1:S54°13'49\"E + 63.64'",
+   "worst_misfit_ft": 0.12
+  }
+ ],
+ "failed": [],
+ "new_closed": [],
+ "new_failed": [],
+ "extra_names_by_sheet": {
+  "presidio": [],
+  "r10434_1": [],
+  "r10434_3": []
+ }
+}

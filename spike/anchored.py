@@ -677,6 +677,286 @@ def anchored_parcels(internals, closed_names):
     return out
 
 
+# --- cross-sheet chains (leg 4 task 1) -------------------------------------------------------------------
+# The south set draws overlapping ground (Presidio tile: presidio/R-10434.2 + R-10434.1 + R-10434.3, loop18
+# leg 1) -- pooling all three sheets' own anchors + clean record courses into ONE ground-space graph lets a
+# walk cross a matchline the same way a real traverse would, closing chains no single sheet's own graph
+# ever could. Scoped to the three sheets inverse.SHEET_NAMES/SHEET_PDF already have an anchor inventory
+# for (R-10741 sheets have none -- adding one is inverse.py's own scope, not anchored.py's, untouched here).
+
+EDGE_DUP_TOL_FT = 1.0     # same rationale as recon_set.py's own DUP_TOL_FT_SET: a shared matchline course
+# drawn on both abutting sheets sits within a few tenths of a ft of its own copy (loop12: proven pairs
+# agree <= 0.17 ft, median 0.19 ft).
+EDGE_AZ_TOL_DEG = 2.0     # record az agreement for "this is the same printed course" -- generous vs
+# rounding to the nearest second on two independent reads, tight vs two genuinely different courses.
+EDGE_FT_TOL = 0.5         # record distance agreement, same margin as JR's own leg 3 numbers.
+ANCHOR_DUP_TOL_FT = 1.0   # cluster tol for "this printed coordinate is on two sheets" -- same margin as
+# EDGE_DUP_TOL_FT (a printed coordinate near a matchline sits at the same kind of cross-sheet jitter).
+ANCHOR_AGREE_FT = 0.1     # JR's own number: report any merged pair disagreeing beyond this.
+
+
+def dump_ground(key):
+    """leg 4: this sheet's own anchors + reconstructed edges + half-recorded rows in ground space (EPSG:
+    2227, the SAME real-world CRS every sheet's own georef fit lands in -- load_faces()'s own lon/lat->
+    ground transform, recon_set.py's own pooling, all rely on this same fact), written to
+    spike/out_recon/xsheet_<key>.json. Run via `--dump <key>` in a per-sheet subprocess (SHEET env set the
+    same way run_all() already sets it for `main()`) so this repeats load_anchors()'s own recon.run() call
+    under the correct sheet context; run_cross() then pools the three files with no further subprocessing."""
+    sheet_name = "presidio" if key == "presidio" else next(k for k, v in inverse.SHEET_NAMES.items() if v == key)
+    anchors, g, internals = load_anchors(sheet_name, key)
+    trav = json.loads((OUT / "traverse.json").read_text(encoding="utf-8"))
+    rec_edges, n_rows = recon.load_rec_edges(trav)
+    build_graph(rec_edges)  # canonicalises every e["az"] to the p->q direction, in place (see its own docstring)
+    half_rows = load_half_recorded_rows(trav)
+    out = {"anchors": [{"id": a["id"], "E": a["E"], "N": a["N"]} for a in anchors],
+           "edges": [{"name": e["name"], "kind": e["kind"], "az": e["az"], "ft": e["ft"], "misfit_ft": e["misfit_ft"],
+                      "p": e["p"].tolist(), "q": e["q"].tolist()} for e in rec_edges],
+           "half_rows": [{"name": r["name"], "kind": r["kind"], "az": r["az"], "ft": r["ft"], "half": r["half"],
+                          "p": r["p"].tolist(), "q": r["q"].tolist()} for r in half_rows]}
+    OUT_RECON.mkdir(parents=True, exist_ok=True)
+    (OUT_RECON / f"xsheet_{key}.json").write_text(json.dumps(out), encoding="utf-8")
+    print(f"dumped {key}: {len(anchors)} anchors, {len(rec_edges)} edges, {len(half_rows)} half-rows")
+
+
+def _union_find(n):
+    parent = list(range(n))
+
+    def find(x):
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    def union(a, b):
+        ra, rb = find(a), find(b)
+        if ra != rb:
+            parent[ra] = rb
+    return find, union
+
+
+def merge_anchors_cross(sheets):
+    """A printed coordinate found on two sheets (within ANCHOR_DUP_TOL_FT) collapses to one anchor -- its
+    own placement keeps whichever member's E/N came first (both members are the SAME printed value; either
+    one's own snapped/drawn position is as good as the other's, same as load_anchors()'s own single-sheet
+    placement -- misclosure is always measured against a printed coordinate, never this placement). Returns
+    (merged anchors [id/E/N/pt, run_walks()-ready], sheet:id -> merged id, agreement report)."""
+    items = []
+    for key, d in sheets.items():
+        for a in d["anchors"]:
+            items.append({"key": f"{key}:{a['id']}", "sheet": key, "E": a["E"], "N": a["N"]})
+    n = len(items)
+    find, union = _union_find(n)
+    pairs = []
+    if n:
+        pts = np.array([[it["E"], it["N"]] for it in items])
+        tree = cKDTree(pts)
+        for i in range(n):
+            for j in tree.query_ball_point(pts[i], ANCHOR_DUP_TOL_FT):
+                if j <= i or items[i]["sheet"] == items[j]["sheet"]:
+                    continue
+                dist = float(np.hypot(pts[i][0] - pts[j][0], pts[i][1] - pts[j][1]))
+                pairs.append({"a": items[i]["key"], "b": items[j]["key"], "dist_ft": round(dist, 3),
+                              "agrees": dist <= ANCHOR_AGREE_FT})
+                union(i, j)
+    groups = {}
+    for i in range(n):
+        groups.setdefault(find(i), []).append(i)
+    merged, id_map = [], {}
+    for idxs in groups.values():
+        members = [items[k] for k in idxs]
+        rep = members[0]
+        mid = rep["key"] if len(members) == 1 else "+".join(sorted(m["key"] for m in members))
+        merged.append({"id": mid, "E": rep["E"], "N": rep["N"], "pt": np.array([rep["E"], rep["N"]])})
+        for m in members:
+            id_map[m["key"]] = mid
+    return merged, id_map, pairs
+
+
+def merge_edges_cross(sheets):
+    """A record course drawn on two sheets (same record az/ft, endpoints within EDGE_DUP_TOL_FT in either
+    orientation) collapses to ONE edge before the graph is built -- JR's own rule (task 1): without this a
+    shared matchline course would appear as two near-identical parallel candidates at the same node and the
+    walk would see a false branch there instead of one clean course through. Every sheet-local edge is
+    renamed "<sheet>:<name>" first (a raw name is only unique within its own sheet); a collapsed edge's own
+    display name joins every contributing "<sheet>:<name>" with " | " (cosmetic only -- a real course name
+    can itself contain "+" or ":", e.g. "S52 deg28'06"E + 110.52'", so which sheet(s)/original name(s) a
+    merged edge carries is NEVER recovered by re-parsing that string: each edge also carries its own
+    "parts" list of {sheet, orig_name} structured pairs for that). Returns (merged edges
+    [name/kind/az/ft/misfit_ft/p/q/sheets/parts], duplicate-pair report)."""
+    items = []
+    for key, d in sheets.items():
+        for e in d["edges"]:
+            items.append({"sheet": key, "orig_name": e["name"], "kind": e["kind"], "az": e["az"], "ft": e["ft"],
+                          "misfit_ft": e["misfit_ft"], "p": np.array(e["p"]), "q": np.array(e["q"])})
+    n = len(items)
+    find, union = _union_find(n)
+    if n:
+        ends = np.array([it["p"] for it in items] + [it["q"] for it in items])
+        tree = cKDTree(ends)
+        for i in range(n):
+            for end_pt in (items[i]["p"], items[i]["q"]):
+                for j2 in tree.query_ball_point(end_pt, EDGE_DUP_TOL_FT):
+                    j = j2 % n
+                    if j == i or items[i]["sheet"] == items[j]["sheet"]:
+                        continue
+                    ei, ej = items[i], items[j]
+                    d_same = max(float(np.hypot(*(ei["p"] - ej["p"]))), float(np.hypot(*(ei["q"] - ej["q"]))))
+                    d_opp = max(float(np.hypot(*(ei["p"] - ej["q"]))), float(np.hypot(*(ei["q"] - ej["p"]))))
+                    if d_same <= EDGE_DUP_TOL_FT:
+                        az_j = ej["az"]
+                    elif d_opp <= EDGE_DUP_TOL_FT:
+                        az_j = (ej["az"] + 180) % 360
+                    else:
+                        continue
+                    if abs((ei["az"] - az_j + 180) % 360 - 180) > EDGE_AZ_TOL_DEG:
+                        continue
+                    if abs(ei["ft"] - ej["ft"]) > EDGE_FT_TOL:
+                        continue
+                    union(i, j)
+    groups = {}
+    for i in range(n):
+        groups.setdefault(find(i), []).append(i)
+    merged, dup_report = [], []
+    for idxs in groups.values():
+        members = [items[k] for k in idxs]
+        keep = members[0]
+        name = (f"{keep['sheet']}:{keep['orig_name']}" if len(members) == 1
+                else " | ".join(sorted(f"{m['sheet']}:{m['orig_name']}" for m in members)))
+        merged.append({"name": name, "kind": keep["kind"], "az": keep["az"], "ft": keep["ft"],
+                       "misfit_ft": min(m["misfit_ft"] for m in members), "p": keep["p"], "q": keep["q"],
+                       "sheets": sorted({m["sheet"] for m in members}),
+                       "parts": [{"sheet": m["sheet"], "orig_name": m["orig_name"]} for m in members]})
+        if len(members) > 1:
+            dup_report.append({"course": name, "sheets": sorted({m["sheet"] for m in members}),
+                               "ft": [round(m["ft"], 2) for m in members], "az": [round(m["az"], 3) for m in members]})
+    return merged, dup_report
+
+
+def merge_half_rows_cross(sheets):
+    out = []
+    for key, d in sheets.items():
+        for r in d["half_rows"]:
+            out.append({"name": f"{key}:{r['name']}", "kind": r["kind"], "az": r["az"], "ft": r["ft"],
+                        "half": r["half"], "p": np.array(r["p"]), "q": np.array(r["q"])})
+    return out
+
+
+def render_cross_crop(chain, edges_by_name, tag):
+    """No PDF background (a cross-sheet chain spans more than one sheet's own page, which share no raster)
+    -- a ground-only line plot, courses colored by which sheet drew them (red for a course drawn on 2+
+    sheets, i.e. a shared matchline collapsed by merge_edges_cross()). All three south sheets already land
+    in the same EPSG:2227 ground frame (every sheet's own georef fit, recon_set.py's own pooling, load_
+    faces()'s own transform all rely on the identical fact), so no per-sheet transform is needed here."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    color_by_sheet = {"presidio": "#1f77b4", "r10434_1": "#ff7f0e", "r10434_3": "#9467bd"}
+    first = edges_by_name[chain["courses"][0]["name"]]
+    pos = first["p"].copy()
+    path = [pos.copy()]
+    seg_sheets = []
+    for co in chain["courses"]:
+        e = edges_by_name[co["name"]]
+        fwd = float(np.hypot(*(pos - e["p"]))) <= float(np.hypot(*(pos - e["q"])))
+        pos = apply_record(pos, e, fwd)
+        path.append(pos.copy())
+        seg_sheets.append(e["sheets"])
+    path = np.array(path)
+    fig, ax = plt.subplots(figsize=(6, 6), dpi=150)
+    for i in range(len(path) - 1):
+        sh = seg_sheets[i]
+        c = color_by_sheet.get(sh[0], "#999999") if len(sh) == 1 else "#e03030"
+        ax.plot(path[i:i + 2, 0], path[i:i + 2, 1], color=c, lw=2.2, marker="o", ms=4, zorder=3)
+    handles = [plt.Line2D([0], [0], color=c, lw=2, label=k) for k, c in color_by_sheet.items()]
+    handles.append(plt.Line2D([0], [0], color="#e03030", lw=2, label="shared matchline course"))
+    ax.legend(handles=handles, fontsize=7, loc="best")
+    ax.set_aspect("equal")
+    ax.set_title(f"cross-sheet {chain['start']}->{chain['end']} ({chain['status']}, {chain['n_courses']} courses, "
+                 f"misclosure {chain['misclosure_ft']}')", fontsize=7)
+    OUT_RECON.mkdir(parents=True, exist_ok=True)
+    safe = re.sub(r"[^A-Za-z0-9_-]+", "_", f"{chain['start']}_{chain['end']}_{tag}")[:120]
+    fig.savefig(OUT_RECON / f"l19_4_{safe}.png")
+    plt.close(fig)
+
+
+def run_cross():
+    """leg 4 task 1: dump the three south sheets' own ground anchors/edges (subprocess per sheet, correct
+    SHEET env each time -- same launcher pattern run_all() already uses for `main()`), pool and dedupe
+    them (merge_anchors_cross/merge_edges_cross), then reuse the SAME walk + branch-resolution machinery
+    legs 1-2 already built, unmodified, on the merged graph ("forks resolved only by closure", JR's own
+    task 1 wording -- leg 1's walk, leg 2's branch resolution; NOT leg 3's closure_fills(), deliberately
+    left out here: a half-recorded row's "distance unknown, solve however far it takes to reach anchor A2"
+    branch is calibrated for A2 candidates a few hundred ft away within one sheet's own small anchor pool
+    -- pooling three sheets widens that pool enough that BEARING_TOL_DEG (1 deg) let a spurious ~4,700 ft
+    "solve" through on a real run of this data, accepted only because SOME far-off anchor happened to sit
+    within 1 deg of the row's own bearing and a real chain happened to close from there -- a coincidence,
+    not a record-verified course. Measured, not fixed: this leg reports pooled walk/branch results only.
+    A chain is "new" (exists only because of the cross-sheet join) when its own courses touch more than
+    one sheet -- either a single shared/collapsed course (drawn on 2 sheets) or a run that crosses from
+    one sheet's own edges to another's through a merged node. New closed/branch-resolved chains' own
+    course names are written per contributing sheet to xsheet_extra_<key>.json; `main()`'s own per-sheet
+    run (called AFTER this, see run_all()) folds them into that sheet's own anchored_coverage() call, so
+    the ft gain lands in that sheet's recon_segments.json "anchored" column and flows to recon_set.py's
+    set-level recon_anchored_set_pct with no separate code path."""
+    for key, pdf in SHEET_PDF.items():
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+        if pdf:
+            env["SHEET"] = str(pdf)
+        else:
+            env.pop("SHEET", None)
+        r = subprocess.run([str(PY), str(Path(__file__)), "--dump", key], capture_output=True, text=True,
+                            encoding="utf-8", errors="replace", env=env, cwd=ROOT)
+        print(r.stdout.strip())
+        if r.returncode:
+            raise SystemExit(f"--dump {key} failed:\n" + "\n".join(r.stderr.splitlines()[-30:]))
+
+    sheets = {key: json.loads((OUT_RECON / f"xsheet_{key}.json").read_text(encoding="utf-8")) for key in SHEET_PDF}
+    anchors, id_map, anchor_pairs = merge_anchors_cross(sheets)
+    edges, edge_dups = merge_edges_cross(sheets)
+    adj, node_pos = build_graph(edges)
+    chains, unplaced = run_walks(anchors, edges, adj, node_pos)
+
+    edges_by_name = {e["name"]: e for e in edges}
+
+    def sheets_of(c):
+        s = set()
+        for co in c["courses"]:
+            s.update(edges_by_name[co["name"]]["sheets"])
+        return s
+
+    closed = [c for c in chains if c["status"] == "closed"]
+    failed = [c for c in chains if c["status"] == "failed"]
+    new_closed = [c for c in closed if len(sheets_of(c)) > 1]
+    new_failed = [c for c in failed if len(sheets_of(c)) > 1]
+
+    names_by_sheet = {key: set() for key in SHEET_PDF}
+    for c in new_closed:
+        for co in c["courses"]:
+            for part in edges_by_name[co["name"]]["parts"]:
+                names_by_sheet[part["sheet"]].add(part["orig_name"])
+    for key, names in names_by_sheet.items():
+        (OUT_RECON / f"xsheet_extra_{key}.json").write_text(json.dumps(sorted(names)), encoding="utf-8")
+
+    out = {"n_anchors": len(anchors), "anchor_pairs": anchor_pairs, "edge_dups": edge_dups, "n_edges": len(edges),
+           "n_nodes": len(node_pos), "closed": closed, "failed": failed,
+           "new_closed": new_closed, "new_failed": new_failed,
+           "extra_names_by_sheet": {k: sorted(v) for k, v in names_by_sheet.items()}}
+    OUT_RECON.mkdir(parents=True, exist_ok=True)
+    (OUT_RECON / "anchored_cross.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+
+    for i, c in enumerate(new_closed):
+        render_cross_crop(c, edges_by_name, f"closed{i}")
+    for i, c in enumerate(new_failed):
+        render_cross_crop(c, edges_by_name, f"failed{i}")
+
+    n_disagree = sum(1 for p in anchor_pairs if not p["agrees"])
+    print(f"cross-sheet (south set): {len(anchors)} anchors pooled ({len(anchor_pairs)} matched pairs, "
+          f"{n_disagree} disagree > {ANCHOR_AGREE_FT} ft) | {len(edges)} edges ({len(edge_dups)} matchline "
+          f"pairs collapsed) | {len(new_closed)} new closed, {len(new_failed)} new failed chains "
+          f"(cross-sheet join only)")
+    return out
+
+
 # --- output (leg 4) -------------------------------------------------------------------------------------
 
 def render_crop(key, g, chain, tag, prefix="l19_1"):
@@ -781,6 +1061,14 @@ def main(sheet_name, key):
     adj, node_pos = build_graph(rec_edges)
     chains, unplaced = run_walks(anchors, rec_edges, adj, node_pos)
     anchors_by_id = {a["id"]: a for a in anchors}
+    # leg 4: run_cross() (if it ran first -- see run_all()) writes this sheet's own SHARE of the new
+    # closed/branch-resolved chains that exist only via the cross-sheet join (a chain whose courses span
+    # >1 sheet). Folded into `names` below, same as a within-sheet closed chain -- anchored_coverage()
+    # matches by rec_edges name either way, so this sheet's own recon_segments.json "anchored" column
+    # (and recon_set.py's downstream pooled recon_anchored_set_pct) picks up the cross-sheet gain with no
+    # separate code path. Absent file (no --cross run, or nothing new for this sheet) -> unchanged.
+    cross_extra = OUT_RECON / f"xsheet_extra_{key}.json"
+    cross_names = set(json.loads(cross_extra.read_text(encoding="utf-8"))) if cross_extra.exists() else set()
 
     closed = [c for c in chains if c["status"] == "closed"]
     failed = [c for c in chains if c["status"] == "failed"]
@@ -799,7 +1087,7 @@ def main(sheet_name, key):
     # leg 2+3: recon_anchored -- boundary ft covered by a reconstructed edge that belongs to a closed
     # chain (leg 1/2) OR a closure-stitched one (leg 3), PLUS the accepted fill's own new segment
     # (never in rec_edges, so closed_edge_names()/anchored_coverage() alone can never see it).
-    names = closed_edge_names(chains) | closed_edge_names(closure_stitched)
+    names = closed_edge_names(chains) | closed_edge_names(closure_stitched) | cross_names
     anch_covered_ft, anch_denom_ft, anch_seg_kept = anchored_coverage(internals, names)
     closure_ft, closure_seg_kept = closure_coverage(internals, filled_edges)
     combined_seg_kept = anch_seg_kept | closure_seg_kept
@@ -869,6 +1157,11 @@ def render_chain_crop(key, g, chain, anchors_by_id, rec_edges, tag, prefix="l19_
 
 
 def run_all():
+    # leg 4: cross-sheet FIRST (its own --dump subprocesses recompute anchors/edges independently of
+    # main()), so the per-sheet xsheet_extra_<key>.json files it writes exist before main() runs and can
+    # fold straight into each sheet's own anchored_coverage() call below -- one main() pass per sheet, not
+    # two.
+    run_cross()
     for key, pdf in SHEET_PDF.items():
         env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
         if pdf:
@@ -941,6 +1234,47 @@ def write_report():
                 diff_s = f"{p['diff_pct']:+.1f}%" if p["diff_pct"] is not None else ""
                 lines.append(f"| {p['parcel']} | {p['face_area_sqft']:,.0f} | {ra_s} | {diff_s} |")
         lines.append("")
+
+    cross_p = OUT_RECON / "anchored_cross.json"
+    if cross_p.exists():
+        cx = json.loads(cross_p.read_text(encoding="utf-8"))
+        lines.append("## cross-sheet (south set: presidio + r10434_1 + r10434_3)\n")
+        n_disagree = sum(1 for p in cx["anchor_pairs"] if not p["agrees"])
+        lines.append(f"anchors pooled {cx['n_anchors']} | edges pooled {cx['n_edges']} "
+                      f"({len(cx['edge_dups'])} matchline pairs collapsed) | anchor pairs matched "
+                      f"{len(cx['anchor_pairs'])} ({n_disagree} disagree > {ANCHOR_AGREE_FT} ft)\n")
+        if cx["anchor_pairs"]:
+            lines.append("| a | b | dist ft | agrees (<= 0.1 ft) |")
+            lines.append("|---|---|---|---|")
+            for p in cx["anchor_pairs"]:
+                lines.append(f"| {p['a']} | {p['b']} | {p['dist_ft']} | {'Y' if p['agrees'] else 'N'} |")
+        if cx["edge_dups"]:
+            lines.append("\n| collapsed course | sheets | record ft (each copy) | record az deg (each copy) |")
+            lines.append("|---|---|---|---|")
+            for d in cx["edge_dups"]:
+                lines.append(f"| {d['course']} | {', '.join(d['sheets'])} | {d['ft']} | {d['az']} |")
+        lines.append(f"\nnew (cross-sheet-join-only) closed {len(cx['new_closed'])} | "
+                      f"failed {len(cx['new_failed'])}\n")
+        if cx["new_closed"]:
+            lines.append("| start | end | courses | length ft | misclosure ft |")
+            lines.append("|---|---|---|---|---|")
+            for c in cx["new_closed"]:
+                lines.append(f"| {c['start']} | {c['end']} | {c['n_courses']} | {c['length_ft']} | {c['misclosure_ft']} |")
+        if cx["new_failed"]:
+            lines.append("\n| start | end | courses | length ft | misclosure ft | worst course |")
+            lines.append("|---|---|---|---|---|---|")
+            for c in cx["new_failed"]:
+                lines.append(f"| {c['start']} | {c['end']} | {c['n_courses']} | {c['length_ft']} | "
+                              f"{c['misclosure_ft']} | {c['worst_course']} ({c['worst_misfit_ft']}') |")
+        lines.append("\nponytail: leg 3's closure_fills() (half-recorded row completed by a third anchor) "
+                      "is NOT run on the cross-sheet graph -- task 1 asks only for the walk + branch "
+                      "resolution (legs 1-2); a real run of this data showed why: pooling three sheets' "
+                      "anchors widens the half-recorded row's own third-anchor search enough that "
+                      "BEARING_TOL_DEG (1 deg, fine within one sheet's small local pool) let a spurious "
+                      "~4,700 ft distance solve through as \"accepted\" on a coincidental bearing match, "
+                      "not a record-verified course.\n")
+        lines.append("")
+
     total_accepted = total_ft = 0
     for key in SHEET_PDF:
         fp = OUT_RECON / f"anchored_{key}.json"
@@ -1100,6 +1434,36 @@ def selftest():
     assert all("agrees" in c["reason"] for c in cands_a), f"accepted-by-agreement reason must say so: {cands_a}"
     assert len(stitched_a) == 2 and len(filled_a) == 2, f"both agreeing fills must be stitched and scored: {stitched_a} {filled_a}"
 
+    # leg 4: two sheets' own copies of one matchline course (near-coincident endpoints, agreeing record
+    # az/ft) collapse to one edge; a genuinely different course a few ft off never merges. A printed
+    # coordinate on two sheets, agreeing within 0.1 ft, collapses to one anchor.
+    sheets_edges = {
+        "s1": {"anchors": [], "half_rows": [],
+               "edges": [{"name": "e0", "kind": "line", "az": 90.0, "ft": 100.0, "misfit_ft": 0.02,
+                          "p": [0.0, 0.0], "q": [100.0, 0.0]},
+                         {"name": "far", "kind": "line", "az": 90.0, "ft": 50.0, "misfit_ft": 0.02,
+                          "p": [0.0, 5.0], "q": [50.0, 5.0]}]},
+        "s2": {"anchors": [], "half_rows": [],
+               "edges": [{"name": "eA", "kind": "line", "az": 90.05, "ft": 100.02, "misfit_ft": 0.03,
+                          "p": [0.3, 0.1], "q": [100.2, -0.1]}]},
+    }
+    merged_edges, edge_dups = merge_edges_cross(sheets_edges)
+    assert len(merged_edges) == 2, f"one shared course collapses, the 5 ft-off one stays separate: {merged_edges}"
+    shared = next(e for e in merged_edges if e["name"] != "s1:far")
+    assert sorted(shared["sheets"]) == ["s1", "s2"], f"collapsed edge must carry both sheets: {shared}"
+    assert sorted(p["sheet"] for p in shared["parts"]) == ["s1", "s2"], f"parts must name each sheet's own course: {shared}"
+    assert len(edge_dups) == 1 and sorted(edge_dups[0]["sheets"]) == ["s1", "s2"], f"collapse must be reported: {edge_dups}"
+
+    sheets_anchors = {
+        "s1": {"edges": [], "half_rows": [], "anchors": [{"id": "CO1", "E": 1000.0, "N": 2000.0}]},
+        "s2": {"edges": [], "half_rows": [], "anchors": [{"id": "CO9", "E": 1000.05, "N": 2000.0},
+                                                          {"id": "CO10", "E": 5000.0, "N": 2000.0}]},
+    }
+    merged_anchors, id_map, pairs = merge_anchors_cross(sheets_anchors)
+    assert len(merged_anchors) == 2, f"the agreeing pair merges, the far one stays its own anchor: {merged_anchors}"
+    assert len(pairs) == 1 and pairs[0]["agrees"], f"a 0.05 ft pair must be reported and agree (<= 0.1 ft): {pairs}"
+    assert id_map["s1:CO1"] == id_map["s2:CO9"], f"the merged pair must share one merged anchor id: {id_map}"
+
     print("anchored.selftest OK: a clean 3-course chain closes within 0.01 ft; a 2 ft distance error "
           "on one course fails and names that course; a two-way branch resolves when only one "
           "continuation closes, stays open (ambiguous) when both do; leg 3 -- a fill checked by a third "
@@ -1112,6 +1476,10 @@ if __name__ == "__main__":
         selftest()
     elif "--all" in sys.argv:
         run_all()
+    elif "--dump" in sys.argv:
+        dump_ground(sys.argv[sys.argv.index("--dump") + 1])
+    elif "--cross" in sys.argv:
+        run_cross()
     elif len(sys.argv) > 1 and sys.argv[1] in SHEET_PDF:
         key = sys.argv[1]
         sheet_name = "presidio" if key == "presidio" else next(k for k, v in inverse.SHEET_NAMES.items() if v == key)

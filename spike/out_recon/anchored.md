@@ -67,6 +67,17 @@ closure fills -- leg 3, a fill counts only when a second landing checks it:
 | T-4->T-3 | N35°15'31"W | distance | 198.231 ft | 183.05 ft (+15.181 ft) | refused | unchecked (no third anchor reached) | 0.0 |
 | T-18->T-16 | S87°48'20"E | distance | 973.14 ft | 114.29 ft (+858.850 ft) | refused | unchecked (no third anchor reached) | 0.0 |
 
+## cross-sheet (south set: presidio + r10434_1 + r10434_3)
+
+anchors pooled 66 | edges pooled 139 (0 matchline pairs collapsed) | anchor pairs matched 0 (0 disagree > 0.1 ft)
+
+
+new (cross-sheet-join-only) closed 0 | failed 0
+
+
+ponytail: leg 3's closure_fills() (half-recorded row completed by a third anchor) is NOT run on the cross-sheet graph -- task 1 asks only for the walk + branch resolution (legs 1-2); a real run of this data showed why: pooling three sheets' anchors widens the half-recorded row's own third-anchor search enough that BEARING_TOL_DEG (1 deg, fine within one sheet's small local pool) let a spurious ~4,700 ft distance solve through as "accepted" on a coincidental bearing match, not a record-verified course.
+
+
 ## set
 
 recon_closure_ft (sum over sheets with anchors -- ponytail: not deduped across matchlines the way recon_set.py's own set numbers are, negligible at 0 accepted fills): 0 accepted, +0.0 ft
