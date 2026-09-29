@@ -17,28 +17,28 @@
   "tables": 4826.4,
   "titleblock": 0.0,
   "matchline": 7269.6,
-  "leader_wedge": 3077.0,
+  "leader_wedge": 3027.3,
   "wedge_residual": 861.1,
   "edge_column": 0.0
  },
  "protected_from_removal_ft": {
-  "leader_wedge": 1282.0,
+  "leader_wedge": 1331.7,
   "wedge_residual": 39.2
  },
  "covered_invariance": {
-  "baseline_raw_ft": 5166.5,
-  "pre_removal_ft": 5166.5,
-  "final_ft": 5166.5,
+  "baseline_raw_ft": 5531.6,
+  "pre_removal_ft": 5531.6,
+  "final_ft": 5531.6,
   "diff_vs_pre_removal_ft": 0.0,
   "diff_vs_raw_ft": 0.0
  },
- "drawn_boundary_ft": 10598.7,
- "reconstructed_edges": 54,
- "traverse_rows": 95,
- "recon_all_covered_ft": 5166.5,
- "recon_all_denom_ft": 10598.7,
- "recon_dim_covered_ft": 5154.1,
- "recon_dim_denom_ft": 10129.4,
+ "drawn_boundary_ft": 10648.4,
+ "reconstructed_edges": 57,
+ "traverse_rows": 90,
+ "recon_all_covered_ft": 5531.6,
+ "recon_all_denom_ft": 10648.4,
+ "recon_dim_covered_ft": 5519.2,
+ "recon_dim_denom_ft": 10179.1,
  "weight_classes": {
   "1.98": {
    "count": 11,
@@ -67,9 +67,9 @@
  },
  "rw_weight": 1.98,
  "buffer_sensitivity_ft": {
-  "1.0pt": 5139.9,
-  "1.5pt": 5164.6,
-  "2.5pt": 5191.5
+  "1.0pt": 5505.9,
+  "1.5pt": 5529.7,
+  "2.5pt": 5560.6
  },
  "parcels_all": {
   "n": 1,
@@ -116,7 +116,7 @@
    "parcel": "",
    "named": false,
    "touches_frame": false,
-   "pct_covered": 20.9,
+   "pct_covered": 46.27,
    "closure_ft": null,
    "counts": false
   },
@@ -196,7 +196,7 @@
    "parcel": "",
    "named": false,
    "touches_frame": false,
-   "pct_covered": 53.13,
+   "pct_covered": 84.71,
    "closure_ft": null,
    "counts": false
   },
@@ -643,6 +643,12 @@
    "misfit_ft": 0.13
   },
   {
+   "name": "L=236.35'",
+   "az": 257.8362,
+   "ft": 235.93,
+   "misfit_ft": 0.15
+  },
+  {
    "name": "S57Â°58'33\"W + 50.14'",
    "az": 237.9758,
    "ft": 50.14,
@@ -823,12 +829,6 @@
    "misfit_ft": 0.08
   },
   {
-   "name": "N68Â°24'07\"E + 245.61'",
-   "az": 248.4019,
-   "ft": 245.61,
-   "misfit_ft": 0.08
-  },
-  {
    "name": "N86Â°55'35\"E + 24.23'",
    "az": 86.9264,
    "ft": 24.23,
@@ -853,6 +853,12 @@
    "misfit_ft": 0.04
   },
   {
+   "name": "N68Â°24'07\"E + 245.61'",
+   "az": 248.4019,
+   "ft": 245.61,
+   "misfit_ft": 0.08
+  },
+  {
    "name": "L6",
    "az": 109.8056,
    "ft": 6.29,
@@ -871,10 +877,22 @@
    "misfit_ft": 0.09
   },
   {
+   "name": "L=130.56'",
+   "az": 83.4039,
+   "ft": 130.52,
+   "misfit_ft": 0.26
+  },
+  {
    "name": "S71Â°35'42\"W + 59.42'",
    "az": 251.595,
    "ft": 59.42,
    "misfit_ft": 0.12
+  },
+  {
+   "name": "L=54.14'",
+   "az": 86.7726,
+   "ft": 54.14,
+   "misfit_ft": 0.21
   },
   {
    "name": "L4",

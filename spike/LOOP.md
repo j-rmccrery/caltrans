@@ -519,3 +519,18 @@ counts each foot of ground once; parcels are scored against the official AREAS t
 | 5 | R from R=/delta/L stacks; chord from alignment BC/EC | L/R = printed delta < 0.02 deg; chord <= 0.5 ft |
 | 6 | cross-sheet parcels; R-10741.2 DETAIL "A" -> 46825-5 | ring closes <= 1 ft on record only |
 | 7 | gold set on R-10741; recon gold join | wrong-pass 0 on keyed clean edges |
+
+# Loop 19 (queued 2026-09-29 ~01:20, JR: "step four ... finally be implemented"): coordinate-anchored rebuild (T-001)
+
+Starts when loop 18 leg 5 returns (commit what it proves first; unresolved radius work folds in or becomes a narrow leg).
+Idea: walk the record between printed coordinates. Start at a printed coordinate on the boundary (Presidio 24, R-10434.1 10,
+R-10434.3 25 within 0.2 ft), apply printed courses in order (bearing+distance, R/delta/L, (T) totals) computing each corner
+from record numbers only (the drawing chooses the order, never a value), accept a chain only when it lands on the next
+printed coordinate within tolerance; a miss is a closure failure naming the likely course. Parcels walked whole between
+anchors and closing count, and are checked against the AREAS table area. Matchline-crossing parcels close in ground.
+
+Legs (draft): 0 fix inverse.corridor_test (wrong reason on the Presidio 1,086 ft run: continuous, bends 4.9 ft at 76 %);
+1 anchor inventory + course graph ordering from the drawing; 2 record walk + closure between anchors, misclosure report;
+3 recon/parcel scoring on anchored chains (own column, set headline with/without); 4 cross-sheet chains.
+Working rules from loop 18: fresh agent per leg with a short brief; fast one-sheet inner loop (traverse + recon only),
+canonical bench once at the end of each leg (run_in_background + poll to 6 rows, one bench at a time).

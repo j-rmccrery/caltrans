@@ -58,6 +58,13 @@ RAD_TOK = re.compile(_NOT_MIDWORD + r"R=([\d,]{1,7}\.\d{2})'?")
 # Δ/△/A marker in front of it stays optional, matching a bare "=2°13'32"" seen on r10434_1
 ANG_TOK = re.compile(_NOT_MIDWORD + r"(?:[Δ△]|A)?=(\d{1,3})°(\d{2})'(\d{2})\"")
 LEN_TOK = re.compile(_NOT_MIDWORD + r"L=(\d{1,5}\.\d{2})'?(\(T\))?")
+STACK_SECOND_PAIR_REACH_PT = 200.0  # pt: how far a SECOND bare L= (evidence of a second delta/L pair
+# sharing one already-joined R=, loop18 leg 5 lever 2's own second-pair push below) may sit from the R=
+# block. Measured on R-10741.1's "R=1169.90' delta=15d39'31" L=319.73' delta=32d20'00" L=660.20'": the
+# whole curve's own "L=660.20'" sits 138 pt from R, past every other reach in this file -- 200 clears it
+# with margin while a curve-dense sheet's own OTHER, unrelated L= blocks are rarely this close to an
+# R= that already has its own pair (the real safety net is attach_nearby_curve_R's chord fit, this is
+# only evidence a second pair might exist at all, not proof of which one).
 STATION = re.compile(r"\d\+\d|\bSTA\b", re.I)  # a block naming a station: the number after + is never a distance,
 # even when it and its +prefix land in separate annotations (checked on the whole block, not the token)
 AREA_CTX = re.compile(r"SQ\.?\s?FT|ACRES?\b|\bAC\.|±", re.I)  # a parcel-area figure, in a bubble, an acreage
@@ -2015,6 +2022,14 @@ def main():
     for lab in labels:
         if lab["kind"] == "arc" and lab.get("region"):
             labels_by_region.setdefault(tuple(lab["region"]), []).append(lab)
+    curve_data_stacks = []  # loop18 leg 5, lever 2: R=/delta PAIRS whose own L fell just outside the tight
+    # join reach -- traverse.py's attach_nearby_curve_R() pairs each with an unrelated-looking but
+    # record-consistent lone-L arc elsewhere on the sheet by geometry (delta consistency + chord fit).
+    # A SEPARATE case -- one shared R read against a second delta/L pair, see the `elif` below -- is
+    # resolved directly here instead, by matching the second L='s own VALUE to a specific already-open
+    # lone-L label; a generic geometric search for it (an earlier version of this leg) duplicate-stacked
+    # already-working curves on Presidio (R=1450.0' etc.) and cost them to new false ambiguity.
+    seen_rd = set()
     for b in curve_blocks:
         parts = b["text"].replace(" ", "").split("|")
         joined = [b]  # every block whose text ended up in `parts`, so the L= value's own drawn fillet
@@ -2043,6 +2058,60 @@ def main():
         R = next((float(m[1].replace(",", "")) for t in parts for m in [RAD_TOK.search(t)] if m), None)
         D = next((dms(*m.groups()[:3]) for t in parts for m in [ANG_TOK.search(t)] if m), None)
         L = next((float(m[1]) for t in parts for m in [LEN_TOK.search(t)] if m), None)
+        if R and D and not L and (R, D) not in seen_rd:
+            # loop18 leg 5, lever 2: an R=/delta PAIR with no L of its own within the tight vertical join
+            # reach (3.2 glyph_h) above -- measured on r10434_3's "R=2075.00'"/"=15 deg 56'53""": its own
+            # delta fragment joins fine (12.2 pt below, under the 23.1 pt cap) but the matching "L=577.57'"
+            # sits 26.5 pt below, 3.4 pt past it (the reviewer's own "22-57 pt away" range is this same gap
+            # measured across every genuine case, not a distance to some unrelated curve). Rather than
+            # loosen the join reach itself (used for every curve-data block on the sheet, including short,
+            # curve-dense corners where a wider reach risks pulling in an unrelated neighbour's L), this
+            # R/delta pair is queued for traverse.py's attach_nearby_curve_R(), which pairs it with an
+            # ALREADY-RESOLVED lone-L arc by its own two independent gates (delta consistency, chord fit)
+            # instead of text layout.
+            seen_rd.add((R, D))
+            curve_data_stacks.append({"R": R, "delta": D, "cx": float(b["cx"]), "cy": float(b["cy"])})
+        elif R and L is not None:
+            # loop18 leg 5 (orchestrator gate, R-10741.1): a compound curve's shared R is printed ONCE
+            # and read against not one but TWO delta/L pairs on one line ("R=1169.90' delta=15d39'31"
+            # L=319.73' delta=32d20'00" L=660.20'") -- the join loop above only ever binds R to the
+            # FIRST/closest pair (here the 319.73' sub-total, already consumed as the R+D+L triple below);
+            # the SECOND pair (660.20' whole curve) sits 138 pt further along the identical reading line
+            # (op@u 137.7, op@n -4.7 -- essentially on the same line, past the join reach), its own delta
+            # a low-confidence, garbled "32d2" + a stray fragment no reader on this sheet ever completes.
+            # Rather than push a generic stack for traverse.py's wide geometric search (measured: even a
+            # collinear-gated version still duplicate-stacked and cost r10434_1/presidio/r10434_3 their
+            # already-working accepts to new false ambiguity -- two DIFFERENT reasons a stack can go wrong
+            # on a curve-dense sheet is one too many), this ATTACHES DIRECTLY to the one specific,
+            # already-independently-validated lone-L label the second L= text names -- found by VALUE
+            # (its own printed L, matched to that label's own "ft" -- the reviewer's own framing: "bind R
+            # and delta to the arc label whose printed L equals that block's L"), not by a geometric
+            # search that has to guess which nearby arc is meant. Still never a guess: gated on the label
+            # being a UNIQUE match (no other still-open lone-L label shares this exact L, to 0.01 ft) AND
+            # the resulting chord (2R*sin(delta/2), delta = L/R) agreeing with the label's own drawn chord
+            # within 0.5 ft, same tolerance every other chord-fit gate in this file uses.
+            c2, u2, n2 = c, u, n
+            for lb in curve_blocks:
+                if lb in joined or not LEN_TOK.search(lb["text"]) or RAD_TOK.search(lb["text"]) or ANG_TOK.search(lb["text"]):
+                    continue
+                op2 = np.array([lb["cx"], lb["cy"]]) - c2
+                if not (abs(op2 @ n2) < 3.2 * b["glyph_h"] and 0 < op2 @ u2 < STACK_SECOND_PAIR_REACH_PT):
+                    continue
+                L2 = float(LEN_TOK.search(lb["text"])[1])
+                targets = [lab for lab in labels if lab["kind"] == "arc" and lab.get("ok") and "R" not in lab
+                           and "ft" in lab and abs(lab["ft"] - L2) <= 0.01]
+                if len(targets) != 1:
+                    continue  # no open lone-L label at this value, or an ambiguous tie: refused
+                target = targets[0]
+                delta2 = math.degrees(L2 / R)
+                chord2 = 2 * R * math.sin(math.radians(delta2) / 2)
+                line2 = target["line"]
+                drawn_chord2 = float(np.hypot(line2[-1][0] - line2[0][0], line2[-1][1] - line2[0][1])) * scale
+                if abs(chord2 - drawn_chord2) > 0.5:
+                    continue
+                target["R"] = R
+                target["delta"] = delta2
+                target["R_source"] = f"shared R from {b['text']!r} (second delta/L pair on the same reading line)"
         if R and D and L and (R, D, L) not in seen:  # a joined block and its paired neighbour(s) can
             seen.add((R, D, L))                       # each independently gather the same full triple
             calc = R * math.radians(D)
@@ -2113,8 +2182,22 @@ def main():
                     labels.append({"kind": "arc", "printed": printed, "ft": L, "R": R, "delta": D, "line": shape(pieces[0]), "ok": ok2, "how": "leader" if tip else "beside", "region": region(len_block)})
                     if not ok2:
                         exceptions.append({"kind": "arc length", "text": printed, "drawn_ft": round(drawn, 2), "off_ft": round(drawn - L, 2), "region": region(len_block), "line": shape(pieces[0])})
+            else:
+                # loop18 leg 5, lever 2: no drawn fillet within `reach` of THIS block at all -- on the
+                # south sheets this is never a misread, it's a printed R=/delta/L stack that describes a
+                # CURVE TOO LONG for the small fillet-radius search above (that search deliberately caps
+                # candidates at the printed L itself, line 2074, and stays local to `reach` -- right for
+                # an 8-17 ft corner fillet, wrong for a real R/W curve of hundreds of feet). The pipeline
+                # still validated this triple's own internal consistency (L=R*delta, the "curve L=R*delta"
+                # row above) -- it just has nowhere on THIS sheet to place a drawn span. Recorded here,
+                # not guessed at: traverse.py's attach_nearby_curve_R() pairs it (by proximity, then a
+                # delta-consistency + chord check against the CANDIDATE arc's own drawn geometry, never
+                # this block's) with a lone L=-only arc edge elsewhere on the sheet whose own record L
+                # already agrees with this R/delta.
+                curve_data_stacks.append({"R": R, "delta": D, "L": L, "cx": float(len_block["cx"]), "cy": float(len_block["cy"])})
 
     (OUT / "labels.json").write_text(json.dumps(labels, ensure_ascii=False), encoding="utf-8")
+    (OUT / "curve_data.json").write_text(json.dumps(curve_data_stacks, ensure_ascii=False), encoding="utf-8")
     (OUT / "radials.json").write_text(json.dumps(radials, ensure_ascii=False), encoding="utf-8")
     with open(OUT / "checks.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["check", "printed", "drawn", "difference", "result"]); w.writerows(rows)

@@ -458,9 +458,9 @@ def main():
             if how == "beside" and cands[0][0] > 8.0:
                 how += "; beside too far"
             curve_hits.append((t, row, seg, how, region))
-            # ponytail: a curve tag's pass/queue decision is finalized later (the row_run/group
-            # emission below), so it still gets placed unconditionally here, same as before this leg --
-            # no queued curve tag was found in evidence for target 1; revisit if one turns up
+            # a curve tag's pass/queue decision is finalized later (the row_run/group emission below,
+            # by_parent loop), so it still gets placed unconditionally here -- filtered back out by
+            # curve_len_ok once every tag's outcome is known (loop18 leg 5)
             placed.append(entry)
 
     # loop9 leg A rule 3: NO.-int -> the resolved (t, row, seg, how, region) hit for every curve tag that
@@ -499,6 +499,7 @@ def main():
                             out.append([t["tag"], "arc length", f"{row['L']:.2f}", sum_str, f"{rdrawn - total:+.2f}", "FAIL", how])
                         prefix = "association unproven: " if forced else "wrong line likely: " if queued else ""
                         queue.append({"tag": t["tag"], "issue": prefix + f"drawn run {rdrawn:.2f} ft vs row-run table total {total:.2f} ft ({label})", "region": region, "line": shape(span_pieces[-1])})
+                    curve_len_ok[t["tag"]] = by_sum
                     continue
                 d = seg["len_pt"] * scale
                 queued = forced or wrong_line_likely("arc length", d - row["L"], row["L"])
@@ -506,6 +507,7 @@ def main():
                     out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{d:.2f}", f"{d - row['L']:+.2f}", "FAIL", how])
                 prefix = "association unproven: " if forced else "wrong line likely: " if queued else ""
                 queue.append({"tag": t["tag"], "issue": prefix + f"drawn {d:.2f} ft vs table {row['L']:.2f} ft", "region": region, "line": shape(seg)})
+                curve_len_ok[t["tag"]] = False
             return
         Ls = [row["L"] for t, row, seg, how, region in sub]
         total, by_sum = run_sum(drawn, Ls)
@@ -514,6 +516,7 @@ def main():
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f} = {' + '.join(f'{x:.2f}' for x in Ls)}", f"{drawn - total:+.2f}",
                             f"pass as a run of {len(Ls)}: the boundary between these arcs is not drawn", how])
                 group_fires += 1
+                curve_len_ok[t["tag"]] = True
             else:
                 forced = "resolved-by" in how or "beside too far" in how or "radius unproven" in how
                 queued = forced or wrong_line_likely("arc length", drawn - row["L"], row["L"])
@@ -521,8 +524,18 @@ def main():
                     out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "FAIL", how])
                 prefix = "association unproven: " if forced else "wrong line likely: " if queued else ""
                 queue.append({"tag": t["tag"], "issue": prefix + f"drawn run {drawn:.2f} ft vs table {row['L']:.2f} ft (run holds {len(Ls)} tags summing {total:.2f})", "region": region, "line": shape(ref_seg)})
+                curve_len_ok[t["tag"]] = False
 
     row_run_fires = 0  # leg9A: tags that only passed as a run of consecutive table rows (some untagged)
+    # loop18 leg 5: whether a curve tag's own arc-length check settled on a clean pass (True), a
+    # confirmed FAIL or an unproven/queued association (False) -- every curve tag in curve_hits gets an
+    # entry here exactly once (the total/ok_l/window branches below and emit_run() between them cover
+    # every path out of the by_parent loop). A line tag is already excluded from `placed` at push time
+    # when queued (loop17 leg B); a curve tag used to be placed unconditionally ("ponytail: ... revisit
+    # if one turns up" -- one has: R-10434.3's C26, off by 83.88 ft, silently walked into the traverse
+    # by radial anyway) because its pass/fail isn't known until this loop runs, well after push time --
+    # filtered out of `placed` below once every tag's outcome is in.
+    curve_len_ok = {}
     by_parent = {}
     for hit in curve_hits:
         by_parent.setdefault(hit[2]["parent"], []).append(hit)
@@ -565,10 +578,12 @@ def main():
                 if not ok_t:
                     prefix = "association unproven: " if forced else "wrong line likely: " if queued_t else ""
                     queue.append({"tag": t["tag"], "issue": prefix + f"drawn run {drawn:.2f} ft vs table total {row['L']:.2f} ft", "region": region, "line": shape(seg)})
+                curve_len_ok[t["tag"]] = ok_t
                 continue
             ok_l = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
             if ok_l:
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "pass", how])
+                curve_len_ok[t["tag"]] = True
                 continue
             window = parent_window(arcs, seg, row["L"], scale)
             if window is not None:
@@ -576,6 +591,7 @@ def main():
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{wdrawn:.2f} = " + " + ".join(f"{x['len_pt'] * scale:.2f}" for x in window),
                             f"{wdrawn - row['L']:+.2f}", f"pass as a run of {len(window)}: the boundary within its own curve is not drawn", how])
                 window_fires += 1
+                curve_len_ok[t["tag"]] = True
                 continue
             remaining.append((t, row, seg, how, region))
         # pieces carrying "seq" (split_at's own cuts) span the outermost marks in seq order; a candidate
@@ -591,6 +607,15 @@ def main():
             span_pieces = sorted((x for x in arcs if x.get("parent") == parent and "seq" in x and lo <= x["seq"] <= hi), key=lambda x: x["seq"])
             drawn = sum(x["len_pt"] for x in span_pieces) * scale
             emit_run(seqed, drawn, max(span_pieces, key=lambda x: x["len_pt"]))
+
+    # loop18 leg 5: drop a curve tag whose own arc-length check settled on a confirmed FAIL or an
+    # unproven/queued association -- every curve tag placed above got pushed unconditionally (the
+    # by_parent loop needed to run first to know which), same discipline a line tag already gets at
+    # push time (loop17 leg B). Measured: R-10434.3's C26 (FAIL, drawn 244.10 vs table 328.02, off
+    # 83.88 ft -- its printed length reaches into a "SEE DETAIL A" cross-sheet inset this sheet's own
+    # pool can't see) used to reach tag_labels.json anyway and get a record chord direction from a
+    # nearby radial in traverse.py, walking the wrong 83.88 ft of curve as if it were record-clean.
+    placed = [e for e in placed if e["kind"] != "curve" or curve_len_ok.get(e["tag"], False)]
 
     with open(OUT / "tags_checks.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.writer(f); w.writerow(["tag", "check", "printed", "drawn", "difference", "result", "association"]); w.writerows(out)

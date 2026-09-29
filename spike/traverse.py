@@ -564,6 +564,88 @@ def share_curve_radius(edges, scale):
     return filled
 
 
+CURVE_DATA_REACH_PT = 70.0  # pt: how far a printed R=/delta/L stack may sit from the LABEL of a lone-L
+# arc edge it completes (attach_nearby_curve_R). Reviewer's own manual measure of 13 genuine pairs on
+# the 6 gate sheets found the R text sitting 22-57 pt from its own arc's label; 70 clears the widest
+# measured case with margin while staying well short of pulling in an unrelated curve elsewhere on a
+# busy sheet -- the two independent numeric gates below (delta consistency, chord fit) are what actually
+# keep a same-sheet coincidence out, this radius is only a first, cheap prefilter.
+
+
+def attach_nearby_curve_R(edges, curve_data, scale):
+    """Loop18 leg 5, lever 2: a lone-L arc edge (its own record length already resolved and checked by
+    checks.py, "ok": True, but never printed beside any R=/delta value of its own -- these carry "L" but
+    no "R" here) sometimes has its R/delta printed as a SEPARATE R=/delta PAIR elsewhere on the sheet
+    with no drawn fillet within reach of ITS OWN position: checks.py's own fillet-radius search
+    deliberately caps candidates at the printed L itself and stays local (right for an 8-17 ft corner
+    fillet, wrong for a real R/W curve of hundreds of feet) -- see checks.py's curve_blocks loop, the
+    branch that collects these into curve_data.json instead of silently dropping them. (A DIFFERENT case
+    -- a compound curve's one shared R read against a SECOND delta/L pair further along the same
+    annotation, e.g. R-10741.1's "R=1169.90' delta=15d39'31" L=319.73' delta=32d20'00" L=660.20'" -- is
+    resolved directly in checks.py by matching the second L= text's own VALUE to the specific open lone-L
+    label it names, never through this generic search; seeing every candidate's own drawn geometry from
+    just an R's position was too easy to fool on a curve-dense sheet, see checks.py's own "second pair"
+    comment for what that cost before it moved there.)
+    Never guessed: a stack is attached to a candidate arc edge only when (a) the candidate's own already-
+    record L, divided by the stack's R, agrees with the stack's own printed delta within
+    DELTA_CONSISTENCY_TOL_DEG (the same L=R*theta identity check used everywhere else in this file), and
+    (b) the resulting chord (2*R*sin(delta/2)) agrees with the candidate's own DRAWN chord (its matched
+    piece's endpoints, in ground ft) within 0.5 ft -- record R + record delta + drawn geometry all
+    agreeing independently, the same two-gate discipline RADIAL_CENTER_TOL_FT/TANGENT_TOL_DEG already use
+    together for a radial. Multiple curve_data entries sharing the same R are merged into one donor first
+    (two printed occurrences of one real curve's R should never double-vote it); an R that (after
+    merging) still qualifies for more than one candidate, or a candidate with more than one qualifying R,
+    is ambiguous UNLESS exactly one of the candidate's own qualifying R's is itself globally unambiguous
+    (matches no other candidate) -- a same-sheet coincidence must never block a DIFFERENT candidate's own
+    single clean donor.
+    Sets "R", "delta" and "R_source" on a completed edge; mutates edges in place. Returns the count
+    filled. Must run before complete_curve_chords (which requires "R")."""
+    candidates = [e for e in edges if e["kind"] == "arc" and "R" not in e and "L" in e
+                  and not e.get("impossible") and e.get("region") is not None]
+
+    def region_pt(e):
+        x0, y0, x1, y1 = e["region"]
+        return np.array([(x0 + x1) / 2.0, (y0 + y1) / 2.0])
+
+    positions_by_r = {}  # R -> [own printed position, ...] (every occurrence, for the reach test)
+    delta_by_r = {}       # R -> its own printed delta (every curve_data entry has one)
+    for stack in curve_data:
+        positions_by_r.setdefault(stack["R"], []).append(np.array([stack["cx"], stack["cy"]]))
+        delta_by_r.setdefault(stack["R"], stack["delta"])
+
+    by_edge = {}       # id(candidate edge) -> {R: delta_computed} that pass both gates against it
+    cand_count_by_r = {}  # R -> count of DISTINCT candidate edges it passed both gates against
+    for R, positions in positions_by_r.items():
+        delta_known = delta_by_r[R]
+        for e in candidates:
+            if min(float(np.hypot(*(region_pt(e) - p))) for p in positions) > CURVE_DATA_REACH_PT:
+                continue
+            delta = math.degrees(e["L"] / R)
+            if abs(delta - delta_known) > DELTA_CONSISTENCY_TOL_DEG:
+                continue
+            chord = 2 * R * math.sin(math.radians(delta) / 2)
+            drawn_chord = float(np.hypot(*(e["p1"] - e["p0"]))) * scale
+            if abs(chord - drawn_chord) > 0.5:
+                continue
+            by_edge.setdefault(id(e), {})[R] = delta
+            cand_count_by_r[R] = cand_count_by_r.get(R, 0) + 1
+
+    filled = 0
+    for e in candidates:
+        cands = by_edge.get(id(e))
+        if not cands:
+            continue
+        clean = {R: delta for R, delta in cands.items() if cand_count_by_r[R] == 1}
+        if len(clean) != 1:
+            continue  # no clean (globally-unambiguous) donor, or two disagreeing: refused
+        R, delta = next(iter(clean.items()))
+        e["R"] = R
+        e["delta"] = delta
+        e["R_source"] = f"nearby curve-data stack R={R}' Δ={delta_by_r[R]}°"
+        filled += 1
+    return filled
+
+
 def record_vector_misfit(p, q, az, d):
     """Loop17 leg A: one edge's own record vector (compass az, distance d) walked from ITS OWN drawn
     start p, checked against its own drawn end q -- never a chain's carried position. walk() used to
@@ -578,6 +660,53 @@ def record_vector_misfit(p, q, az, d):
     whole-chain closure diagnostic (misfit_end_ft/misfit_max_ft) alongside this per-edge measure."""
     end = p + d * np.array([math.sin(math.radians(az)), math.cos(math.radians(az))])
     return end, float(np.hypot(*(end - q)))
+
+
+ALIGNMENT_SNAP_FT = 1.0  # ft: how close an arc's own drawn end must sit to a printed ALIGNMENT DATA (or
+# POINT) table coordinate before that point counts as ITS end (JR's lever 3 ruling). Alignment points
+# are centreline stations -- this is deliberately tight (leg 2's own boundary-point SNAP_FT is 0.2 ft,
+# but that's for a point ON the boundary; an alignment point sits on the CENTRELINE, only useful here on
+# the rarer curve where the R/W line runs coincident with it) so a station that merely sits somewhere
+# near a curve, without landing on its actual drawn endpoint, can never masquerade as record evidence.
+
+
+def add_alignment_chord_edges(edges, points, ground):
+    """Loop18 leg 5, lever 3: where BOTH of an arc's own drawn ends sit within ALIGNMENT_SNAP_FT of a
+    DIFFERENT printed record coordinate (an ALIGNMENT DATA station or a POINT/NORTHING/EASTING table
+    row -- inverse.table_points(), reused as-is, never re-parsed here), the inverse bearing between
+    those two record points is a record CHORD direction for that arc -- the alignment IS the drawn
+    boundary there, and its own two endpoints are surveyed record positions independent of the curve's
+    own R/delta/L. Injected as a synthetic chord-bearing LINE edge (kind="line", chord_label=True, same
+    p0/p1 as the arc it describes) so it flows through the EXISTING "CB" source in
+    complete_curve_chords() unchanged -- that source already resolves a chord az from any chord_label
+    line edge sharing both the arc's own nodes, whatever put it there. Never guessed: both ends must
+    each match their OWN distinct point (a single point near both ends -- a degenerate, near-zero-length
+    arc -- is refused), and complete_curve_chords' own drawn-chord sign pick still decides which of the
+    two 180-apart record candidates applies, same as every other chord source. Returns the count of
+    synthetic edges added; call before node-clustering so they join the node graph, and before
+    complete_curve_chords()."""
+    if not points:
+        return 0
+    P = np.array([[p["E"], p["N"]] for p in points], float)
+    added = 0
+    for e in list(edges):
+        if e["kind"] != "arc" or e.get("chord_label"):
+            continue
+        picks = []
+        for p in (e["p0"], e["p1"]):
+            d = np.hypot(*(P - ground(p)).T)
+            i = int(np.argmin(d))
+            picks.append((i, float(d[i])))
+        (i0, d0), (i1, d1) = picks
+        if i0 == i1 or d0 > ALIGNMENT_SNAP_FT or d1 > ALIGNMENT_SNAP_FT:
+            continue
+        A, B = points[i0], points[i1]
+        az = math.degrees(math.atan2(B["E"] - A["E"], B["N"] - A["N"])) % 360
+        edges.append({"kind": "line", "az": az, "p0": e["p0"], "p1": e["p1"], "pts": np.array([e["p0"], e["p1"]]),
+                      "flags": [], "region": None, "chord_label": True, "impossible": False,
+                      "src": f"alignment {A['id']}-{B['id']}"})
+        added += 1
+    return added
 
 
 def selftest():
@@ -865,6 +994,80 @@ def selftest():
     print("traverse.selftest: record_vector_misfit OK (edge2 unpoisoned by edge1's own 10 ft error; "
           "chain-level closure diagnostic still shows it)")
 
+    # loop18 leg 5: two ARC edges sharing an endpoint (a PCC-style curve-to-curve join) must never merge
+    # into one edge -- each keeps its own L/R/delta and its own drawn "pts" span. Two LINE edges sharing
+    # an endpoint under the same shape (a bearing-only edge, a distance-only edge, same run) still merge.
+    arc1 = {"kind": "arc", "p0": np.array([0.0, 0.0]), "p1": np.array([10.0, 0.0]), "L": 184.70, "R": 1570.73, "src": "L=184.70'(T)"}
+    arc2 = {"kind": "arc", "p0": np.array([10.0, 0.0]), "p1": np.array([20.0, 0.0]), "L": 130.56, "src": "L=130.56'"}
+    out_arcs = merge_endpoint_pairs([dict(arc1), dict(arc2)])
+    assert len(out_arcs) == 2, f"two arc edges sharing an endpoint must stay separate records, got {out_arcs}"
+    line1 = {"kind": "line", "p0": np.array([0.0, 0.0]), "p1": np.array([10.0, 0.0]), "az": 90.0, "src": "N90E"}
+    line2 = {"kind": "line", "p0": np.array([0.0, 0.0]), "p1": np.array([10.0, 0.0]), "ft": 10.0, "src": "10.00'"}
+    out_lines = merge_endpoint_pairs([dict(line1), dict(line2)])
+    assert len(out_lines) == 1 and "az" in out_lines[0] and "ft" in out_lines[0], f"a bearing-only and a distance-only line on the same run must still merge, got {out_lines}"
+    print("traverse.selftest: merge_endpoint_pairs OK (two arc edges sharing an endpoint stay separate "
+          "records; a line's own bearing-only/distance-only pair still merges)")
+
+    # loop18 leg 5, lever 2: attach_nearby_curve_R -- R=500', L=100' (delta 11.4593 deg, chord 99.83 ft).
+    def mk_arc(L, p1x, region):
+        return {"kind": "arc", "p0": np.array([0.0, 0.0]), "p1": np.array([p1x, 0.0]), "L": L, "region": region, "src": f"L={L}'"}
+    stack = {"R": 500.0, "delta": 11.4593, "L": 100.0, "cx": 5.0, "cy": 50.0}
+    good = mk_arc(100.0, 99.83, (0, 0, 10, 10))          # region centre (5,5), 45 pt from the stack: passes both gates
+    wrong_chord = mk_arc(100.0, 80.0, (0, 0, 10, 10))    # same delta identity, drawn chord way off: refused
+    far = mk_arc(100.0, 99.83, (0, 200, 10, 210))        # same everything, 155 pt from the stack: outside reach
+    n = attach_nearby_curve_R([good], [stack], 1.0)
+    assert n == 1 and good.get("R") == 500.0 and abs(good.get("delta", 0) - 11.4593) < 1e-3, f"a delta- and chord-consistent nearby stack must attach, got {good}"
+    n = attach_nearby_curve_R([wrong_chord], [stack], 1.0)
+    assert n == 0 and "R" not in wrong_chord, f"a chord mismatch past 0.5 ft must refuse, got {wrong_chord}"
+    n = attach_nearby_curve_R([far], [stack], 1.0)
+    assert n == 0 and "R" not in far, f"a stack past CURVE_DATA_REACH_PT must refuse, got {far}"
+    a1 = mk_arc(100.0, 99.83, (0, 0, 10, 10))
+    a2 = mk_arc(100.0, 99.83, (0, 40, 10, 50))  # region centre (5,45), also within reach of the same stack
+    n = attach_nearby_curve_R([a1, a2], [stack], 1.0)
+    assert n == 0 and "R" not in a1 and "R" not in a2, f"one stack qualifying for two candidate edges must refuse both, got {a1} {a2}"
+
+    # loop18 leg 5 (orchestrator gate, Presidio): duplicate curve_data entries sharing one R (two printed
+    # occurrences of the same real curve) must merge into one clean donor, not manufacture ambiguity; a
+    # separate, unrelated "wide-net" stack (a huge R -- chord ~= L for any nearby candidate at this
+    # delta-consistency-defeating scale, the artificial version of the real R=1585.52'/1372.00' false
+    # positives measured on Presidio when this mechanism still used a delta-less wide search) that
+    # matches TWO different candidates must exclude itself from both without blocking the first
+    # candidate's own clean R=500' donor. (A huge R's own delta -- degrees(L/R), tiny -- coincidentally
+    # clears DELTA_CONSISTENCY_TOL_DEG against any candidate's own L this way too, which is exactly why
+    # a stack with no real, printed delta doesn't get this generic a search any more -- see this
+    # function's own docstring.)
+    dup1 = mk_arc(100.0, 99.83, (0, 0, 10, 10))
+    dup2 = mk_arc(50.0, 50.0, (0, 0, 10, 10))
+    stack_real = {"R": 500.0, "delta": 11.4593, "cx": 5.0, "cy": 5.0}
+    stack_real_dup = {"R": 500.0, "delta": 11.4593, "cx": 5.0, "cy": 60.0}
+    stack_wide_net = {"R": 1.0e7, "delta": round(math.degrees(100.0 / 1.0e7), 6), "cx": 5.0, "cy": 5.0}
+    n = attach_nearby_curve_R([dup1, dup2], [stack_real, stack_real_dup, stack_wide_net], 1.0)
+    assert n == 1 and dup1.get("R") == 500.0, f"a real donor plus its own duplicate must still cleanly attach, unblocked by an unrelated wide-net stack, got {dup1}"
+    assert "R" not in dup2, f"a candidate with only a wide-net (self-ambiguous) donor must refuse, got {dup2}"
+    print("traverse.selftest: attach_nearby_curve_R OK (delta+chord-consistent nearby stack attaches; a "
+          "chord mismatch, an out-of-reach stack, and a stack ambiguous between two candidates all refuse; "
+          "a duplicate same-R entry merges cleanly and a wide-net stack self-excludes without blocking "
+          "a different candidate's own clean donor)")
+
+    # loop18 leg 5, lever 3: add_alignment_chord_edges -- identity ground(), an arc from (0,0) to (10,0)
+    # with two distinct alignment points within 1 ft of each end.
+    ground_id = lambda p: p
+    arc = {"kind": "arc", "p0": np.array([0.0, 0.05]), "p1": np.array([10.0, -0.05]), "L": 12.0}
+    pts = [{"id": "A-1", "E": 0.0, "N": 0.0}, {"id": "A-2", "E": 10.0, "N": 0.0}]
+    out = [dict(arc)]
+    n = add_alignment_chord_edges(out, pts, ground_id)
+    assert n == 1 and len(out) == 2 and out[1]["chord_label"] and abs(out[1]["az"] - 90.0) < 1e-6, f"both ends within snap of distinct points must add a chord edge, got {out}"
+    far_arc = {"kind": "arc", "p0": np.array([0.0, 5.0]), "p1": np.array([10.0, 0.0]), "L": 12.0}  # p0 5 ft off A-1
+    out2 = [dict(far_arc)]
+    n2 = add_alignment_chord_edges(out2, pts, ground_id)
+    assert n2 == 0 and len(out2) == 1, f"an end past ALIGNMENT_SNAP_FT of any point must refuse, got {out2}"
+    same_pt_arc = {"kind": "arc", "p0": np.array([0.0, 0.0]), "p1": np.array([0.3, 0.0]), "L": 1.0}  # both ends nearest A-1
+    out3 = [dict(same_pt_arc)]
+    n3 = add_alignment_chord_edges(out3, pts, ground_id)
+    assert n3 == 0 and len(out3) == 1, f"both ends snapping to the SAME point (a degenerate span) must refuse, got {out3}"
+    print("traverse.selftest: add_alignment_chord_edges OK (two distinct in-tolerance alignment points add "
+          "a chord-bearing edge; an out-of-tolerance end and a same-point degenerate span both refuse)")
+
 
 def sheet_glyph_h():
     """Median glyph height on this sheet, in sheet pt: the natural unit for a snap tolerance that
@@ -875,6 +1078,31 @@ def sheet_glyph_h():
         return 6.0
     blocks = json.loads(p.read_text(encoding="utf-8"))
     return float(np.median([b["glyph_h"] for b in blocks])) if blocks else 6.0
+
+
+def merge_endpoint_pairs(edges):
+    """build_edges' own pass 2: the same LINE under two separate blocks (bearing beside, distance by
+    leader elsewhere on the same run) becomes one edge, matched by endpoint proximity alone. Line kind
+    only (loop18 leg 5, see build_edges' own call site for the measured Presidio case this fixed) --
+    two ARC edges sharing an endpoint is the ordinary shape of any curve chain (a PC/PT/PCC/PRC is
+    exactly where one curve's record ends and the next begins), so endpoint proximity is no evidence
+    two curve labels name the same record course the way it is for a line's bearing/distance pair.
+    Module-level so traverse.selftest can exercise it directly against a synthetic pair."""
+    merged = []
+    for e in edges:
+        for m in merged:
+            if m["kind"] == e["kind"] == "line" and (np.hypot(*(m["p0"] - e["p0"])) < SAME and np.hypot(*(m["p1"] - e["p1"])) < SAME
+                                           or np.hypot(*(m["p0"] - e["p1"])) < SAME and np.hypot(*(m["p1"] - e["p0"])) < SAME):
+                for k in ("az", "ft", "R", "L", "delta"):
+                    if k in e and k not in m:
+                        m[k] = e[k]
+                m["own_bearing_nearby"] = m.get("own_bearing_nearby", False) or e.get("own_bearing_nearby", False)
+                m["chord_label"] = m.get("chord_label", False) or e.get("chord_label", False)
+                m["src"] += " + " + e["src"]
+                break
+        else:
+            merged.append(e)
+    return merged
 
 
 def build_edges():
@@ -890,6 +1118,17 @@ def build_edges():
     bearing_regions |= {tuple(x["region"]) for x in exceptions if x.get("kind") == "bearing" and x.get("region")}
     edges = []
     for x in labels:
+        if x["kind"] == "arc" and x.get("ok") is False:
+            # loop18 leg 5: checks.py already measured this printed length against its matched drawn
+            # piece and found it disagrees (labels.json's own "ok" -- set on every arc-kind entry that
+            # reaches here, see checks.py's rows.append/labels.append pairs) -- e.g. a curve cut by a
+            # sheet MATCHLINE or a "SEE DETAIL" inset, where only PART of the record curve is drawn on
+            # THIS sheet (R-10434.1's R=245.00' L=289.24' ends at its own MATCHLINE 46 ft short; measured
+            # by crop, spike/out_recon/l18_5_*.png). Carrying its R/L/delta onto an edge anyway would let
+            # complete_curve_chords() (below) walk a record chord across a span checks.py already knows
+            # is the wrong one -- refused, not guessed, same discipline loop17 leg B already applies to a
+            # queued table tag (tables.py never places one in tag_labels.json to begin with).
+            continue
         P = np.array(x["line"], float)
         e = {"src": x["printed"], "kind": "arc" if x["kind"] == "arc" else "line", "p0": P[0], "p1": P[-1], "pts": P, "flags": [],
              "region": tuple(x["region"]) if x.get("region") else None,
@@ -955,22 +1194,20 @@ def build_edges():
     edges = merged
 
     # pass 2: the same line under two separate blocks (bearing beside, distance by leader elsewhere on
-    # the same run): one edge, matched by endpoint proximity
-    merged = []
-    for e in edges:
-        for m in merged:
-            if m["kind"] == e["kind"] and (np.hypot(*(m["p0"] - e["p0"])) < SAME and np.hypot(*(m["p1"] - e["p1"])) < SAME
-                                           or np.hypot(*(m["p0"] - e["p1"])) < SAME and np.hypot(*(m["p1"] - e["p0"])) < SAME):
-                for k in ("az", "ft", "R", "L", "delta"):
-                    if k in e and k not in m:
-                        m[k] = e[k]
-                m["own_bearing_nearby"] = m.get("own_bearing_nearby", False) or e.get("own_bearing_nearby", False)
-                m["chord_label"] = m.get("chord_label", False) or e.get("chord_label", False)
-                m["src"] += " + " + e["src"]
-                break
-        else:
-            merged.append(e)
-    edges = merged
+    # the same run): one edge, matched by endpoint proximity. Line kind only (loop18 leg 5): two ARC
+    # edges sharing an endpoint is the ordinary case for any curve chain (a PC/PT/PCC/PRC by definition
+    # sits where one curve's record ends and the next begins), so proximity alone is no evidence they
+    # are the same record course the way it is for a line's own bearing-vs-distance blocks. Measured on
+    # Presidio: "L=184.70'(T)" (its own run of 2 drawn slivers, 184.68 ft) shares its far endpoint with
+    # "L=130.56'" (its own separate, independently-passing 130.69 ft piece) -- this pass used to fold
+    # them into one edge, keeping only the FIRST value's own L/R/delta (184.70'/R=1570.73') but the
+    # SECOND edge's own drawn "pts" span never entered the merge, so complete_curve_chords() (which
+    # trusts whichever edge object it's handed) had no way to tell its chord was being placed on a span
+    # 54 ft longer than the 184.70' record it names. Two already-complete arc records never need this
+    # completion pattern anyway -- each curve's own R/L/delta is resolved as one unit by checks.py/
+    # tables.py before build_edges ever sees it (unlike a line's bearing and distance, which frequently
+    # arrive as two separate blocks) -- so restricting this pass to "line" costs no real merge.
+    edges = merge_endpoint_pairs(edges)
     # A third pass tried pairing a leftover bearing-only edge with a leftover distance-only edge by
     # collinearity + span overlap alone (no shared block, no shared endpoint): on this sheet the one
     # geometrically plausible match it found (N77 deg 39'22"E paired with the drawn line under "391.93'")
@@ -993,6 +1230,16 @@ def load_radials():
     return [{**r, "point": np.array(r["point"], float)} for r in json.loads(p.read_text(encoding="utf-8"))]
 
 
+def load_curve_data():
+    """Loop18 leg 5: checks.py's curve_data.json (printed R=/delta/L stacks with no drawn fillet of
+    their own nearby) as attach_nearby_curve_R()'s own input -- module-level so it loads the same way
+    load_radials() does."""
+    p = OUT / "curve_data.json"
+    if not p.exists():
+        return []
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
 def main():
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
@@ -1007,6 +1254,17 @@ def main():
         return math.degrees(math.atan2(d[0], d[1])) % 360
 
     edges = build_edges()
+
+    # loop18 leg 5, lever 3: a record chord direction from printed ALIGNMENT DATA / POINT coordinates,
+    # before node-clustering so the synthetic chord edges add_alignment_chord_edges() injects join the
+    # graph like any other. Lazy import: inverse.py pulls in recon.py's heavier deps (shapely, pyproj),
+    # which a caller that only needs build_edges()/complete_curve_chords() (e.g. leg184_crops.py) should
+    # never pay for.
+    import inverse
+    n_align_chords = add_alignment_chord_edges(edges, inverse.table_points(inverse.load_blocks(page), PDF.stem), ground)
+    if n_align_chords:
+        print(f"loop18-5 lever 3: {n_align_chords} curve edge(s) got a synthetic chord-bearing edge from printed ALIGNMENT/POINT coordinates")
+
     print(f"record edges placed on the drawing: {len(edges)} ({sum(1 for e in edges if e['kind'] == 'line' and 'az' in e and 'ft' in e)} lines with bearing and distance, "
           f"{sum(1 for e in edges if e['kind'] == 'arc' and 'R' in e)} curves with R and L)")
 
@@ -1080,6 +1338,10 @@ def main():
     n_radius_shared = share_curve_radius(edges, scale)
     if n_radius_shared:
         print(f"loop17-D radius sharing: {n_radius_shared} curve edge(s) took their radius from a co-curved donor's own R")
+
+    n_curve_data = attach_nearby_curve_R(edges, load_curve_data(), scale)
+    if n_curve_data:
+        print(f"loop18-5 lever 2: {n_curve_data} curve edge(s) took their R/delta from a nearby printed R=/delta/L stack with no drawn fillet of its own")
 
     n_curve_chords = complete_curve_chords(edges, adj, azimuth, load_radials(), ground)
     if n_curve_chords:
