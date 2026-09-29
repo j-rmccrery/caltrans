@@ -9,6 +9,9 @@ comparison is ocr.py's own score.
 
 Output: spike/out/tags_checks.csv, spike/out/tags_queue.json
 usage: [SHEET=<pdf>] python spike/tables.py
+Env overrides (read once at import in checks.py; unset = today's default): CT_DIST_TOL_FT and
+CT_BEAR_LATERAL_FT, reused here via checks.dist_tol_ft()/tag_bearing_tol() for the same tag distance/
+bearing checks -- see checks.py's own module docstring.
 """
 import csv
 import json
@@ -22,7 +25,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from checks import ASSOC, AZ_FILTER, BEAR_TOL, DIST_TOL, az_diff, azimuth, build_pool, fmt_bearing, leaders, lines_on_sheet, linework_segments, parent_window, poly_dist, run_sum, seg_dist, span_for, split_chains, tag_leaders, wrong_line_likely  # noqa: E402
+from checks import ASSOC, AZ_FILTER, BEAR_TOL, CT_BEAR_LATERAL_FT, DIST_TOL, az_diff, azimuth, bearing_tol_for_len_ft, build_pool, dist_tol_ft, fmt_bearing, leaders, lines_on_sheet, linework_segments, parent_window, poly_dist, run_sum, seg_dist, span_for, split_chains, tag_leaders, wrong_line_likely  # noqa: E402
 from georef import OUT, PDF, READS, real_text_blocks, segments  # noqa: E402
 from gt import TABLES  # noqa: E402
 
@@ -30,6 +33,16 @@ RADIUS_TOL = 0.01  # fraction: a polyline arc's fitted radius vs the printed one
 BESIDE = 2.5       # glyph heights: how far from the tag a segment may sit to be "beside" it
 CLEAR = 1.5        # the nearest candidate must be this many times closer than the next, else ambiguous
 BOUNDARY = 0.8     # pt: R/W lines are 1.98, parcel and easement lines 0.84; hatch and ticks are 0.36-0.42
+
+
+def tag_bearing_tol(dist_ft):
+    """Bearing tolerance for a table-tag check (row["dist"] already in ft): default 0.10 ft lateral
+    over the line's own printed length, floored at BEAR_TOL, no cap -- unchanged. checks.py's
+    CT_BEAR_LATERAL_FT env override (read once at import there) replaces the 0.10 ft numerator with
+    that many feet and adds BEAR_TOL_CAP, matching checks.bearing_tol_deg()'s own override."""
+    if CT_BEAR_LATERAL_FT is not None:
+        return bearing_tol_for_len_ft(dist_ft)
+    return max(BEAR_TOL, math.degrees(math.atan2(0.10, dist_ft)))
 
 
 def partial_matches(tag, rows):
@@ -296,15 +309,15 @@ def main():
             gx, gy = a * dx - bb * dy, bb * dx + a * dy
             az = math.degrees(math.atan2(gx, gy)) % 360
             dbrg = min(abs((az - row["az"] + 180) % 360 - 180), abs((az + 180 - row["az"] + 180) % 360 - 180))
-            ok_b = dbrg <= max(BEAR_TOL, math.degrees(math.atan2(0.10, row["dist"])))
-            ok_d = abs(drawn - row["dist"]) <= DIST_TOL + 0.0005 * row["dist"]
+            ok_b = dbrg <= tag_bearing_tol(row["dist"])
+            ok_d = abs(drawn - row["dist"]) <= dist_tol_ft(row["dist"])
             return ok_b and ok_d
         sagitta = seg["len_pt"] ** 2 / (8 * row["R"] / scale)
         if sagitta < 0.5:
             return False  # too flat to fit a radius: not usable evidence
         R = fit_radius(seg["pts"]) * scale
         ok_r = abs(R - row["R"]) <= RADIUS_TOL * row["R"]
-        ok_l = abs(seg["len_pt"] * scale - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
+        ok_l = abs(seg["len_pt"] * scale - row["L"]) <= dist_tol_ft(row["L"])
         return ok_r and ok_l
 
     ambig = []  # diagnostic: ambiguous tags, for the table-order adjacency headroom
@@ -419,7 +432,7 @@ def main():
             gx, gy = a * dx - bb * dy, bb * dx + a * dy
             az = math.degrees(math.atan2(gx, gy)) % 360
             dbrg = min(abs((az - row["az"] + 180) % 360 - 180), abs((az + 180 - row["az"] + 180) % 360 - 180))
-            ok_b = dbrg <= max(BEAR_TOL, math.degrees(math.atan2(0.10, row["dist"])))  # a 6 ft line: 0.1 ft sideways is 1 deg
+            ok_b = dbrg <= tag_bearing_tol(row["dist"])  # a 6 ft line: 0.1 ft sideways is 1 deg
             queued_b = not ok_b and (forced_unproven or wrong_line_likely("bearing", dbrg * 60))
             if not queued_b:
                 out.append([t["tag"], "bearing", row["bearing"], fmt_bearing(az if abs((az - row["az"] + 180) % 360 - 180) < 90 else az + 180), f"{dbrg * 60:.1f}'", "pass" if ok_b else "FAIL", how])
@@ -430,7 +443,7 @@ def main():
             if row["total"]:
                 out.append([t["tag"], "distance", f"{row['dist']:.2f}(T)", f"{drawn:.2f}", "", "total over several segments; not checked", how])
             else:
-                ok_d = abs(drawn - row["dist"]) <= DIST_TOL + 0.0005 * row["dist"]
+                ok_d = abs(drawn - row["dist"]) <= dist_tol_ft(row["dist"])
                 # loop15: this same segment's own bearing already disagreed enough to be queued (queued_b)
                 # -- direct evidence it is the wrong line, not a second independent disagreement, extended
                 # from the arc-length/radius rule since it is the identical "same segment already
@@ -571,7 +584,7 @@ def main():
                         forced = True
                         how = f"{how}; radius unproven"
             if row["total"]:  # a (T) total names this whole run itself, not a share of it: never grouped
-                ok_t = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
+                ok_t = abs(drawn - row["L"]) <= dist_tol_ft(row["L"])
                 queued_t = not ok_t and (forced or wrong_line_likely("arc length", drawn - row["L"], row["L"]))
                 if not queued_t:
                     out.append([t["tag"], "arc length", f"{row['L']:.2f}(T)", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "pass" if ok_t else "FAIL", how])
@@ -580,7 +593,7 @@ def main():
                     queue.append({"tag": t["tag"], "issue": prefix + f"drawn run {drawn:.2f} ft vs table total {row['L']:.2f} ft", "region": region, "line": shape(seg)})
                 curve_len_ok[t["tag"]] = ok_t
                 continue
-            ok_l = abs(drawn - row["L"]) <= DIST_TOL + 0.0005 * row["L"]
+            ok_l = abs(drawn - row["L"]) <= dist_tol_ft(row["L"])
             if ok_l:
                 out.append([t["tag"], "arc length", f"{row['L']:.2f}", f"{drawn:.2f}", f"{drawn - row['L']:+.2f}", "pass", how])
                 curve_len_ok[t["tag"]] = True

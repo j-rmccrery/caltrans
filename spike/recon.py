@@ -112,9 +112,13 @@ usage: [SHEET=<pdf>] python spike/recon.py   (after parcels.py and traverse.py)
        python spike/recon.py --no-inverse    (loop18 leg 2: recon_no_inverse.json/recon_segments_no_
                                                inverse.json, excluding any "by inverse ..." traverse row)
        python spike/recon.py --selftest
+Env override (read once at import; unset = today's default 0.5 ft): CT_MISFIT_FT replaces load_rec_edges()'s
+clean-edge misfit bar. CLOSURE_MAX_FT (face closure, already 1.0 ft) is not overridable -- JR's 2026-09-29
+"increase to a full foot" what-if left it alone (loop19-tol1 bench: CT_MISFIT_FT=1.0).
 """
 import json
 import math
+import os
 import re
 import sys
 from pathlib import Path
@@ -185,6 +189,11 @@ DUP_TOL_PT = 1.0         # pt-equivalent: how close two elementary segments' own
 DENSIFY_FT = 1.0         # ft: elementary-segment length for the covered/dimensioned classification
 CLOSE_PCT = 0.99
 CLOSURE_MAX_FT = 1.0
+CT_MISFIT_FT = os.environ.get("CT_MISFIT_FT")  # 2026-09-29 what-if (loop19-tol1): env override, read
+CT_MISFIT_FT = float(CT_MISFIT_FT) if CT_MISFIT_FT else None  # once at import. Unset -> load_rec_edges()'s
+# own "misfit_ft <= 0.5" clean-edge bar, unchanged (default). Set (e.g. CT_MISFIT_FT=1.0) -> a record
+# edge whose OWN drawn-vs-record misfit is that many ft or less also counts as clean (reconstructable).
+# CLOSURE_MAX_FT (face/anchored closure, already 1.0 ft) is untouched -- JR's ask left it alone.
 KINK_BRIDGE_FT = 10.0    # ft: a run of consecutive uncovered ring pieces this short or shorter, with
                           # the SAME reconstructed edge on both sides of it, is a stray digitizing kink
                           # in that one edge's own drawn piece, not a separate record course (loop17 leg
@@ -749,13 +758,15 @@ def load_rec_edges(trav, exclude_inverse=False):
     itself) -- see rec_segments(), which is what actually follows it for coverage; "p"/"q"/"az"/"ft"
     here stay the row's own CHORD endpoints/direction/length, used by face_closure()'s record walk.
     exclude_inverse=True (loop18 leg 2) drops a row inverse.py added ("source": "by inverse ...") --
-    the "without inverse" comparison recon_set.py and bench's recon_inverse_ft column both want."""
+    the "without inverse" comparison recon_set.py and bench's recon_inverse_ft column both want.
+    CT_MISFIT_FT env override (read once at import, defined above CLOSURE_MAX_FT) replaces the 0.5 ft
+    clean bar."""
     rec = []
     n_rows = 0
     for chain in trav:
         for row in chain["edges"]:
             n_rows += 1
-            if row["kind"] not in ("line", "arc") or row["flags"] or row["misfit_ft"] > 0.5:
+            if row["kind"] not in ("line", "arc") or row["flags"] or row["misfit_ft"] > (CT_MISFIT_FT if CT_MISFIT_FT is not None else 0.5):
                 continue
             if exclude_inverse and str(row.get("source", "")).startswith("by inverse"):
                 continue

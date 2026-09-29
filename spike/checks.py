@@ -9,6 +9,12 @@ Every failure or unmatched label becomes an exception with its sheet region. No 
 the exception queue is driven by geometry, which is the point.
 usage: [SHEET=<pdf>] python spike/checks.py   ->  spike/out[/<sheet>]/checks.csv, exceptions.json
        python spike/checks.py --selftest      (wrong_line_likely; no sheet needed)
+Env overrides (read once at import; unset = today's default): CT_DIST_TOL_FT replaces DIST_TOL's
+"0.30 ft + 0.05%" distance/arc-length tolerance with a flat number of ft (dist_tol_ft()); CT_BEAR_LATERAL_FT
+replaces bearing_tol_deg()'s LINEWORK_W-scaled bearing tolerance with the angle giving that many ft of
+lateral offset over the line's own length, still floored/capped at BEAR_TOL/BEAR_TOL_CAP
+(bearing_tol_for_len_ft()). tables.py reuses both. 2026-09-29 what-if (JR): CT_DIST_TOL_FT=1.0
+CT_BEAR_LATERAL_FT=1.0 (loop19-tol1 bench).
 """
 import csv
 import hashlib
@@ -83,9 +89,20 @@ _NTS_TOKEN = r"(?<![A-Za-z])(?:N\.?T\.?S\.?|NOT\s+TO\s+SCALE)(?![A-Za-z])"  # "N
 NTS_RE = re.compile(_NTS_TOKEN, re.I)
 SCALE_NTS_RE = re.compile(r"SCALE.*?" + _NTS_TOKEN, re.I)
 DIST_TOL = 0.30   # ft, plus 0.05 %
+CT_DIST_TOL_FT = os.environ.get("CT_DIST_TOL_FT")  # 2026-09-29 what-if (loop19-tol1): env override, read
+CT_DIST_TOL_FT = float(CT_DIST_TOL_FT) if CT_DIST_TOL_FT else None  # once at import. Unset -> DIST_TOL's
+# own "0.30 ft + 0.05% of the printed length" formula, unchanged (default). Set (e.g. CT_DIST_TOL_FT=1.0)
+# -> every distance/arc-length check (checks.py and tables.py, via dist_tol_ft() below) instead uses that
+# many feet FLAT (no percentage term), sheet-wide. Never read anywhere except dist_tol_ft().
 ASSOC = set(filter(None, os.environ.get("ASSOC", "").split(",")))  # remaining diagnostics: layers, orderdiag (tables.py)
 NOT_LINEWORK = re.compile(r"LBL|anno|ANNO|TBL|SHEET|Sheet|Wipeout|PNT|border|TEXT|TXT|Format|Seal", re.I)  # ASSOC=layers: CAD layer names that are not linework
 AZ_FILTER = 0.5   # deg: a candidate line must run within this of the printed bearing (grid), where one is printed
+
+
+def dist_tol_ft(want):
+    """Distance-check tolerance in ft for a printed length `want`: DIST_TOL (0.30 ft) plus 0.05% of
+    want by default, or the flat CT_DIST_TOL_FT env override when set (no percentage term)."""
+    return CT_DIST_TOL_FT if CT_DIST_TOL_FT is not None else DIST_TOL + 0.0005 * want
 
 
 def dist_num(m):
@@ -163,12 +180,31 @@ MIN_BEARING_LEN_PT = 10.0  # pt: below this a straight piece's own azimuth is to
 # bearing against at all (leg C follow-up) -- queued, never passed or failed
 ARC_TOUCH_PT = 1.0  # pt: "touch" for at_tip's arc-kind proximity fallback means within this of the tip
 ARC_TOUCH_CLEAR_PT = 2.0  # pt: a second candidate this close (or closer) makes the nearest one a tie, not a touch (loop15b)
+CT_BEAR_LATERAL_FT = os.environ.get("CT_BEAR_LATERAL_FT")  # 2026-09-29 what-if (loop19-tol1): env
+CT_BEAR_LATERAL_FT = float(CT_BEAR_LATERAL_FT) if CT_BEAR_LATERAL_FT else None  # override, read once at
+# import. Unset -> bearing_tol_deg()'s own LINEWORK_W-scaled formula, unchanged (default). Set (e.g.
+# CT_BEAR_LATERAL_FT=1.0) -> bearing_tol_deg() and tables.py's own tag_bearing_tol() instead use the
+# angle giving that many feet of LATERAL offset over the line's own length in ft, still floored at
+# BEAR_TOL and capped at BEAR_TOL_CAP. Never read anywhere except bearing_tol_for_len_ft().
 
 
-def bearing_tol_deg(len_pt):
+def bearing_tol_for_len_ft(len_ft):
+    """CT_BEAR_LATERAL_FT override: the angle giving that many feet of lateral offset over a line
+    len_ft long, floored at BEAR_TOL, capped at BEAR_TOL_CAP -- same shape as bearing_tol_deg()'s
+    default formula, just fed a length in ft and a feet-sized numerator instead of LINEWORK_W (pt)."""
+    return min(max(BEAR_TOL, math.degrees(math.atan2(CT_BEAR_LATERAL_FT, max(len_ft, 1e-6)))), BEAR_TOL_CAP)
+
+
+def bearing_tol_deg(len_pt, scale=None):
     """A piece len_pt long has its azimuth known only to about atan(w / len_pt) -- the shorter the
     piece, the less two endpoints each off by w pin down the direction between them. Never tighter
-    than the base BEAR_TOL, never looser than BEAR_TOL_CAP; scales with no per-sheet constant."""
+    than the base BEAR_TOL, never looser than BEAR_TOL_CAP; scales with no per-sheet constant.
+    CT_BEAR_LATERAL_FT env override (see above): when set and a `scale` (ft/pt, the page's own
+    ground-ft-per-point) is given, uses bearing_tol_for_len_ft() on the line's length in ft instead;
+    a caller with no scale to give (none currently) keeps the default formula even when the env
+    override is set, since len_pt's unit there is not known to be points."""
+    if CT_BEAR_LATERAL_FT is not None and scale:
+        return bearing_tol_for_len_ft(len_pt * scale)
     return min(max(BEAR_TOL, math.degrees(math.atan2(LINEWORK_W, max(len_pt, 1e-6)))), BEAR_TOL_CAP)
 
 
@@ -545,7 +581,7 @@ def nearest_line(b, chains, tol_perp, want_ft=None, scale=None, tol_deg=4.0, wan
         # (loop6 leg C rule 3: a wrong parallel neighbour). Only narrows what the earlier az filter above
         # already admitted -- that filter already rejects most wrong candidates outright, so this mostly
         # re-ranks survivors by agreement instead of leaving the last tiebreak to proximity alone.
-        scored = [(p, ln, az_diff(az_of(ln), want_az), bearing_tol_deg(ln["len_pt"])) for p, ln in cands]
+        scored = [(p, ln, az_diff(az_of(ln), want_az), bearing_tol_deg(ln["len_pt"], scale)) for p, ln in cands]
         survivors = [(p, ln, d, t) for p, ln, d, t in scored if d <= 3 * t]
         if survivors:
             agree = [(p, ln) for p, ln, d, t in survivors if d <= t]
@@ -1208,7 +1244,7 @@ def run_sum(drawn, Ls):
     between them isn't drawn (loop2 legC / STATE.md D3-6 / loop5 legB): the "pass as a run of N" rule.
     Shared by the inline L= labels below and by tables.py's table-tag curves."""
     total = sum(Ls)
-    return total, len(Ls) > 1 and abs(drawn - total) <= DIST_TOL + 0.0005 * total
+    return total, len(Ls) > 1 and abs(drawn - total) <= dist_tol_ft(total)
 
 
 def parent_window(arcs, seed, want, scale):
@@ -1221,7 +1257,7 @@ def parent_window(arcs, seed, want, scale):
         return None
     run = sorted((x for x in arcs if x.get("parent") == seed["parent"] and "seq" in x), key=lambda x: x["seq"])
     k = next(i for i, x in enumerate(run) if x is seed)
-    tol = DIST_TOL + 0.0005 * want
+    tol = dist_tol_ft(want)
     hits = [(i, j) for i in range(0, k + 1) for j in range(k, len(run))
             if abs(sum(x["len_pt"] for x in run[i:j + 1]) * scale - want) <= tol
             and chord_ok(run[i]["pts"][0], run[j]["pts"][-1], want, scale, tol)]
@@ -1621,13 +1657,13 @@ def main():
             near = far = None
             if arc is None and not led:
                 near = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 5.0 * b["glyph_h"]]
-                close = [x for x in near if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
+                close = [x for x in near if abs(x["len_pt"] * scale - want) <= dist_tol_ft(want)]
                 if not close:  # some curve-data callouts (the tunnel-easement corridor, a busy curve
                     # elsewhere) are drafted well clear of their curve for room, past 5 glyph heights;
                     # widen the search but keep the same tight length match, so a coincidence this far
                     # out would need to land within DIST_TOL by pure chance
                     far = [x for x in arcs if poly_dist(np.array([b["cx"], b["cy"]]), x["pts"]) < 160.0]
-                    close = [x for x in far if abs(x["len_pt"] * scale - want) <= DIST_TOL + 0.0005 * want]
+                    close = [x for x in far if abs(x["len_pt"] * scale - want) <= dist_tol_ft(want)]
                 # same tie-break as tables.py's whole-vs-piece pick (leg E): a length-match tie used to
                 # fall to close's own order (arcs' get_drawings()/split_at build order, not the geometry).
                 # Tie-break on point count (prefer the specific piece over the whole path) then the
@@ -1637,7 +1673,7 @@ def main():
                     arc, arc_proven = found, True  # length-verified: proven
             if arc is not None:
                 drawn = arc["len_pt"] * scale
-                ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                ok = abs(drawn - want) <= dist_tol_ft(want)
                 if ok:  # own length matches a drawn piece directly: done, no need to look for a run-mate
                     rows.append(["arc length", lines[0], f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass"])
                     labels.append({"kind": "arc", "printed": lines[0], "ft": want, "line": shape(arc), "ok": True, "how": "leader" if led else "beside", "region": region(b)})
@@ -1754,7 +1790,7 @@ def main():
                 return None
             az = dir_az((p1 - p0) / chord_pt)
             diff = min(abs((az - want_az + 180) % 360 - 180), abs((az + 180 - want_az + 180) % 360 - 180))
-            tol = bearing_tol_deg(chord_pt)
+            tol = bearing_tol_deg(chord_pt, scale)
             cline = [[round(float(x), 1), round(float(y), 1)] for x, y in (p0, p1)]
             return az, diff, tol, cline
 
@@ -1818,7 +1854,7 @@ def main():
                     az = math.degrees(math.atan2(gx, gy)) % 360               # from grid north, clockwise
                     want = azimuth(part)
                     diff = min(abs((az - want + 180) % 360 - 180), abs((az + 180 - want + 180) % 360 - 180))
-                    tol = bearing_tol_deg(ln["len_pt"])
+                    tol = bearing_tol_deg(ln["len_pt"], scale)
                     ok = diff <= tol
                 if not ok:
                     # a chord result is only ever taken when it PASSES -- never used to relabel one FAIL
@@ -1875,7 +1911,7 @@ def main():
                     ln = nearest_line(b, chains, 5.0 * b["glyph_h"], want, scale, want_az=baz, az_of=az_of)
                 if ln is not None:
                     ln = span_for(ln, want, scale, chains)
-                    if is_total and ln is not None and baz is not None and az_diff(az_of(ln), baz) > bearing_tol_deg(ln["len_pt"] * scale):
+                    if is_total and ln is not None and baz is not None and az_diff(az_of(ln), baz) > bearing_tol_deg(ln["len_pt"] * scale, 1.0):
                         # leg H2: a bare (T) run total whose block carries a bearing must be measured on
                         # a run whose OWN direction -- after span_for's own possibly multi-piece join --
                         # actually passes that bearing, not just the seed piece's coarser per-piece
@@ -1896,7 +1932,7 @@ def main():
                     chord = chord_distance(bi, led, want, baz)
                     if chord is not None:
                         drawn, cline = chord
-                        if abs(drawn - want) <= DIST_TOL + 0.0005 * want:
+                        if abs(drawn - want) <= dist_tol_ft(want):
                             rows.append(["chord distance", part, f"{drawn:.2f}", f"{drawn - want:+.2f}", "pass"])
                             labels.append({"kind": "chord distance", "printed": part, "ft": want, "line": cline, "ok": True, "how": "beside", "region": region(b)})
                             continue
@@ -1917,7 +1953,7 @@ def main():
                     arc, arc_proven = at_tip(bi, "arc", want)[1:3] if led else (nearest_arc(b, arcs, 1.5 * b["glyph_h"]), False)
                     if arc is not None and (ln is None or abs(arc["len_pt"] * scale - want) < abs(ln["len_pt"] * scale - want)):
                         drawn = arc["len_pt"] * scale
-                        ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                        ok = abs(drawn - want) <= dist_tol_ft(want)
                         if not ok and is_total:  # a bare (T) run total was only ever meant to accept a
                             # pass on this fallback too, whichever kind (line or arc) it lands on
                             exceptions.append({"kind": "arc length", "text": part, "issue": f"association unproven: measured {drawn:.2f} vs printed {want:.2f} ft (T)", "region": region(b), "line": shape(arc)}); continue
@@ -1936,7 +1972,7 @@ def main():
                 if min(ln["p0"][0], ln["p1"][0]) < 262 or max(ln["p0"][0], ln["p1"][0]) > W - 50:
                     exceptions.append({"kind": "distance", "text": part, "issue": "line runs to the sheet edge (matchline); not checkable on this sheet", "region": region(b)}); continue
                 drawn = ln["len_pt"] * scale
-                ok = abs(drawn - want) <= DIST_TOL + 0.0005 * want
+                ok = abs(drawn - want) <= dist_tol_ft(want)
                 if not ok:
                     # a bare "NNN.NN'(T)" run total (leg H2) is only ever meant to accept a pass -- any
                     # fail on it is unproven association, not evidence of a real disagreement, whatever
@@ -1968,7 +2004,7 @@ def main():
         drawn = arc["len_pt"] * scale
         for p in group:  # a (T) total names this whole run itself, not a share of it: check it directly
             if p["total"]:
-                ok = abs(drawn - p["want"]) <= DIST_TOL + 0.0005 * p["want"]
+                ok = abs(drawn - p["want"]) <= dist_tol_ft(p["want"])
                 if not ok and wrong_line_likely("arc length", drawn - p["want"], p["want"]):
                     exceptions.append({"kind": "arc length", "text": p["text"], "issue": f"wrong line likely: measured {drawn:.2f} vs printed {p['want']:.2f} ft", "region": p["region"], "line": shape(arc)}); continue
                 rows.append(["arc length", p["text"], f"{drawn:.2f}", f"{drawn - p['want']:+.2f}", "pass" if ok else "FAIL"])
@@ -2140,7 +2176,7 @@ def main():
             pt = tip[0] if tip else np.array([len_block["cx"], len_block["cy"]])
             fits = []
             for x in sorted((x for x in arcs if poly_dist(pt, x["pts"]) < reach), key=lambda x: poly_dist(pt, x["pts"])):
-                if x["len_pt"] * scale > L + DIST_TOL + 0.0005 * L:
+                if x["len_pt"] * scale > L + dist_tol_ft(L):
                     continue  # a piece longer than the fillet's own printed total can't be the fillet, or
                     # a fragment of it (this is a fillet's own radius search, not a compound-curve run: a
                     # large R/W curve built from several same-radius facets can fool the 3-point
@@ -2155,7 +2191,7 @@ def main():
                 # already matches the printed L, that is the fillet, on its own -- no summing. Only a
                 # genuinely fragmented short fillet (several pieces, none matching L alone) falls to the
                 # same-centre group-and-sum
-                exact = next((x for x, _ in fits if abs(x["len_pt"] * scale - L) <= DIST_TOL + 0.0005 * L), None)
+                exact = next((x for x, _ in fits if abs(x["len_pt"] * scale - L) <= dist_tol_ft(L)), None)
                 if exact is not None:
                     pieces = [exact]
                 else:
@@ -2168,7 +2204,7 @@ def main():
                     pieces = [x for x, _ in group]
                 lens_ft = [x["len_pt"] * scale for x in pieces]
                 drawn = sum(lens_ft)
-                ok2 = abs(drawn - L) <= DIST_TOL + 0.0005 * L
+                ok2 = abs(drawn - L) <= dist_tol_ft(L)
                 printed = f"R={R}' L={L}'"
                 if not ok2 and wrong_line_likely("arc length", drawn - L, L):
                     exceptions.append({"kind": "arc length", "text": printed, "issue": f"wrong line likely: measured {drawn:.2f} vs printed {L:.2f} ft", "region": region(len_block), "line": shape(pieces[0])})

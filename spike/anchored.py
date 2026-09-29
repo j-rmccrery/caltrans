@@ -59,6 +59,11 @@ usage: python spike/anchored.py <presidio|r10434_1|r10434_3>   (SHEET env alread
                                                                   for r10434_1/r10434_3 -- see --all)
        python spike/anchored.py --all       (drives all three sheets, one subprocess each, like bench.py)
        python spike/anchored.py --selftest
+Env override (read once at import; unset = today's default 0.5 ft): CT_ARRIVE_FT replaces ARRIVE_FT
+("reaches a node within X ft of another anchor's position"). CLOSURE_MAX_FT (already 1.0 ft) is not
+overridable -- JR's 2026-09-29 "increase to a full foot" what-if left it alone (loop19-tol1 bench:
+CT_ARRIVE_FT=1.0). recon.py's own CT_MISFIT_FT (see recon.load_rec_edges) governs the reconstructed-edge
+pool this module walks, since anchored.py reuses recon.load_rec_edges() verbatim.
 """
 import json
 import math
@@ -89,6 +94,11 @@ NODE_FT = 2.0        # course-graph vertex clustering, ground ft -- recon.py's o
 # the "on the same point/line" tolerance this whole project already uses, reused here for "same drawn
 # vertex" rather than fit fresh per sheet.
 ARRIVE_FT = 0.5      # JR's own number: "reaches a node within 0.5 ft of another anchor's position"
+CT_ARRIVE_FT = os.environ.get("CT_ARRIVE_FT")  # 2026-09-29 what-if (loop19-tol1): env override, read
+CT_ARRIVE_FT = float(CT_ARRIVE_FT) if CT_ARRIVE_FT else ARRIVE_FT  # once at import. Unset -> ARRIVE_FT
+# itself (0.5 ft), unchanged (default). Set (e.g. CT_ARRIVE_FT=1.0) -> that many ft instead, everywhere
+# ARRIVE_FT is used below (landing on a different anchor, ends a walk). CLOSURE_MAX_FT (already 1.0 ft,
+# closed-vs-failed) is untouched -- JR's ask left it alone.
 CLOSURE_MAX_FT = 1.0  # closed vs failed -- recon.py's own CLOSURE_MAX_FT (face closure), reused: this
 # is the SAME kind of check (does the record close where it should), just anchored on a printed
 # coordinate instead of a ring's own start point.
@@ -309,7 +319,7 @@ def walk_one(anchor, k0, rec_edges, adj, node_anchors, anchors_by_id):
 
 def run_walks(anchors, rec_edges, adj, node_pos):
     for a in anchors:
-        a["node"], a["node_dist"] = nearest_node(node_pos, a["pt"], ARRIVE_FT)
+        a["node"], a["node_dist"] = nearest_node(node_pos, a["pt"], CT_ARRIVE_FT)
     node_anchors = {}
     for a in anchors:
         if a["node"] is not None:
@@ -531,7 +541,7 @@ def closure_fills(chains, half_rows, anchors, anchors_by_id, rec_edges, adj, nod
         terminals = _dfs(a2["pt"].copy(), a2["node"], used, [], rec_edges, adj, node_anchors, anchors_by_id,
                           a2["id"], BRANCH_MAX_DEPTH, [BRANCH_MAX_PATHS])
         hits = [t for t in terminals if t["end"] is not None and t["end"] != cand["chain_start"]]
-        good = [t for t in hits if t["misclosure_ft"] <= ARRIVE_FT]
+        good = [t for t in hits if t["misclosure_ft"] <= CT_ARRIVE_FT]
         return good, hits
 
     def fmt(cand):
