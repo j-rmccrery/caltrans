@@ -534,3 +534,7 @@ Legs (draft): 0 fix inverse.corridor_test (wrong reason on the Presidio 1,086 ft
 3 recon/parcel scoring on anchored chains (own column, set headline with/without); 4 cross-sheet chains.
 Working rules from loop 18: fresh agent per leg with a short brief; fast one-sheet inner loop (traverse + recon only),
 canonical bench once at the end of each leg (run_in_background + poll to 6 rows, one bench at a time).
+
+Loop 19 status: leg 1 anchored walk (7208f5a), leg 2 anchored score + forks by closure (37465da, recon_anchored 1.03 %).
+JR (2026-09-29): "do all three": leg 3 fills checked by a second landing (running), leg 5 R-10741 gold set (running in
+parallel, snapshot only, no bench), then leg 4 cross-sheet chains + cross-sheet parcels incl. R-10741.2 DETAIL "A" (46825-5).

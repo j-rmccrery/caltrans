@@ -1422,6 +1422,10 @@ def main():
                 row["bearing_source"] = e["bearing_source"]
             if "chord_source" in e:  # loop16-E: this curve's chord az came from the record, not the drawing
                 row["chord_source"] = e["chord_source"]
+            if "R" in e:  # loop19 leg 3: printed radius/length, passed through so a "R/L printed, no
+                row["R"] = e["R"]  # record chord direction" row's chord LENGTH (2R sin(L/2R), record-only,
+            if "L" in e:  # no drawing) is available to anchored.py without re-deriving it from build_edges()
+                row["L"] = e["L"]
             rows.append(row)
         return rows, misfits
 

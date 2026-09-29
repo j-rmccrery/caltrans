@@ -47,7 +47,7 @@ SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0, "chord distance": 
 TAGS_COLS = ["tags_assoc", "tags_pass", "tags_fail", "tags_queued"]
 PARCELS_COLS = ["faces", "faces_named"]
 TRAVERSE_COLS = ["chains", "closed"]
-RECON_COLS = ["recon_all", "recon_dim", "recon_parcels", "recon_inverse_ft", "recon_anchored"]
+RECON_COLS = ["recon_all", "recon_dim", "recon_parcels", "recon_inverse_ft", "recon_anchored", "recon_closure_ft"]
 OUT_RECON = ROOT / "spike" / "out_recon"
 ANCHORED_KEYS = {"presidio", "r10434_1", "r10434_3"}  # loop19 leg 1's own anchored.SHEET_PDF scope --
                                                        # anchored.py has no anchors built for the other
@@ -164,7 +164,9 @@ def recon_cols(pdf, key):
     gains from "by inverse ..." traverse rows alone (0 on a sheet inverse.py never touched). loop19 leg
     2: on a sheet anchored.py has anchors for (ANCHORED_KEYS), also runs anchored.py <key> -- it re-runs
     recon.py internally (deterministic, same numbers) and patches recon_segments.json with the "anchored"
-    column recon_set.py's own set-level recon_anchored_set_pct needs."""
+    column recon_set.py's own set-level recon_anchored_set_pct needs. loop19 leg 3: recon_closure_ft is
+    that same anchored.py run's own "recon_closure"."added_ft" -- net NEW boundary ft a checked closure
+    fill's own segment adds (already folded into recon_anchored above; this column is the breakout)."""
     ok, err = run_step("recon.py", pdf)
     if not ok:
         print(f"recon.py failed: {err}")
@@ -172,20 +174,21 @@ def recon_cols(pdf, key):
     ok2, err2 = run_step("recon.py", pdf, args=["--no-inverse"])
     if not ok2:
         print(f"recon.py --no-inverse failed: {err2}")
-    anchored_str = ""
+    anchored_str, closure_ft = "", ""
     if key in ANCHORED_KEYS:
         ok3, err3 = run_step("anchored.py", pdf, args=[key])
         if not ok3:
             print(f"anchored.py failed: {err3}")
-            anchored_str = "err"
+            anchored_str, closure_ft = "err", "err"
         else:
             try:
                 a = json.loads((OUT_RECON / f"anchored_{key}.json").read_text(encoding="utf-8"))
                 ra = a["recon_anchored"]
                 anchored_str = f"{int(ra['covered_ft'])}/{int(ra['denom_ft'])}"
+                closure_ft = a["recon_closure"]["added_ft"]
             except Exception as e:
                 print(f"anchored read failed: {type(e).__name__} {e}")
-                anchored_str = "err"
+                anchored_str, closure_ft = "err", "err"
     o = out_dir(pdf)
     try:
         r = json.loads((o / "recon.json").read_text(encoding="utf-8"))
@@ -199,6 +202,7 @@ def recon_cols(pdf, key):
             "recon_parcels": f"{r['parcels_all']['n']}/{r['parcels_all']['of']}|{r['parcels_dim']['n']}/{r['parcels_dim']['of']}",
             "recon_inverse_ft": inverse_ft,
             "recon_anchored": anchored_str or f"0/{int(r['recon_all_denom_ft'])}",
+            "recon_closure_ft": closure_ft,
         }
     except Exception as e:
         print(f"recon read failed: {type(e).__name__} {e}")

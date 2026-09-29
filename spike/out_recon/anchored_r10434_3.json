@@ -392,24 +392,47 @@
   "denom_ft": 17271.2,
   "pct": 0.0
  },
- "solvable_by_closure_unchecked": [
+ "recon_closure": {
+  "added_ft": 0.0,
+  "n_accepted": 0,
+  "n_candidates": 3
+ },
+ "closure_candidates": [
+  {
+   "chain_start": "T-3",
+   "reaches": "T-2",
+   "course": "L=181.54'",
+   "kind": "arc",
+   "missing": "chord direction",
+   "computed": "104.7782 deg",
+   "drawing": "104.78 deg (-0.002 deg)",
+   "status": "refused",
+   "reason": "unchecked (no third anchor reached)",
+   "added_ft": 0.0
+  },
   {
    "chain_start": "T-4",
-   "course": "N35°15'31\"W",
-   "missing": "distance",
    "reaches": "T-3",
-   "computed_ft": 198.231,
-   "drawn_ft": 183.05,
-   "diff_ft": 15.181
+   "course": "N35°15'31\"W",
+   "kind": "line",
+   "missing": "distance",
+   "computed": "198.231 ft",
+   "drawing": "183.05 ft (+15.181 ft)",
+   "status": "refused",
+   "reason": "unchecked (no third anchor reached)",
+   "added_ft": 0.0
   },
   {
    "chain_start": "T-18",
-   "course": "S87°48'20\"E",
-   "missing": "distance",
    "reaches": "T-16",
-   "computed_ft": 973.14,
-   "drawn_ft": 114.29,
-   "diff_ft": 858.85
+   "course": "S87°48'20\"E",
+   "kind": "line",
+   "missing": "distance",
+   "computed": "973.14 ft",
+   "drawing": "114.29 ft (+858.850 ft)",
+   "status": "refused",
+   "reason": "unchecked (no third anchor reached)",
+   "added_ft": 0.0
   }
  ],
  "anchored_parcels": []

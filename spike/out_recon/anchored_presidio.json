@@ -748,6 +748,11 @@
   "denom_ft": 10648.4,
   "pct": 3.16
  },
- "solvable_by_closure_unchecked": [],
+ "recon_closure": {
+  "added_ft": 0.0,
+  "n_accepted": 0,
+  "n_candidates": 0
+ },
+ "closure_candidates": [],
  "anchored_parcels": []
 }

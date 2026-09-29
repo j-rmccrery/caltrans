@@ -208,7 +208,9 @@
       2133930.48
      ]
     ],
-    "chord_source": "tangent to S20°32'23\"W + 462.09'"
+    "chord_source": "tangent to S20°32'23\"W + 462.09'",
+    "R": 1169.9,
+    "L": 660.2
    },
    {
     "edge": "S11°47'37\"E",

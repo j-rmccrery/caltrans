@@ -1,4 +1,4 @@
-# Anchored record walk (loop19 leg 1 + leg 2)
+# Anchored record walk (loop19 leg 1 + leg 2 + leg 3)
 
 ## presidio
 
@@ -23,6 +23,8 @@ ambiguous branches (2+ continuations close, left open):
 | start | courses so far | candidate ends |
 |---|---|---|
 | CO4 | 1 | CO18 |
+recon_closure: 0/0 fills accepted, +0.0 ft (net, folded into recon_anchored above)
+
 
 ## r10434_1
 
@@ -37,12 +39,14 @@ closed misclosure ft: median 0.010, max 0.010
 | start | end | courses | length ft | misclosure ft | resolved |
 |---|---|---|---|---|---|
 | CO9 | CO11 | 4 | 558.09 | 0.01 |  |
+recon_closure: 0/1 fills accepted, +0.0 ft (net, folded into recon_anchored above)
 
-solvable by closure (unchecked -- zero redundancy, never scored):
 
-| chain start | course | missing | computed | vs. drawing | reaches |
-|---|---|---|---|---|---|
-| CO13 | 176.33' | bearing | 178.3795 deg | +0.002 deg | CO8 |
+closure fills -- leg 3, a fill counts only when a second landing checks it:
+
+| A->B | course | missing | computed | vs. drawing | status | reason | ft added |
+|---|---|---|---|---|---|---|---|
+| CO13->CO8 | 176.33' | bearing | 178.3795 deg | 178.377 deg (+0.002 deg) | refused | unchecked (no third anchor reached) | 0.0 |
 
 ## r10434_3
 
@@ -52,10 +56,17 @@ closed 0 (0 by branch resolution) | failed 0 | open 19 (0 ambiguous branches)
 
 recon_anchored: 0/17,271 ft (0.0%)
 
+recon_closure: 0/3 fills accepted, +0.0 ft (net, folded into recon_anchored above)
 
-solvable by closure (unchecked -- zero redundancy, never scored):
 
-| chain start | course | missing | computed | vs. drawing | reaches |
-|---|---|---|---|---|---|
-| T-4 | N35°15'31"W | distance | 198.231 ft | +15.181 ft | T-3 |
-| T-18 | S87°48'20"E | distance | 973.14 ft | +858.850 ft | T-16 |
+closure fills -- leg 3, a fill counts only when a second landing checks it:
+
+| A->B | course | missing | computed | vs. drawing | status | reason | ft added |
+|---|---|---|---|---|---|---|---|
+| T-3->T-2 | L=181.54' | chord direction | 104.7782 deg | 104.78 deg (-0.002 deg) | refused | unchecked (no third anchor reached) | 0.0 |
+| T-4->T-3 | N35°15'31"W | distance | 198.231 ft | 183.05 ft (+15.181 ft) | refused | unchecked (no third anchor reached) | 0.0 |
+| T-18->T-16 | S87°48'20"E | distance | 973.14 ft | 114.29 ft (+858.850 ft) | refused | unchecked (no third anchor reached) | 0.0 |
+
+## set
+
+recon_closure_ft (sum over sheets with anchors -- ponytail: not deduped across matchlines the way recon_set.py's own set numbers are, negligible at 0 accepted fills): 0 accepted, +0.0 ft

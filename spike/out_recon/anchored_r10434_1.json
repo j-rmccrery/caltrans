@@ -292,15 +292,23 @@
   "denom_ft": 9079.4,
   "pct": 3.55
  },
- "solvable_by_closure_unchecked": [
+ "recon_closure": {
+  "added_ft": 0.0,
+  "n_accepted": 0,
+  "n_candidates": 1
+ },
+ "closure_candidates": [
   {
    "chain_start": "CO13",
-   "course": "176.33'",
-   "missing": "bearing",
    "reaches": "CO8",
-   "computed_az_deg": 178.3795,
-   "drawn_az_deg": 178.377,
-   "diff_deg": 0.002
+   "course": "176.33'",
+   "kind": "line",
+   "missing": "bearing",
+   "computed": "178.3795 deg",
+   "drawing": "178.377 deg (+0.002 deg)",
+   "status": "refused",
+   "reason": "unchecked (no third anchor reached)",
+   "added_ft": 0.0
   }
  ],
  "anchored_parcels": []

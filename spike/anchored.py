@@ -102,6 +102,9 @@ BEARING_TOL_DEG = 1.0   # leg 2, solvable-by-closure only: how far a half-record
                         # bearing may sit from the bearing closure needs and still count as "this course
                         # reaches that anchor" -- closed chains measured 0.007-0.011 ft misclosure over
                         # hundreds of ft, so a real match sits far under this
+AGREE_FT_TOL = 0.1      # leg 3: two independent anchor pairs' own computed DISTANCE fill must agree
+                        # within this to accept without a third-anchor continuation (JR's own number)
+AGREE_DEG_TOL = 0.01    # leg 3: same, for a computed BEARING/chord-direction fill (JR's own number)
 
 
 # --- anchors (leg 1) -----------------------------------------------------------------------------------
@@ -381,33 +384,54 @@ def patch_recon_segments_anchored(anchored_seg_kept):
 
 # --- solvable by closure, unchecked (leg 2) ---------------------------------------------------------------
 
-def load_half_recorded_lines(trav):
-    """Every kind=='line' traverse row missing exactly ONE of bearing/distance from the record (the OTHER
-    came from the drawing, per traverse.py's own "bearing from drawing"/"distance from drawing" flags --
-    never both, that is "no record" and outside this leg's scope). These never qualify as a
+def load_half_recorded_rows(trav):
+    """Every traverse row missing exactly ONE record element (the OTHER came from the drawing) --
+    never both, that is "no record" and outside this leg's scope. These never qualify as a
     reconstructed edge (recon.load_rec_edges() requires flags==[]), so they are invisible to the course
-    graph above; reported here only, never scored -- a single such course has zero redundancy."""
+    graph above; leg 2 only reported them (never scored, zero redundancy); leg 3's closure_fills()
+    checks them against a second landing before counting one.
+
+    kind=='line': "bearing from drawing"/"distance from drawing" flags (traverse.py) -- half="bearing"
+    means record gave distance only (row["ft"]), row["az"] is the DRAWING's; half="distance" means
+    record gave bearing only (row["az"]), row["ft"] is the DRAWING's.
+
+    kind=='arc', flag "R/L printed, no record chord direction" (traverse.py): R and L are BOTH record
+    (this leg's own traverse.py addition passes them through on the row), so the chord LENGTH is fully
+    record-derived (2R sin(L/2R), same formula traverse.py's own full-record arc branch uses) even
+    though the row's own "ft" is the DRAWING's chord length (traverse.py never trusted R/L for a
+    distance without a record direction too -- see its own comment). Only the chord DIRECTION is
+    missing -- same shape as a line's half="bearing" (known distance, missing bearing), so it is folded
+    into that same category with the record-derived length substituted for row["ft"]."""
     rows = []
     for chain in trav:
         for row in chain["edges"]:
-            if row["kind"] != "line" or not row.get("pts") or len(row["pts"]) < 2:
+            if not row.get("pts") or len(row["pts"]) < 2:
                 continue
             flags = row["flags"]
-            half = None
-            if "bearing from drawing" in flags and "distance from drawing" not in flags:
-                half = "bearing"   # record gave distance (row["ft"]) only; row["az"] is the DRAWING's
-            elif "distance from drawing" in flags and "bearing from drawing" not in flags:
-                half = "distance"  # record gave bearing (row["az"]) only; row["ft"] is the DRAWING's
-            if half is None:
-                continue
             pts = np.array(row["pts"], float)
-            # row["az"] is only the direction of whichever way ITS OWN chain happened to walk it (p0->p1
-            # or p1->p0) -- same ambiguity build_graph() resolves for a clean rec_edges entry (see its own
-            # docstring); fixed here the identical way, once, into "the record az from pts[0] to pts[-1]".
+            # row["az"]/a record az is only the direction of whichever way ITS OWN chain happened to
+            # walk it (p0->p1 or p1->p0) -- same ambiguity build_graph() resolves for a clean rec_edges
+            # entry (see its own docstring); fixed here the identical way, once, into "the az from
+            # pts[0] to pts[-1]" (a line's full chord for a line, a curve's own chord for an arc).
             drawn_az = float(recon.azimuth_arr((pts[-1] - pts[0])[None, :])[0])
-            az = (row["az"] + 180) % 360 if abs((row["az"] - drawn_az + 180) % 360 - 180) >= 90 else row["az"]
-            rows.append({"name": row["edge"], "az": az, "ft": row["ft"], "half": half,
-                         "p": pts[0], "q": pts[-1]})
+            if row["kind"] == "line":
+                half = None
+                if "bearing from drawing" in flags and "distance from drawing" not in flags:
+                    half = "bearing"
+                elif "distance from drawing" in flags and "bearing from drawing" not in flags:
+                    half = "distance"
+                if half is None:
+                    continue
+                az = (row["az"] + 180) % 360 if abs((row["az"] - drawn_az + 180) % 360 - 180) >= 90 else row["az"]
+                rows.append({"name": row["edge"], "kind": "line", "az": az, "ft": row["ft"], "half": half,
+                             "p": pts[0], "q": pts[-1]})
+            elif row["kind"] == "arc" and "R/L printed, no record chord direction" in flags and "R" in row and "L" in row:
+                R, L = row["R"], row["L"]
+                if not R or abs(L / R) >= 2 * math.pi:  # a real half-angle is well under this; guards div/domain
+                    continue
+                chord_ft = 2 * R * math.sin(L / R / 2)
+                rows.append({"name": row["edge"], "kind": "arc", "az": drawn_az, "ft": chord_ft, "half": "bearing",
+                             "p": pts[0], "q": pts[-1], "drawn_ft": row["ft"]})
     return rows
 
 
@@ -426,13 +450,14 @@ def chain_end_state(chain, anchors_by_id, rec_edges_by_name):
     return pos, n
 
 
-def solvable_by_closure(chains, half_rows, anchors, anchors_by_id, rec_edges, node_tol=NODE_FT):
-    """OPEN chains (post branch resolution, still "ran out of record courses") whose current position
-    sits at one end of a half-recorded row (within node_tol -- the course graph's own "same drawn vertex"
-    tolerance) that, completed from THIS position to some OTHER anchor's own printed coordinate, agrees
-    with the row's own KNOWN element (BEARING_TOL_DEG for a known bearing, CLOSURE_MAX_FT for a known
-    distance -- the missing element is never checked against anything, there is nothing to check it
-    against). Reports every match found; picks none, scores none."""
+def _closure_candidates(chains, half_rows, anchors, anchors_by_id, rec_edges, node_tol=NODE_FT):
+    """leg 2's own match: an OPEN chain (post branch resolution, "ran out of record courses") whose
+    current position sits at one end of a half-recorded row (within node_tol) that, completed from THIS
+    position to some OTHER anchor's own printed coordinate, agrees with the row's own KNOWN element
+    (BEARING_TOL_DEG for a known bearing, CLOSURE_MAX_FT for a known distance). Every match found, with
+    enough state (pos, fwd, the open chain itself, the candidate anchor) for leg 3's own closure_fills()
+    to check it against a second landing -- the missing element itself is not checked against anything
+    here, there is nothing to check it against yet."""
     rec_edges_by_name = {e["name"]: e for e in rec_edges}
     out = []
     for c in chains:
@@ -456,18 +481,149 @@ def solvable_by_closure(chains, half_rows, anchors, anchors_by_id, rec_edges, no
                     known_az = row["az"] if fwd else (row["az"] + 180) % 360
                     if abs((needed_az - known_az + 180) % 360 - 180) > BEARING_TOL_DEG:
                         continue
-                    out.append({"chain_start": c["start"], "course": row["name"], "missing": "distance",
-                               "reaches": a2["id"], "computed_ft": round(needed_d, 3),
-                               "drawn_ft": row["ft"], "diff_ft": round(needed_d - row["ft"], 3)})
-                else:  # missing bearing; known element is the record distance
+                    # exact solve (the distance IS "however far it takes to reach a2") -- lands at a2 by
+                    # construction, zero residual; the third-anchor/agreement check is what actually earns it.
+                    fill_az, fill_ft, value, residual_ft = row["az"], needed_d, round(needed_d, 3), 0.0
+                    diagnostic = {"drawn_ft": row["ft"], "diff_ft": round(needed_d - row["ft"], 3)}
+                else:  # missing bearing/chord direction; known element is the record distance/chord length
                     if abs(needed_d - row["ft"]) > CLOSURE_MAX_FT:
                         continue
                     computed_az = needed_az if fwd else (needed_az + 180) % 360
-                    out.append({"chain_start": c["start"], "course": row["name"], "missing": "bearing",
-                               "reaches": a2["id"], "computed_az_deg": round(computed_az, 4),
-                               "drawn_az_deg": round(row["az"], 4),
-                               "diff_deg": round((computed_az - row["az"] + 180) % 360 - 180, 3)})
+                    # walking the RECORD length (row["ft"]) in computed_az from pos lands short/long of
+                    # a2 by this much -- the real landing residual (already bounded <= CLOSURE_MAX_FT above).
+                    fill_az, fill_ft, value, residual_ft = computed_az, row["ft"], round(computed_az, 4), round(abs(needed_d - row["ft"]), 3)
+                    diagnostic = {"drawn_az_deg": round(row.get("drawn_az", row["az"]), 4),
+                                  "diff_deg": round((computed_az - row.get("drawn_az", row["az"]) + 180) % 360 - 180, 3)}
+                out.append({"chain": c, "chain_start": c["start"], "course": row["name"], "kind": row["kind"],
+                            "missing": row["half"] if row["kind"] == "line" else "chord direction",
+                            "reaches": a2["id"], "a2": a2, "fwd": fwd, "row": row, "residual_ft": residual_ft,
+                            "fill_az": fill_az, "fill_ft": fill_ft, "value": value, **diagnostic})
     return out
+
+
+def closure_fills(chains, half_rows, anchors, anchors_by_id, rec_edges, adj, node_pos, node_tol=NODE_FT):
+    """Leg 3: leg 2's own candidate match (_closure_candidates(), zero redundancy, never scored) --
+    checked. A fill counts ONLY when redundancy checks it: after filling, the walk continues on record
+    courses alone (never through another half-recorded row -- those are never in rec_edges/adj, see
+    load_half_recorded_rows()'s own docstring, so a second unknown between the same pair just makes the
+    continuation dead-end, refused "unchecked", never a false accept) to a THIRD printed anchor within
+    ARRIVE_FT (0.5 ft, JR's own number); or the same fill is implied independently by two different
+    (chain_start, reaches) anchor pairs agreeing within AGREE_DEG_TOL/AGREE_FT_TOL. Returns
+    (candidates: every attempt, report-ready dicts; stitched: one closed-chain dict per ACCEPTED fill,
+    same shape run_walks() produces, for closed_edge_names()/anchored_coverage() to fold in verbatim;
+    filled_edges: the accepted fill's own geometry, for recon_closure_ft's coverage measurement)."""
+    node_anchors = {}
+    for a in anchors:
+        if a.get("node") is not None:
+            node_anchors.setdefault(a["node"], []).append(a["id"])
+    idx_by_name = {e["name"]: i for i, e in enumerate(rec_edges)}
+    raw = _closure_candidates(chains, half_rows, anchors, anchors_by_id, rec_edges, node_tol)
+
+    def continuation(cand):
+        """_dfs() started past the fill (at a2's own node) instead of at a branch -- same bounded search
+        resolve_branch() already uses; a landing back at chain_start or a2 itself is excluded by _dfs()'s
+        own start_id filter (start_id=a2['id'] here), so every hit is a genuinely different, THIRD
+        anchor."""
+        a2 = cand["a2"]
+        if a2.get("node") is None:
+            return [], []
+        used = {idx_by_name[co["name"]] for co in cand["chain"]["courses"] if co["name"] in idx_by_name}
+        terminals = _dfs(a2["pt"].copy(), a2["node"], used, [], rec_edges, adj, node_anchors, anchors_by_id,
+                          a2["id"], BRANCH_MAX_DEPTH, [BRANCH_MAX_PATHS])
+        hits = [t for t in terminals if t["end"] is not None and t["end"] != cand["chain_start"]]
+        good = [t for t in hits if t["misclosure_ft"] <= ARRIVE_FT]
+        return good, hits
+
+    def fmt(cand):
+        if cand["missing"] == "distance":
+            return f"{cand['value']} ft", f"{cand['drawn_ft']} ft ({cand['diff_ft']:+.3f} ft)"
+        return f"{cand['value']} deg", f"{cand['drawn_az_deg']} deg ({cand['diff_deg']:+.3f} deg)"
+
+    entries, by_course = [], {}
+    for cand in raw:
+        good, hits = continuation(cand)
+        computed, drawing = fmt(cand)
+        e = {"chain_start": cand["chain_start"], "reaches": cand["reaches"], "course": cand["course"],
+             "kind": cand["kind"], "missing": cand["missing"], "computed": computed, "drawing": drawing}
+        if len(good) == 1:
+            e.update(status="accepted", reason=f"checked ({cand['chain_start']}->{cand['reaches']}->{good[0]['end']})",
+                      check_anchor=good[0]["end"], check_misclosure_ft=good[0]["misclosure_ft"], _third=good[0])
+        elif len(good) > 1:
+            e.update(status="refused", reason=f"ambiguous continuation ({len(good)} third anchors close)")
+        elif hits:
+            worst = min(hits, key=lambda t: t["misclosure_ft"])
+            e.update(status="refused", reason=f"disagrees (checking landing {worst['misclosure_ft']} ft off at {worst['end']})")
+        else:
+            e.update(status="refused", reason="unchecked (no third anchor reached)")
+        e["_cand"] = cand
+        entries.append(e)
+        by_course.setdefault(cand["course"], []).append(e)
+
+    # agreement fallback: two DIFFERENT (chain_start, reaches) pairs computing the SAME row's missing
+    # value, within AGREE_DEG_TOL (bearing/chord direction) or AGREE_FT_TOL (distance) of each other.
+    for course, es in by_course.items():
+        if any(e["status"] == "accepted" for e in es):
+            continue
+        pairs = {(e["chain_start"], e["reaches"]) for e in es}
+        if len(pairs) < 2:
+            continue
+        tol = AGREE_FT_TOL if es[0]["_cand"]["missing"] == "distance" else AGREE_DEG_TOL
+        base = es[0]["_cand"]["value"]
+        agree_pairs = {(e["chain_start"], e["reaches"]) for e in es if abs(e["_cand"]["value"] - base) <= tol}
+        if len(agree_pairs) >= 2:
+            for e in es:
+                if (e["chain_start"], e["reaches"]) in agree_pairs:
+                    e.update(status="accepted", reason=f"agrees across {len(agree_pairs)} anchor pairs (<= {tol})")
+        else:
+            for e in es:
+                if e["status"] != "accepted":
+                    e.update(status="refused", reason="ambiguous (independent routes disagree)")
+
+    stitched, filled_edges, candidates = [], [], []
+    for e in entries:
+        cand = e.pop("_cand")
+        added_ft = 0.0
+        if e["status"] == "accepted":
+            row_course = {"name": cand["course"], "kind": cand["kind"], "ft": cand["fill_ft"], "misfit_ft": 0.0}
+            end_id = e.get("check_anchor", cand["reaches"])
+            third = e.get("_third")
+            tail_courses = third["courses"] if third else []
+            tail_len = third["length_ft"] if third else 0.0
+            misclosure = e.get("check_misclosure_ft", cand["residual_ft"])
+            stitched.append({"start": cand["chain_start"], "end": end_id, "status": "closed",
+                              "misclosure_ft": misclosure,
+                              "length_ft": round(cand["chain"]["length_ft"] + cand["fill_ft"] + tail_len, 2),
+                              "n_courses": cand["chain"]["n_courses"] + 1 + len(tail_courses),
+                              "courses": cand["chain"]["courses"] + [row_course] + tail_courses,
+                              "resolved": "closure_fill", "closure_course": cand["course"]})
+            p, q = cand["row"]["p"], cand["row"]["q"]
+            if not cand["fwd"]:
+                p, q = q, p
+            filled_edges.append({"name": cand["course"], "az": cand["fill_az"], "ft": cand["fill_ft"], "p": p, "q": q})
+            added_ft = cand["fill_ft"]
+        e.pop("_third", None)
+        e["added_ft"] = round(added_ft, 1)
+        candidates.append(e)
+    return candidates, stitched, filled_edges
+
+
+def closure_coverage(internals, filled_edges):
+    """recon_closure_ft: boundary ft newly matched by an ACCEPTED fill's own geometry (chord only,
+    ponytail: an arc fill's own curve bow is not walked here the way rec_segments() does for a clean
+    rec_edges entry -- upgrade to the same per-segment polyline if a fill ever lands on a sharp arc and
+    the chord-vs-curve gap starts to matter). Same covered_mask() recon.py's own recon_all/anchored_
+    coverage already use, restricted to `remaining` (post contamination-removal) so it cannot double-
+    count ground recon_all/recon_anchored never counted the drawing for in the first place."""
+    mid, seg_az, seg_len, remaining = internals["mid"], internals["seg_az"], internals["seg_len"], internals["remaining"]
+    buffer_ft = internals["buffer_ft"]
+    if not filled_edges:
+        return 0.0, np.zeros(int(remaining.sum()), bool)
+    rP = np.array([e["p"] for e in filled_edges])
+    rQ = np.array([e["q"] for e in filled_edges])
+    rAz = np.array([e["az"] for e in filled_edges])
+    any_match, _ = recon.covered_mask(mid, seg_az, rP, rQ, rAz, buffer_ft, recon.PARALLEL_TOL_DEG)
+    covered_ft = float(seg_len[remaining & any_match].sum())
+    return covered_ft, any_match[remaining]
 
 
 # --- anchored parcels (leg 2) -----------------------------------------------------------------------------
@@ -558,12 +714,73 @@ def render_crop(key, g, chain, tag, prefix="l19_1"):
     plt.close(fig)
 
 
+def render_closure_crop(key, g, anchors_by_id, rec_edges, filled_by_name, chain, idx):
+    """Leg 3: an accepted fill's own crop -- every printed anchor on the sheet (small blue dots, so the
+    gate can see A/B/C among them), the whole stitched chain replayed corner to corner, and the filled
+    course itself picked out in red. by_name replay mirrors render_chain_crop(); the ONE course whose
+    name is chain["closure_course"] is not in rec_edges (it was never a clean record row) so its own
+    az/ft come from filled_by_name (closure_fills()'s own filled_edges, already oriented forward -- see
+    its own docstring) instead."""
+    import pymupdf
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    inv_fn = recon.inv_of(g["params"])
+    page = pymupdf.open(PDF)[0]
+    W, H = page.rect.width, page.rect.height
+    px = page.get_pixmap(matrix=pymupdf.Matrix(1, 1), colorspace=pymupdf.csGRAY)
+    img = np.frombuffer(px.samples, dtype=np.uint8).reshape(px.height, px.width)
+
+    by_name = {e["name"]: e for e in rec_edges}
+    start = anchors_by_id[chain["start"]]
+    pos, n = start["pt"].copy(), start["node"]
+    ground_pts = [pos.copy()]
+    fill_idx = None
+    for i, co in enumerate(chain["courses"]):
+        if co["name"] == chain["closure_course"]:
+            fe = filled_by_name[co["name"]]
+            pos = pos + np.array([fe["ft"] * math.sin(math.radians(fe["az"])), fe["ft"] * math.cos(math.radians(fe["az"]))])
+            fill_idx = i
+        else:
+            e = by_name[co["name"]]
+            fwd = e["n0"] == n
+            pos = apply_record(pos, e, fwd)
+            n = e["n1"] if fwd else e["n0"]
+        ground_pts.append(pos.copy())
+    pg = inv_fn(np.array(ground_pts))
+
+    cx, cy = pg.mean(0)
+    span = max(float(np.hypot(*(pg.max(0) - pg.min(0)))), 40) * 0.6
+    x0, x1 = max(0, cx - span), min(W, cx + span)
+    y0, y1 = max(0, cy - span), min(H, cy + span)
+    fig, ax = plt.subplots(figsize=(7, 7), dpi=150)
+    ax.imshow(img, cmap="gray", extent=(0, W, H, 0))
+    all_pts = inv_fn(np.array([a["pt"] for a in anchors_by_id.values()]))
+    ax.scatter(all_pts[:, 0], all_pts[:, 1], color="#1f77b4", s=16, zorder=3, label="printed anchors")
+    ax.plot(pg[:, 0], pg[:, 1], color="#2ca02c", lw=1.6, marker="o", ms=3, zorder=4)
+    if fill_idx is not None:
+        seg = pg[fill_idx:fill_idx + 2]
+        ax.plot(seg[:, 0], seg[:, 1], color="#e03030", lw=3.0, zorder=5, label="filled course")
+    ax.scatter([pg[0, 0]], [pg[0, 1]], color="#ffdd00", s=70, zorder=6, marker="^", edgecolor="k", label="A (start)")
+    ax.scatter([pg[-1, 0]], [pg[-1, 1]], color="#ff7f0e", s=70, zorder=6, marker="s", edgecolor="k", label="C (checked)")
+    ax.set_xlim(x0, x1); ax.set_ylim(y1, y0); ax.set_aspect("equal")
+    ax.set_title(f"{key}: closure fill {chain['closure_course']} ({chain['start']}->{chain['end']}, "
+                 f"misclosure {chain['misclosure_ft']}')", fontsize=8)
+    ax.legend(loc="lower right", fontsize=6)
+    ax.axis("off")
+    OUT_RECON.mkdir(parents=True, exist_ok=True)
+    safe = re.sub(r"[^A-Za-z0-9_-]+", "_", f"{chain['start']}_{chain['end']}_{idx}")
+    fig.savefig(OUT_RECON / f"l19_3_{key}_{safe}.png")
+    plt.close(fig)
+
+
 def main(sheet_name, key):
     anchors, g, internals = load_anchors(sheet_name, key)
     trav = json.loads((OUT / "traverse.json").read_text(encoding="utf-8"))
     rec_edges, n_rows = recon.load_rec_edges(trav)
     adj, node_pos = build_graph(rec_edges)
     chains, unplaced = run_walks(anchors, rec_edges, adj, node_pos)
+    anchors_by_id = {a["id"]: a for a in anchors}
 
     closed = [c for c in chains if c["status"] == "closed"]
     failed = [c for c in chains if c["status"] == "failed"]
@@ -571,42 +788,60 @@ def main(sheet_name, key):
     resolved = [c for c in closed if c.get("branch_resolved")]
     ambiguous = [c for c in open_ if "ambiguous" in c.get("reason", "")]
 
-    # leg 2: recon_anchored -- boundary ft covered by a reconstructed edge that belongs to a closed chain
-    names = closed_edge_names(chains)
+    # leg 3: fills checked by a second landing (closure_fills() itself calls leg 2's own candidate
+    # match); accepted ones become their own "closed" chains, folded into recon_anchored below exactly
+    # like a branch-resolved one (closed_edge_names() takes status=="closed" from any chain-shaped dict).
+    half_rows = load_half_recorded_rows(trav)
+    closure_candidates, closure_stitched, filled_edges = closure_fills(chains, half_rows, anchors,
+                                                                        anchors_by_id, rec_edges, adj, node_pos)
+    closure_accepted = [c for c in closure_candidates if c["status"] == "accepted"]
+
+    # leg 2+3: recon_anchored -- boundary ft covered by a reconstructed edge that belongs to a closed
+    # chain (leg 1/2) OR a closure-stitched one (leg 3), PLUS the accepted fill's own new segment
+    # (never in rec_edges, so closed_edge_names()/anchored_coverage() alone can never see it).
+    names = closed_edge_names(chains) | closed_edge_names(closure_stitched)
     anch_covered_ft, anch_denom_ft, anch_seg_kept = anchored_coverage(internals, names)
-    patch_recon_segments_anchored(anch_seg_kept)
+    closure_ft, closure_seg_kept = closure_coverage(internals, filled_edges)
+    combined_seg_kept = anch_seg_kept | closure_seg_kept
+    seg_len_remaining = internals["seg_len"][internals["remaining"]]
+    total_covered_ft = float(seg_len_remaining[combined_seg_kept].sum())
+    closure_net_ft = float(seg_len_remaining[closure_seg_kept & ~anch_seg_kept].sum())  # net new (no double count)
+    patch_recon_segments_anchored(combined_seg_kept)
 
-    half_rows = load_half_recorded_lines(trav)
-    anchors_by_id = {a["id"]: a for a in anchors}
-    solvable = solvable_by_closure(chains, half_rows, anchors, anchors_by_id, rec_edges)
-
-    parcels = anchored_parcels(internals, names)
+    parcels = anchored_parcels(internals, names | {c["course"] for c in closure_accepted})
 
     out = {"sheet": key, "n_anchors": len(anchors), "n_anchors_unplaced": len(unplaced),
            "n_reconstructed_edges": len(rec_edges), "n_nodes": len(node_pos),
            "closed": closed, "failed": failed, "open": open_,
            "branch_resolved": resolved, "branch_ambiguous": ambiguous,
-           "recon_anchored": {"covered_ft": round(anch_covered_ft, 1), "denom_ft": round(anch_denom_ft, 1),
-                               "pct": round(100 * anch_covered_ft / anch_denom_ft, 2) if anch_denom_ft else 0},
-           "solvable_by_closure_unchecked": solvable,
+           "recon_anchored": {"covered_ft": round(total_covered_ft, 1), "denom_ft": round(anch_denom_ft, 1),
+                               "pct": round(100 * total_covered_ft / anch_denom_ft, 2) if anch_denom_ft else 0},
+           "recon_closure": {"added_ft": round(closure_net_ft, 1), "n_accepted": len(closure_accepted),
+                              "n_candidates": len(closure_candidates)},
+           "closure_candidates": closure_candidates,
            "anchored_parcels": parcels}
     OUT_RECON.mkdir(parents=True, exist_ok=True)
     (OUT_RECON / f"anchored_{key}.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
 
-    # crops: 3 longest closed chains + every failed one (leg 1) + every branch-resolved closed chain (leg 2)
+    # crops: 3 longest closed chains + every failed one (leg 1) + every branch-resolved closed chain
+    # (leg 2) + every accepted closure fill, all anchors shown (leg 3)
     for c in sorted(closed, key=lambda c: -c["length_ft"])[:3]:
         render_chain_crop(key, g, c, anchors_by_id, rec_edges, "closed")
     for c in failed:
         render_chain_crop(key, g, c, anchors_by_id, rec_edges, "failed")
     for i, c in enumerate(resolved):  # index disambiguates two resolved chains sharing the same start/end
         render_chain_crop(key, g, c, anchors_by_id, rec_edges, f"resolved{i}", prefix="l19_2")
+    filled_by_name = {e["name"]: e for e in filled_edges}
+    for i, c in enumerate(closure_stitched):
+        render_closure_crop(key, g, anchors_by_id, rec_edges, filled_by_name, c, i)
 
     print(f"anchored ({key}): {len(anchors)} anchors ({len(unplaced)} unplaced), "
           f"{len(rec_edges)}/{n_rows} reconstructed edges, {len(node_pos)} nodes -> "
           f"{len(closed)} closed ({len(resolved)} by branch resolution), {len(failed)} failed, "
           f"{len(open_)} open ({len(ambiguous)} ambiguous branches) | "
-          f"recon_anchored {anch_covered_ft:,.0f}/{anch_denom_ft:,.0f} ft ({out['recon_anchored']['pct']:.1f}%) | "
-          f"solvable-by-closure (unchecked) {len(solvable)} | anchored parcels {len(parcels)}")
+          f"recon_anchored {total_covered_ft:,.0f}/{anch_denom_ft:,.0f} ft ({out['recon_anchored']['pct']:.1f}%) | "
+          f"closure fills {len(closure_accepted)}/{len(closure_candidates)} accepted (+{closure_net_ft:,.1f} ft) | "
+          f"anchored parcels {len(parcels)}")
     return out
 
 
@@ -649,7 +884,7 @@ def run_all():
 
 
 def write_report():
-    lines = ["# Anchored record walk (loop19 leg 1 + leg 2)\n"]
+    lines = ["# Anchored record walk (loop19 leg 1 + leg 2 + leg 3)\n"]
     for key in SHEET_PDF:
         fp = OUT_RECON / f"anchored_{key}.json"
         if not fp.exists():
@@ -684,17 +919,18 @@ def write_report():
             lines.append("|---|---|---|")
             for c in d["branch_ambiguous"]:
                 lines.append(f"| {c['start']} | {c['n_courses']} | {', '.join(c.get('ambiguous_ends', []))} |")
-        sv = d.get("solvable_by_closure_unchecked")
-        if sv:
-            lines.append("\nsolvable by closure (unchecked -- zero redundancy, never scored):\n")
-            lines.append("| chain start | course | missing | computed | vs. drawing | reaches |")
-            lines.append("|---|---|---|---|---|---|")
-            for s in sv:
-                if s["missing"] == "distance":
-                    computed, vs_drawing = f"{s['computed_ft']} ft", f"{s['diff_ft']:+.3f} ft"
-                else:
-                    computed, vs_drawing = f"{s['computed_az_deg']} deg", f"{s['diff_deg']:+.3f} deg"
-                lines.append(f"| {s['chain_start']} | {s['course']} | {s['missing']} | {computed} | {vs_drawing} | {s['reaches']} |")
+        rc = d.get("recon_closure")
+        cc = d.get("closure_candidates")
+        if rc:
+            lines.append(f"recon_closure: {rc['n_accepted']}/{rc['n_candidates']} fills accepted, "
+                          f"+{rc['added_ft']:,.1f} ft (net, folded into recon_anchored above)\n")
+        if cc:
+            lines.append("\nclosure fills -- leg 3, a fill counts only when a second landing checks it:\n")
+            lines.append("| A->B | course | missing | computed | vs. drawing | status | reason | ft added |")
+            lines.append("|---|---|---|---|---|---|---|---|")
+            for s in cc:
+                lines.append(f"| {s['chain_start']}->{s['reaches']} | {s['course']} | {s['missing']} | "
+                              f"{s['computed']} | {s['drawing']} | {s['status']} | {s['reason']} | {s['added_ft']} |")
         ap = d.get("anchored_parcels")
         if ap:
             lines.append("\nparcels whose whole ring sits in closed anchored chains:\n")
@@ -705,6 +941,19 @@ def write_report():
                 diff_s = f"{p['diff_pct']:+.1f}%" if p["diff_pct"] is not None else ""
                 lines.append(f"| {p['parcel']} | {p['face_area_sqft']:,.0f} | {ra_s} | {diff_s} |")
         lines.append("")
+    total_accepted = total_ft = 0
+    for key in SHEET_PDF:
+        fp = OUT_RECON / f"anchored_{key}.json"
+        if not fp.exists():
+            continue
+        d = json.loads(fp.read_text(encoding="utf-8"))
+        rc = d.get("recon_closure")
+        if rc:
+            total_accepted += rc["n_accepted"]
+            total_ft += rc["added_ft"]
+    lines.append(f"## set\n\nrecon_closure_ft (sum over sheets with anchors -- ponytail: not deduped across "
+                 f"matchlines the way recon_set.py's own set numbers are, negligible at {total_accepted} "
+                 f"accepted fills): {total_accepted} accepted, +{total_ft:,.1f} ft\n")
     (OUT_RECON / "anchored.md").write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -759,6 +1008,46 @@ def _walk_branch(rec_edges, anchors_pt):
     return walk_one(a0, adj[a0["node"]][0], rec_edges, adj, node_anchors, anchors_by_id)
 
 
+def _closure_setup(tail=True, tail_ft_error=0.0):
+    """A1(0,0) -e0-> (0,50) [clean, open: "ran out of record courses"] -row1(east, distance
+    missing)-> A2(100,50) [-e2-> (100,100) = A3, when tail] -- the leg 3 fixture: row1's own known
+    bearing (east) points exactly at A2, so the missing distance solves to land there; e2 (when
+    present) is the third-anchor continuation. A3 stays snapped to e2's own DRAWN endpoint (so it is a
+    real graph target); tail_ft_error perturbs e2's own RECORD length only, same as a real course whose
+    record disagrees with the drawing -- the walked position misses A3's printed coordinate by that much
+    (_finish_at_anchor's own misclosure), without touching where A3 sits on the graph."""
+    edges = [_edge("e0", (0, 0), (0, 50))]
+    anchors_pt = {"A1": (0.0, 0.0), "A2": (100.0, 50.0)}
+    if tail:
+        e2 = _edge("e2", (100, 50), (100, 100))
+        e2["ft"] += tail_ft_error
+        edges.append(e2)
+        anchors_pt["A3"] = (100.0, 100.0)
+    half_rows = [{"name": "row1", "kind": "line", "az": 90.0, "ft": 95.0, "half": "distance",
+                  "p": np.array([0.0, 50.0]), "q": np.array([100.0, 50.0])}]
+    adj, node_pos = build_graph(edges)
+    anchors = [{"id": aid, "pt": np.array(pt, float)} for aid, pt in anchors_pt.items()]
+    chains, _ = run_walks(anchors, edges, adj, node_pos)
+    anchors_by_id = {a["id"]: a for a in anchors}
+    return chains, half_rows, anchors, anchors_by_id, edges, adj, node_pos
+
+
+def _agree_setup():
+    """A1(0,0) -e0-> (0,50) -rowB(distance known 100', bearing missing)-> two UNCONNECTED anchors
+    A2(0,150), A5(0,150.5) sitting on the exact same ray from (0,50) (dx=0 for both) -- neither offers a
+    third-anchor continuation (no edges reach them), but their own independently computed bearings agree
+    exactly, so the agreement fallback (not the third-anchor one) must accept both."""
+    edges = [_edge("e0", (0, 0), (0, 50))]
+    anchors_pt = {"A1": (0.0, 0.0), "A2": (0.0, 150.0), "A5": (0.0, 150.5)}
+    half_rows = [{"name": "rowB", "kind": "line", "az": 0.0, "ft": 100.0, "half": "bearing",
+                  "p": np.array([0.0, 50.0]), "q": np.array([100.0, 50.0])}]
+    adj, node_pos = build_graph(edges)
+    anchors = [{"id": aid, "pt": np.array(pt, float)} for aid, pt in anchors_pt.items()]
+    chains, _ = run_walks(anchors, edges, adj, node_pos)
+    anchors_by_id = {a["id"]: a for a in anchors}
+    return chains, half_rows, anchors, anchors_by_id, edges, adj, node_pos
+
+
 def selftest():
     """Synthetic 3-course chain between two anchors: closes within 0.01 ft on clean record numbers; a
     2 ft distance error on one course fails and names that course. Leg 2: a two-way branch where only
@@ -783,9 +1072,39 @@ def selftest():
     assert both["status"] == "open" and "ambiguous" in both["reason"], f"both-close must stay open: {both}"
     assert sorted(both.get("ambiguous_ends", [])) == ["A2", "A3"], f"both candidate ends must be listed: {both}"
 
+    # leg 3: a fill checked by a third anchor within ARRIVE_FT (0.5 ft) is accepted; the same fill with
+    # no third anchor is refused ("unchecked"); a checking landing 2 ft off is refused ("disagrees").
+    chains, half_rows, anchors, anchors_by_id, edges, adj, node_pos = _closure_setup(tail=True)
+    cands, stitched, filled = closure_fills(chains, half_rows, anchors, anchors_by_id, edges, adj, node_pos)
+    assert len(cands) == 1, f"exactly one candidate expected: {cands}"
+    assert cands[0]["status"] == "accepted" and "checked" in cands[0]["reason"], f"third anchor within 0.5 ft must accept: {cands[0]}"
+    assert stitched and stitched[0]["end"] == "A3" and stitched[0]["misclosure_ft"] < 0.01, f"stitched chain must reach A3: {stitched}"
+    assert filled and abs(filled[0]["ft"] - 100.0) < 0.01, f"filled distance must solve to 100.0 ft: {filled}"
+
+    chains_u, half_rows_u, anchors_u, anchors_by_id_u, edges_u, adj_u, node_pos_u = _closure_setup(tail=False)
+    cands_u, stitched_u, filled_u = closure_fills(chains_u, half_rows_u, anchors_u, anchors_by_id_u, edges_u, adj_u, node_pos_u)
+    assert len(cands_u) == 1 and cands_u[0]["status"] == "refused" and "unchecked" in cands_u[0]["reason"], f"no third anchor must refuse: {cands_u}"
+    assert not stitched_u and not filled_u, f"a refused fill must not be stitched or scored: {stitched_u} {filled_u}"
+
+    chains_d, half_rows_d, anchors_d, anchors_by_id_d, edges_d, adj_d, node_pos_d = _closure_setup(tail=True, tail_ft_error=2.0)
+    cands_d, stitched_d, filled_d = closure_fills(chains_d, half_rows_d, anchors_d, anchors_by_id_d, edges_d, adj_d, node_pos_d)
+    assert len(cands_d) == 1 and cands_d[0]["status"] == "refused" and "disagrees" in cands_d[0]["reason"], f"a 2 ft off landing must refuse: {cands_d}"
+    assert not stitched_d and not filled_d, f"a disagreeing fill must not be stitched or scored: {stitched_d} {filled_d}"
+
+    # leg 3: two independent anchor pairs computing the SAME missing bearing, agreeing exactly, accept
+    # via the agreement fallback even with no third-anchor continuation at all (neither A2 nor A5 is
+    # graph-connected here).
+    chains_a, half_rows_a, anchors_a, anchors_by_id_a, edges_a, adj_a, node_pos_a = _agree_setup()
+    cands_a, stitched_a, filled_a = closure_fills(chains_a, half_rows_a, anchors_a, anchors_by_id_a, edges_a, adj_a, node_pos_a)
+    assert len(cands_a) == 2 and all(c["status"] == "accepted" for c in cands_a), f"agreeing independent pairs must accept: {cands_a}"
+    assert all("agrees" in c["reason"] for c in cands_a), f"accepted-by-agreement reason must say so: {cands_a}"
+    assert len(stitched_a) == 2 and len(filled_a) == 2, f"both agreeing fills must be stitched and scored: {stitched_a} {filled_a}"
+
     print("anchored.selftest OK: a clean 3-course chain closes within 0.01 ft; a 2 ft distance error "
           "on one course fails and names that course; a two-way branch resolves when only one "
-          "continuation closes, stays open (ambiguous) when both do")
+          "continuation closes, stays open (ambiguous) when both do; leg 3 -- a fill checked by a third "
+          "anchor within 0.5 ft accepts, the same fill with no third anchor or a 2 ft off landing "
+          "refuses, two independent anchor pairs agreeing accepts without any third anchor at all")
 
 
 if __name__ == "__main__":
