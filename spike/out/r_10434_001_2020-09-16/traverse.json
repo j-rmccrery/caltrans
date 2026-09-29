@@ -2,9 +2,9 @@
  {
   "closed": false,
   "n_edges": 12,
-  "full_record": 4,
-  "misfit_max_ft": 0.12,
-  "misfit_end_ft": 0.07,
+  "full_record": 5,
+  "misfit_max_ft": 0.1,
+  "misfit_end_ft": 0.04,
   "edges": [
    {
     "edge": "43.30'",
@@ -166,16 +166,13 @@
    {
     "edge": "L=121.66'",
     "kind": "arc",
-    "az": 124.3113,
-    "ft": 121.59,
-    "misfit_ft": 0.0,
-    "chain_misfit_ft": 0.1,
-    "flags": [
-     "chord direction from drawing",
-     "R/L printed, no record chord direction"
-    ],
-    "E": 5991981.79,
-    "N": 2121457.21,
+    "az": 124.2803,
+    "ft": 121.62,
+    "misfit_ft": 0.07,
+    "chain_misfit_ft": 0.07,
+    "flags": [],
+    "E": 5991981.86,
+    "N": 2121457.25,
     "pts": [
      [
       5991881.39,
@@ -241,7 +238,8 @@
       5991981.82,
       2121457.31
      ]
-    ]
+    ],
+    "chord_source": "radial S36°43'34\"W(R)"
    },
    {
     "edge": "L=196.08' + L=303.85'",
@@ -249,13 +247,13 @@
     "az": 115.2233,
     "ft": 195.56,
     "misfit_ft": 0.0,
-    "chain_misfit_ft": 0.1,
+    "chain_misfit_ft": 0.07,
     "flags": [
      "chord direction from drawing",
      "R/L printed, no record chord direction"
     ],
-    "E": 5992158.7,
-    "N": 2121373.88,
+    "E": 5992158.77,
+    "N": 2121373.91,
     "pts": [
      [
       5991981.82,
@@ -329,12 +327,12 @@
     "az": 66.0116,
     "ft": 4.92,
     "misfit_ft": 0.07,
-    "chain_misfit_ft": 0.12,
+    "chain_misfit_ft": 0.05,
     "flags": [
      "bearing from drawing"
     ],
-    "E": 5992163.2,
-    "N": 2121375.88,
+    "E": 5992163.27,
+    "N": 2121375.91,
     "pts": [
      [
       5992163.31,
@@ -352,10 +350,10 @@
     "az": 106.67,
     "ft": 50.56,
     "misfit_ft": 0.06,
-    "chain_misfit_ft": 0.1,
+    "chain_misfit_ft": 0.04,
     "flags": [],
-    "E": 5992211.63,
-    "N": 2121361.37,
+    "E": 5992211.7,
+    "N": 2121361.41,
     "pts": [
      [
       5992211.73,
@@ -373,10 +371,10 @@
     "az": 105.3508,
     "ft": 80.97,
     "misfit_ft": 0.04,
-    "chain_misfit_ft": 0.07,
+    "chain_misfit_ft": 0.04,
     "flags": [],
-    "E": 5992289.72,
-    "N": 2121339.94,
+    "E": 5992289.78,
+    "N": 2121339.97,
     "pts": [
      [
       5992289.78,

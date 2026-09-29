@@ -502,3 +502,20 @@ Lessons: subagents' background benches die at hand-back (leg B): benches run in 
 were text canonicalisation and a discarded value, not reading: check what the reader returned before replacing it.
 Check a subagent's diagnosis against the gold notes (leg A called 359.00' a wrong association; gold says right line, the
 drawn piece is a tick-cut fragment).
+
+# Loop 18: record anchors (started 2026-09-28 ~19:15; plan from the Opus 5.5 + Fable 5.1 review; JR rulings)
+
+JR rulings: an inverse between two printed coordinates is a record course (own column); a "(T)" total counts for every
+piece of one straight line (or arc) under one printed bearing/R when the pieces sum to it within 0.5 ft; the headline
+counts each foot of ground once; parcels are scored against the official AREAS tables. Coordinate-anchored rebuild
+(T-001) after the fixes (JR: "do the fixes, then get to 4"). Rules as loop 17; budget 10; benches in the foreground.
+
+| leg | work | gate |
+|---|---|---|
+| 1 | measure: ground-deduped set totals, class e out of denominators, parcel score vs AREAS tables, ceiling restated; R-10741.1 L=660.20' direction bug | per-sheet numbers unchanged except where explained; old and new headline side by side; +~599 ft with crop |
+| 2 | printed coordinates (tables + callouts) -> inverse courses | agrees with any printed bearing/distance on the run (record vs record, <= 0.01 deg / 0.1 ft); one straight or arc; `by inverse` column |
+| 3 | (T) totals as whole courses | pieces sum to total <= 0.5 ft, one line/arc, one printed bearing or R |
+| 4 | radials with centre test (123 printed, 43 captured) | radial + R hits fitted centre <= 0.5 ft; gain counted in boundary ft |
+| 5 | R from R=/delta/L stacks; chord from alignment BC/EC | L/R = printed delta < 0.02 deg; chord <= 0.5 ft |
+| 6 | cross-sheet parcels; R-10741.2 DETAIL "A" -> 46825-5 | ring closes <= 1 ft on record only |
+| 7 | gold set on R-10741; recon gold join | wrong-pass 0 on keyed clean edges |

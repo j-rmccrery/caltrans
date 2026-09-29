@@ -1,0 +1,105 @@
+{
+ "dup_tol_ft": 1.0,
+ "old_sum_of_per_sheet": {
+  "drawn_ft": 69794.2,
+  "covered_ft": 28522.8,
+  "dim_denom_ft": 53026.0,
+  "dim_covered_ft": 27622.7
+ },
+ "new_set": {
+  "drawn_ft": 63336.9,
+  "covered_ft": 25361.6,
+  "dim_denom_ft": 47477.6,
+  "dim_covered_ft": 24868.6
+ },
+ "overlap_ft_removed": {
+  "drawn_ft": 6457.3,
+  "covered_ft": 3161.2,
+  "dim_denom_ft": 5548.4,
+  "dim_covered_ft": 2754.1
+ },
+ "recon_all_set_pct": 40.04,
+ "recon_dim_set_pct": 52.38,
+ "recon_all_old_pct": 40.87,
+ "recon_dim_old_pct": 52.09,
+ "per_sheet_recon_json": {
+  "presidio": {
+   "recon_all_denom_ft": 10469.4,
+   "recon_all_covered_ft": 4307.9,
+   "removed_ft": {
+    "frame": 7382.1,
+    "tables": 4826.4,
+    "titleblock": 0.0,
+    "matchline": 7269.6,
+    "leader_wedge": 3182.0,
+    "wedge_residual": 885.6,
+    "edge_column": 0.0
+   }
+  },
+  "r10434_1": {
+   "recon_all_denom_ft": 8979.5,
+   "recon_all_covered_ft": 2401.0,
+   "removed_ft": {
+    "frame": 8401.8,
+    "tables": 1781.7,
+    "titleblock": 1252.9,
+    "matchline": 8595.8,
+    "leader_wedge": 1585.4,
+    "wedge_residual": 0.0,
+    "edge_column": 13.0
+   }
+  },
+  "r10434_3": {
+   "recon_all_denom_ft": 17081.1,
+   "recon_all_covered_ft": 4189.6,
+   "removed_ft": {
+    "frame": 8625.2,
+    "tables": 10001.3,
+    "titleblock": 37.9,
+    "matchline": 8577.1,
+    "leader_wedge": 4063.3,
+    "wedge_residual": 0.0,
+    "edge_column": 0.0
+   }
+  },
+  "r10741_1": {
+   "recon_all_denom_ft": 10422.2,
+   "recon_all_covered_ft": 5957.8,
+   "removed_ft": {
+    "frame": 5849.1,
+    "tables": 18296.7,
+    "titleblock": 0.0,
+    "matchline": 0.0,
+    "leader_wedge": 30.5,
+    "wedge_residual": 70.0,
+    "edge_column": 0.0
+   }
+  },
+  "r10741_2": {
+   "recon_all_denom_ft": 12416.6,
+   "recon_all_covered_ft": 6653.1,
+   "removed_ft": {
+    "frame": 5998.8,
+    "tables": 12230.7,
+    "titleblock": 0.0,
+    "matchline": 113.0,
+    "leader_wedge": 65.6,
+    "wedge_residual": 0.0,
+    "edge_column": 29.6
+   }
+  },
+  "r10741_3": {
+   "recon_all_denom_ft": 10425.4,
+   "recon_all_covered_ft": 5013.4,
+   "removed_ft": {
+    "frame": 5079.7,
+    "tables": 17082.8,
+    "titleblock": 0.0,
+    "matchline": 493.8,
+    "leader_wedge": 105.3,
+    "wedge_residual": 0.0,
+    "edge_column": 0.0
+   }
+  }
+ }
+}

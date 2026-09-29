@@ -1,30 +1,51 @@
 # recon ceiling: no_traverse_edge, classified
 
-class a = dimensioned here, not read/associated (next fix) | b = dimensioned on a matchline neighbour | c = referenced, not dimensioned here | d = not dimensioned anywhere in the set (true ceiling loss) | e = contamination (not boundary)
+class a = dimensioned here, not read/associated (next fix) | b = dimensioned on a matchline neighbour | c = referenced, not dimensioned here (a different sheet/deed) | c_T = a bare (T) total nearby, no per-piece breakdown yet (loop18 leg 1: reachable in principle, split out of c) | d = not dimensioned anywhere in the set (true ceiling loss) | e = contamination (not boundary)
 
-| sheet | notrav_ft | a | b | c | d | e | recon_dim_denom | recon_dim_covered |
-|---|---|---|---|---|---|---|---|---|
-| presidio | 4104 | 1833 | 0 | 1468 | 30 | 774 | 10577 | 3881 |
-| r_10434_001_2020-09-16 | 4090 | 411 | 0 | 757 | 1429 | 1493 | 8556 | 2033 |
-| r_10434_003_2020-09-16 | 4677 | 1251 | 0 | 1875 | 1551 | 0 | 13142 | 3119 |
-| r_10741_001_2017-02-10 | 11 | 11 | 0 | 0 | 0 | 0 | 6282 | 5300 |
-| r_10741_002_2017-02-10 | 1621 | 90 | 106 | 0 | 1425 | 0 | 8772 | 6653 |
-| r_10741_003_2017-02-10 | 1109 | 143 | 333 | 0 | 632 | 0 | 6501 | 4606 |
-| **total** | 15612 | 3739 | 439 | 4099 | 5067 | 2267 | 53829 | 25592 |
+| sheet | notrav_ft | a | b | c | c_T | d | e | recon_dim_denom | recon_dim_covered |
+|---|---|---|---|---|---|---|---|---|---|
+| presidio | 3318 | 1833 | 0 | 473 | 969 | 30 | 14 | 10000 | 4296 |
+| r_10434_001_2020-09-16 | 3651 | 411 | 0 | 511 | 246 | 1429 | 1054 | 8172 | 2329 |
+| r_10434_003_2020-09-16 | 4639 | 1213 | 0 | 758 | 1118 | 1551 | 0 | 13256 | 3782 |
+| r_10741_001_2017-02-10 | 11 | 11 | 0 | 0 | 0 | 0 | 0 | 6325 | 5958 |
+| r_10741_002_2017-02-10 | 1621 | 90 | 291 | 0 | 0 | 1240 | 0 | 8772 | 6653 |
+| r_10741_003_2017-02-10 | 1109 | 143 | 333 | 0 | 0 | 632 | 0 | 6501 | 4606 |
+| **total** | 14349 | 3701 | 624 | 1741 | 2332 | 4883 | 1068 | 53026 | 27623 |
+
+## reached but unclean (loop18 leg 1, JR): a traverse row already sits on this stretch, but is itself flagged or misfit -- reachable in principle, a read/association fix rather than a missing record. recon_attrib.py's own buckets, summed per sheet:
+
+| sheet | curve | distance_from_drawing | bearing_from_drawing | misfit | unclean total |
+|---|---|---|---|---|---|
+| presidio | 0 | 0 | 0 | 0 | 0 |
+| r_10434_001_2020-09-16 | 1283 | 670 | 240 | 0 | 2192 |
+| r_10434_003_2020-09-16 | 2214 | 1752 | 529 | 340 | 4835 |
+| r_10741_001_2017-02-10 | 0 | 0 | 0 | 357 | 357 |
+| r_10741_002_2017-02-10 | 217 | 280 | 0 | 0 | 497 |
+| r_10741_003_2017-02-10 | 0 | 621 | 165 | 0 | 786 |
+| **total** |  |  |  |  | 8668 |
 
 ## ceiling implied by this split
 
-ceiling_reachable = covered + a + b (record dimensions it, pipeline could in principle reach it); ceiling_honest = ceiling_reachable / (denom - c - d - e) (denominator narrowed to boundary THIS record actually dimensions, on this or a neighbour sheet).
+ceiling_reachable = covered + a + b + c_T + unclean (record dimensions or already reaches it, pipeline could in principle complete it); ceiling_honest = ceiling_reachable / (denom - c - d - e) (denominator narrowed to boundary THIS record actually dimensions, on this or a neighbour sheet -- c_T and unclean stay IN the denominator, since both are already-dimensioned boundary a fix can reach, unlike c/d/e).
 
 | sheet | current_pct | ceiling_reachable_pct | ceiling_honest_pct (denom - c,d,e) |
 |---|---|---|---|
-| presidio | 36.7 | 54.0 | 68.8 |
-| r_10434_001_2020-09-16 | 23.8 | 28.6 | 50.1 |
-| r_10434_003_2020-09-16 | 23.7 | 33.3 | 45.0 |
-| r_10741_001_2017-02-10 | 84.4 | 84.5 | 84.5 |
-| r_10741_002_2017-02-10 | 75.8 | 78.1 | 93.2 |
-| r_10741_003_2017-02-10 | 70.8 | 78.2 | 86.6 |
-| **total** | 47.5 | 55.3 | 70.2 |
+| presidio | 43.0 | 71.0 | 74.8 |
+| r_10434_001_2020-09-16 | 28.5 | 63.4 | 100.0 |
+| r_10434_003_2020-09-16 | 28.5 | 82.6 | 100.0 |
+| r_10741_001_2017-02-10 | 94.2 | 100.0 | 100.0 |
+| r_10741_002_2017-02-10 | 75.8 | 85.9 | 100.0 |
+| r_10741_003_2017-02-10 | 70.8 | 90.3 | 100.0 |
+| **total (per-sheet sum, OLD basis)** | 52.1 | 81.0 | 94.7 |
+
+### same split, denominator/covered from the deduped SET (recon_set.py) instead of the per-sheet sum
+
+current_pct and ceiling_reachable_pct only -- ceiling_honest_pct (denom - c,d,e) is NOT restated here: c/b/c_T/unclean/d/e are still the per-sheet SUM (recon_ceiling's own run_sheet() classifies one sheet's own no_traverse_edge pool at a time, not the pooled/deduped set), so subtracting them from the SET's own deduped, overlap-free denominator double-subtracts the shared matchline ground and can push the ratio past 100% (measured, dropped rather than published wrong). A deduped class breakdown is a separate leg.
+
+| basis | current_pct | ceiling_reachable_pct |
+|---|---|---|
+| OLD (per-sheet sum) | 52.1 | 81.0 |
+| NEW (deduped set) | 52.4 | 84.7 |
 
 ## top 5 class-a runs (next fixes)
 

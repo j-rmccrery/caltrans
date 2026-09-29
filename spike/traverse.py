@@ -394,7 +394,23 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
                 continue
             if len(end_candidates) == 2:
                 a0, a1 = end_candidates[0], end_candidates[1]
-                if abs((a0 - a1 + 180) % 360 - 180) > TANGENT_TOL_DEG * 2:
+                # loop18 leg 1: compare mod 180, not mod 360. Each end's own candidate was already
+                # picked by _pick_by_drawn_chord's circ180 (mod-180, undirected) proximity to this
+                # SAME curve's drawn_chord_az -- so two genuinely-agreeing ends can still land exactly
+                # 180 deg apart here whenever their two donor lines use opposite n0/n1-vs-node
+                # conventions (one donor's record az reads "into" the shared node, the other's reads
+                # "out of" it -- a bookkeeping artifact of which line owns which end of the printed
+                # course, not a disagreement about the course itself). Measured on R-10741.1's
+                # "L=660.20'" curve (a bare-L block that shares R=1169.90' via share_curve_radius()
+                # with the "R=1169.90' L=319.73'" sub-total on the same drawn stroke): its two clean
+                # tangent donors, S20d32'23"W 462.09' at one end (record direction INTO that node) and
+                # S11d47'37"E at the other (record direction OUT OF that node), resolve to a0=184.37,
+                # a1=4.37 -- the same undirected chord line, exactly 180 deg apart -- and the old mod-
+                # 360 check refused the curve outright. A real disagreement (two donors that describe
+                # different physical directions) still differs by neither ~0 nor ~180 mod 180, so this
+                # widened test does not let one through -- see traverse.selftest's companion case.
+                d180 = abs((a0 - a1) % 180)
+                if min(d180, 180 - d180) > TANGENT_TOL_DEG * 2:
                     continue  # both ends found a donor but they disagree: ambiguous, refuse (not guessed)
             end, az = next(iter(end_candidates.items()))
             e["az"] = az
@@ -613,6 +629,32 @@ def selftest():
     edges_amb, adj_amb = curve_edges(extra=[donor2])
     n_amb = complete_curve_chords(edges_amb, adj_amb, az_id)
     assert n_amb == 0 and "az" not in edges_amb[1], "two disagreeing tangent donors at one node must refuse, not guess"
+
+    # loop18 leg 1: opposite-end donors that use opposite n0/n1-vs-node record-direction conventions
+    # must still AGREE when they describe the same physical chord line, even though each end's own
+    # independently-picked candidate lands 180 deg apart from the other's (see the mod-180 comment at
+    # the ambiguity check itself) -- this reproduces R-10741.1's "L=660.20'" curve bug. A second donor
+    # at node 12, geometrically tangent (same p0/p1 as the "ok" case) but with a genuinely different
+    # own record az (200 instead of the collinear 270) must still be refused -- the widened check must
+    # not let a REAL disagreement through along with the 180-flip artifact.
+    donor_opp_ok = {"kind": "line", "p0": np.array([200.0, 100.0]), "p1": np.array([100.0, 100.0]), "az": 270.0,
+                    "ft": 100.0, "flags": [], "impossible": False, "n0": 14, "n1": 12,
+                    "src": "record L west (into node)", "chord_label": False}
+    edges_opp, adj_opp = curve_edges(extra=[donor_opp_ok])
+    n_opp = complete_curve_chords(edges_opp, adj_opp, az_id)
+    assert n_opp == 1 and "az" in edges_opp[1], (
+        "two tangent donors describing the SAME chord line via opposite node-direction conventions "
+        "(candidates 180 deg apart) must resolve, not refuse")
+    assert min(abs((edges_opp[1]["az"] - 45.0) % 180), 180 - abs((edges_opp[1]["az"] - 45.0) % 180)) < 0.5, \
+        f"resolved az should be 45 or 225 (same undirected chord), got {edges_opp[1]['az']}"
+
+    donor_opp_bad = {**donor_opp_ok, "az": 200.0, "src": "record L wrong"}
+    edges_opp2, adj_opp2 = curve_edges(extra=[donor_opp_bad])
+    n_opp2 = complete_curve_chords(edges_opp2, adj_opp2, az_id)
+    assert n_opp2 == 0 and "az" not in edges_opp2[1], (
+        "a genuinely wrong donor at the other end (not a 180-flip of the same chord) must still refuse")
+    print("traverse.selftest: complete_curve_chords loop18 opposite-convention fix OK (180-flip donors "
+          "agree; a genuinely disagreeing donor still refuses)")
 
     # loop16 leg F: radial source, no adjoining record LINE at all -- just the arc and a printed
     # radial at node 11 (0,0). The radial line points from the PC to the curve's own centre (100,0),

@@ -1,0 +1,1168 @@
+{
+ "headline": "1/19",
+ "parcels_reconstructed": 1,
+ "parcels_in_areas_tables": 19,
+ "parcels_with_a_face": 15,
+ "parcels": [
+  {
+   "parcel": "46825",
+   "listed_on": [
+    "r10434_1",
+    "r10434_3"
+   ],
+   "record_area_sqft": null,
+   "record_remarks": "SEE M-1225.2",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825",
+     "counts": false,
+     "pct_covered": 0.42,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825",
+     "counts": false,
+     "pct_covered": 0.0,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825",
+     "counts": false,
+     "pct_covered": 0.0,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|63269",
+     "counts": false,
+     "pct_covered": 1.9,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 4120182.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825",
+     "merged": false,
+     "face_area_sqft": 781.7,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5425.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5425.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825",
+     "merged": false,
+     "face_area_sqft": 43776.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825",
+     "merged": false,
+     "face_area_sqft": 43776.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "merged": true,
+     "face_area_sqft": 3912027.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|63269",
+     "merged": true,
+     "face_area_sqft": 414510.6,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825",
+     "merged": false,
+     "face_area_sqft": 43776.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    }
+   ]
+  },
+  {
+   "parcel": "46825-4",
+   "listed_on": [
+    "r10741_2"
+   ],
+   "record_area_sqft": null,
+   "record_remarks": "",
+   "has_face": false,
+   "reconstructed": false,
+   "faces": [],
+   "area_agreement": []
+  },
+  {
+   "parcel": "46825-5",
+   "listed_on": [
+    "r10741_2"
+   ],
+   "record_area_sqft": null,
+   "record_remarks": "",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "r10741_2",
+     "face": "46825-5",
+     "counts": false,
+     "pct_covered": 93.08,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10741_2",
+     "face": "46825-5",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10741_3",
+     "face": "46825-5",
+     "counts": false,
+     "pct_covered": 59.26,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "r10741_2",
+     "face": "46825-5",
+     "merged": false,
+     "face_area_sqft": 2862960.9,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10741_2",
+     "face": "46825-5",
+     "merged": false,
+     "face_area_sqft": 2862960.9,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10741_3",
+     "face": "46825-5",
+     "merged": false,
+     "face_area_sqft": 242470.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    }
+   ]
+  },
+  {
+   "parcel": "61806-1",
+   "listed_on": [
+    "r10434_1"
+   ],
+   "record_area_sqft": 455637.60000000003,
+   "record_remarks": "10.46 AC. HIGHWAY ESMT. AT GRADE",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 4120182.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5414.1,
+     "record_area_sqft": 1268467.2,
+     "diff_pct": -99.57
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5425.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5425.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    }
+   ]
+  },
+  {
+   "parcel": "61806-10",
+   "listed_on": [
+    "r10434_1"
+   ],
+   "record_area_sqft": 51400.799999999996,
+   "record_remarks": "1.18 AC. HIGHWAY ESMT. (RUCKMAN)",
+   "has_face": false,
+   "reconstructed": false,
+   "faces": [],
+   "area_agreement": []
+  },
+  {
+   "parcel": "61806-2",
+   "listed_on": [
+    "presidio",
+    "r10434_1"
+   ],
+   "record_area_sqft": 314067.6,
+   "record_remarks": "7.21 AC. HIGH VIADUCT ESMT.",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "61806-2",
+     "counts": false,
+     "pct_covered": 46.27,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "61806-2",
+     "merged": false,
+     "face_area_sqft": 193673.9,
+     "record_area_sqft": 314067.6,
+     "diff_pct": -38.33
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 4120182.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5414.1,
+     "record_area_sqft": 1268467.2,
+     "diff_pct": -99.57
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5425.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5425.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    }
+   ]
+  },
+  {
+   "parcel": "61806-4",
+   "listed_on": [
+    "presidio"
+   ],
+   "record_area_sqft": 145490.4,
+   "record_remarks": "3.34 AC. TUNNEL EASEMENT",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61806-4|61806-5|61806-9|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806-4|61985-2",
+     "counts": false,
+     "pct_covered": 30.59,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61806-4|61806-5|61806-9|63269",
+     "merged": true,
+     "face_area_sqft": 1825786.7,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806-4|61985-2",
+     "merged": true,
+     "face_area_sqft": 135164.4,
+     "record_area_sqft": 160862.4,
+     "diff_pct": -15.98
+    }
+   ]
+  },
+  {
+   "parcel": "61806-5",
+   "listed_on": [
+    "presidio",
+    "r10434_3"
+   ],
+   "record_area_sqft": 229561.19999999998,
+   "record_remarks": "5.27 AC. HIGHWAY ESMT. AT GRADE",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61806-4|61806-5|61806-9|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806-5",
+     "counts": false,
+     "pct_covered": 0.0,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-5",
+     "counts": false,
+     "pct_covered": 0.0,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-5",
+     "counts": false,
+     "pct_covered": 0.0,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61806-4|61806-5|61806-9|63269",
+     "merged": true,
+     "face_area_sqft": 1825786.7,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806-5",
+     "merged": false,
+     "face_area_sqft": 2848.4,
+     "record_area_sqft": 229561.19999999998,
+     "diff_pct": -98.76
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "merged": true,
+     "face_area_sqft": 3912027.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-5",
+     "merged": false,
+     "face_area_sqft": 6058.3,
+     "record_area_sqft": 229561.19999999998,
+     "diff_pct": -97.36
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-5",
+     "merged": false,
+     "face_area_sqft": 6058.3,
+     "record_area_sqft": 229561.19999999998,
+     "diff_pct": -97.36
+    }
+   ]
+  },
+  {
+   "parcel": "61806-6",
+   "listed_on": [
+    "r10434_3"
+   ],
+   "record_area_sqft": 194713.19999999998,
+   "record_remarks": "4.47 AC. PERPETUAL TUNNEL EASEMENT",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "r10434_3",
+     "face": "61806-6",
+     "counts": false,
+     "pct_covered": 40.58,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-6|63269",
+     "counts": false,
+     "pct_covered": 14.18,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "r10434_3",
+     "face": "61806-6",
+     "merged": false,
+     "face_area_sqft": 17704.5,
+     "record_area_sqft": 194713.19999999998,
+     "diff_pct": -90.91
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-6|63269",
+     "merged": true,
+     "face_area_sqft": 144223.8,
+     "record_area_sqft": 693475.2,
+     "diff_pct": -79.2
+    }
+   ]
+  },
+  {
+   "parcel": "61806-7",
+   "listed_on": [
+    "r10434_3"
+   ],
+   "record_area_sqft": 164221.2,
+   "record_remarks": "3.77 AC. HIGHWAY ESMT. AT LOW VIADUCT",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "merged": true,
+     "face_area_sqft": 3912027.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    }
+   ]
+  },
+  {
+   "parcel": "61806-8",
+   "listed_on": [
+    "r10434_3"
+   ],
+   "record_area_sqft": 320601.60000000003,
+   "record_remarks": "7.36 AC. HIGHWAY ESMT. AT GRADE",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-8",
+     "counts": false,
+     "pct_covered": 0.0,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-8",
+     "counts": false,
+     "pct_covered": 0.0,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-8|63269",
+     "counts": false,
+     "pct_covered": 25.53,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "merged": true,
+     "face_area_sqft": 3912027.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-8",
+     "merged": false,
+     "face_area_sqft": 6053.3,
+     "record_area_sqft": 320601.60000000003,
+     "diff_pct": -98.11
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-8",
+     "merged": false,
+     "face_area_sqft": 6053.3,
+     "record_area_sqft": 320601.60000000003,
+     "diff_pct": -98.11
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-8|63269",
+     "merged": true,
+     "face_area_sqft": 22531.9,
+     "record_area_sqft": 819363.6,
+     "diff_pct": -97.25
+    }
+   ]
+  },
+  {
+   "parcel": "61806-9",
+   "listed_on": [
+    "presidio"
+   ],
+   "record_area_sqft": 6970.0,
+   "record_remarks": "6,970 S.F. HIGHWAY ESMT. AT GRADE",
+   "has_face": true,
+   "reconstructed": true,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61806-4|61806-5|61806-9|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806-9",
+     "counts": true,
+     "pct_covered": 100.0,
+     "closure_ft": 0.01,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61806-4|61806-5|61806-9|63269",
+     "merged": true,
+     "face_area_sqft": 1825786.7,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806-9",
+     "merged": false,
+     "face_area_sqft": 6974.5,
+     "record_area_sqft": 6970.0,
+     "diff_pct": 0.06
+    }
+   ]
+  },
+  {
+   "parcel": "61985-1",
+   "listed_on": [
+    "presidio"
+   ],
+   "record_area_sqft": 2518.0,
+   "record_remarks": "2,518 S.F. PERPETUAL TUNNEL EASEMENT",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "presidio",
+     "face": "61985-1|61985-2|61985-3|61985-4",
+     "counts": false,
+     "pct_covered": 36.0,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+     "merged": true,
+     "face_area_sqft": 1223581.4,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "presidio",
+     "face": "61985-1|61985-2|61985-3|61985-4",
+     "merged": true,
+     "face_area_sqft": 48411.5,
+     "record_area_sqft": 70690.0,
+     "diff_pct": -31.52
+    }
+   ]
+  },
+  {
+   "parcel": "61985-2",
+   "listed_on": [
+    "presidio"
+   ],
+   "record_area_sqft": 15372.0,
+   "record_remarks": "15,372 S.F. TCE, EXP. 12/31/2013",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "61806-4|61985-2",
+     "counts": false,
+     "pct_covered": 30.59,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "presidio",
+     "face": "61985-1|61985-2|61985-3|61985-4",
+     "counts": false,
+     "pct_covered": 36.0,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "61806-4|61985-2",
+     "merged": true,
+     "face_area_sqft": 135164.4,
+     "record_area_sqft": 160862.4,
+     "diff_pct": -15.98
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+     "merged": true,
+     "face_area_sqft": 1223581.4,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "presidio",
+     "face": "61985-1|61985-2|61985-3|61985-4",
+     "merged": true,
+     "face_area_sqft": 48411.5,
+     "record_area_sqft": 70690.0,
+     "diff_pct": -31.52
+    }
+   ]
+  },
+  {
+   "parcel": "61985-3",
+   "listed_on": [
+    "presidio"
+   ],
+   "record_area_sqft": 49552.0,
+   "record_remarks": "49,552 S.F. TCE (TIEBACK), EXP. 12/31/2013",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "presidio",
+     "face": "61985-1|61985-2|61985-3|61985-4",
+     "counts": false,
+     "pct_covered": 36.0,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+     "merged": true,
+     "face_area_sqft": 1223581.4,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "presidio",
+     "face": "61985-1|61985-2|61985-3|61985-4",
+     "merged": true,
+     "face_area_sqft": 48411.5,
+     "record_area_sqft": 70690.0,
+     "diff_pct": -31.52
+    }
+   ]
+  },
+  {
+   "parcel": "61985-4",
+   "listed_on": [
+    "presidio"
+   ],
+   "record_area_sqft": 3248.0,
+   "record_remarks": "3,248 S.F. PERPETUAL TUNNEL EASEMENT",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "presidio",
+     "face": "61985-1|61985-2|61985-3|61985-4",
+     "counts": false,
+     "pct_covered": 36.0,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "61806|61985|61985-1|61985-2|61985-3|61985-4",
+     "merged": true,
+     "face_area_sqft": 1223581.4,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "presidio",
+     "face": "61985-1|61985-2|61985-3|61985-4",
+     "merged": true,
+     "face_area_sqft": 48411.5,
+     "record_area_sqft": 70690.0,
+     "diff_pct": -31.52
+    }
+   ]
+  },
+  {
+   "parcel": "63269",
+   "listed_on": [
+    "presidio",
+    "r10434_1",
+    "r10434_3"
+   ],
+   "record_area_sqft": 498761.99999999994,
+   "record_remarks": "11.45 AC. OF R/W BASED ON PERMIT (SEE NOTE 2)",
+   "has_face": true,
+   "reconstructed": false,
+   "faces": [
+    {
+     "sheet": "presidio",
+     "face": "63269",
+     "counts": false,
+     "pct_covered": 0.0,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806|61806-4|61806-5|61806-9|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "counts": false,
+     "pct_covered": null,
+     "closure_ft": null,
+     "touches_frame": true
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|63269",
+     "counts": false,
+     "pct_covered": 1.9,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-6|63269",
+     "counts": false,
+     "pct_covered": 14.18,
+     "closure_ft": null,
+     "touches_frame": false
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-8|63269",
+     "counts": false,
+     "pct_covered": 25.53,
+     "closure_ft": null,
+     "touches_frame": false
+    }
+   ],
+   "area_agreement": [
+    {
+     "sheet": "presidio",
+     "face": "63269",
+     "merged": false,
+     "face_area_sqft": 1151.2,
+     "record_area_sqft": 498761.99999999994,
+     "diff_pct": -99.77
+    },
+    {
+     "sheet": "presidio",
+     "face": "61806|61806-4|61806-5|61806-9|63269",
+     "merged": true,
+     "face_area_sqft": 1825786.7,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 4120182.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5414.1,
+     "record_area_sqft": 1268467.2,
+     "diff_pct": -99.57
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5425.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_1",
+     "face": "46825|61806-1|61806-2|63269",
+     "merged": true,
+     "face_area_sqft": 5425.1,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|61806|61806-5|61806-7|61806-8|63269",
+     "merged": true,
+     "face_area_sqft": 3912027.2,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "46825|63269",
+     "merged": true,
+     "face_area_sqft": 414510.6,
+     "record_area_sqft": null,
+     "diff_pct": null
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-6|63269",
+     "merged": true,
+     "face_area_sqft": 144223.8,
+     "record_area_sqft": 693475.2,
+     "diff_pct": -79.2
+    },
+    {
+     "sheet": "r10434_3",
+     "face": "61806-8|63269",
+     "merged": true,
+     "face_area_sqft": 22531.9,
+     "record_area_sqft": 819363.6,
+     "diff_pct": -97.25
+    }
+   ]
+  },
+  {
+   "parcel": "9178-16",
+   "listed_on": [
+    "r10741_1",
+    "r10741_2"
+   ],
+   "record_area_sqft": 13355.0,
+   "record_remarks": "13355 SF SLOPE EASEMENT",
+   "has_face": false,
+   "reconstructed": false,
+   "faces": [],
+   "area_agreement": []
+  },
+  {
+   "parcel": "9178-3",
+   "listed_on": [
+    "r10741_3"
+   ],
+   "record_area_sqft": null,
+   "record_remarks": "ROADWAY EASEMENT,",
+   "has_face": false,
+   "reconstructed": false,
+   "faces": [],
+   "area_agreement": []
+  }
+ ]
+}

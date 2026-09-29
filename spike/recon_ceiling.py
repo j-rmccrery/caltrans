@@ -276,13 +276,20 @@ def classify_run(run, tok_cands, note_cands, neighbor_recs, buffer_ft):
             e = rec_edges[rparent[best[0]]]
             return "b", {"neighbor": nkey, "edge": e["name"], "edge_ft": e["ft"], "edge_az": round(e["az"], 2)}
 
-    # (c) referenced but not dimensioned here: a note nearby, or only a (T) total nearby
+    # (c) referenced but not dimensioned here: a note nearby (SEE R-, PER DEED, ...) -- genuinely not
+    # this sheet's own record value, unreachable from these six sheets alone.
     for n in note_cands:
         if math.hypot(n["gx"] - mid[0], n["gy"] - mid[1]) <= PLAUSIBLE_FT:
             return "c", {"note": n["text"]}
+    # (c_T) a bare "(T)" total nearby, no per-piece breakdown -- loop18 leg 1 (JR): this IS the sheet's
+    # own printed record value for the whole run, just not yet split into its own pieces (loop18 leg 3's
+    # own task: "(T) totals as whole courses"). Split out of (c) into its own class: reachable in
+    # principle (a total that sums its own run within tolerance is a record value, not a missing one),
+    # not lumped in with a genuine cross-reference to another sheet/deed this six-sheet set can never
+    # resolve on its own.
     for c in tok_cands:
         if c["kind"] == "distance" and c["total"] and math.hypot(c["gx"] - mid[0], c["gy"] - mid[1]) <= PLAUSIBLE_FT:
-            return "c", {"note": f"(T) total only: {c['text']} in \"{c['block']}\""}
+            return "c_T", {"note": f"(T) total only: {c['text']} in \"{c['block']}\""}
 
     return "d", {}
 
@@ -401,6 +408,21 @@ def make_crops(sheet_name, page, classified):
 SHEET_ORDER = ["presidio", "r10434_1", "r10434_3", "r10741_1", "r10741_2", "r10741_3"]
 
 
+UNCLEAN_BUCKETS = ["curve", "distance_from_drawing", "bearing_from_drawing", "misfit"]  # loop18 leg 1
+# (JR): recon_attrib.py's own buckets for a segment the record DOES reach (a traverse row sits on it)
+# but that row is still flagged/misfit -- reachable in principle (a read/association fix, not a missing
+# record), unlike the no_traverse_edge pool recon_ceiling.py's own a/b/c/c_T/d/e split classifies.
+# "other_flag"/"no_traverse_edge_*"/"residual_contamination"/"anomaly" are deliberately excluded: JR's
+# own ruling names exactly these four.
+
+
+def load_attrib(short_key, stem):
+    p = (BASE_OUT / stem / "attrib.json") if stem else (BASE_OUT / "attrib.json")
+    if not p.exists():
+        return {}
+    return json.loads(p.read_text(encoding="utf-8")).get("buckets_ft", {})
+
+
 def report():
     rows = []
     for short_key in SHEET_ORDER:
@@ -409,17 +431,22 @@ def report():
         if not p.exists():
             print(f"missing {p}, run: SHEET=... python spike/recon_ceiling.py")
             continue
-        rows.append(json.loads(p.read_text(encoding="utf-8")))
+        r = json.loads(p.read_text(encoding="utf-8"))
+        r["short_key"] = short_key
+        r["unclean_ft"] = sum(load_attrib(short_key, stem).get(b, 0.0) for b in UNCLEAN_BUCKETS)
+        rows.append(r)
 
-    classes = ["a", "b", "c", "d", "e"]
+    classes = ["a", "b", "c", "c_T", "d", "e"]
     lines = ["# recon ceiling: no_traverse_edge, classified\n"]
     lines.append("class a = dimensioned here, not read/associated (next fix) | b = dimensioned on a "
-                  "matchline neighbour | c = referenced, not dimensioned here | d = not dimensioned "
-                  "anywhere in the set (true ceiling loss) | e = contamination (not boundary)\n")
-    lines.append("| sheet | notrav_ft | a | b | c | d | e | recon_dim_denom | recon_dim_covered |")
-    lines.append("|---|---|---|---|---|---|---|---|---|")
+                  "matchline neighbour | c = referenced, not dimensioned here (a different sheet/deed) | "
+                  "c_T = a bare (T) total nearby, no per-piece breakdown yet (loop18 leg 1: reachable in "
+                  "principle, split out of c) | d = not dimensioned anywhere in the set (true ceiling "
+                  "loss) | e = contamination (not boundary)\n")
+    lines.append("| sheet | notrav_ft | a | b | c | c_T | d | e | recon_dim_denom | recon_dim_covered |")
+    lines.append("|---|---|---|---|---|---|---|---|---|---|")
     tot = {k: 0.0 for k in classes}
-    tot_notrav = tot_denom = tot_cov = 0.0
+    tot_notrav = tot_denom = tot_cov = tot_unclean = 0.0
     for r in rows:
         cf = r["classes_ft"]
         lines.append(f"| {r['sheet']} | {r['notrav_ft']:.0f} | " + " | ".join(f"{cf.get(k, 0):.0f}" for k in classes)
@@ -427,29 +454,70 @@ def report():
         for k in classes:
             tot[k] += cf.get(k, 0.0)
         tot_notrav += r["notrav_ft"]; tot_denom += r["recon_dim_denom_ft"]; tot_cov += r["recon_dim_covered_ft"]
+        tot_unclean += r["unclean_ft"]
     lines.append(f"| **total** | {tot_notrav:.0f} | " + " | ".join(f"{tot[k]:.0f}" for k in classes)
                   + f" | {tot_denom:.0f} | {tot_cov:.0f} |\n")
 
+    lines.append("## reached but unclean (loop18 leg 1, JR): a traverse row already sits on this "
+                  "stretch, but is itself flagged or misfit -- reachable in principle, a read/association "
+                  "fix rather than a missing record. recon_attrib.py's own buckets, summed per sheet:\n")
+    lines.append("| sheet | curve | distance_from_drawing | bearing_from_drawing | misfit | unclean total |")
+    lines.append("|---|---|---|---|---|---|")
+    for r in rows:
+        stem = SHORT2STEM[r["short_key"]]
+        b = load_attrib(r["short_key"], stem)
+        lines.append(f"| {r['sheet']} | " + " | ".join(f"{b.get(k, 0):.0f}" for k in UNCLEAN_BUCKETS)
+                      + f" | {r['unclean_ft']:.0f} |")
+    lines.append(f"| **total** | " + " | ".join("" for _ in UNCLEAN_BUCKETS) + f" | {tot_unclean:.0f} |\n")
+
     lines.append("## ceiling implied by this split\n")
-    lines.append("ceiling_reachable = covered + a + b (record dimensions it, pipeline could in "
-                  "principle reach it); ceiling_honest = ceiling_reachable / (denom - c - d - e) "
-                  "(denominator narrowed to boundary THIS record actually dimensions, on this or a "
-                  "neighbour sheet).\n")
+    lines.append("ceiling_reachable = covered + a + b + c_T + unclean (record dimensions or already "
+                  "reaches it, pipeline could in principle complete it); ceiling_honest = "
+                  "ceiling_reachable / (denom - c - d - e) (denominator narrowed to boundary THIS record "
+                  "actually dimensions, on this or a neighbour sheet -- c_T and unclean stay IN the "
+                  "denominator, since both are already-dimensioned boundary a fix can reach, unlike c/d/e).\n")
     lines.append("| sheet | current_pct | ceiling_reachable_pct | ceiling_honest_pct (denom - c,d,e) |")
     lines.append("|---|---|---|---|")
     for r in rows:
         cf = r["classes_ft"]
         denom, cov = r["recon_dim_denom_ft"], r["recon_dim_covered_ft"]
-        reach = cov + cf.get("a", 0) + cf.get("b", 0)
+        reach = cov + cf.get("a", 0) + cf.get("b", 0) + cf.get("c_T", 0) + r["unclean_ft"]
         denom_honest = denom - cf.get("c", 0) - cf.get("d", 0) - cf.get("e", 0)
         cur_pct = 100 * cov / denom if denom else 0
         reach_pct = 100 * reach / denom if denom else 0
         honest_pct = 100 * reach / denom_honest if denom_honest else 0
         lines.append(f"| {r['sheet']} | {cur_pct:.1f} | {reach_pct:.1f} | {honest_pct:.1f} |")
-    reach_tot = tot_cov + tot["a"] + tot["b"]
+    reach_tot = tot_cov + tot["a"] + tot["b"] + tot["c_T"] + tot_unclean
     denom_honest_tot = tot_denom - tot["c"] - tot["d"] - tot["e"]
-    lines.append(f"| **total** | {100*tot_cov/tot_denom:.1f} | {100*reach_tot/tot_denom:.1f} | "
+    lines.append(f"| **total (per-sheet sum, OLD basis)** | {100*tot_cov/tot_denom:.1f} | {100*reach_tot/tot_denom:.1f} | "
                  f"{100*reach_tot/denom_honest_tot:.1f} |\n")
+
+    # loop18 leg 1 (JR): "recompute on the deduped set basis" -- recon_set.py's own six-sheet union
+    # (matchline overlap collapsed, ceiling class (e) already removed at recon.py's own source) replaces
+    # the per-sheet SUM as the denominator/covered basis; the a/b/c_T/unclean/c/d/e class breakdown
+    # above is still the per-sheet (not re-deduped) sum -- an approximation, flagged as such, since
+    # re-deriving that split on the pooled/deduped segment set is a separate leg (recon_ceiling.py's own
+    # run_sheet() classifies per sheet, one sheet's own traverse/attrib neighbourhood at a time).
+    set_p = OUT_RECON / "set_recon.json"
+    if set_p.exists():
+        s = json.loads(set_p.read_text(encoding="utf-8"))
+        new = s["new_set"]
+        set_reach = new["dim_covered_ft"] + tot["a"] + tot["b"] + tot["c_T"] + tot_unclean
+        lines.append("### same split, denominator/covered from the deduped SET (recon_set.py) instead of the per-sheet sum\n")
+        lines.append("current_pct and ceiling_reachable_pct only -- ceiling_honest_pct (denom - c,d,e) is "
+                      "NOT restated here: c/b/c_T/unclean/d/e are still the per-sheet SUM (recon_ceiling's "
+                      "own run_sheet() classifies one sheet's own no_traverse_edge pool at a time, not the "
+                      "pooled/deduped set), so subtracting them from the SET's own deduped, overlap-free "
+                      "denominator double-subtracts the shared matchline ground and can push the ratio "
+                      "past 100% (measured, dropped rather than published wrong). A deduped class "
+                      "breakdown is a separate leg.\n")
+        lines.append("| basis | current_pct | ceiling_reachable_pct |")
+        lines.append("|---|---|---|")
+        lines.append(f"| OLD (per-sheet sum) | {100*tot_cov/tot_denom:.1f} | {100*reach_tot/tot_denom:.1f} |")
+        lines.append(f"| NEW (deduped set) | {100*new['dim_covered_ft']/new['dim_denom_ft'] if new['dim_denom_ft'] else 0:.1f} | "
+                     f"{100*set_reach/new['dim_denom_ft'] if new['dim_denom_ft'] else 0:.1f} |\n")
+    else:
+        lines.append(f"(recon_set.py not yet run -- {set_p} missing; per-sheet-sum basis only above)\n")
 
     lines.append("## top 5 class-a runs (next fixes)\n")
     a_runs = []

@@ -46,9 +46,20 @@ Definitions (loop16 leg A, retry):
                   left/right edge -- a parallel column line just inside the true border that
                   FRAME_TOL_PT's tight (~1 pt) tolerance does not reach. Upgrade to a real per-sheet
                   detector if this proves too broad or too narrow on a sheet.
-  Removal order is frame -> tables -> matchline -> leader_wedge -> edge_column (a segment already
-  claimed by an earlier class is not reconsidered, so overlapping regions attribute to the first
-  class that touches them, not double-counted).
+    titleblock  - loop18 leg 1: recon_ceiling.py's own ceiling class (e), at the source -- a title-
+                  block/legend/notes boilerplate region (TITLEBLOCK_RE) whose own table-grid linework
+                  got noded into a face the same way TABLE_ISOLATION_FT's debris faces do, but sits
+                  close enough to real R/W or named-face boundary that the isolation distance test
+                  above never caught it (measured: R-10434.1, 1,493 ft).
+    wedge_residual - loop18 leg 1: recon_ceiling's own ceiling class (e), the rest of it -- (a) a
+                  chained run of elementary segments whose own direction nearly reverses
+                  (wedge_spike_mask(), BEND_CONTAM_DEG: a real boundary course never walks backward on
+                  itself) and (b) PRESIDIO_CONTAM_PT, a hand-measured point list of leader wedges that
+                  converge on a label rather than running parallel to the corridor (recon_attrib.py's
+                  own crop evidence) that recon.py's own leader_wedge class above still misses.
+  Removal order is frame -> tables -> titleblock -> matchline -> leader_wedge -> wedge_residual ->
+  edge_column (a segment already claimed by an earlier class is not reconsidered, so overlapping
+  regions attribute to the first class that touches them, not double-counted).
 - reconstructed edge: a traverse.json row with kind in ("line", "arc"), flags == [] and misfit_ft <=
   0.5. misfit_ft (loop17 leg A, traverse.record_vector_misfit()) is this edge's OWN record vector
   (bearing/chord az + distance) walked from ITS OWN drawn start and checked against its own drawn
@@ -186,6 +197,63 @@ ZOOM_PT = 600.0           # pt: page-space window size (both axes) for the zoome
 ZOOM_SCALE = 3.0          # raster scale for the zoom crop (>= 3x page pt so lines/text stay legible)
 COVERED_INVARIANCE_TOL_FT = 0.5  # a removal must not change covered ft by more than this (discretization slack)
 OUT_RECON = Path(__file__).parent / "out_recon"
+
+# loop18 leg 1: ceiling class (e) contamination (recon_ceiling.py), moved to the source -- recon_ceiling
+# found 2,267 ft across the six gate sheets that is drawn-boundary linework recon.py's own five removal
+# classes above never caught, but is not real boundary either (a title-block/legend/notes table region,
+# or a leader/wedge shape recon.py's own leader_wedge class missed). JR (2026-09-28): remove it from the
+# denominators here, not by subtracting the ceiling's hand total after the fact.
+TITLEBLOCK_RE = re.compile(  # identical to recon_ceiling.TITLEBLOCK_RE (loop17 leg M): anchors unique to
+                            # the title/notes/legend block ONLY -- a generic phrase that can legitimately
+                            # appear as a real note or callout elsewhere on the sheet is deliberately
+                            # excluded (recon_ceiling's own docstring: a "...STATE OF CALIFORNIA..."
+                            # disclaimer paragraph near the sheet's TOP once blew this box up to swallow
+                            # nearly the whole sheet). Measured: R-10434.1's own GRANTOR NOTES/LEGEND/
+                            # title-block region, 1,493 ft of its own table-grid linework counted as
+                            # drawn boundary with no region ever removing it.
+                            r"GRANTOR NOTES|^LEGEND$|COPYRIGHT 20\d\d CALIFORNIA DEPARTMENT OF TRANSPORTATION|"
+                            r"^RECORD MAP$|^SCALE:|^DRAFTED BY|^CHECKED BY|^SHEET NO\.?$|^TOTAL SHEETS$|"
+                            r"^PROJECT ID:", re.I)
+TITLEBLOCK_PAD_FT = 5.0   # ft: kept tight (recon_ceiling's own measured choice) -- under-catching genuine
+                           # title-block debris at an outer corner costs a few more "d" (true ceiling
+                           # loss) ft, not a false removal of real boundary
+TITLEBLOCK_CLUSTER_FT = 400.0  # ft: single-linkage clustering radius over TITLEBLOCK_RE's own matched
+                           # text positions, largest cluster only -- recon_ceiling.titleblock_box() took
+                           # one bbox over EVERY match, safe there (it only ever coerced an already-
+                           # unexplained "d" run, per its own docstring); a hard removal class needs
+                           # more care. Measured on R-10434.1: the real title-block corner's 9 matches
+                           # (GRANTOR NOTES, LEGEND, COPYRIGHT, SCALE:, RECORD MAP, DRAFTED/CHECKED BY,
+                           # SHEET NO./TOTAL SHEETS/PROJECT ID:) sit within 56-310 ft of their own
+                           # nearest neighbour; a SEPARATE "SCALE: 1"=100'" note near the drawing itself
+                           # (the ^SCALE: pattern matches both) sits 1,172 ft from the nearest real
+                           # title-block match -- one bbox over both blew the box up to swallow ~1,300
+                           # ft of real boundary between them (measured: 4,689 ft removed vs the true
+                           # ~1,493). 400 ft sits comfortably between the two.
+BEND_CONTAM_DEG = 150.0   # deg: a chained run of elementary segments whose own direction very nearly
+                           # reverses (a spike/wedge/leader shape a real boundary course never walks)
+                           # is contamination, not boundary -- see recon_ceiling.BEND_CONTAM_DEG, same
+                           # value, same measured cases (a real gently-sweeping curve's own unwrapped
+                           # bend never approaches this; a wedge/spike's does)
+CHAIN_TOL_FT_SET = 1.5    # ft: how close two elementary segments' shared endpoint must sit to chain into
+                           # one run for the bend test -- see recon_ceiling.CHAIN_TOL_FT, same value
+LOCAL_SPLIT_DEG_SET = 20.0  # deg: a run also breaks wherever ONE step turns more than this (recon_ceiling
+                           # .LOCAL_SPLIT_DEG) -- essential here: applied to the WHOLE boundary (not
+                           # recon_ceiling's own already-sparse uncovered-only pool), a run chained by
+                           # gap alone walks every ordinary polygon corner in sequence and its cumulative
+                           # unwrapped bend crosses BEND_CONTAM_DEG well before completing one rectangular
+                           # parcel (measured: without this split, Presidio's wedge_residual class wrongly
+                           # took 3,798 ft instead of ~87). Splitting on each sharp per-step turn keeps a
+                           # run to the gently-curving-or-straight pieces a real spike/wedge shape is.
+PRESIDIO_CONTAM_PT = [    # page-pt (cx, cy), read directly off read_shx.json -- three leader wedges that
+                          # converge on a label rather than running parallel to the corridor for their
+                          # whole length (recon_attrib.py's own docstring measured this by crop:
+                          # out_recon/_crop_dk046825_063269.png). Presidio-specific by construction (no
+                          # equivalent hand list exists, or was measured needed, on any other sheet).
+    (789.5, 281.5),   # "DK-046825-X1-X1"
+    (1230.0, 388.0),  # "063269-X1-X1"
+    (964.5, 396.0),   # "63269" bubble
+]
+PRESIDIO_CONTAM_TOL_PT = 160.0
 
 
 def ground_of(params):
@@ -463,6 +531,89 @@ def radial_table_regions(blocks, reach=250):
                 x1 = max(x1, max(ob["cx"] + ob.get("w", 40) / 2 for ob in row))
         regions.append([round(min(xs) - 20), round(min(ys) - 16), round(x1 + 20), round(max(ys) + 16)])
     return regions
+
+
+def largest_cluster(pts, radius_ft):
+    """pts (N,2) -> the points of the largest single-linkage cluster (edges within radius_ft), by
+    count -- a plain union-find, cheap at the handful of matches this is ever run on. See
+    TITLEBLOCK_CLUSTER_FT's own comment for why this exists."""
+    n = len(pts)
+    parent = list(range(n))
+
+    def find(i):
+        while parent[i] != i:
+            parent[i] = parent[parent[i]]; i = parent[i]
+        return i
+
+    d = np.hypot(*(pts[:, None, :] - pts[None, :, :]).transpose(2, 0, 1))
+    for i in range(n):
+        for j in range(i + 1, n):
+            if d[i, j] <= radius_ft:
+                ri, rj = find(i), find(j)
+                if ri != rj:
+                    parent[ri] = rj
+    roots = [find(i) for i in range(n)]
+    biggest = max(set(roots), key=roots.count)
+    return pts[[i for i in range(n) if roots[i] == biggest]]
+
+
+def titleblock_region(blocks, ground):
+    """ground-space box (a shapely Polygon) around the LARGEST single-linkage cluster (largest_cluster(),
+    TITLEBLOCK_CLUSTER_FT) of title-block/legend/notes text matches (TITLEBLOCK_RE), padded by
+    TITLEBLOCK_PAD_FT -- ported from recon_ceiling.titleblock_box() (loop17 leg M), which only ever fed
+    the ceiling report; this is the same rule applied at the source so it actually removes the ft from
+    recon.py's own denominators, with the clustering step added since a hard removal here (unlike
+    recon_ceiling's own "d"-run-only gate) needs to reject an unrelated same-text-pattern match
+    elsewhere on the sheet, not merge it in. None where no such text exists on the sheet (most of the
+    six gate sheets carry none)."""
+    pts = [ground(np.array([[b["cx"], b["cy"]]]))[0] for b in blocks if TITLEBLOCK_RE.search(b["text"])]
+    if not pts:
+        return None
+    pts = largest_cluster(np.array(pts), TITLEBLOCK_CLUSTER_FT)
+    lo, hi = pts.min(0) - TITLEBLOCK_PAD_FT, pts.max(0) + TITLEBLOCK_PAD_FT
+    return Polygon([(lo[0], lo[1]), (hi[0], lo[1]), (hi[0], hi[1]), (lo[0], hi[1])])
+
+
+def wedge_spike_mask(P, Q, mid, seg_len, seg_az, chain_tol_ft, bend_deg, local_split_deg):
+    """bool per elementary segment: part of a chained run (endpoint proximity AND no single sharp
+    per-step turn -- same two-part chaining recon_ceiling.build_runs() uses, LOCAL_SPLIT_DEG included:
+    see LOCAL_SPLIT_DEG_SET's own comment for why the turn split matters here) whose own direction very
+    nearly reverses end to end (ptp of the run's own per-segment azimuth, unwrapped relative to its
+    first member so a run whose azimuth range straddles a multiple of 180 does not read as a false
+    reversal -- see recon_ceiling.build_runs()'s own comment). A real boundary course only ever walks
+    forward; a spike/wedge/leader shape does not. Ported from recon_ceiling's own per-run bend
+    classification (loop17 leg M, class (e) "near-reversal run"), applied here to every elementary
+    segment of the boundary (not just an already-uncovered no-traverse-edge pool), so a wedge shape
+    anywhere is removed at the source, not only inside the ceiling report."""
+    n = len(mid)
+    if n == 0:
+        return np.zeros(0, bool)
+
+    def az_diff360(a, b):
+        d = abs(a - b) % 360
+        return min(d, 360 - d)
+
+    runs = []
+    cur = []
+    for i in range(n):
+        if cur:
+            prev = cur[-1]
+            gap = min(np.hypot(*(Q[prev] - P[i])), np.hypot(*(Q[prev] - Q[i])), np.hypot(*(P[prev] - P[i])))
+            turn = az_diff360(seg_az[prev], seg_az[i])
+            if gap > chain_tol_ft or turn > local_split_deg:
+                runs.append(cur); cur = []
+        cur.append(i)
+    if cur:
+        runs.append(cur)
+    hit = np.zeros(n, bool)
+    for members in runs:
+        if len(members) < 2:
+            continue
+        az0 = seg_az[members[0]]
+        rel = (seg_az[members] - az0 + 180) % 360 - 180
+        if float(np.ptp(rel)) >= bend_deg:
+            hit[members] = True
+    return hit
 
 
 def region_hit(region, mid):
@@ -829,6 +980,28 @@ def run(sheet_name, return_internals=False):
     vertical = (az_mod < EDGE_COL_ANGLE_DEG) | (az_mod > 180 - EDGE_COL_ANGLE_DEG)
     near_edge = (np.abs(mid_pt[:, 0] - x0) < EDGE_COL_TOL_PT) | (np.abs(mid_pt[:, 0] - x1) < EDGE_COL_TOL_PT) if len(mid_pt) else np.zeros(len(mid), bool)
 
+    # loop18 leg 1: ceiling class (e), at the source -- see TITLEBLOCK_RE/PRESIDIO_CONTAM_PT/
+    # wedge_spike_mask() above. The point-radius test is restricted to LEADER_W_LO/HI stroke weight,
+    # same as label_leader_lines above -- a flat point-radius over EVERY stroke measured 0.84 pt real
+    # parcel/easement boundary and 0.72 pt table gridlines within reach of these 3 points (neither a
+    # leader wedge); weight is what actually tells a wedge apart from real boundary here, not distance.
+    titleblock_union = titleblock_region(blocks, ground)
+    contam_pts_ground = ground(np.array(PRESIDIO_CONTAM_PT)) if sheet_name == "presidio" else np.zeros((0, 2))
+    contam_tol_ground = PRESIDIO_CONTAM_TOL_PT * scale
+    presidio_wedge_hit = np.zeros(len(mid), bool)
+    if len(contam_pts_ground):
+        wedge_lines = []
+        for ln, w in weighted:
+            if not (LEADER_W_LO <= w <= LEADER_W_HI):
+                continue
+            gc = ground(np.array(ln.coords))
+            if np.hypot(*(gc[:, None, :] - contam_pts_ground[None, :, :]).transpose(2, 0, 1)).min() <= contam_tol_ground:
+                wedge_lines.append(LineString(gc))
+        if wedge_lines:
+            presidio_wedge_union = unary_union([ln.buffer(leader_tol_ft) for ln in wedge_lines])
+            presidio_wedge_hit = region_hit(presidio_wedge_union, mid)
+    wedge_bend_hit = wedge_spike_mask(P, Q, mid, seg_len, seg_az, CHAIN_TOL_FT_SET, BEND_CONTAM_DEG, LOCAL_SPLIT_DEG_SET)
+
     removed_ft = {}
     protected_ft = {}
     remaining = np.ones(len(mid), bool)
@@ -847,8 +1020,10 @@ def run(sheet_name, return_internals=False):
     apply("frame", region_hit(frame_buf, mid) | region_hit(furniture_union, mid))
     apply("tables", region_hit(table_union, mid))
     removed_ft["tables"] = round(removed_ft["tables"] + dropped_face_ft, 1)  # + the isolated-face debris above
+    apply("titleblock", region_hit(titleblock_union, mid))
     apply("matchline", (mid_pt[:, 0] < MATCHLINE_X0_PT) | (mid_pt[:, 0] > W - MATCHLINE_MARGIN_PT) if len(mid_pt) else np.zeros(len(mid), bool))
     apply("leader_wedge", region_hit(leader_union, mid))
+    apply("wedge_residual", presidio_wedge_hit | wedge_bend_hit)
     apply("edge_column", vertical & near_edge)
 
     covered_ft = float(seg_len[remaining & cov_mask_full].sum())
@@ -925,6 +1100,19 @@ def run(sheet_name, return_internals=False):
     Pf, Qf = P[remaining], Q[remaining]
     cov_final = cov_mask_full[remaining]
     dim_final = dim_mask_full[remaining]
+
+    # loop18 leg 1: this sheet's own final elementary segments (ground ft, EPSG:2227 -- the same real-
+    # world CRS every sheet's own `ground()` affine and load_faces()'s lon/lat->2227 transform both land
+    # in, same as matchline.py/recon_ceiling.py's own cross-sheet neighbour tests already rely on), with
+    # their covered/dimensioned flags -- consumed by recon_set.py to dedupe the SIX sheets' own drawn
+    # boundary into one ground union without re-deriving each sheet's own removal/dedup pipeline.
+    seg_out = {
+        "sheet": sheet_name, "P": Pf.round(2).tolist(), "Q": Qf.round(2).tolist(),
+        "seg_len_ft": seg_len[remaining].round(2).tolist(),
+        "covered": cov_final.tolist(), "dimensioned": dim_final.tolist(),
+    }
+    (OUT / "recon_segments.json").write_text(json.dumps(seg_out, ensure_ascii=False), encoding="utf-8")
+
     make_figure(sheet_name, page, inv, Pf, Qf, cov_final, dim_final, buffer_ft)
     center = densest_cluster_center(rec_edges)
     if center is not None:

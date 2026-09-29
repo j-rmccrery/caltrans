@@ -69,12 +69,11 @@ FACE_ONE_SHORT_PCT = 90.0  # a named face >= this %% covered, with exactly one u
 # far end of each wedge leg (measured: only 106-263 ft nets within 120-160 pt of the label itself,
 # against 354-664 ft of leg recon.py's own docstring measures end to end) -- fine for ranking (this
 # bucket is a few hundred ft either way, nowhere near top 3), not exact.
-PRESIDIO_CONTAM_PT = [
-    (789.5, 281.5),   # "DK-046825-X1-X1"
-    (1230.0, 388.0),  # "063269-X1-X1"
-    (964.5, 396.0),   # "63269" bubble
-]
-PRESIDIO_CONTAM_TOL_PT = 160.0
+# loop18 leg 1: moved to recon.py (its own "wedge_residual" removal class, at the source) -- kept as
+# aliases here so this module's own residual_contamination bucket (below) and recon_ceiling.py's
+# import of these two names both keep working unchanged.
+PRESIDIO_CONTAM_PT = recon.PRESIDIO_CONTAM_PT
+PRESIDIO_CONTAM_TOL_PT = recon.PRESIDIO_CONTAM_TOL_PT
 
 SHEET_NAMES = ["presidio", "r10434_1", "r10434_3", "r10741_1", "r10741_2", "r10741_3"]
 BASE_OUT = Path(__file__).parent / "out"  # spike/out/ -- OUT itself is fixed to THIS process's own SHEET

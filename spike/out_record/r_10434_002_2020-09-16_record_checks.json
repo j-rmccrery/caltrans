@@ -359,10 +359,10 @@
   "chord_note": "no chord column printed in this sheet's curve tables (cells are always R, delta, L)",
   "tangency": {
    "available": true,
-   "n_tags_traced": 28,
+   "n_tags_traced": 25,
    "adjacency": {
     "line-line": 4,
-    "line-curve": 6,
+    "line-curve": 4,
     "curve-curve": 5
    },
    "n_line_curve_line_joins_found": 0,

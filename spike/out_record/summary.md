@@ -10,7 +10,7 @@
 - Part B: no drawn station labels found outside table regions.
 - Part C: 23 curve rows (L=R*delta fails: 0), 21 line rows (bad cell count: 0).
   - chord check: no chord column printed in this sheet's curve tables (cells are always R, delta, L)
-  - tangency (info): 28 tags have traced geometry; adjacent-endpoint pairs found {'line-line': 4, 'line-curve': 6, 'curve-curve': 5}; 0/0 direct line-curve-line joins match printed delta within tolerance
+  - tangency (info): 25 tags have traced geometry; adjacent-endpoint pairs found {'line-line': 4, 'line-curve': 4, 'curve-curve': 5}; 0/0 direct line-curve-line joins match printed delta within tolerance
 
 ## R-10434.1
 - Part A: 17 alignment rows read.
@@ -24,7 +24,7 @@
 - Part B: 1 station labels on the drawing, 1 within 15 pt of a drawn segment.
 - Part C: 7 curve rows (L=R*delta fails: 0), 18 line rows (bad cell count: 0).
   - chord check: no chord column printed in this sheet's curve tables (cells are always R, delta, L)
-  - tangency (info): 14 tags have traced geometry; adjacent-endpoint pairs found {'line-line': 8, 'line-curve': 0, 'curve-curve': 0}; 0/0 direct line-curve-line joins match printed delta within tolerance
+  - tangency (info): 12 tags have traced geometry; adjacent-endpoint pairs found {'line-line': 6, 'line-curve': 0, 'curve-curve': 0}; 0/0 direct line-curve-line joins match printed delta within tolerance
 
 ## R-10434.3
 - Part A: 33 alignment rows read.
@@ -37,7 +37,7 @@
   - line_dist is straight-line ft between the two labels' nearest-segment points, not arc-traced along curves, and 'nearest segment' can pick the wrong parallel line (same ambiguity STATE.md's Known Traps already documents for this codebase)
 - Part C: 38 curve rows (L=R*delta fails: 0), 45 line rows (bad cell count: 0).
   - chord check: no chord column printed in this sheet's curve tables (cells are always R, delta, L)
-  - tangency (info): 40 tags have traced geometry; adjacent-endpoint pairs found {'line-line': 7, 'line-curve': 0, 'curve-curve': 3}; 0/0 direct line-curve-line joins match printed delta within tolerance
+  - tangency (info): 32 tags have traced geometry; adjacent-endpoint pairs found {'line-line': 3, 'line-curve': 0, 'curve-curve': 3}; 0/0 direct line-curve-line joins match printed delta within tolerance
 
 ## R-10741.1
 - Part A: no ALIGNMENT DATA table (no STATION/NORTHING/EASTING header) on this sheet.

@@ -15,27 +15,29 @@
  "removed_ft": {
   "frame": 7382.1,
   "tables": 4826.4,
+  "titleblock": 0.0,
   "matchline": 7269.6,
-  "leader_wedge": 3339.0,
+  "leader_wedge": 3182.0,
+  "wedge_residual": 885.6,
   "edge_column": 0.0
  },
  "protected_from_removal_ft": {
-  "leader_wedge": 1020.1
+  "leader_wedge": 1177.1
  },
  "covered_invariance": {
-  "baseline_raw_ft": 4061.6,
-  "pre_removal_ft": 4061.6,
-  "final_ft": 4061.6,
+  "baseline_raw_ft": 4307.9,
+  "pre_removal_ft": 4307.9,
+  "final_ft": 4307.9,
   "diff_vs_pre_removal_ft": 0.0,
   "diff_vs_raw_ft": 0.0
  },
- "drawn_boundary_ft": 11197.9,
- "reconstructed_edges": 50,
+ "drawn_boundary_ft": 10469.4,
+ "reconstructed_edges": 53,
  "traverse_rows": 94,
- "recon_all_covered_ft": 4061.6,
- "recon_all_denom_ft": 11197.9,
- "recon_dim_covered_ft": 4049.2,
- "recon_dim_denom_ft": 10653.5,
+ "recon_all_covered_ft": 4307.9,
+ "recon_all_denom_ft": 10469.4,
+ "recon_dim_covered_ft": 4295.5,
+ "recon_dim_denom_ft": 10000.0,
  "weight_classes": {
   "1.98": {
    "count": 11,
@@ -64,9 +66,9 @@
  },
  "rw_weight": 1.98,
  "buffer_sensitivity_ft": {
-  "1.0pt": 4030.0,
-  "1.5pt": 4058.8,
-  "2.5pt": 4088.6
+  "1.0pt": 4281.2,
+  "1.5pt": 4306.1,
+  "2.5pt": 4332.9
  },
  "parcels_all": {
   "n": 1,
@@ -185,7 +187,7 @@
    "parcel": "",
    "named": false,
    "touches_frame": false,
-   "pct_covered": 52.82,
+   "pct_covered": 97.86,
    "closure_ft": null,
    "counts": false
   },
@@ -561,7 +563,7 @@
    "parcel": "61985-1|61985-2|61985-3|61985-4",
    "named": true,
    "touches_frame": false,
-   "pct_covered": 28.95,
+   "pct_covered": 36.0,
    "closure_ft": null,
    "counts": false
   }
@@ -614,6 +616,12 @@
    "az": 103.0611,
    "ft": 59.89,
    "misfit_ft": 0.06
+  },
+  {
+   "name": "L=150.85'",
+   "az": 281.5686,
+   "ft": 149.96,
+   "misfit_ft": 0.09
   },
   {
    "name": "N19Â°13'28\"W + 17.71'",
@@ -724,6 +732,12 @@
    "misfit_ft": 0.1
   },
   {
+   "name": "L=249.97'",
+   "az": 44.7233,
+   "ft": 235.08,
+   "misfit_ft": 0.13
+  },
+  {
    "name": "S10Â°09'24\"W + 101.10'",
    "az": 10.1567,
    "ft": 101.1,
@@ -818,6 +832,12 @@
    "az": 86.9264,
    "ft": 24.23,
    "misfit_ft": 0.11
+  },
+  {
+   "name": "L=109.33'",
+   "az": 97.1954,
+   "ft": 108.75,
+   "misfit_ft": 0.09
   },
   {
    "name": "S74Â°57'42\"E + 113.39'",
