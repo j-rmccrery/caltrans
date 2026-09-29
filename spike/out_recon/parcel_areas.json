@@ -342,7 +342,7 @@
      "sheet": "presidio",
      "face": "61806-2",
      "counts": false,
-     "pct_covered": 46.27,
+     "pct_covered": 73.56,
      "closure_ft": null,
      "touches_frame": false
     },
@@ -444,7 +444,7 @@
      "sheet": "presidio",
      "face": "61806-4|61985-2",
      "counts": false,
-     "pct_covered": 30.59,
+     "pct_covered": 31.3,
      "closure_ft": null,
      "touches_frame": false
     }
@@ -823,7 +823,7 @@
      "sheet": "presidio",
      "face": "61806-4|61985-2",
      "counts": false,
-     "pct_covered": 30.59,
+     "pct_covered": 31.3,
      "closure_ft": null,
      "touches_frame": false
     },

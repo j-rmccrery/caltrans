@@ -17,27 +17,28 @@
   "tables": 4826.4,
   "titleblock": 0.0,
   "matchline": 7269.6,
-  "leader_wedge": 3182.0,
-  "wedge_residual": 885.6,
+  "leader_wedge": 3077.0,
+  "wedge_residual": 861.1,
   "edge_column": 0.0
  },
  "protected_from_removal_ft": {
-  "leader_wedge": 1177.1
+  "leader_wedge": 1282.0,
+  "wedge_residual": 39.2
  },
  "covered_invariance": {
-  "baseline_raw_ft": 4307.9,
-  "pre_removal_ft": 4307.9,
-  "final_ft": 4307.9,
+  "baseline_raw_ft": 5166.5,
+  "pre_removal_ft": 5166.5,
+  "final_ft": 5166.5,
   "diff_vs_pre_removal_ft": 0.0,
   "diff_vs_raw_ft": 0.0
  },
- "drawn_boundary_ft": 10469.4,
- "reconstructed_edges": 53,
- "traverse_rows": 94,
- "recon_all_covered_ft": 4307.9,
- "recon_all_denom_ft": 10469.4,
- "recon_dim_covered_ft": 4295.5,
- "recon_dim_denom_ft": 10000.0,
+ "drawn_boundary_ft": 10598.7,
+ "reconstructed_edges": 54,
+ "traverse_rows": 95,
+ "recon_all_covered_ft": 5166.5,
+ "recon_all_denom_ft": 10598.7,
+ "recon_dim_covered_ft": 5154.1,
+ "recon_dim_denom_ft": 10129.4,
  "weight_classes": {
   "1.98": {
    "count": 11,
@@ -66,9 +67,9 @@
  },
  "rw_weight": 1.98,
  "buffer_sensitivity_ft": {
-  "1.0pt": 4281.2,
-  "1.5pt": 4306.1,
-  "2.5pt": 4332.9
+  "1.0pt": 5139.9,
+  "1.5pt": 5164.6,
+  "2.5pt": 5191.5
  },
  "parcels_all": {
   "n": 1,
@@ -123,7 +124,7 @@
    "parcel": "61806-4|61985-2",
    "named": true,
    "touches_frame": false,
-   "pct_covered": 30.59,
+   "pct_covered": 31.3,
    "closure_ft": null,
    "counts": false
   },
@@ -131,7 +132,7 @@
    "parcel": "",
    "named": false,
    "touches_frame": false,
-   "pct_covered": 0.0,
+   "pct_covered": 5.31,
    "closure_ft": null,
    "counts": false
   },
@@ -139,7 +140,7 @@
    "parcel": "61806-2",
    "named": true,
    "touches_frame": false,
-   "pct_covered": 46.27,
+   "pct_covered": 73.56,
    "closure_ft": null,
    "counts": false
   },
@@ -147,7 +148,7 @@
    "parcel": "",
    "named": false,
    "touches_frame": false,
-   "pct_covered": 0.0,
+   "pct_covered": 0.18,
    "closure_ft": null,
    "counts": false
   },
@@ -886,6 +887,12 @@
    "az": 91.9722,
    "ft": 6.44,
    "misfit_ft": 0.09
+  },
+  {
+   "name": "T-total 860.77'(T): N74Â°18'38\"W 860.77' (anchor -> record)",
+   "az": 285.6894,
+   "ft": 860.77,
+   "misfit_ft": 0.0
   }
  ]
 }

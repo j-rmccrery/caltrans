@@ -1,0 +1,155 @@
+[
+ {
+  "token": "860.77'(T)",
+  "verdict": "accepted",
+  "kind": "line",
+  "governing": 285.68944444444446,
+  "reason": null,
+  "sum_ft": 860.7699999999202,
+  "diff_ft": -7.980816008057445e-11
+ },
+ {
+  "token": "235.42'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 2 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "573.93'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 11 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "L=573.93'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "184.70'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 10 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "L=184.70'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "232.07'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 10 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "L=232.07'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "399.86'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "241.32'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 9 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "413.98'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "L=413.98'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "48.10'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "123.12'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "122.69'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "70.80'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "102.46'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ }
+]

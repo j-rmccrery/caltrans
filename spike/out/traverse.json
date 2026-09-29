@@ -3905,5 +3905,36 @@
     ]
    }
   ]
+ },
+ {
+  "closed": false,
+  "n_edges": 1,
+  "full_record": 1,
+  "misfit_max_ft": 0.0,
+  "misfit_end_ft": 0.0,
+  "edges": [
+   {
+    "edge": "T-total 860.77'(T): N74°18'38\"W 860.77' (anchor -> record)",
+    "kind": "line",
+    "az": 285.68944444444446,
+    "ft": 860.77,
+    "misfit_ft": 0.0,
+    "chain_misfit_ft": 0.0,
+    "flags": [],
+    "E": 5994252.18,
+    "N": 2120484.72,
+    "pts": [
+     [
+      5993423.48,
+      2120717.49
+     ],
+     [
+      5994252.18,
+      2120484.72
+     ]
+    ],
+    "source": "by (T) total 860.77'(T)"
+   }
+  ]
  }
 ]

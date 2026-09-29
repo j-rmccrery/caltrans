@@ -1,0 +1,101 @@
+[
+ {
+  "token": "57.52'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 6 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "127.57'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "222.86'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "134.03'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 6 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "210.67'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 9 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "L=210.67'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "57.52'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 3 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "134.03'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 3 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "127.57'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "ambiguous span: 3 nearby R= candidates",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "50.64'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ },
+ {
+  "token": "96.71'(T)",
+  "verdict": "refused",
+  "kind": null,
+  "governing": null,
+  "reason": "no governing bearing: nothing printed nearby matches",
+  "sum_ft": null,
+  "diff_ft": null
+ }
+]

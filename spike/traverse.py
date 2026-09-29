@@ -1074,6 +1074,18 @@ def main():
         out.sort(key=lambda r: (-r["closed"], -r["n_edges"]))
         (OUT / "traverse.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
 
+    # loop18 leg 3: "(T)" run totals as whole record courses -- every sheet with a c_T run
+    # (recon_ceiling.py's own class), not just the leg 2 trio; empty on a sheet with none. Runs after
+    # the inverse rows above (it re-bootstraps recon.py itself, so it sees any inverse gain too) and
+    # reads the traverse.json just written for its own "already-clean elsewhere" sum check (see
+    # t_total.existing_clean_ft) -- so this must stay LAST.
+    import t_total
+    new_chains2 = t_total.add_t_total_chains(sheet_name)
+    if new_chains2:
+        out += new_chains2
+        out.sort(key=lambda r: (-r["closed"], -r["n_edges"]))
+        (OUT / "traverse.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+
     closed = [r for r in out if r["closed"]]
     long_ = [r for r in out if r["n_edges"] >= 2]
     print(f"chains: {len(out)} ({len(closed)} closed, {len(long_)} of 2+ edges); edges with a full record {sum(r['full_record'] for r in out)} of {sum(r['n_edges'] for r in out)}")
