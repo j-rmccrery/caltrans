@@ -172,7 +172,7 @@
     "chain_misfit_ft": 0.1,
     "flags": [
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5991981.79,
     "N": 2121457.21,
@@ -252,7 +252,7 @@
     "chain_misfit_ft": 0.1,
     "flags": [
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5992158.7,
     "N": 2121373.88,
@@ -652,7 +652,7 @@
     "chain_misfit_ft": 0.02,
     "flags": [
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5992583.1,
     "N": 2120659.96,
@@ -732,7 +732,7 @@
     "chain_misfit_ft": 4.11,
     "flags": [
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5992586.61,
     "N": 2120653.88,
@@ -1063,7 +1063,7 @@
     "chain_misfit_ft": 8.48,
     "flags": [
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5992796.9,
     "N": 2120356.11,
@@ -1123,7 +1123,7 @@
     "chain_misfit_ft": 14.84,
     "flags": [
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5992844.53,
     "N": 2120469.61,
@@ -1796,23 +1796,20 @@
  {
   "closed": false,
   "n_edges": 2,
-  "full_record": 0,
-  "misfit_max_ft": 0.0,
-  "misfit_end_ft": 0.0,
+  "full_record": 1,
+  "misfit_max_ft": 0.08,
+  "misfit_end_ft": 0.08,
   "edges": [
    {
     "edge": "L=170.24'",
     "kind": "arc",
-    "az": 347.2143,
-    "ft": 169.1,
-    "misfit_ft": 0.0,
-    "chain_misfit_ft": 0.0,
-    "flags": [
-     "chord direction from drawing",
-     "chord from drawing (no radius)"
-    ],
-    "E": 5992603.2,
-    "N": 2120617.02,
+    "az": 347.1976,
+    "ft": 169.16,
+    "misfit_ft": 0.08,
+    "chain_misfit_ft": 0.08,
+    "flags": [],
+    "E": 5992603.14,
+    "N": 2120617.08,
     "pts": [
      [
       5992640.63,
@@ -1878,7 +1875,8 @@
       5992603.2,
       2120617.02
      ]
-    ]
+    ],
+    "chord_source": "radial N66°01'11\"E(R)"
    },
    {
     "edge": "L=16.95'",
@@ -1886,13 +1884,13 @@
     "az": 334.5394,
     "ft": 17.02,
     "misfit_ft": 0.0,
-    "chain_misfit_ft": 0.0,
+    "chain_misfit_ft": 0.08,
     "flags": [
      "chord direction from drawing",
      "chord from drawing (no radius)"
     ],
-    "E": 5992595.88,
-    "N": 2120632.4,
+    "E": 5992595.82,
+    "N": 2120632.45,
     "pts": [
      [
       5992595.88,
@@ -2478,7 +2476,7 @@
     "flags": [
      "L 5.57 ft shorter than the drawn chord: impossible match, dropped from the graph",
      "chord direction from drawing",
-     "chord from drawing (no radius)"
+     "R/L printed, no record chord direction"
     ],
     "E": 5992678.35,
     "N": 2122078.2,

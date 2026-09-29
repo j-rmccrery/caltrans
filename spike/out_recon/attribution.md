@@ -1,14 +1,14 @@
 # recon attribution: every dimensioned-uncovered foot, one cause
 
-total lost across 6 sheets: 28,236.5 ft
+total lost across 6 sheets: 27,581.5 ft
 
 ## per-sheet bucket table (ft)
 
 | sheet | lost_ft | no_traverse_edge_unlabelled | curve | distance_from_drawing | no_traverse_edge_labelled | bearing_from_drawing | misfit | residual_contamination |
 |---|---|---|---|---|---|---|---|---|
-| presidio | 6696 | 2334 | 1006 | 806 | 1104 | 508 | 272 | 666 |
-| r_10434_001_2020-09-16 | 6523 | 3660 | 1524 | 670 | 430 | 240 | 0 | 0 |
-| r_10434_003_2020-09-16 | 10022 | 3911 | 2724 | 1752 | 767 | 529 | 340 | 0 |
+| presidio | 6604 | 2334 | 914 | 806 | 1104 | 508 | 272 | 666 |
+| r_10434_001_2020-09-16 | 6386 | 3660 | 1386 | 670 | 430 | 240 | 0 | 0 |
+| r_10434_003_2020-09-16 | 9596 | 3911 | 2297 | 1752 | 767 | 529 | 340 | 0 |
 | r_10741_001_2017-02-10 | 982 | 11 | 615 | 0 | 0 | 0 | 357 | 0 |
 | r_10741_002_2017-02-10 | 2118 | 1585 | 217 | 280 | 36 | 0 | 0 | 0 |
 | r_10741_003_2017-02-10 | 1895 | 1108 | 0 | 621 | 0 | 165 | 0 | 0 |
@@ -17,31 +17,31 @@ total lost across 6 sheets: 28,236.5 ft
 
 | bucket | ft | % of total lost |
 |---|---|---|
-| no_traverse_edge_unlabelled | 12,607.8 | 44.7% |
-| curve | 6,084.6 | 21.5% |
-| distance_from_drawing | 4,130.1 | 14.6% |
-| no_traverse_edge_labelled | 2,337.9 | 8.3% |
-| bearing_from_drawing | 1,441.6 | 5.1% |
-| misfit | 968.4 | 3.4% |
+| no_traverse_edge_unlabelled | 12,607.8 | 45.7% |
+| curve | 5,429.6 | 19.7% |
+| distance_from_drawing | 4,130.1 | 15.0% |
+| no_traverse_edge_labelled | 2,337.9 | 8.5% |
+| bearing_from_drawing | 1,441.6 | 5.2% |
+| misfit | 968.4 | 3.5% |
 | residual_contamination | 666.1 | 2.4% |
 | other_flag | 0.0 | 0.0% (never the nearest row) |
 | anomaly | 0.0 | 0.0% (never the nearest row) |
 
-no_traverse_edge splits unlabelled/labelled and residual_contamination (7) is carved out of it by hand -- together they are one cause ("the record never reached this line"): 55.3% combined, the largest single cause by a wide margin over any one flag/misfit/curve bucket.
+no_traverse_edge splits unlabelled/labelled and residual_contamination (7) is carved out of it by hand -- together they are one cause ("the record never reached this line"): 56.6% combined, the largest single cause by a wide margin over any one flag/misfit/curve bucket.
 
 ## top 3 buckets: notes and examples
 
-### no_traverse_edge_unlabelled (12,608 ft, 44.7%)
+### no_traverse_edge_unlabelled (12,608 ft, 45.7%)
 - 46825|61806|61806-1|61806-2|63269 vicinity (r_10434_001_2020-09-16): 3298.4 ft
 - 46825-5 vicinity (r_10741_002_2017-02-10): 1584.6 ft
 - the record simply never reached this stretch -- no traverse.json row of any kind (line, curve, flagged or not) sits within recon.py's own buffer+direction tolerance. "labelled" means a bearing/distance-shaped text block sits within 40 pt on the sheet but never became an edge (an association miss, not a missing record); "unlabelled" means no such text sits nearby either.
 
-### curve (6,085 ft, 21.5%)
+### curve (5,430 ft, 19.7%)
 - L=660.20' (r_10741_001_2017-02-10): 598.7 ft
 - L=577.57' (r_10434_003_2020-09-16): 448.6 ft
 - loop16 leg E: a curve can be a clean rec_edge now (CB, or a tangent record line, gives its chord direction; see traverse.py's complete_curve_chords). What remains here is a curve still missing a record radius/delta, or one whose only candidate record tangents disagree (refused, not guessed).
 
-### distance_from_drawing (4,130 ft, 14.6%)
+### distance_from_drawing (4,130 ft, 15.0%)
 - S5°49'27"E (r_10434_003_2020-09-16): 1150.1 ft
 - N37°30'09"E (presidio): 491.1 ft
 
@@ -52,15 +52,15 @@ no_traverse_edge splits unlabelled/labelled and residual_contamination (7) is ca
 | sheet | parcel | pct_covered | counts | n_uncovered_pieces | one_edge_short | blockers_ft |
 |---|---|---|---|---|---|---|
 | presidio | 63269 | 0.0 | False | 3 | False | {'distance_from_drawing': 28.2, 'no_traverse_edge': 166.6} |
-| presidio | 61806-4|61985-2 | 25.36 | False | 153 | False | {'curve': 742.0, 'no_traverse_edge': 751.6, 'misfit': 220.1, 'bearing_from_drawing': 168.5} |
+| presidio | 61806-4|61985-2 | 30.59 | False | 121 | False | {'curve': 624.1, 'no_traverse_edge': 746.9, 'misfit': 220.1, 'bearing_from_drawing': 168.5} |
 | presidio | 61806-2 | 46.27 | False | 47 | False | {'bearing_from_drawing': 325.5, 'no_traverse_edge': 1288.8} |
 | presidio | 61806-5 | 0.0 | False | 52 | False | {'no_traverse_edge': 249.2} |
 | presidio | 61806 | 0.0 | False | 7 | False | {'no_traverse_edge': 485.3} |
-| presidio | 61985-1|61985-2|61985-3|61985-4 | 20.51 | False | 104 | False | {'bearing_from_drawing': 151.5, 'curve': 311.8, 'no_traverse_edge': 1097.4} |
+| presidio | 61985-1|61985-2|61985-3|61985-4 | 28.95 | False | 91 | False | {'bearing_from_drawing': 151.5, 'curve': 147.7, 'no_traverse_edge': 1097.4} |
 | r_10434_001_2020-09-16 | 46825 | 0.42 | False | 3 | False | {'no_traverse_edge': 407.6} |
 | r_10434_003_2020-09-16 | 46825 | 0.0 | False | 73 | False | {'no_traverse_edge': 617.0, 'bearing_from_drawing': 35.6} |
 | r_10434_003_2020-09-16 | 46825 | 0.0 | False | 32 | False | {'no_traverse_edge': 303.9} |
-| r_10434_003_2020-09-16 | 46825|63269 | 0.4 | False | 130 | False | {'curve': 574.8, 'no_traverse_edge': 904.2, 'misfit': 185.8, 'distance_from_drawing': 1161.0} |
+| r_10434_003_2020-09-16 | 46825|63269 | 1.9 | False | 121 | False | {'curve': 536.4, 'no_traverse_edge': 904.2, 'misfit': 182.5, 'distance_from_drawing': 1161.0} |
 | r_10434_003_2020-09-16 | 61806-6 | 40.58 | False | 17 | False | {'no_traverse_edge': 249.6, 'bearing_from_drawing': 27.3, 'distance_from_drawing': 339.8} |
 | r_10434_003_2020-09-16 | 61806-6|63269 | 14.18 | False | 187 | False | {'no_traverse_edge': 1162.0, 'bearing_from_drawing': 182.5, 'curve': 671.6, 'distance_from_drawing': 408.3} |
 | r_10434_003_2020-09-16 | 61806-8 | 0.0 | False | 24 | False | {'curve': 141.6, 'no_traverse_edge': 160.7} |

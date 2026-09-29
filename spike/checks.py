@@ -197,6 +197,24 @@ def dms(d, m, s):
     return int(d) + int(m) / 60 + int(s) / 3600
 
 
+def attach_shared_curve_radius(labels_by_region, region_key, R, D):
+    """Loop17 leg H: the curve-data joined-triple pass (main()'s curve_blocks loop) can validate a
+    genuine (R, delta, L) triple for an "L=..." block that was ALREADY resolved into its own "arc" label
+    by the standalone L=/(T) or bare-distance-as-arc branches earlier in main() -- previously this R/delta
+    was thrown away outright (len_checked's own "continue", meant only to stop a duplicate length re-
+    check) because a fresh label was never created for an already-resolved block. Every already-placed
+    "arc" label is indexed by its own region (labels_by_region, built once in main() before this loop);
+    this attaches R/delta onto whichever of THOSE labels still lacks R, keyed by the SAME region the
+    length check used, never a guess by proximity or ordering. Returns the count filled (0 or 1: a region
+    holds at most one "arc" label without R, since a region is one printed annotation block)."""
+    filled = 0
+    for lab in labels_by_region.get(region_key, []):
+        if "R" not in lab:
+            lab["R"], lab["delta"] = R, D
+            filled += 1
+    return filled
+
+
 def azimuth(b):
     m = BEAR.match(b)
     a = dms(m[2], m[3], m[4])
@@ -1381,6 +1399,24 @@ def selftest():
     assert wrong_line_likely("distance", off, 28.23) is True, "overshoot side unchanged"
     # the calibration example this cut must never flip (an overshoot inside the old 200% cut already)
     assert wrong_line_likely("distance", 330.77, 256.75) is False, "calibrated real disagreement must stay a FAIL"
+
+    # loop17 leg H: attach_shared_curve_radius must carry R/delta onto an already-placed "arc" label
+    # sharing the curve-data block's own region (the len_checked case) -- never onto an unrelated region,
+    # never overwrite a label that already has its own (possibly different-source) R, and fill at most
+    # the one label lacking R in that region.
+    region_a, region_b = (10, 10, 20, 20), (500, 500, 510, 510)
+    lab_needs_r = {"kind": "arc", "printed": "L=59.06'", "ft": 59.06, "region": region_a}
+    lab_has_r = {"kind": "arc", "printed": "L=13.27'", "ft": 13.27, "region": region_a, "R": 15.0, "delta": 50.7}
+    lab_elsewhere = {"kind": "arc", "printed": "L=999.00'", "ft": 999.0, "region": region_b}
+    by_region = {}
+    for lab in (lab_needs_r, lab_has_r, lab_elsewhere):
+        by_region.setdefault(lab["region"], []).append(lab)
+    n = attach_shared_curve_radius(by_region, region_a, 1470.0, 2.3)
+    assert n == 1, f"expected exactly the one region-A label lacking R to fill, got {n}"
+    assert lab_needs_r["R"] == 1470.0 and lab_needs_r["delta"] == 2.3, "R/delta must land on the label missing them"
+    assert lab_has_r["R"] == 15.0, "a label that already has its own R must never be overwritten"
+    assert "R" not in lab_elsewhere, "a different region's label must never gain a radius it wasn't checked against"
+    print("checks.py selftest: attach_shared_curve_radius OK (fills only the same-region label missing R, never overwrites, never leaks to another region)")
     # a small, real-looking disagreement on either side of 1.0x must never be flagged
     assert wrong_line_likely("distance", -21.62, 76.46) is False        # 28.3% undershoot
     assert wrong_line_likely("distance", 29.06, 22.56) is False         # 128.8% overshoot
@@ -1939,6 +1975,17 @@ def main():
     def n_curve_toks(text):
         return sum(1 for pat in (RAD_TOK, ANG_TOK, LEN_TOK) for _ in pat.finditer(text))
     seen = set()
+    # loop17 leg H: every "arc" label already placed by the standalone L=/(T) or bare-distance-as-arc
+    # branches above, keyed by its own region -- so the joined-triple pass below can find and finish an
+    # ALREADY-RESOLVED label's row instead of discarding a genuine, already-checked (and possibly
+    # already-passing, see rows.append above) radius purely because that label happened to resolve first.
+    # Census (spike/legG17_census.py): 25 of 50 "no R" rows had their own exact (R, delta, L) triple
+    # sitting right there in checks.csv, already computed and PASSING -- len_checked's own "continue"
+    # threw the radius away every time instead of carrying it onto the label that already exists.
+    labels_by_region = {}
+    for lab in labels:
+        if lab["kind"] == "arc" and lab.get("region"):
+            labels_by_region.setdefault(tuple(lab["region"]), []).append(lab)
     for b in curve_blocks:
         parts = b["text"].replace(" ", "").split("|")
         joined = [b]  # every block whose text ended up in `parts`, so the L= value's own drawn fillet
@@ -1982,9 +2029,14 @@ def main():
             # corner can put several similar-length fillets within reach of one label
             len_block = next((bb for bb in joined if LEN_TOK.search(bb["text"].replace(" ", ""))), b)
             if id(len_block) in len_checked:
-                continue  # this L= value already got its own full geometric check above (it's also its
-                # own standalone "L=...'" block); a second row for the identical drawn piece would just
-                # double-count one label as two passes (or two, possibly conflicting, fails)
+                # loop17 leg H: this L= value already got its own full geometric check above (it's also
+                # its own standalone "L=...'" block) -- never re-measure it a second time (would double-
+                # count one label as two passes, or two possibly-conflicting fails), but DO carry this
+                # already-checked R/delta onto the label that check already placed, keyed by the same
+                # block's own region -- never guessed, the identical triple this pass just validated above.
+                attach_shared_curve_radius(labels_by_region, tuple(region(len_block)), R, D)
+                continue
+
             tip = tips.get(bidx.get(id(len_block)))
             reach = max(4.0, 0.6 * tip[2]) if tip else 5.0 * len_block["glyph_h"]
             pt = tip[0] if tip else np.array([len_block["cx"], len_block["cy"]])
