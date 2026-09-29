@@ -937,9 +937,9 @@
  {
   "closed": false,
   "n_edges": 8,
-  "full_record": 2,
-  "misfit_max_ft": 14.84,
-  "misfit_end_ft": 14.84,
+  "full_record": 3,
+  "misfit_max_ft": 47.22,
+  "misfit_end_ft": 47.22,
   "edges": [
    {
     "edge": "S2°05'55\"W",
@@ -1263,16 +1263,13 @@
    {
     "edge": "R=245.0' L=289.24'",
     "kind": "arc",
-    "az": 60.3874,
-    "ft": 233.05,
-    "misfit_ft": 0.0,
-    "chain_misfit_ft": 14.84,
-    "flags": [
-     "chord direction from drawing",
-     "R/L printed, no record chord direction"
-    ],
-    "E": 5993047.14,
-    "N": 2120584.76,
+    "az": 65.7805,
+    "ft": 272.73,
+    "misfit_ft": 46.23,
+    "chain_misfit_ft": 47.22,
+    "flags": [],
+    "E": 5993093.25,
+    "N": 2120581.49,
     "pts": [
      [
       5993049.57,
@@ -1378,7 +1375,8 @@
       5992846.95,
       2120484.25
      ]
-    ]
+    ],
+    "chord_source": "radial N58°02'27\"W(R)"
    }
   ]
  },

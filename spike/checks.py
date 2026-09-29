@@ -423,6 +423,35 @@ def nearest_arc(b, arcs, tol_perp, tol_deg=8.0):
     return None if best is None else best[1]
 
 
+def nearest_arc_end(b, arcs):
+    """Loop18 leg 4: the arc whose own drawn END (p0 or p1, never a point along its body) sits nearest
+    a label -- for a printed radial ("(R)") bearing, which marks a curve's own END direction and so
+    sits beside that END specifically, not tangent-aligned with the curve's flank the way a chord
+    citation does. nearest_arc() (used for chord citations) requires the label's reading direction to
+    run along the curve's OWN tangent there (tol_deg) -- a radial commonly sits off at another angle
+    entirely (it names a RADIAL direction, perpendicular-ish to the tangent), so that filter rejected
+    most genuine radials outright: census (spike/out/leg184_census_*.json) found 80 of 123 printed
+    radials on the three south gate sheets parsed clean (BEAR matched, "(R)" group present) but found
+    no curve this way. No proximity cap here -- unlike nearest_arc's tight tol_perp, a radial can sit
+    a genuine distance from its own curve on a busy sheet (r10434_3 measured real matches out to 229 pt
+    against a false-table-row cluster starting at 143 pt with no other separating signal available at
+    this stage); this function only PROPOSES the pairing, same as nearest_arc already does for a chord
+    citation -- traverse.complete_curve_chords' own tangent + centre-agreement test (loop18 leg 4) is
+    what actually accepts or refuses it before any check result or recon output ever depends on it, so
+    a wrong nearby pick here costs nothing but a discarded radials.json row."""
+    c = np.array([b["cx"], b["cy"]])
+    best = None
+    for arc in arcs:
+        pts = arc["pts"]
+        if len(pts) < 2:
+            continue
+        for end_pt in (pts[0], pts[-1]):
+            d = float(np.hypot(*(end_pt - c)))
+            if best is None or d < best[0]:
+                best = (d, arc)
+    return None if best is None else best[1]
+
+
 def seg_dist(p, a, b):
     ab = b - a
     t = np.clip(((p - a) @ ab) / max(ab @ ab, 1e-9), 0, 1)
@@ -1755,7 +1784,7 @@ def main():
                 # already uses) before ever using it, so a wrong pairing here can misdirect that later
                 # check but never bypass it into a guess.
                 led_r, arc_r, _ = at_tip(bi, "arc")
-                curve = arc_r if led_r and arc_r is not None else nearest_arc(b, arcs, 1.5 * b["glyph_h"])
+                curve = arc_r if led_r and arc_r is not None else nearest_arc_end(b, arcs)
                 if curve is not None and len(curve["pts"]) >= 2:
                     p0, p1 = curve["pts"][0], curve["pts"][-1]
                     lp = np.array([b["cx"], b["cy"]])

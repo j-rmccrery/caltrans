@@ -52,6 +52,31 @@ DELTA_CONSISTENCY_TOL_DEG = 0.1  # deg: how far a curve row's own printed delta 
 # under 0.007 deg (36 rows, loop16 leg F); every known-contaminated merge sits at 0.92 deg or worse
 # (three rows: 0.92, 52, 425). 0.1 clears the real distribution by 15x with room to spare and refuses
 # both contaminated merges with an 9x margin below the smallest one measured.
+RADIAL_CENTER_TOL_FT = 0.5  # ft: loop18 leg 4's centre test (retry: residual form) -- a radial at curve
+# end P with printed bearing theta implies a centre C = P + R*unit(theta or theta+180), R the curve's
+# own record radius (never the drawing's). Accepted only when EVERY one of the arc's own drawn points
+# lies within this of the RECORD circle (centre C, radius R): max(|dist(pt, C) - R|) <= tol -- record R
+# + record bearing + drawn geometry all agreeing independently is what makes a radial safe to bind to a
+# particular arc; the tangent-only test below (TANGENT_TOL_DEG) alone cannot: it only checks DIRECTION
+# at the node, so a radial belonging to an unrelated nearby curve whose tangent happens to line up can
+# still pass it (checks.py's nearest_arc_end widened the radial-to-curve search with no proximity cap
+# specifically to catch genuine far radials, which makes this false-positive path live, not
+# hypothetical). Both tests must pass.
+#   First attempt compared C to the arc's own fit_circle_lsq CENTRE instead of this residual test, and
+# that was wrong: on a shallow arc (small delta) a least-squares circle fit is ill-conditioned in the
+# RADIUS direction specifically (the sagitta -- the only signal that pins down radius -- is tiny
+# relative to point noise/rounding, while the TANGENT direction stays well-determined from the local
+# secant). Measured wrongly-refused (loop18 leg 4 first attempt): R-10434.1's "L=170.24'" (delta 22.4
+# deg, not even that shallow) fit R 438.3 ft against record R 436.3 -- only 2.0 ft apart -- yet the
+# fitted CENTRE sat 2.12 ft from the record-implied one, just past the old 0.5 ft cutoff, because two
+# circles tangent at the same point with radii differing by dR separate at their centres by dR, but
+# separate along the ARC's own extent by only about L^2/2 * |1/R1 - 1/R2| (~0.15 ft over the arc's own
+# 170 ft span) -- centre-to-centre distance amplifies a small radius disagreement into a large-looking
+# number that has nothing to do with how well the record circle actually fits the DRAWN points. The
+# residual form measures the thing that actually matters (does the record circle pass through the
+# drawn points, not does some independently-fitted circle's centre coincide with the record one) and is
+# well-conditioned for any delta: a genuinely wrong radius/wrong-curve pairing still fails it (see
+# selftest's "residual 3 ft, wrong arc" case), a right one with noisy-but-plausible drawn points passes.
 TANGENT_TOL_DEG = 1.0  # deg: how far a curve's own circle-fit tangent at a shared node may sit from a
 # true 180 deg reversal of the adjoining record line's own drawn departure direction (see
 # arc_end_tangent_az/complete_curve_chords) and still count as tangent. Measured (loop16 leg E) over
@@ -193,7 +218,7 @@ def _pick_by_drawn_chord(cands, drawn_chord_az):
     return min(cands, key=lambda c: circ180(c, drawn_chord_az))
 
 
-def complete_curve_chords(edges, adj, azimuth, radials=()):
+def complete_curve_chords(edges, adj, azimuth, radials=(), ground=None):
     """Loop16 leg E (extended leg F): give a curve edge its record chord DIRECTION from the record
     where the record determines it -- never from the drawing (traverse.py used to always take a
     curve's chord az from the drawing; see module docstring). Three record sources, tried per curve
@@ -245,9 +270,17 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
          keep only the one within TANGENT_TOL_DEG of the curve's own drawn tangent there
          (arc_end_tangent_az) -- same tangency discipline as the line-donor source, never a guess:
          a radial that doesn't actually sit near true-tangent-perpendicular at this end is not this
-         end's radial, whatever label happened to be nearest. Two or more radials at one end that
-         each pass but disagree are left alone (ambiguous), same as the line-donor source. Chord az
-         from there is the same tangent +/- delta/2, drawn-chord-picked, as source 2.
+         end's radial, whatever label happened to be nearest. Loop18 leg 4 adds a SECOND, independent
+         gate a passing candidate must also clear when `ground` is given: walking the radial's own
+         printed bearing from this node by the curve's own RECORD radius gives a candidate RECORD
+         CIRCLE, and every one of the arc's own drawn points must sit within RADIAL_CENTER_TOL_FT of it
+         (see that constant's docstring for why this residual form, not a least-squares-fit-centre
+         comparison) -- the tangent test alone only checks direction, so a radial genuinely belonging to
+         a different, merely-nearby curve (checks.py's nearest_arc_end pairs radials to curves with no
+         proximity cap) could still pass it by coincidence; the centre test binds record R + record
+         bearing + drawn geometry together and refuses that case. Two or more radials at one end that
+         each pass both gates but disagree are left alone (ambiguous), same as the line-donor source.
+         Chord az from there is the same tangent +/- delta/2, drawn-chord-picked, as source 2.
     Sets "az", "chord_source" (cites the source: "CB", "tangent to <donor edge's own src>" -- a line OR
     an already-resolved curve, "radial <printed text>") and "chord_source_edge" (a reference to the
     donor -- the donor edge object for CB/tangent (line or curve), or a synthetic {p0, p1, region, src}
@@ -312,6 +345,14 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
             end_candidates = {}  # end (0/1) -> resolved chord az, or None if no/ambiguous donor
             end_donor = {}   # end -> donor object (a line edge, or a synthetic radial donor dict)
             end_source = {}  # end -> the exact chord_source string to store
+            # loop18 leg 4 (retry): this curve's own drawn points, in GROUND ft (not the fitted centre --
+            # see RADIAL_CENTER_TOL_FT's docstring for why a full circle fit is ill-conditioned on a
+            # shallow arc) -- computed once per edge, for the radial source's residual test below.
+            pts_ground = None
+            if radials and ground is not None:
+                pts_arr = e.get("pts", [])
+                if len(pts_arr) >= 1:
+                    pts_ground = np.array([ground(p) for p in pts_arr])
             for end, node in ((0, e["n0"]), (1, e["n1"])):
                 arc_tangent_az = arc_end_tangent_az(e, end, azimuth)
                 if arc_tangent_az is None:
@@ -381,8 +422,33 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
                             # itself (no separate "departing the node" direction to flip past), so it
                             # should agree with arc_tangent_az near-exactly, not near a 180 deg reversal
                             deflect = abs((cand_az - arc_tangent_az + 180) % 360 - 180)
-                            if deflect <= TANGENT_TOL_DEG:
-                                rseen.setdefault(round(cand_az, 4), r)
+                            if deflect > TANGENT_TOL_DEG:
+                                continue
+                            # loop18 leg 4 centre test, residual form (RADIAL_CENTER_TOL_FT docstring
+                            # above): the tangent check alone only confirms DIRECTION at the node --
+                            # checks.py's nearest_arc_end pairs a radial to its curve with no proximity
+                            # cap, so a radial belonging to a different, merely-nearby curve can still
+                            # land here with a matching tangent by coincidence. Walk the radial's own
+                            # printed bearing from this node by the curve's own RECORD radius (never a
+                            # fitted one) to get a candidate RECORD CIRCLE, and require every one of the
+                            # arc's own drawn points to sit within RADIAL_CENTER_TOL_FT of that circle
+                            # (|dist(pt, C) - R| <= tol for every pt) -- refuses (not guesses) when no
+                            # ground transform is available.
+                            if ground is not None:
+                                if pts_ground is None or len(pts_ground) == 0:
+                                    continue
+                                Pg = ground(node_pt)
+                                centre_ok = False
+                                for t in (r["az"], (r["az"] + 180) % 360):
+                                    rad_t = math.radians(t)
+                                    C = Pg + e["R"] * np.array([math.sin(rad_t), math.cos(rad_t)])
+                                    residual = float(np.max(np.abs(np.hypot(*(pts_ground - C).T) - e["R"])))
+                                    if residual <= RADIAL_CENTER_TOL_FT:
+                                        centre_ok = True
+                                        break
+                                if not centre_ok:
+                                    continue
+                            rseen.setdefault(round(cand_az, 4), r)
                     if len(rseen) == 1:
                         ((tangent_az, r),) = rseen.items()
                         end_candidates[end] = _pick_by_drawn_chord([(tangent_az + delta / 2) % 360, (tangent_az - delta / 2) % 360], drawn_chord_az)
@@ -679,6 +745,53 @@ def selftest():
           "CB wins over tangent; disagreeing tangent donors refuse rather than guess; a radial fills the same way "
           "when no record line donates, and refuses when it doesn't match the drawn tangent)")
 
+    # loop18 leg 4 (retry): the centre test, residual form. Same synthetic curve/radial as e_arc_only
+    # above (tangent passes cleanly either way) but with `ground` supplied (identity here: the synthetic
+    # coordinates already ARE the "ground" frame, 1 pt = 1 ft) -- so a candidate must ALSO place every
+    # one of the arc's own drawn points within RADIAL_CENTER_TOL_FT of the candidate RECORD circle
+    # (centre = node + record R along the printed bearing, radius = record R). This 90 deg quarter
+    # circle is well-conditioned (not shallow), so a record R that's off the drawn circle's own radius
+    # shows up in the residual almost 1:1 -- 2 ft off gives residual ~1.98 ft, 3 ft off ~2.96 ft, both
+    # past the 0.5 ft tolerance: refused, same as a radial genuinely belonging to a different, wrong
+    # arc would be (the residual test cannot tell "your own R is wrong" from "you're not even this
+    # curve's radial" apart, and does not need to -- either way the record circle doesn't fit the drawn
+    # points, so the pairing is unsafe to use).
+    def fresh_arc(R):
+        return {"kind": "arc", "p0": quarter[0].copy(), "p1": quarter[-1].copy(), "pts": quarter.copy(), "R": R,
+                "delta": 90.0, "flags": [], "impossible": False, "n0": 11, "n1": 12, "src": "C1", "chord_label": False}
+
+    e_arc_ctr_bad = fresh_arc(102.0)
+    n_ctr_bad = complete_curve_chords([e_arc_ctr_bad], adj_only, az_id, [radial], ground=lambda p: p)
+    assert n_ctr_bad == 0 and "az" not in e_arc_ctr_bad, \
+        "a 2 ft centre shift along the radial (record R 2 ft off a well-conditioned arc's own drawn radius) must refuse"
+    e_arc_wrong = fresh_arc(103.0)
+    n_wrong = complete_curve_chords([e_arc_wrong], adj_only, az_id, [radial], ground=lambda p: p)
+    assert n_wrong == 0 and "az" not in e_arc_wrong, \
+        "a radial on the wrong arc (residual ~3 ft) must refuse"
+    e_arc_ctr_ok = fresh_arc(100.2)
+    n_ctr_ok = complete_curve_chords([e_arc_ctr_ok], adj_only, az_id, [radial], ground=lambda p: p)
+    assert n_ctr_ok == 1 and abs(e_arc_ctr_ok["az"] - 45.0) < 0.5, \
+        "a radial whose residual is 0.2 ft (within RADIAL_CENTER_TOL_FT) must still be accepted"
+
+    # the case the centre-to-centre-distance FIRST ATTEMPT got wrong (see RADIAL_CENTER_TOL_FT's
+    # docstring): a SHALLOW arc (delta 5 deg) whose record R is 2 ft off its own drawn radius. The
+    # residual form must accept it (residual << 0.5 ft over this short an arc), where the fit-centre
+    # form refused it (centre-to-centre distance ~2 ft, past the old cutoff, for no real reason).
+    t5 = np.linspace(0.0, 1.0, 21)
+    angle5 = np.radians(90.0 - 5.0 * t5)
+    shallow = 1000.0 * np.c_[np.cos(angle5), np.sin(angle5)]  # centre (0, 0)
+    e_shallow = {"kind": "arc", "p0": shallow[0].copy(), "p1": shallow[-1].copy(), "pts": shallow.copy(), "R": 1002.0,
+                 "delta": 5.0, "flags": [], "impossible": False, "n0": 21, "n1": 22, "src": "shallow", "chord_label": False}
+    adj_shallow = {21: [0], 22: [0]}
+    # node (shallow[0]) sits due north of the true centre (0,0); the radial toward it reads due south (az 180)
+    radial_shallow = {"point": shallow[0].copy(), "az": 180.0, "printed": "shallow radial", "region": [0, 0, 1, 1]}
+    n_shallow = complete_curve_chords([e_shallow], adj_shallow, az_id, [radial_shallow], ground=lambda p: p)
+    assert n_shallow == 1 and "az" in e_shallow, \
+        "a shallow arc (delta 5 deg) whose record R is 2 ft off its own drawn radius must still be accepted (residual << 0.5 ft)"
+    print("traverse.selftest: complete_curve_chords centre test (residual form) OK -- 2 ft/3 ft record-R "
+          "misses on a well-conditioned arc refused, 0.2 ft accepted, a shallow arc's own 2 ft R miss "
+          "still accepted (well-conditioned-vs-shallow distinction the fit-centre form got backwards)")
+
     # loop17 leg G: curve-to-curve tangent chaining -- a second, smaller quarter circle (R=50, delta=90)
     # continuing tangentially off C1's own p1 (node 12), with no straight record line between them (a
     # compound curve's PC/PT-to-PC/PT join). C1 resolves first (via the line donor, as above, to az 45);
@@ -968,7 +1081,7 @@ def main():
     if n_radius_shared:
         print(f"loop17-D radius sharing: {n_radius_shared} curve edge(s) took their radius from a co-curved donor's own R")
 
-    n_curve_chords = complete_curve_chords(edges, adj, azimuth, load_radials())
+    n_curve_chords = complete_curve_chords(edges, adj, azimuth, load_radials(), ground)
     if n_curve_chords:
         print(f"loop16-E/F curve chord completion: {n_curve_chords} curve edge(s) took their chord direction from the record (CB, a tangent record line, or a radial bearing)")
 
