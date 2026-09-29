@@ -1,0 +1,288 @@
+{
+ "sheet": "r10434_1",
+ "n_anchors": 10,
+ "n_anchors_unplaced": 1,
+ "n_reconstructed_edges": 32,
+ "n_nodes": 48,
+ "closed": [
+  {
+   "start": "CO9",
+   "end": "CO11",
+   "status": "closed",
+   "misclosure_ft": 0.01,
+   "length_ft": 558.09,
+   "n_courses": 4,
+   "courses": [
+    {
+     "name": "S38°30'14\"E + 114.06'",
+     "kind": "line",
+     "ft": 114.06,
+     "misfit_ft": 0.04
+    },
+    {
+     "name": "S54°13'49\"E + 63.64'",
+     "kind": "line",
+     "ft": 63.64,
+     "misfit_ft": 0.12
+    },
+    {
+     "name": "322.30'",
+     "kind": "line",
+     "ft": 322.3,
+     "misfit_ft": 0.08
+    },
+    {
+     "name": "S37°28'25\"E + 58.09'",
+     "kind": "line",
+     "ft": 58.09,
+     "misfit_ft": 0.08
+    }
+   ],
+   "worst_course": "S54°13'49\"E + 63.64'",
+   "worst_misfit_ft": 0.12
+  }
+ ],
+ "failed": [],
+ "open": [
+  {
+   "start": "CO1",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 50.25,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "50.25' + N48°13'57\"W",
+     "kind": "line",
+     "ft": 50.25,
+     "misfit_ft": 0.13
+    }
+   ]
+  },
+  {
+   "start": "CO2",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 317.27,
+   "n_courses": 2,
+   "courses": [
+    {
+     "name": "L=121.66'",
+     "kind": "arc",
+     "ft": 121.62,
+     "misfit_ft": 0.07
+    },
+    {
+     "name": "L=196.08'",
+     "kind": "arc",
+     "ft": 195.65,
+     "misfit_ft": 0.09
+    }
+   ]
+  },
+  {
+   "start": "CO3",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 50.56,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "N73°19'48\"W + 50.56'",
+     "kind": "line",
+     "ft": 50.56,
+     "misfit_ft": 0.06
+    }
+   ]
+  },
+  {
+   "start": "CO3",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 80.97,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "N74°38'57\"W + 80.97'",
+     "kind": "line",
+     "ft": 80.97,
+     "misfit_ft": 0.04
+    }
+   ]
+  },
+  {
+   "start": "CO6",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 299.22,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "N6°58'39\"E + 299.22'",
+     "kind": "line",
+     "ft": 299.22,
+     "misfit_ft": 0.11
+    }
+   ]
+  },
+  {
+   "start": "CO6",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 176.81,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "N2°05'55\"E + 176.81'",
+     "kind": "line",
+     "ft": 176.81,
+     "misfit_ft": 0.06
+    }
+   ]
+  },
+  {
+   "start": "CO7",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 447.55,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "447.55'",
+     "kind": "line",
+     "ft": 447.55,
+     "misfit_ft": 0.06
+    }
+   ]
+  },
+  {
+   "start": "CO9",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 244.69,
+   "n_courses": 3,
+   "courses": [
+    {
+     "name": "S59°14'48\"E + 99.11'",
+     "kind": "line",
+     "ft": 99.11,
+     "misfit_ft": 0.1
+    },
+    {
+     "name": "L=132.85'",
+     "kind": "arc",
+     "ft": 132.34,
+     "misfit_ft": 0.28
+    },
+    {
+     "name": "L=13.71'",
+     "kind": "arc",
+     "ft": 13.24,
+     "misfit_ft": 0.15
+    }
+   ]
+  },
+  {
+   "start": "CO11",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 58.7,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "S46°58'51\"E + 58.70'",
+     "kind": "line",
+     "ft": 58.7,
+     "misfit_ft": 0.12
+    }
+   ]
+  },
+  {
+   "start": "CO12",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 26.47,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "S50°55'26\"W + 26.47'",
+     "kind": "line",
+     "ft": 26.47,
+     "misfit_ft": 0.12
+    }
+   ]
+  },
+  {
+   "start": "CO13",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 21.74,
+   "n_courses": 2,
+   "courses": [
+    {
+     "name": "L2",
+     "kind": "line",
+     "ft": 9.31,
+     "misfit_ft": 0.02
+    },
+    {
+     "name": "L1",
+     "kind": "line",
+     "ft": 12.43,
+     "misfit_ft": 0.1
+    }
+   ]
+  },
+  {
+   "start": "CO13",
+   "end": null,
+   "status": "open",
+   "reason": "ran out of record courses",
+   "misclosure_ft": null,
+   "length_ft": 31.38,
+   "n_courses": 3,
+   "courses": [
+    {
+     "name": "L3",
+     "kind": "line",
+     "ft": 10.05,
+     "misfit_ft": 0.08
+    },
+    {
+     "name": "L4",
+     "kind": "line",
+     "ft": 9.32,
+     "misfit_ft": 0.11
+    },
+    {
+     "name": "L5",
+     "kind": "line",
+     "ft": 12.01,
+     "misfit_ft": 0.1
+    }
+   ]
+  }
+ ]
+}

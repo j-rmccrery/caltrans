@@ -1,1 +1,1217 @@
-[]
+[
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "L_ft": 107.63,
+  "verdict": "refused (corridor gap 12.9' at 5-18')"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "L_ft": 474.71,
+  "verdict": "refused (corridor offset 14.9' at 10%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "L_ft": 1944.47,
+  "verdict": "refused (corridor offset 15.0' at 27%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "L_ft": 2052.95,
+  "verdict": "refused (corridor offset 14.9' at 36%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "L_ft": 1606.9,
+  "verdict": "refused (corridor offset 14.9' at 45%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "L_ft": 938.16,
+  "verdict": "refused (corridor offset 15.0' at 9%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "L_ft": 411.48,
+  "verdict": "refused (corridor offset 14.8' at 92%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "L_ft": 188.44,
+  "verdict": "refused (corridor offset 14.8' at 4%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO1",
+   "N": 2121593.45,
+   "E": 5991797.6,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991797.612588278,
+   "snapped_N": 2121593.465910259
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 1443.15,
+  "verdict": "refused (corridor offset 14.9' at 100%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "B": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "L_ft": 369.05,
+  "verdict": "refused (corridor offset 14.9' at 28%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "B": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "L_ft": 1845.23,
+  "verdict": "refused (corridor offset 14.9' at 2%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "B": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "L_ft": 1957.71,
+  "verdict": "refused (corridor offset 15.0' at 24%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "B": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "L_ft": 1505.65,
+  "verdict": "refused (corridor offset 15.0' at 37%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "B": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "L_ft": 834.08,
+  "verdict": "refused (corridor offset 15.0' at 83%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "B": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "L_ft": 322.46,
+  "verdict": "refused (corridor offset 14.9' at 5%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "B": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "L_ft": 256.29,
+  "verdict": "refused (corridor offset 15.0' at 11%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO2",
+   "N": 2121525.84,
+   "E": 5991881.35,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.027,
+   "snapped_E": 5991881.329006665,
+   "snapped_N": 2121525.8230235437
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 1340.19,
+  "verdict": "refused (corridor offset 14.9' at 3%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "B": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "L_ft": 1561.28,
+  "verdict": "refused (corridor offset 15.0' at 86%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "B": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "L_ft": 1696.3,
+  "verdict": "refused (corridor offset 14.9' at 97%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "B": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "L_ft": 1212.86,
+  "verdict": "refused (corridor offset 15.0' at 47%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "B": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "L_ft": 537.62,
+  "verdict": "refused (corridor offset 14.9' at 2%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "B": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "L_ft": 304.47,
+  "verdict": "refused (corridor offset 14.7' at 5%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "B": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "L_ft": 606.93,
+  "verdict": "refused (corridor offset 14.9' at 96%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO3",
+   "N": 2121361.45,
+   "E": 5992211.76,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.025,
+   "snapped_E": 5992211.77873213,
+   "snapped_N": 2121361.4336229465
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 1037.46,
+  "verdict": "refused (corridor offset 14.8' at 62%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "B": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "L_ft": 202.15,
+  "verdict": "refused (corridor offset 14.7' at 96%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "B": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "L_ft": 349.87,
+  "verdict": "refused (corridor offset 14.9' at 81%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "B": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "L_ft": 1024.93,
+  "verdict": "refused (corridor offset 15.0' at 27%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "B": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "L_ft": 1537.52,
+  "verdict": "refused (corridor offset 14.9' at 95%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "B": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "L_ft": 1970.22,
+  "verdict": "refused (corridor offset 14.9' at 1%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO6",
+   "N": 2119891.55,
+   "E": 5992738.07,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.007,
+   "snapped_E": 5992738.07686629,
+   "snapped_N": 2119891.550597244
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 529.56,
+  "verdict": "refused (corridor offset 14.9' at 93%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "B": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "L_ft": 511.06,
+  "verdict": "refused (corridor offset 14.9' at 38%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "B": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "L_ft": 1159.22,
+  "verdict": "refused (corridor offset 15.0' at 16%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "B": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "L_ft": 1642.03,
+  "verdict": "refused (corridor offset 15.0' at 79%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "B": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "L_ft": 2062.31,
+  "verdict": "refused (corridor offset 14.8' at 10%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO7",
+   "N": 2119718.45,
+   "E": 5992633.66,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.014,
+   "snapped_E": 5992633.660589545,
+   "snapped_N": 2119718.4363614195
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 689.57,
+  "verdict": "refused (corridor offset 14.9' at 39%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "B": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "L_ft": 678.22,
+  "verdict": "refused (corridor offset 15.0' at 5%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "B": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "L_ft": 1204.72,
+  "verdict": "refused (corridor offset 14.9' at 72%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "B": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "L_ft": 1644.05,
+  "verdict": "refused (corridor offset 14.9' at 52%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO8",
+   "N": 2120229.34,
+   "E": 5992646.91,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992646.9176140055,
+   "snapped_N": 2120229.3576606195
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 180.5,
+  "verdict": "refused (corridor offset 14.7' at 98%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "B": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "L_ft": 553.76,
+  "verdict": "refused (corridor offset 14.9' at 43%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "B": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "L_ft": 998.72,
+  "verdict": "refused (corridor offset 15.0' at 44%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO9",
+   "N": 2120846.02,
+   "E": 5992364.61,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.019,
+   "snapped_E": 5992364.592974811,
+   "snapped_N": 2120846.011292096
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 507.37,
+  "verdict": "refused (corridor offset 14.6' at 5%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "B": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "L_ft": 445.2,
+  "verdict": "refused (corridor offset 10.7' at 18%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO11",
+   "N": 2121210.24,
+   "E": 5991947.49,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.017,
+   "snapped_E": 5991947.473589957,
+   "snapped_N": 2121210.234589379
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 1047.22,
+  "verdict": "refused (corridor offset 14.8' at 12%)"
+ },
+ {
+  "sheet": "r10434_1",
+  "A": {
+   "id": "CO12",
+   "N": 2121517.37,
+   "E": 5991625.2,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.02,
+   "snapped_E": 5991625.212676387,
+   "snapped_N": 2121517.3849939476
+  },
+  "B": {
+   "id": "CO13",
+   "N": 2120407.89,
+   "E": 5992620.47,
+   "source": "callout",
+   "sheet": "r10434_1",
+   "control_used": true,
+   "snap_ft": 0.013,
+   "snapped_E": 5992620.465353507,
+   "snapped_N": 2120407.9019350945
+  },
+  "L_ft": 1490.47,
+  "verdict": "refused (corridor offset 14.9' at 18%)"
+ }
+]
