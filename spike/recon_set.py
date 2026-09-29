@@ -43,8 +43,12 @@ SHEETS = {  # short key -> out dir stem (mirrors bench.SHEETS / recon_ceiling.SH
 BASE_OUT = Path(__file__).parent / "out"
 
 
-def load_sheet_segments(short_key, stem):
-    p = BASE_OUT / stem / "recon_segments.json" if stem else BASE_OUT / "recon_segments.json"
+def load_sheet_segments(short_key, stem, no_inverse=False):
+    """no_inverse=True (loop18 leg 2): recon_segments_no_inverse.json when bench.py's recon.py
+    --no-inverse step wrote one for this sheet, else the plain file (a sheet inverse.py never touched
+    has no by-inverse rows to exclude in the first place -- same numbers either way)."""
+    base = BASE_OUT / stem if stem else BASE_OUT
+    p = base / "recon_segments_no_inverse.json" if no_inverse and (base / "recon_segments_no_inverse.json").exists() else base / "recon_segments.json"
     if not p.exists():
         raise SystemExit(f"missing {p} -- run the bench (--parcels --traverse, which runs recon.py) for {short_key} first")
     d = json.loads(p.read_text(encoding="utf-8"))
@@ -72,10 +76,10 @@ def old_headline():
             "dim_denom_ft": round(dim_denom, 1), "dim_covered_ft": round(dim_covered, 1)}, per_sheet
 
 
-def pool_all_sheets():
+def pool_all_sheets(no_inverse=False):
     P_all, Q_all, len_all, cov_all, dim_all, sheet_all = [], [], [], [], [], []
     for short_key, stem in SHEETS.items():
-        P, Q, seg_len, cov, dim = load_sheet_segments(short_key, stem)
+        P, Q, seg_len, cov, dim = load_sheet_segments(short_key, stem, no_inverse=no_inverse)
         if len(P) == 0:
             continue
         P_all.append(P); Q_all.append(Q); len_all.append(seg_len); cov_all.append(cov); dim_all.append(dim)
@@ -105,6 +109,16 @@ def run():
     new_dim_denom = float(seg_len2[dim2].sum())
     new_dim_covered = float(seg_len2[cov2 & dim2].sum())
 
+    # loop18 leg 2: the same set pooling, over recon_segments_no_inverse.json -- the headline with every
+    # "by inverse ..." traverse row excluded (identical to new_set on a run where none was ever accepted).
+    P0, Q0, mid0, seg_len0, seg_az0, cov0, dim0, sheet0 = pool_all_sheets(no_inverse=True)
+    P02, Q02, mid02, seg_len02, seg_az02, (cov02, dim02) = dedupe_segments(
+        P0, Q0, mid0, seg_len0, seg_az0, DUP_TOL_FT_SET, PARALLEL_TOL_DEG, [cov0, dim0])
+    no_inv_drawn = float(seg_len02.sum())
+    no_inv_covered = float(seg_len02[cov02].sum())
+    no_inv_dim_denom = float(seg_len02[dim02].sum())
+    no_inv_dim_covered = float(seg_len02[cov02 & dim02].sum())
+
     result = {
         "dup_tol_ft": DUP_TOL_FT_SET,
         "old_sum_of_per_sheet": old,
@@ -112,6 +126,13 @@ def run():
             "drawn_ft": round(new_drawn, 1), "covered_ft": round(new_covered, 1),
             "dim_denom_ft": round(new_dim_denom, 1), "dim_covered_ft": round(new_dim_covered, 1),
         },
+        "new_set_no_inverse": {
+            "drawn_ft": round(no_inv_drawn, 1), "covered_ft": round(no_inv_covered, 1),
+            "dim_denom_ft": round(no_inv_dim_denom, 1), "dim_covered_ft": round(no_inv_dim_covered, 1),
+            "recon_all_pct": round(100 * no_inv_covered / no_inv_drawn, 2) if no_inv_drawn else 0,
+            "recon_dim_pct": round(100 * no_inv_dim_covered / no_inv_dim_denom, 2) if no_inv_dim_denom else 0,
+        },
+        "inverse_gain_ft": round(new_covered - no_inv_covered, 1),
         "overlap_ft_removed": {
             "drawn_ft": round(old["drawn_ft"] - new_drawn, 1),
             "covered_ft": round(old["covered_ft"] - new_covered, 1),
@@ -134,6 +155,9 @@ def run():
     print(f"NEW (set, deduped):     recon_all {new_covered:,.0f}/{new_drawn:,.0f} ft "
           f"({result['recon_all_set_pct']:.1f}%) | recon_dim {new_dim_covered:,.0f}/{new_dim_denom:,.0f} ft "
           f"({result['recon_dim_set_pct']:.1f}%)")
+    print(f"NEW without inverse:    recon_all {no_inv_covered:,.0f}/{no_inv_drawn:,.0f} ft "
+          f"({result['new_set_no_inverse']['recon_all_pct']:.1f}%) | recon_dim {no_inv_dim_covered:,.0f}/{no_inv_dim_denom:,.0f} ft "
+          f"({result['new_set_no_inverse']['recon_dim_pct']:.1f}%) | inverse gain {result['inverse_gain_ft']:,.1f} ft")
     print(f"overlap removed: drawn {result['overlap_ft_removed']['drawn_ft']:,.0f} ft | "
           f"covered {result['overlap_ft_removed']['covered_ft']:,.0f} ft | "
           f"dim_denom {result['overlap_ft_removed']['dim_denom_ft']:,.0f} ft | "

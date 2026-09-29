@@ -47,7 +47,7 @@ SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0, "chord distance": 
 TAGS_COLS = ["tags_assoc", "tags_pass", "tags_fail", "tags_queued"]
 PARCELS_COLS = ["faces", "faces_named"]
 TRAVERSE_COLS = ["chains", "closed"]
-RECON_COLS = ["recon_all", "recon_dim", "recon_parcels"]
+RECON_COLS = ["recon_all", "recon_dim", "recon_parcels", "recon_inverse_ft"]
 TABLES_COLS = ["table_rows", "rows_clean"]
 READ_COLS = ["frame", "blocks_read", "bearings_parsed", "distances_parsed"]
 # coverage: distance+bearing passes over every parsed distance/bearing token (a rate over checked values alone
@@ -154,18 +154,28 @@ def traverse_cols(pdf):
 
 
 def recon_cols(pdf):
-    """recon.py: run only after --parcels and --traverse have both written their outputs (loop16 leg A)."""
+    """recon.py: run only after --parcels and --traverse have both written their outputs (loop16 leg A).
+    Also runs recon.py --no-inverse (loop18 leg 2): recon_inverse_ft is the ft recon_all_covered_ft
+    gains from "by inverse ..." traverse rows alone (0 on a sheet inverse.py never touched)."""
     ok, err = run_step("recon.py", pdf)
     if not ok:
         print(f"recon.py failed: {err}")
         return {k: "err" for k in RECON_COLS}
+    ok2, err2 = run_step("recon.py", pdf, args=["--no-inverse"])
+    if not ok2:
+        print(f"recon.py --no-inverse failed: {err2}")
     o = out_dir(pdf)
     try:
         r = json.loads((o / "recon.json").read_text(encoding="utf-8"))
+        inverse_ft = ""
+        if ok2 and (o / "recon_no_inverse.json").exists():
+            r0 = json.loads((o / "recon_no_inverse.json").read_text(encoding="utf-8"))
+            inverse_ft = round(r["recon_all_covered_ft"] - r0["recon_all_covered_ft"], 1)
         return {
             "recon_all": f"{int(r['recon_all_covered_ft'])}/{int(r['recon_all_denom_ft'])}",
             "recon_dim": f"{int(r['recon_dim_covered_ft'])}/{int(r['recon_dim_denom_ft'])}",
             "recon_parcels": f"{r['parcels_all']['n']}/{r['parcels_all']['of']}|{r['parcels_dim']['n']}/{r['parcels_dim']['of']}",
+            "recon_inverse_ft": inverse_ft,
         }
     except Exception as e:
         print(f"recon read failed: {type(e).__name__} {e}")

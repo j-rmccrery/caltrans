@@ -12,6 +12,15 @@
   "dim_denom_ft": 47477.6,
   "dim_covered_ft": 24868.6
  },
+ "new_set_no_inverse": {
+  "drawn_ft": 63336.9,
+  "covered_ft": 25361.6,
+  "dim_denom_ft": 47477.6,
+  "dim_covered_ft": 24868.6,
+  "recon_all_pct": 40.04,
+  "recon_dim_pct": 52.38
+ },
+ "inverse_gain_ft": 0.0,
  "overlap_ft_removed": {
   "drawn_ft": 6457.3,
   "covered_ft": 3161.2,

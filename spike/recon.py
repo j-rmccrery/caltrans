@@ -109,6 +109,8 @@ Definitions (loop16 leg A, retry):
   this count either (they are not parcel candidates).
 
 usage: [SHEET=<pdf>] python spike/recon.py   (after parcels.py and traverse.py)
+       python spike/recon.py --no-inverse    (loop18 leg 2: recon_no_inverse.json/recon_segments_no_
+                                               inverse.json, excluding any "by inverse ..." traverse row)
        python spike/recon.py --selftest
 """
 import json
@@ -739,19 +741,23 @@ def load_faces(gj):
     return faces
 
 
-def load_rec_edges(trav):
+def load_rec_edges(trav, exclude_inverse=False):
     """A clean traverse.json row (flags==[], misfit<=0.5) as a reconstructed edge. kind=="line" as
     before; kind=="arc" now qualifies too (loop16 leg E: once traverse.py's own chord-direction
     completion clears "chord direction from drawing", an arc row can be flag-free the same as a
     line). An arc entry additionally carries its own full drawn "pts" polyline (ground ft, the curve
     itself) -- see rec_segments(), which is what actually follows it for coverage; "p"/"q"/"az"/"ft"
-    here stay the row's own CHORD endpoints/direction/length, used by face_closure()'s record walk."""
+    here stay the row's own CHORD endpoints/direction/length, used by face_closure()'s record walk.
+    exclude_inverse=True (loop18 leg 2) drops a row inverse.py added ("source": "by inverse ...") --
+    the "without inverse" comparison recon_set.py and bench's recon_inverse_ft column both want."""
     rec = []
     n_rows = 0
     for chain in trav:
         for row in chain["edges"]:
             n_rows += 1
             if row["kind"] not in ("line", "arc") or row["flags"] or row["misfit_ft"] > 0.5:
+                continue
+            if exclude_inverse and str(row.get("source", "")).startswith("by inverse"):
                 continue
             pts = row.get("pts")
             if not pts or len(pts) < 2:
@@ -800,7 +806,7 @@ def densest_cluster_center(rec_edges):
     return (pts * w[:, None]).sum(0) / w.sum()
 
 
-def run(sheet_name, return_internals=False):
+def run(sheet_name, return_internals=False, exclude_inverse=False, make_figures=True, suffix=""):
     page = pymupdf.open(PDF)[0]
     g = json.loads((OUT / "georef.json").read_text())
     ground = ground_of(g["params"])
@@ -852,7 +858,7 @@ def run(sheet_name, return_internals=False):
     named_Q = np.vstack([r[1:] for r in named_rings]) if named_rings else np.zeros((0, 2))
 
     trav = json.loads((OUT / "traverse.json").read_text())
-    rec_edges, n_rows = load_rec_edges(trav)
+    rec_edges, n_rows = load_rec_edges(trav, exclude_inverse=exclude_inverse)
     rec_P, rec_Q, rec_az, rec_parent = rec_segments(rec_edges)
     rec_lines_union = unary_union([LineString([p, q]) for p, q in zip(rec_P, rec_Q)]) if len(rec_P) else None
 
@@ -1095,7 +1101,7 @@ def run(sheet_name, return_internals=False):
         "edges": [{"name": e["name"], "az": round(e["az"], 4), "ft": e["ft"], "misfit_ft": e["misfit_ft"]} for e in rec_edges],
     }
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "recon.json").write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding="utf-8")
+    (OUT / f"recon{suffix}.json").write_text(json.dumps(result, indent=1, ensure_ascii=False), encoding="utf-8")
 
     Pf, Qf = P[remaining], Q[remaining]
     cov_final = cov_mask_full[remaining]
@@ -1111,13 +1117,14 @@ def run(sheet_name, return_internals=False):
         "seg_len_ft": seg_len[remaining].round(2).tolist(),
         "covered": cov_final.tolist(), "dimensioned": dim_final.tolist(),
     }
-    (OUT / "recon_segments.json").write_text(json.dumps(seg_out, ensure_ascii=False), encoding="utf-8")
+    (OUT / f"recon_segments{suffix}.json").write_text(json.dumps(seg_out, ensure_ascii=False), encoding="utf-8")
 
-    make_figure(sheet_name, page, inv, Pf, Qf, cov_final, dim_final, buffer_ft)
-    center = densest_cluster_center(rec_edges)
-    if center is not None:
-        center_pt = inv(center)[0]
-        make_zoom_figure(sheet_name, page, inv, Pf, Qf, cov_final, dim_final, center_pt)
+    if make_figures:
+        make_figure(sheet_name, page, inv, Pf, Qf, cov_final, dim_final, buffer_ft)
+        center = densest_cluster_center(rec_edges)
+        if center is not None:
+            center_pt = inv(center)[0]
+            make_zoom_figure(sheet_name, page, inv, Pf, Qf, cov_final, dim_final, center_pt)
 
     pct_all = 100 * covered_ft / drawn_ft if drawn_ft else 0
     pct_dim = 100 * dim_covered_ft / dim_ft if dim_ft else 0
@@ -1372,7 +1379,12 @@ def main():
         selftest()
         return
     sheet_name = "presidio" if PDF == DEFAULT else PDF.stem
-    run(sheet_name)
+    if "--no-inverse" in sys.argv:
+        # loop18 leg 2: the "without inverse" comparison, to a separate file pair -- never touches the
+        # normal recon.json/recon_segments.json/figures a plain run writes.
+        run(sheet_name, exclude_inverse=True, make_figures=False, suffix="_no_inverse")
+    else:
+        run(sheet_name)
 
 
 if __name__ == "__main__":

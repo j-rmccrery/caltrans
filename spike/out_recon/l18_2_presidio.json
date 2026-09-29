@@ -1,0 +1,29 @@
+[
+ {
+  "sheet": "presidio",
+  "A": {
+   "id": "T-6",
+   "N": 2120378.27,
+   "E": 5993999.17,
+   "source": "table",
+   "sheet": "presidio",
+   "control_used": null,
+   "snap_ft": 0.068
+  },
+  "B": {
+   "id": "T-7",
+   "N": 2120468.4,
+   "E": 5994023.77,
+   "source": "table",
+   "sheet": "presidio",
+   "control_used": null,
+   "snap_ft": 0.056
+  },
+  "L_ft": 93.43,
+  "az_deg": 15.2664,
+  "covered_frac": 0.978,
+  "n_segments": 92,
+  "boundary_ft": 90.6,
+  "verdict": "skipped (already covered)"
+ }
+]

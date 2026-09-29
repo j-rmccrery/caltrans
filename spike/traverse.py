@@ -32,7 +32,7 @@ import pymupdf
 from scipy.spatial import cKDTree
 
 sys.path.insert(0, str(Path(__file__).parent))
-from georef import OUT, PDF, READS, real_text_blocks  # noqa: E402
+from georef import OUT, PDF, READS, DEFAULT, real_text_blocks  # noqa: E402
 
 NODE = 3.0  # pt: two edge ends this close meet
 SAME = 1.5  # pt: a bearing's line and a distance's line this close are one line
@@ -1061,6 +1061,18 @@ def main():
         out.append(rec)
     out.sort(key=lambda r: (-r["closed"], -r["n_edges"]))
     (OUT / "traverse.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
+
+    # loop18 leg 2: inverse courses between two printed record coordinates -- only for the reviewer-
+    # evidence sheets (spike/inverse.py's SHEET_NAMES); every other sheet's traverse.json is untouched,
+    # byte-identical to loop18-1. Runs after the baseline write above: it bootstraps recon.py (needs
+    # traverse.json on disk already) for the contamination-removed boundary the corridor test needs.
+    sheet_name = "presidio" if PDF == DEFAULT else PDF.stem
+    import inverse
+    new_chains = inverse.add_inverse_chains(sheet_name)
+    if new_chains:
+        out += new_chains
+        out.sort(key=lambda r: (-r["closed"], -r["n_edges"]))
+        (OUT / "traverse.json").write_text(json.dumps(out, indent=1, ensure_ascii=False), encoding="utf-8")
 
     closed = [r for r in out if r["closed"]]
     long_ = [r for r in out if r["n_edges"] >= 2]
