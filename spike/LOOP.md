@@ -464,3 +464,41 @@ Parked: record-first traverse (docs/tickets/T-001-record-first-traverse.md).
 Leg E result (118aa83): draw order and grouping do not link labels to lines; a label-placement score never beat nearest-line.
 Leg F dropped (JR, 2026-09-28): its two workable pieces already exist (NOT_LINEWORK layer filter, loop 2: no gain; rotation
 prefilter, loop 15). Replaced by M (ceiling, running) then G: curve chord directions (21.5 % of lost ft).
+
+## Loop 17 close-out (2026-09-28 ~18:45)
+
+| leg | result | commit |
+|---|---|---|
+| A | traverse misfit was cumulative (one bad edge failed every clean edge after it): now per edge, 19 rows clean; face_closure counted a course split by a stray vertex twice (61806-9 162 -> 0.20 ft). 29.5 -> 31.8 % | 2c413b6 |
+| B | wrong_line_likely catches undershoot; queued tags no longer reach traverse; <= 10 ft out-and-back kinks bridged between pieces of one record course. First parcel reconstructed: Presidio 61806-9. Two gold "real" fails (359.00', L39) now queued as tick-cut fragments | 6f67c17 |
+| C | PP-OCRv5 boxes lose to RapidOCR on R-10741 (keyed 14: 6 vs 14); no change. Bearings were read all along | 9492c67 |
+| D | OCR bearing symbols canonicalised (lower-case compass, ' * " for degree); compound-curve R shared; first curves from record (Presidio R=232.04'). 31.8 -> 37.0 % | 72ea6ff |
+| E | PDF draw order / grouping / placement rule do not link labels to lines (probe) | 118aa83 |
+| F | dropped (JR): its workable parts already exist | - |
+| M | ceiling: honest ceiling 70.2 % of the boundary the set dimensions; (a) unread-but-printed 3,739 ft is an upper bound | b9d5f52 |
+| G | curve-to-curve tangent chaining; census of 75 undirected arcs; nothing completes | b619930 |
+| H | curve_blocks pass discarded R for labels placed by an earlier pass: 27 arcs gain R, 8 more curves clean. 37.0 -> 38.1 % | 6aae037 |
+
+Final bench row `loop17-final` (= loop17-H):
+
+| sheet | recon_all (ft) | recon_dim (ft) | parcels |
+|---|---|---|---|
+| Presidio | 4,061 / 11,197 (36.3 %) | 4,049 / 10,653 | 1/61 |
+| R-10434.1 | 2,277 / 10,186 (22.4 %) | 2,205 / 8,591 | 0/52 |
+| R-10434.3 | 4,062 / 17,075 (23.8 %) | 3,654 / 13,250 | 0/96 |
+| R-10741.1 | 5,299 / 10,448 (50.7 %) | 5,299 / 6,281 | 0/5 |
+| R-10741.2 | 6,653 / 12,416 (53.6 %) | 6,653 / 8,771 | 0/6 |
+| R-10741.3 | 5,013 / 10,425 (48.1 %) | 4,605 / 6,501 | 0/4 |
+| all six | 27,365 / 71,747 (38.1 %) | 26,465 / 54,047 (49.0 %) | 1/224 |
+
+Against loop16-final: recon_all 29.5 -> 38.1 %, recon_dim 38.9 -> 49.0 %, parcels 0 -> 1. Check columns: wrong_line
+7->5, 8->7, 14->12; R-10741 bearings 13->18, 18->20, 13->20 all pass; label coverage R-10741 27->32/39, 38->40/58,
+30->37/48; gold wrong-pass 0 everywhere. `demo.py --fast` 136 s (caches not cleared).
+
+Dispatches: 8 of 10, all sonnet. Nothing stashed. Parked: docs/tickets/T-001 (record-first traverse). JR declined a
+records request for native DGN/DWG.
+
+Lessons: subagents' background benches die at hand-back (leg B): benches run in the foreground. Two "OCR" problems
+were text canonicalisation and a discarded value, not reading: check what the reader returned before replacing it.
+Check a subagent's diagnosis against the gold notes (leg A called 359.00' a wrong association; gold says right line, the
+drawn piece is a tick-cut fragment).

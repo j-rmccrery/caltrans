@@ -3,30 +3,31 @@
 Branch `caltrans-spike` on `gitlab.com/jrmccrery/dredge-code` (orphan branch; never merge into `main`).
 Plan: `ROADMAP.md`. Layers for the screen: `spike/out/QGIS_LAYERS.md`. Run everything: `python spike/demo.py --fast`.
 
-## Resume here (2026-09-28 14:30): loop 16 closed
+## Resume here (2026-09-28 18:45): loop 17 closed
 
 **Accuracy = how much of the survey is reconstructable from the record** (JR, 2026-09-27; `spike/recon.py`, bench
-columns recon_all / recon_dim / recon_parcels). Six bench sheets, bench row `loop16-final`: **29.5 % of drawn boundary
-(20,876 / 70,661 ft), 38.9 % of the dimensioned boundary (20,667 / 53,096 ft); whole parcels 0 of 224.** Per sheet:
-Presidio 27.4 %, R-10434.1 17.6, .3 16.5, R-10741.1 41.4, .2 46.6, .3 32.1. Pass precision, fail quality and label
-coverage are supporting measures. Earlier hand figures (10.5 %, 0/359) used a different denominator; don't compare.
+columns recon_all / recon_dim / recon_parcels). Six bench sheets, bench row `loop17-final`: **38.1 % of drawn boundary
+(27,365 / 71,747 ft), 49.0 % of the dimensioned boundary (26,465 / 54,047 ft); whole parcels 1 of 224** (Presidio
+61806-9). Per sheet: Presidio 36.3 %, R-10434.1 22.4, .3 23.8, R-10741.1 50.7, .2 53.6, .3 48.1. Loop 16 ended at
+29.5 % / 38.9 % / 0.
 
-Lost feet by cause (`spike/out_recon/attribution.md`): record never reaches the line 48 % (unlabelled 35 %), curves
-19.3 %, distance-only rows 13.8 %, bearing-only rows 12.4 %, misfit 6.2 %.
+**Ceiling** (`spike/out_recon/ceiling_report.md`, leg M): of the boundary no traverse row reaches, much is only
+referenced (SEE R-, PER DEED) or dimensioned nowhere in this set. Against the boundary this record dimensions somewhere
+in the set, the honest ceiling is ~70 %; reachable by reading/association alone ~55 % of recon_dim (upper bound).
 
-Loop 16 commits: c79f686 (metric), a075fad (dedupe + attribution), 2e8b7b0 (collinear bearing inheritance), 3417768
-(curve chord from record; zero curves qualify), f366d65 (radials, inline R/delta, chord-length fix). Details and
-lessons: `spike/LOOP.md` loop 16.
+Lost feet by cause: `spike/out_recon/attribution.md`. Loop 17 detail and lessons: `spike/LOOP.md` loop 17.
 
-Next, ranked by lost feet:
-1. Curves (19.3 %): machinery is in; blockers are data. R-10741.1's "R=1169.90'" is read but bound only to the adjacent compound-curve piece (loop 17 leg C; an earlier "R=189.90'" note was an orchestrator misread); Presidio
-   curves meet their adjoining record lines 12-89 deg off tangent at busy vertices (confirmed on crops), so a chord
-   direction needs a radial or CB there.
-2. Bearing-only rows (12.4 %): a coordinate/alignment table value reader (point id -> N/E) would give distances from
-   record coordinates; none exists (`TABLES` in georef.py is hand-keyed for Presidio only).
-3. Unlabelled lines (35 %): measure how much is boundary the record never dimensions (ceiling) before building.
-4. Open checks: R-10741.1 arc fail "L=319.73'" -4.52 ft (leg F, unverified, possibly wrong part of a compound curve);
-   residual Presidio leader legs in the denominator (~700 ft attributed); face_pieces() skips contamination removal.
+Next, ranked by lost feet (JR: no records request for native CAD; work from the PDFs):
+1. Unread-but-printed values near unreached boundary (leg M class (a), <= 3,739 ft; top examples in ceiling_report.md,
+   e.g. Presidio N74°18'38"W beside the DK-046825 callout, R-10741.3 N51°26'23"E with an OCR noise prefix).
+2. Curves still without a direction: no line or radial at either node; 4 bare-distance arcs never reach curve_blocks
+   (471 ft); R-10434.1 L=16.95' wrong-L pick in a joined block.
+3. Bearing-only rows (distance from drawing): a coordinate-table value reader (none exists).
+4. Matchline neighbours (leg M class (b), 439 ft): walk a course across the matchline.
+5. Scan path (from 2026-09-27, not started): alphabet reader + VLM vote on read_v5.json boxes; 8 keyed R-65.2 misreads.
+6. Parked: record-first traverse (docs/tickets/T-001-record-first-traverse.md).
+Open: "SAM" note (2026-09-25) still unexplained; R-10741.1 S10°30'18"E 371.76' vs drawn 364.61 ft is a genuine
+record/drawing disagreement.
 
 ## Loop 15 (2026-09-27): a fail needs proof, a no-line cause found, a third gold set
 
