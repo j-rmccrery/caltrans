@@ -460,3 +460,7 @@ legs that run the bench go one at a time. Budget 10 dispatches.
 | F | inverse label-style placement: find a label's line by the drafter's label rules, calibrated on gold-confirmed passes only | (association) | gold wrong-pass 0; every new pass crop viewed |
 
 Parked: record-first traverse (docs/tickets/T-001-record-first-traverse.md).
+
+Leg E result (118aa83): draw order and grouping do not link labels to lines; a label-placement score never beat nearest-line.
+Leg F dropped (JR, 2026-09-28): its two workable pieces already exist (NOT_LINEWORK layer filter, loop 2: no gain; rotation
+prefilter, loop 15). Replaced by M (ceiling, running) then G: curve chord directions (21.5 % of lost ft).

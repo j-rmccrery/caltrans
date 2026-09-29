@@ -205,13 +205,26 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
          proximity, so an unrelated nearby chord label can never attach to the wrong curve): the
          record value itself, ambiguous by 180 deg exactly like any other bearing -- resolved by
          drawn chord, same rule as every other source below.
-      2. tangent - a record line edge (its own printed bearing, or a loop16-D inherited one) meeting
-         the curve tangentially at a shared node: arc_end_tangent_az() there, compared against the
-         line's own resolved record direction continuing THROUGH the node into the curve, within
-         TANGENT_TOL_DEG of true tangency. Two or more candidate donors at one end that disagree once
-         resolved are left alone (ambiguous -- the "(T)" trap STATE.md flagged: an alignment tangent
-         and the R/W line running collinear with it are different record courses that happen to share
-         a drawn point, and averaging them would be a guess, not a record value), same pattern
+      2. tangent - a record line edge (its own printed bearing, or a loop16-D inherited one), OR
+         (loop17 leg G) another curve edge THIS SAME FUNCTION has already resolved a chord az for --
+         meeting the curve tangentially at a shared node: arc_end_tangent_az() there, compared against
+         the donor's own resolved record direction continuing THROUGH the node into the curve, within
+         TANGENT_TOL_DEG of true tangency. For a curve donor, its own record tangent AT that end is not
+         stored directly (only its chord az is) but is recovered the same way this function derives any
+         curve's chord from a tangent -- inverted: of the donor's own two record-consistent tangent
+         candidates (donor_az +/- donor_delta/2), the one nearer the donor's own drawn tangent there
+         (arc_end_tangent_az on the donor, same discipline as _pick_by_drawn_chord) is its record
+         tangent "into" the donor at that end; the direction "away" from the donor (continuing through
+         the shared node) is that +/- 180 -- exactly the role a line donor's own record_tangent_az
+         plays below, so a line donor and a curve donor land in the same `seen` dict and disagree (or
+         agree) by the same rule. A compound/reverse curve chain (one curve's PC/PT meets the next's,
+         no straight line between them) resolves this way, hop by hop, over complete_curve_chords'
+         own fixed-point loop (main() calls it once already-filled edges are re-scanned by the caller's
+         iteration -- see the while loop below) -- same fixed-point pattern inherit_bearings() uses for
+         a run of collinear distance-only pieces. Two or more candidate donors at one end that disagree
+         once resolved are left alone (ambiguous -- the "(T)" trap STATE.md flagged: an alignment
+         tangent and the R/W line running collinear with it are different record courses that happen to
+         share a drawn point, and averaging them would be a guess, not a record value), same pattern
          inherit_bearings() already uses for a disagreeing straight-line neighbour. Tried at both ends
          independently; if both ends yield a candidate and they disagree beyond TANGENT_TOL_DEG (past
          where sampling noise alone would explain it), the curve is left alone too -- two ends of one
@@ -220,14 +233,14 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
          direction into the curve) +/- delta/2; sign picked against the curve's OWN drawn chord
          (_pick_by_drawn_chord) -- the drawing decides only WHICH of the two record-consistent values
          applies, same rule leg D's own docstring states for straight-line inheritance.
-      3. radial - loop16 leg F. Tried at an end only once the tangent-LINE search above found no
-         record line meeting it (an empty `seen`, never an ambiguous one -- an end where two record
-         lines already disagree stays refused, radial or not; the line evidence takes priority when
-         it exists at all). `radials` is checks.py's radials.json (a printed "(R)" bearing -- real
-         record data with no drawn line of its own to check, see checks.py's "bearing (R)" branch),
-         pre-filtered to this end's own node point within NODE pt (a radial and the curve it names
-         share a drawn point, same coincidence test build_edges' own node-clustering already uses).
-         A radial bearing gives the RADIAL line's own direction, ambiguous by 180 deg like any
+      3. radial - loop16 leg F. Tried at an end only once the tangent search above (line OR curve
+         donor) found no record edge meeting it (an empty `seen`, never an ambiguous one -- an end
+         where two record edges already disagree stays refused, radial or not; the line/curve evidence
+         takes priority when it exists at all). `radials` is checks.py's radials.json (a printed "(R)"
+         bearing -- real record data with no drawn line of its own to check, see checks.py's "bearing
+         (R)" branch), pre-filtered to this end's own node point within NODE pt (a radial and the curve
+         it names share a drawn point, same coincidence test build_edges' own node-clustering already
+         uses). A radial bearing gives the RADIAL line's own direction, ambiguous by 180 deg like any
          bearing -- rotate it +/-90 deg for the two candidate TANGENT directions at that point, and
          keep only the one within TANGENT_TOL_DEG of the curve's own drawn tangent there
          (arc_end_tangent_az) -- same tangency discipline as the line-donor source, never a guess:
@@ -235,11 +248,13 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
          end's radial, whatever label happened to be nearest. Two or more radials at one end that
          each pass but disagree are left alone (ambiguous), same as the line-donor source. Chord az
          from there is the same tangent +/- delta/2, drawn-chord-picked, as source 2.
-    Sets "az", "chord_source" (cites the source: "CB", "tangent to <donor edge's own src>", or
-    "radial <printed text>") and "chord_source_edge" (a reference to the donor -- the donor edge
-    object for CB/tangent, or a synthetic {p0, p1, region, src} dict for radial, shaped the same way
-    a crop script (legE_crops.py) already reads a donor) on a completed row; mutates edges in place.
-    Returns the count completed."""
+    Sets "az", "chord_source" (cites the source: "CB", "tangent to <donor edge's own src>" -- a line OR
+    an already-resolved curve, "radial <printed text>") and "chord_source_edge" (a reference to the
+    donor -- the donor edge object for CB/tangent (line or curve), or a synthetic {p0, p1, region, src}
+    dict for radial, shaped the same way a crop script (legE_crops.py) already reads a donor) on a
+    completed row; mutates edges in place. Returns the count completed FOR ONE PASS -- a curve-donor
+    chain longer than one hop needs this function called again (or looped to a fixed point by the
+    caller) once its first donor is itself resolved; main() does this (see the while loop there)."""
     filled = 0
     # CB: index chord-label line edges by their own node pair, once (not a per-curve adjacency scan --
     # a chord label shares BOTH the arc's nodes, not just one, so it is never found via adj[] alone).
@@ -248,106 +263,145 @@ def complete_curve_chords(edges, adj, azimuth, radials=()):
         if m["kind"] == "line" and m.get("chord_label") and "az" in m:
             by_node_pair.setdefault(frozenset((m["n0"], m["n1"])), []).append(m)
 
-    for e in edges:
-        if e["kind"] != "arc" or "az" in e or e.get("impossible") or "R" not in e:
-            continue
-        if "delta" in e:
-            delta = e["delta"]
-            # L = R*theta is a geometric identity for one real curve piece: a printed delta that
-            # disagrees with this SAME edge's own L/R-implied angle means build_edges' pass-2
-            # endpoint-proximity merge (a pre-existing, unrelated-to-this-leg step: two arc edges
-            # merge whenever their drawn endpoints sit within SAME pt, whatever their R/L/delta say)
-            # combined a table curve row with a DIFFERENT, merely nearby-ending arc record -- measured
-            # on r10434_3's "L=34.05' + C19": C19's own table row is R=65, L=93.18, delta=82.14 deg
-            # (its OWN L/R angle, 82.14 deg, agrees with its own delta, as it must); the edge this
-            # leg would place a chord on instead carries the SHORTER "L=34.05'" label's own drawn
-            # geometry with C19's R and delta grafted on by the merge -- L/R-implied 30.02 deg, 52 deg
-            # off the printed 82.14 deg. Neither L nor delta can be trusted alone once they disagree
-            # this much: refused, not guessed.
-            if "L" in e and abs(delta - math.degrees(e["L"] / e["R"])) > DELTA_CONSISTENCY_TOL_DEG:
+    # loop17 leg G: a curve-donor chain (compound/reverse curves meeting with no line between them,
+    # source 2 above) needs more than one pass -- the SECOND curve in a chain isn't a valid donor until
+    # the FIRST one has itself been filled, which may happen later in this same edges-list scan (or not
+    # at all until a later pass, if it was found via node j > this edge's own index). Looped to a fixed
+    # point exactly like inherit_bearings(): each pass can only ADD "az" to a previously-unresolved
+    # curve, never remove one, so this always terminates (bounded by the curve count) and never
+    # re-litigates an already-filled row (guarded by "az" in e below).
+    changed = True
+    while changed:
+        changed = False
+        for e in edges:
+            if e["kind"] != "arc" or "az" in e or e.get("impossible") or "R" not in e:
                 continue
-        elif "L" in e:
-            delta = math.degrees(e["L"] / e["R"])
-        else:
-            continue  # no delta/L: nothing to place a direction on (still flagged, unchanged)
-        drawn_chord_az = azimuth(e["p0"], e["p1"])
-
-        cb = by_node_pair.get(frozenset((e["n0"], e["n1"])))
-        if cb:
-            # stored raw (unresolved), exactly like any other record bearing -- walk() already resolves
-            # the +/-180 ambiguity per traversal direction; ..._pick_by_drawn_chord would be a no-op
-            # here anyway (the two candidates are exactly 180 apart, indistinguishable mod 180)
-            e["az"] = cb[0]["az"]
-            e["chord_source"] = "CB"
-            e["chord_source_edge"] = cb[0]  # direct reference, for a crop script (loop16-D's own pattern)
-            filled += 1
-            continue
-
-        end_candidates = {}  # end (0/1) -> resolved chord az, or None if no/ambiguous donor
-        end_donor = {}   # end -> donor object (a line edge, or a synthetic radial donor dict)
-        end_source = {}  # end -> the exact chord_source string to store
-        for end, node in ((0, e["n0"]), (1, e["n1"])):
-            arc_tangent_az = arc_end_tangent_az(e, end, azimuth)
-            if arc_tangent_az is None:
-                continue
-            seen = {}  # resolved record-tangent az (rounded) -> donor edge, collapses agreeing donors
-            for j in adj.get(node, []):
-                m = edges[j]
-                if m["kind"] != "line" or "az" not in m or m.get("impossible") or m.get("chord_label"):
+            if "delta" in e:
+                delta = e["delta"]
+                # L = R*theta is a geometric identity for one real curve piece: a printed delta that
+                # disagrees with this SAME edge's own L/R-implied angle means build_edges' pass-2
+                # endpoint-proximity merge (a pre-existing, unrelated-to-this-leg step: two arc edges
+                # merge whenever their drawn endpoints sit within SAME pt, whatever their R/L/delta say)
+                # combined a table curve row with a DIFFERENT, merely nearby-ending arc record -- measured
+                # on r10434_3's "L=34.05' + C19": C19's own table row is R=65, L=93.18, delta=82.14 deg
+                # (its OWN L/R angle, 82.14 deg, agrees with its own delta, as it must); the edge this
+                # leg would place a chord on instead carries the SHORTER "L=34.05'" label's own drawn
+                # geometry with C19's R and delta grafted on by the merge -- L/R-implied 30.02 deg, 52 deg
+                # off the printed 82.14 deg. Neither L nor delta can be trusted alone once they disagree
+                # this much: refused, not guessed.
+                if "L" in e and abs(delta - math.degrees(e["L"] / e["R"])) > DELTA_CONSISTENCY_TOL_DEG:
                     continue
-                other_end = m["p1"] if m["n0"] == node else m["p0"]
-                own_end = m["p0"] if m["n0"] == node else m["p1"]
-                line_leave_az = azimuth(own_end, other_end)  # departing the node, away from the curve
-                diff = abs((m["az"] - line_leave_az + 180) % 360 - 180)
-                # the record direction continuing THROUGH the node, into the curve -- opposite the
-                # line's own departure direction just resolved above
-                record_tangent_az = (((m["az"] if diff < 90 else (m["az"] + 180) % 360)) + 180) % 360
-                deflect = abs(180 - abs((line_leave_az - arc_tangent_az + 180) % 360 - 180))
-                if deflect <= TANGENT_TOL_DEG:
-                    seen.setdefault(round(record_tangent_az, 4), m)
-            if len(seen) == 1:
-                ((tangent_az, m),) = seen.items()
-                end_candidates[end] = _pick_by_drawn_chord([(tangent_az + delta / 2) % 360, (tangent_az - delta / 2) % 360], drawn_chord_az)
-                end_donor[end] = m
-                end_source[end] = f"tangent to {m['src']}"
-            elif not seen and radials:
-                # loop16 leg F: no record LINE meets this end tangentially -- try a printed radial
-                # bearing at this end instead. A radial line's own direction is ambiguous by 180 deg
-                # (like any bearing), so it gives two candidate TANGENT directions here (+/- 90 deg);
-                # only one sitting within TANGENT_TOL_DEG of the curve's own drawn tangent counts as
-                # "this radial, resolved" -- never both, and never a radial whose node point doesn't
-                # actually sit at this end.
-                node_pt = e["p0"] if end == 0 else e["p1"]
-                rseen = {}
-                for r in radials:
-                    if np.hypot(*(r["point"] - node_pt)) >= NODE:
-                        continue
-                    for cand_az in ((r["az"] + 90) % 360, (r["az"] - 90) % 360):
-                        # direct undirected difference -- unlike the line donor above, a rotated
-                        # radial candidate already names the "into the curve" tangent direction
-                        # itself (no separate "departing the node" direction to flip past), so it
-                        # should agree with arc_tangent_az near-exactly, not near a 180 deg reversal
-                        deflect = abs((cand_az - arc_tangent_az + 180) % 360 - 180)
-                        if deflect <= TANGENT_TOL_DEG:
-                            rseen.setdefault(round(cand_az, 4), r)
-                if len(rseen) == 1:
-                    ((tangent_az, r),) = rseen.items()
-                    end_candidates[end] = _pick_by_drawn_chord([(tangent_az + delta / 2) % 360, (tangent_az - delta / 2) % 360], drawn_chord_az)
-                    stub = node_pt + 30.0 * np.array([math.sin(math.radians(r["az"])), math.cos(math.radians(r["az"]))])
-                    end_donor[end] = {"p0": node_pt, "p1": stub, "region": r.get("region"), "src": r["printed"]}
-                    end_source[end] = f"radial {r['printed']}"
+            elif "L" in e:
+                delta = math.degrees(e["L"] / e["R"])
+            else:
+                continue  # no delta/L: nothing to place a direction on (still flagged, unchanged)
+            drawn_chord_az = azimuth(e["p0"], e["p1"])
 
-        if not end_candidates:
-            continue
-        if len(end_candidates) == 2:
-            a0, a1 = end_candidates[0], end_candidates[1]
-            if abs((a0 - a1 + 180) % 360 - 180) > TANGENT_TOL_DEG * 2:
-                continue  # both ends found a donor but they disagree: ambiguous, refuse (not guessed)
-        end, az = next(iter(end_candidates.items()))
-        e["az"] = az
-        e["chord_source"] = end_source[end]
-        e["chord_source_edge"] = end_donor[end]  # direct reference, for a crop script (loop16-D's own pattern)
-        filled += 1
+            cb = by_node_pair.get(frozenset((e["n0"], e["n1"])))
+            if cb:
+                # stored raw (unresolved), exactly like any other record bearing -- walk() already resolves
+                # the +/-180 ambiguity per traversal direction; ..._pick_by_drawn_chord would be a no-op
+                # here anyway (the two candidates are exactly 180 apart, indistinguishable mod 180)
+                e["az"] = cb[0]["az"]
+                e["chord_source"] = "CB"
+                e["chord_source_edge"] = cb[0]  # direct reference, for a crop script (loop16-D's own pattern)
+                filled += 1
+                changed = True
+                continue
+
+            end_candidates = {}  # end (0/1) -> resolved chord az, or None if no/ambiguous donor
+            end_donor = {}   # end -> donor object (a line edge, or a synthetic radial donor dict)
+            end_source = {}  # end -> the exact chord_source string to store
+            for end, node in ((0, e["n0"]), (1, e["n1"])):
+                arc_tangent_az = arc_end_tangent_az(e, end, azimuth)
+                if arc_tangent_az is None:
+                    continue
+                seen = {}  # resolved record-tangent az (rounded) -> donor edge, collapses agreeing donors
+                for j in adj.get(node, []):
+                    m = edges[j]
+                    if m is e or m.get("impossible") or m.get("chord_label"):
+                        continue
+                    if m["kind"] == "line":
+                        if "az" not in m:
+                            continue
+                        other_end = m["p1"] if m["n0"] == node else m["p0"]
+                        own_end = m["p0"] if m["n0"] == node else m["p1"]
+                        line_leave_az = azimuth(own_end, other_end)  # departing the node, away from the curve
+                        diff = abs((m["az"] - line_leave_az + 180) % 360 - 180)
+                        # the record direction continuing THROUGH the node, into the curve -- opposite the
+                        # line's own departure direction just resolved above
+                        record_tangent_az = (((m["az"] if diff < 90 else (m["az"] + 180) % 360)) + 180) % 360
+                        deflect = abs(180 - abs((line_leave_az - arc_tangent_az + 180) % 360 - 180))
+                    elif m["kind"] == "arc" and "az" in m and "R" in m:
+                        # loop17 leg G: another curve, already resolved by an earlier pass of this same
+                        # function (or an earlier source on THIS pass), meeting at the shared node -- see
+                        # this function's own docstring, source 2, for how a donor curve's record tangent
+                        # at its own shared end is recovered from its chord az +/- its own delta/2.
+                        m_end = 0 if m["n0"] == node else 1
+                        m_drawn_tangent = arc_end_tangent_az(m, m_end, azimuth)
+                        if m_drawn_tangent is None:
+                            continue
+                        if "delta" in m:
+                            m_delta = m["delta"]
+                        elif "L" in m:
+                            m_delta = math.degrees(m["L"] / m["R"])
+                        else:
+                            continue
+                        # m_drawn_tangent plays line_leave_az's role directly (both are DRAWN directions
+                        # pointing away from the shared node into the donor's own far side); the record
+                        # tangent into e is the reverse of the donor's own record tangent into ITSELF
+                        m_tangent_into = _pick_by_drawn_chord([(m["az"] + m_delta / 2) % 360, (m["az"] - m_delta / 2) % 360], m_drawn_tangent)
+                        line_leave_az = m_drawn_tangent
+                        record_tangent_az = (m_tangent_into + 180) % 360
+                        deflect = abs(180 - abs((line_leave_az - arc_tangent_az + 180) % 360 - 180))
+                    else:
+                        continue
+                    if deflect <= TANGENT_TOL_DEG:
+                        seen.setdefault(round(record_tangent_az, 4), m)
+                if len(seen) == 1:
+                    ((tangent_az, m),) = seen.items()
+                    end_candidates[end] = _pick_by_drawn_chord([(tangent_az + delta / 2) % 360, (tangent_az - delta / 2) % 360], drawn_chord_az)
+                    end_donor[end] = m
+                    end_source[end] = f"tangent to {m['src']}"
+                elif not seen and radials:
+                    # loop16 leg F: no record LINE meets this end tangentially -- try a printed radial
+                    # bearing at this end instead. A radial line's own direction is ambiguous by 180 deg
+                    # (like any bearing), so it gives two candidate TANGENT directions here (+/- 90 deg);
+                    # only one sitting within TANGENT_TOL_DEG of the curve's own drawn tangent counts as
+                    # "this radial, resolved" -- never both, and never a radial whose node point doesn't
+                    # actually sit at this end.
+                    node_pt = e["p0"] if end == 0 else e["p1"]
+                    rseen = {}
+                    for r in radials:
+                        if np.hypot(*(r["point"] - node_pt)) >= NODE:
+                            continue
+                        for cand_az in ((r["az"] + 90) % 360, (r["az"] - 90) % 360):
+                            # direct undirected difference -- unlike the line donor above, a rotated
+                            # radial candidate already names the "into the curve" tangent direction
+                            # itself (no separate "departing the node" direction to flip past), so it
+                            # should agree with arc_tangent_az near-exactly, not near a 180 deg reversal
+                            deflect = abs((cand_az - arc_tangent_az + 180) % 360 - 180)
+                            if deflect <= TANGENT_TOL_DEG:
+                                rseen.setdefault(round(cand_az, 4), r)
+                    if len(rseen) == 1:
+                        ((tangent_az, r),) = rseen.items()
+                        end_candidates[end] = _pick_by_drawn_chord([(tangent_az + delta / 2) % 360, (tangent_az - delta / 2) % 360], drawn_chord_az)
+                        stub = node_pt + 30.0 * np.array([math.sin(math.radians(r["az"])), math.cos(math.radians(r["az"]))])
+                        end_donor[end] = {"p0": node_pt, "p1": stub, "region": r.get("region"), "src": r["printed"]}
+                        end_source[end] = f"radial {r['printed']}"
+
+            if not end_candidates:
+                continue
+            if len(end_candidates) == 2:
+                a0, a1 = end_candidates[0], end_candidates[1]
+                if abs((a0 - a1 + 180) % 360 - 180) > TANGENT_TOL_DEG * 2:
+                    continue  # both ends found a donor but they disagree: ambiguous, refuse (not guessed)
+            end, az = next(iter(end_candidates.items()))
+            e["az"] = az
+            e["chord_source"] = end_source[end]
+            e["chord_source_edge"] = end_donor[end]  # direct reference, for a crop script (loop16-D's own pattern)
+            filled += 1
+            changed = True
     return filled
 
 
@@ -582,6 +636,27 @@ def selftest():
     print("traverse.selftest: complete_curve_chords OK (tangent chord az = tangent +/- delta/2 on a synthetic 90 deg curve; "
           "CB wins over tangent; disagreeing tangent donors refuse rather than guess; a radial fills the same way "
           "when no record line donates, and refuses when it doesn't match the drawn tangent)")
+
+    # loop17 leg G: curve-to-curve tangent chaining -- a second, smaller quarter circle (R=50, delta=90)
+    # continuing tangentially off C1's own p1 (node 12), with no straight record line between them (a
+    # compound curve's PC/PT-to-PC/PT join). C1 resolves first (via the line donor, as above, to az 45);
+    # C2 has NO line donor of its own anywhere -- it can only resolve once C1 has, by treating C1 as a
+    # tangent donor the same way a line is treated. One complete_curve_chords() call must fill both in
+    # one pass (the fixed-point while loop re-scanning C2 after C1 fills within the same call).
+    angle2 = np.radians(90.0 - 90.0 * t)
+    center2 = np.array([100.0, 50.0])
+    quarter2 = center2 + 50.0 * np.c_[np.cos(angle2), np.sin(angle2)]
+    assert np.hypot(*(quarter2[0] - quarter[-1])) < 1e-6, "C2 must start exactly where C1 ends (shared node 12)"
+    e_c2 = {"kind": "arc", "p0": quarter2[0].copy(), "p1": quarter2[-1].copy(), "pts": quarter2.copy(), "R": 50.0,
+            "delta": 90.0, "flags": [], "impossible": False, "n0": 12, "n1": 13, "src": "C2", "chord_label": False}
+    edges_chain, adj_chain = curve_edges(extra=[e_c2])
+    n_chain = complete_curve_chords(edges_chain, adj_chain, az_id)
+    assert n_chain == 2, f"expected both C1 and C2 filled in one call (fixed point), got {n_chain}"
+    assert abs(edges_chain[1]["az"] - 45.0) < 0.5, "C1's own result must be unchanged by C2's presence"
+    assert abs(edges_chain[2]["az"] - 315.0) < 0.5, f"C2 should chord az ~315 (tangent to C1's own resolved 45, its own delta 90), got {edges_chain[2].get('az')}"
+    assert edges_chain[2]["chord_source"] == "tangent to C1", edges_chain[2].get("chord_source")
+    print("traverse.selftest: complete_curve_chords curve-to-curve chaining OK (C2 has no line donor of its own; "
+          "resolves in the same call once C1 does, via the fixed-point loop)")
 
     # loop17 leg D: share_curve_radius -- a sub-piece of the SAME drawn circle (quarter's own first
     # half, t 0..0.5: still centred (100,0), R=100) printed with its own delta/L but no R must take R
