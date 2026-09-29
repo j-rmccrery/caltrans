@@ -47,7 +47,12 @@ SMALL = {"distance": 5.0, "arc length": 5.0, "bearing": 60.0, "chord distance": 
 TAGS_COLS = ["tags_assoc", "tags_pass", "tags_fail", "tags_queued"]
 PARCELS_COLS = ["faces", "faces_named"]
 TRAVERSE_COLS = ["chains", "closed"]
-RECON_COLS = ["recon_all", "recon_dim", "recon_parcels", "recon_inverse_ft"]
+RECON_COLS = ["recon_all", "recon_dim", "recon_parcels", "recon_inverse_ft", "recon_anchored"]
+OUT_RECON = ROOT / "spike" / "out_recon"
+ANCHORED_KEYS = {"presidio", "r10434_1", "r10434_3"}  # loop19 leg 1's own anchored.SHEET_PDF scope --
+                                                       # anchored.py has no anchors built for the other
+                                                       # sheets yet, so their own recon_anchored reads
+                                                       # 0/<recon_all_denom_ft>, not "err"
 TABLES_COLS = ["table_rows", "rows_clean"]
 READ_COLS = ["frame", "blocks_read", "bearings_parsed", "distances_parsed"]
 # coverage: distance+bearing passes over every parsed distance/bearing token (a rate over checked values alone
@@ -153,10 +158,13 @@ def traverse_cols(pdf):
         return {k: "err" for k in TRAVERSE_COLS}
 
 
-def recon_cols(pdf):
+def recon_cols(pdf, key):
     """recon.py: run only after --parcels and --traverse have both written their outputs (loop16 leg A).
     Also runs recon.py --no-inverse (loop18 leg 2): recon_inverse_ft is the ft recon_all_covered_ft
-    gains from "by inverse ..." traverse rows alone (0 on a sheet inverse.py never touched)."""
+    gains from "by inverse ..." traverse rows alone (0 on a sheet inverse.py never touched). loop19 leg
+    2: on a sheet anchored.py has anchors for (ANCHORED_KEYS), also runs anchored.py <key> -- it re-runs
+    recon.py internally (deterministic, same numbers) and patches recon_segments.json with the "anchored"
+    column recon_set.py's own set-level recon_anchored_set_pct needs."""
     ok, err = run_step("recon.py", pdf)
     if not ok:
         print(f"recon.py failed: {err}")
@@ -164,6 +172,20 @@ def recon_cols(pdf):
     ok2, err2 = run_step("recon.py", pdf, args=["--no-inverse"])
     if not ok2:
         print(f"recon.py --no-inverse failed: {err2}")
+    anchored_str = ""
+    if key in ANCHORED_KEYS:
+        ok3, err3 = run_step("anchored.py", pdf, args=[key])
+        if not ok3:
+            print(f"anchored.py failed: {err3}")
+            anchored_str = "err"
+        else:
+            try:
+                a = json.loads((OUT_RECON / f"anchored_{key}.json").read_text(encoding="utf-8"))
+                ra = a["recon_anchored"]
+                anchored_str = f"{int(ra['covered_ft'])}/{int(ra['denom_ft'])}"
+            except Exception as e:
+                print(f"anchored read failed: {type(e).__name__} {e}")
+                anchored_str = "err"
     o = out_dir(pdf)
     try:
         r = json.loads((o / "recon.json").read_text(encoding="utf-8"))
@@ -176,6 +198,7 @@ def recon_cols(pdf):
             "recon_dim": f"{int(r['recon_dim_covered_ft'])}/{int(r['recon_dim_denom_ft'])}",
             "recon_parcels": f"{r['parcels_all']['n']}/{r['parcels_all']['of']}|{r['parcels_dim']['n']}/{r['parcels_dim']['of']}",
             "recon_inverse_ft": inverse_ft,
+            "recon_anchored": anchored_str or f"0/{int(r['recon_all_denom_ft'])}",
         }
     except Exception as e:
         print(f"recon read failed: {type(e).__name__} {e}")
@@ -265,7 +288,7 @@ def run(key, steps):
     if "traverse" in steps:
         res.update(traverse_cols(pdf))
     if "parcels" in steps and "traverse" in steps:
-        res.update(recon_cols(pdf))
+        res.update(recon_cols(pdf, key))
     res.update(tables)
     try:
         passes = sum(int(str(res[k]).split("/")[0]) for k in ("distance", "bearing"))

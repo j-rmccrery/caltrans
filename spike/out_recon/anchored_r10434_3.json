@@ -384,5 +384,33 @@
     }
    ]
   }
- ]
+ ],
+ "branch_resolved": [],
+ "branch_ambiguous": [],
+ "recon_anchored": {
+  "covered_ft": 0.0,
+  "denom_ft": 17271.2,
+  "pct": 0.0
+ },
+ "solvable_by_closure_unchecked": [
+  {
+   "chain_start": "T-4",
+   "course": "N35°15'31\"W",
+   "missing": "distance",
+   "reaches": "T-3",
+   "computed_ft": 198.231,
+   "drawn_ft": 183.05,
+   "diff_ft": 15.181
+  },
+  {
+   "chain_start": "T-18",
+   "course": "S87°48'20\"E",
+   "missing": "distance",
+   "reaches": "T-16",
+   "computed_ft": 973.14,
+   "drawn_ft": 114.29,
+   "diff_ft": 858.85
+  }
+ ],
+ "anchored_parcels": []
 }

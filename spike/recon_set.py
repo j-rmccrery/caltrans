@@ -46,7 +46,12 @@ BASE_OUT = Path(__file__).parent / "out"
 def load_sheet_segments(short_key, stem, no_inverse=False):
     """no_inverse=True (loop18 leg 2): recon_segments_no_inverse.json when bench.py's recon.py
     --no-inverse step wrote one for this sheet, else the plain file (a sheet inverse.py never touched
-    has no by-inverse rows to exclude in the first place -- same numbers either way)."""
+    has no by-inverse rows to exclude in the first place -- same numbers either way).
+
+    "anchored" (loop19 leg 2): anchored.py patches this same recon_segments.json with a bool column,
+    same shape/order as covered/dimensioned, ONLY on the sheets it has anchors for (presidio, r10434_1,
+    r10434_3 today -- anchored.SHEET_PDF's own scope). A sheet without that column contributes all-False
+    (0 anchored ft there, not an error -- no anchors built for it yet)."""
     base = BASE_OUT / stem if stem else BASE_OUT
     p = base / "recon_segments_no_inverse.json" if no_inverse and (base / "recon_segments_no_inverse.json").exists() else base / "recon_segments.json"
     if not p.exists():
@@ -57,7 +62,8 @@ def load_sheet_segments(short_key, stem, no_inverse=False):
     seg_len = np.array(d["seg_len_ft"], float)
     cov = np.array(d["covered"], bool)
     dim = np.array(d["dimensioned"], bool)
-    return P, Q, seg_len, cov, dim
+    anch = np.array(d["anchored"], bool) if "anchored" in d else np.zeros(len(seg_len), bool)
+    return P, Q, seg_len, cov, dim, anch
 
 
 def old_headline():
@@ -77,27 +83,29 @@ def old_headline():
 
 
 def pool_all_sheets(no_inverse=False):
-    P_all, Q_all, len_all, cov_all, dim_all, sheet_all = [], [], [], [], [], []
+    P_all, Q_all, len_all, cov_all, dim_all, anch_all, sheet_all = [], [], [], [], [], [], []
     for short_key, stem in SHEETS.items():
-        P, Q, seg_len, cov, dim = load_sheet_segments(short_key, stem, no_inverse=no_inverse)
+        P, Q, seg_len, cov, dim, anch = load_sheet_segments(short_key, stem, no_inverse=no_inverse)
         if len(P) == 0:
             continue
         P_all.append(P); Q_all.append(Q); len_all.append(seg_len); cov_all.append(cov); dim_all.append(dim)
+        anch_all.append(anch)
         sheet_all.append(np.full(len(P), short_key, dtype=object))
     P = np.vstack(P_all); Q = np.vstack(Q_all)
     seg_len = np.concatenate(len_all); cov = np.concatenate(cov_all); dim = np.concatenate(dim_all)
+    anch = np.concatenate(anch_all)
     sheet = np.concatenate(sheet_all)
     mid = (P + Q) / 2
     seg_az = azimuth_arr(Q - P)
-    return P, Q, mid, seg_len, seg_az, cov, dim, sheet
+    return P, Q, mid, seg_len, seg_az, cov, dim, anch, sheet
 
 
 def run():
-    P, Q, mid, seg_len, seg_az, cov, dim, sheet = pool_all_sheets()
+    P, Q, mid, seg_len, seg_az, cov, dim, anch, sheet = pool_all_sheets()
     old, per_sheet = old_headline()
 
-    P2, Q2, mid2, seg_len2, seg_az2, (cov2, dim2) = dedupe_segments(
-        P, Q, mid, seg_len, seg_az, DUP_TOL_FT_SET, PARALLEL_TOL_DEG, [cov, dim])
+    P2, Q2, mid2, seg_len2, seg_az2, (cov2, dim2, anch2) = dedupe_segments(
+        P, Q, mid, seg_len, seg_az, DUP_TOL_FT_SET, PARALLEL_TOL_DEG, [cov, dim, anch])
     # loop18 leg 1: overlap ft removed -- old per-sheet SUM minus the deduped set total, split by class
     # (drawn/dim/covered), so the gate can compare this script's own measured overlap against JR's two
     # independently-measured numbers (traverse-row overlap .2/.3 3,874 ft, .1/.2 1,645 ft; the DENOMINATOR
@@ -108,12 +116,16 @@ def run():
     new_covered = float(seg_len2[cov2].sum())
     new_dim_denom = float(seg_len2[dim2].sum())
     new_dim_covered = float(seg_len2[cov2 & dim2].sum())
+    # loop19 leg 2: recon_anchored at the SET level, same denominator as recon_all_set (new_drawn) --
+    # deduped the identical way (a shared matchline course carries its anchored flag through the collapse
+    # via dedupe_segments()'s own OR rule, same as covered/dimensioned).
+    new_anchored = float(seg_len2[anch2].sum())
 
     # loop18 leg 2: the same set pooling, over recon_segments_no_inverse.json -- the headline with every
     # "by inverse ..." traverse row excluded (identical to new_set on a run where none was ever accepted).
-    P0, Q0, mid0, seg_len0, seg_az0, cov0, dim0, sheet0 = pool_all_sheets(no_inverse=True)
-    P02, Q02, mid02, seg_len02, seg_az02, (cov02, dim02) = dedupe_segments(
-        P0, Q0, mid0, seg_len0, seg_az0, DUP_TOL_FT_SET, PARALLEL_TOL_DEG, [cov0, dim0])
+    P0, Q0, mid0, seg_len0, seg_az0, cov0, dim0, anch0, sheet0 = pool_all_sheets(no_inverse=True)
+    P02, Q02, mid02, seg_len02, seg_az02, (cov02, dim02, anch02) = dedupe_segments(
+        P0, Q0, mid0, seg_len0, seg_az0, DUP_TOL_FT_SET, PARALLEL_TOL_DEG, [cov0, dim0, anch0])
     no_inv_drawn = float(seg_len02.sum())
     no_inv_covered = float(seg_len02[cov02].sum())
     no_inv_dim_denom = float(seg_len02[dim02].sum())
@@ -141,6 +153,8 @@ def run():
         },
         "recon_all_set_pct": round(100 * new_covered / new_drawn, 2) if new_drawn else 0,
         "recon_dim_set_pct": round(100 * new_dim_covered / new_dim_denom, 2) if new_dim_denom else 0,
+        "recon_anchored_ft": round(new_anchored, 1),
+        "recon_anchored_set_pct": round(100 * new_anchored / new_drawn, 2) if new_drawn else 0,
         "recon_all_old_pct": round(100 * old["covered_ft"] / old["drawn_ft"], 2) if old["drawn_ft"] else 0,
         "recon_dim_old_pct": round(100 * old["dim_covered_ft"] / old["dim_denom_ft"], 2) if old["dim_denom_ft"] else 0,
         "per_sheet_recon_json": {k: {"recon_all_denom_ft": r["recon_all_denom_ft"], "recon_all_covered_ft": r["recon_all_covered_ft"],
@@ -154,7 +168,8 @@ def run():
           f"({result['recon_dim_old_pct']:.1f}%)")
     print(f"NEW (set, deduped):     recon_all {new_covered:,.0f}/{new_drawn:,.0f} ft "
           f"({result['recon_all_set_pct']:.1f}%) | recon_dim {new_dim_covered:,.0f}/{new_dim_denom:,.0f} ft "
-          f"({result['recon_dim_set_pct']:.1f}%)")
+          f"({result['recon_dim_set_pct']:.1f}%) | recon_anchored {new_anchored:,.0f}/{new_drawn:,.0f} ft "
+          f"({result['recon_anchored_set_pct']:.1f}%)")
     print(f"NEW without inverse:    recon_all {no_inv_covered:,.0f}/{no_inv_drawn:,.0f} ft "
           f"({result['new_set_no_inverse']['recon_all_pct']:.1f}%) | recon_dim {no_inv_dim_covered:,.0f}/{no_inv_dim_denom:,.0f} ft "
           f"({result['new_set_no_inverse']['recon_dim_pct']:.1f}%) | inverse gain {result['inverse_gain_ft']:,.1f} ft")

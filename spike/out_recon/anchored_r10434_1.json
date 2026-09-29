@@ -284,5 +284,24 @@
     }
    ]
   }
- ]
+ ],
+ "branch_resolved": [],
+ "branch_ambiguous": [],
+ "recon_anchored": {
+  "covered_ft": 322.3,
+  "denom_ft": 9079.4,
+  "pct": 3.55
+ },
+ "solvable_by_closure_unchecked": [
+  {
+   "chain_start": "CO13",
+   "course": "176.33'",
+   "missing": "bearing",
+   "reaches": "CO8",
+   "computed_az_deg": 178.3795,
+   "drawn_az_deg": 178.377,
+   "diff_deg": 0.002
+  }
+ ],
+ "anchored_parcels": []
 }

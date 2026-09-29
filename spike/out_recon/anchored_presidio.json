@@ -42,6 +42,31 @@
    "worst_misfit_ft": 0.13
   },
   {
+   "start": "CO2",
+   "end": "T-5",
+   "status": "closed",
+   "misclosure_ft": 0.008,
+   "length_ft": 356.07,
+   "n_courses": 2,
+   "courses": [
+    {
+     "name": "S10°09'24\"W + 101.10'",
+     "kind": "line",
+     "ft": 101.1,
+     "misfit_ft": 0.04
+    },
+    {
+     "name": "L=269.94'",
+     "kind": "arc",
+     "ft": 254.97,
+     "misfit_ft": 0.16
+    }
+   ],
+   "worst_course": "L=269.94'",
+   "worst_misfit_ft": 0.16,
+   "branch_resolved": true
+  },
+  {
    "start": "CO7",
    "end": "T-1",
    "status": "closed",
@@ -112,32 +137,83 @@
    ],
    "worst_course": "S75°11'08\"E + 208.34'",
    "worst_misfit_ft": 0.14
+  },
+  {
+   "start": "CO18",
+   "end": "CO4",
+   "status": "closed",
+   "misclosure_ft": 0.014,
+   "length_ft": 360.8,
+   "n_courses": 3,
+   "courses": [
+    {
+     "name": "N67°07'01\"W + 138.21'",
+     "kind": "line",
+     "ft": 138.21,
+     "misfit_ft": 0.07
+    },
+    {
+     "name": "L13",
+     "kind": "line",
+     "ft": 39.97,
+     "misfit_ft": 0.05
+    },
+    {
+     "name": "N71°52'13\"W + 182.62'",
+     "kind": "line",
+     "ft": 182.62,
+     "misfit_ft": 0.04
+    }
+   ],
+   "worst_course": "N67°07'01\"W + 138.21'",
+   "worst_misfit_ft": 0.07,
+   "branch_resolved": true
+  },
+  {
+   "start": "CO18",
+   "end": "CO4",
+   "status": "closed",
+   "misclosure_ft": 0.005,
+   "length_ft": 407.53,
+   "n_courses": 4,
+   "courses": [
+    {
+     "name": "L12",
+     "kind": "line",
+     "ft": 34.89,
+     "misfit_ft": 0.04
+    },
+    {
+     "name": "L11",
+     "kind": "line",
+     "ft": 21.9,
+     "misfit_ft": 0.06
+    },
+    {
+     "name": "N70°37'16\"W + 168.12'",
+     "kind": "line",
+     "ft": 168.12,
+     "misfit_ft": 0.05
+    },
+    {
+     "name": "N71°52'13\"W + 182.62'",
+     "kind": "line",
+     "ft": 182.62,
+     "misfit_ft": 0.04
+    }
+   ],
+   "worst_course": "L11",
+   "worst_misfit_ft": 0.06,
+   "branch_resolved": true
   }
  ],
  "failed": [],
  "open": [
   {
-   "start": "CO2",
-   "end": null,
-   "status": "open",
-   "reason": "branch",
-   "misclosure_ft": null,
-   "length_ft": 101.1,
-   "n_courses": 1,
-   "courses": [
-    {
-     "name": "S10°09'24\"W + 101.10'",
-     "kind": "line",
-     "ft": 101.1,
-     "misfit_ft": 0.04
-    }
-   ]
-  },
-  {
    "start": "CO4",
    "end": null,
    "status": "open",
-   "reason": "branch",
+   "reason": "branch (ambiguous: 2 continuations close)",
    "misclosure_ft": null,
    "length_ft": 182.62,
    "n_courses": 1,
@@ -148,6 +224,9 @@
      "ft": 182.62,
      "misfit_ft": 0.04
     }
+   ],
+   "ambiguous_ends": [
+    "CO18"
    ]
   },
   {
@@ -171,7 +250,7 @@
    "start": "CO7",
    "end": null,
    "status": "open",
-   "reason": "branch",
+   "reason": "branch (2 candidates, 2 paths explored within depth 6, none closed)",
    "misclosure_ft": null,
    "length_ft": 174.2,
    "n_courses": 2,
@@ -357,58 +436,6 @@
    ]
   },
   {
-   "start": "CO18",
-   "end": null,
-   "status": "open",
-   "reason": "branch",
-   "misclosure_ft": null,
-   "length_ft": 178.18,
-   "n_courses": 2,
-   "courses": [
-    {
-     "name": "N67°07'01\"W + 138.21'",
-     "kind": "line",
-     "ft": 138.21,
-     "misfit_ft": 0.07
-    },
-    {
-     "name": "L13",
-     "kind": "line",
-     "ft": 39.97,
-     "misfit_ft": 0.05
-    }
-   ]
-  },
-  {
-   "start": "CO18",
-   "end": null,
-   "status": "open",
-   "reason": "branch",
-   "misclosure_ft": null,
-   "length_ft": 224.91,
-   "n_courses": 3,
-   "courses": [
-    {
-     "name": "L12",
-     "kind": "line",
-     "ft": 34.89,
-     "misfit_ft": 0.04
-    },
-    {
-     "name": "L11",
-     "kind": "line",
-     "ft": 21.9,
-     "misfit_ft": 0.06
-    },
-    {
-     "name": "N70°37'16\"W + 168.12'",
-     "kind": "line",
-     "ft": 168.12,
-     "misfit_ft": 0.05
-    }
-   ]
-  },
-  {
    "start": "CO19",
    "end": null,
    "status": "open",
@@ -576,23 +603,6 @@
    ]
   },
   {
-   "start": "T-5",
-   "end": null,
-   "status": "open",
-   "reason": "branch",
-   "misclosure_ft": null,
-   "length_ft": 254.97,
-   "n_courses": 1,
-   "courses": [
-    {
-     "name": "L=269.94'",
-     "kind": "arc",
-     "ft": 254.97,
-     "misfit_ft": 0.16
-    }
-   ]
-  },
-  {
    "start": "T-7",
    "end": null,
    "status": "open",
@@ -615,5 +625,129 @@
     }
    ]
   }
- ]
+ ],
+ "branch_resolved": [
+  {
+   "start": "CO2",
+   "end": "T-5",
+   "status": "closed",
+   "misclosure_ft": 0.008,
+   "length_ft": 356.07,
+   "n_courses": 2,
+   "courses": [
+    {
+     "name": "S10°09'24\"W + 101.10'",
+     "kind": "line",
+     "ft": 101.1,
+     "misfit_ft": 0.04
+    },
+    {
+     "name": "L=269.94'",
+     "kind": "arc",
+     "ft": 254.97,
+     "misfit_ft": 0.16
+    }
+   ],
+   "worst_course": "L=269.94'",
+   "worst_misfit_ft": 0.16,
+   "branch_resolved": true
+  },
+  {
+   "start": "CO18",
+   "end": "CO4",
+   "status": "closed",
+   "misclosure_ft": 0.014,
+   "length_ft": 360.8,
+   "n_courses": 3,
+   "courses": [
+    {
+     "name": "N67°07'01\"W + 138.21'",
+     "kind": "line",
+     "ft": 138.21,
+     "misfit_ft": 0.07
+    },
+    {
+     "name": "L13",
+     "kind": "line",
+     "ft": 39.97,
+     "misfit_ft": 0.05
+    },
+    {
+     "name": "N71°52'13\"W + 182.62'",
+     "kind": "line",
+     "ft": 182.62,
+     "misfit_ft": 0.04
+    }
+   ],
+   "worst_course": "N67°07'01\"W + 138.21'",
+   "worst_misfit_ft": 0.07,
+   "branch_resolved": true
+  },
+  {
+   "start": "CO18",
+   "end": "CO4",
+   "status": "closed",
+   "misclosure_ft": 0.005,
+   "length_ft": 407.53,
+   "n_courses": 4,
+   "courses": [
+    {
+     "name": "L12",
+     "kind": "line",
+     "ft": 34.89,
+     "misfit_ft": 0.04
+    },
+    {
+     "name": "L11",
+     "kind": "line",
+     "ft": 21.9,
+     "misfit_ft": 0.06
+    },
+    {
+     "name": "N70°37'16\"W + 168.12'",
+     "kind": "line",
+     "ft": 168.12,
+     "misfit_ft": 0.05
+    },
+    {
+     "name": "N71°52'13\"W + 182.62'",
+     "kind": "line",
+     "ft": 182.62,
+     "misfit_ft": 0.04
+    }
+   ],
+   "worst_course": "L11",
+   "worst_misfit_ft": 0.06,
+   "branch_resolved": true
+  }
+ ],
+ "branch_ambiguous": [
+  {
+   "start": "CO4",
+   "end": null,
+   "status": "open",
+   "reason": "branch (ambiguous: 2 continuations close)",
+   "misclosure_ft": null,
+   "length_ft": 182.62,
+   "n_courses": 1,
+   "courses": [
+    {
+     "name": "N71°52'13\"W + 182.62'",
+     "kind": "line",
+     "ft": 182.62,
+     "misfit_ft": 0.04
+    }
+   ],
+   "ambiguous_ends": [
+    "CO18"
+   ]
+  }
+ ],
+ "recon_anchored": {
+  "covered_ft": 336.9,
+  "denom_ft": 10648.4,
+  "pct": 3.16
+ },
+ "solvable_by_closure_unchecked": [],
+ "anchored_parcels": []
 }

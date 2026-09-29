@@ -29,6 +29,8 @@
  },
  "recon_all_set_pct": 42.58,
  "recon_dim_set_pct": 55.64,
+ "recon_anchored_ft": 660.3,
+ "recon_anchored_set_pct": 1.03,
  "recon_all_old_pct": 43.17,
  "recon_dim_old_pct": 55.02,
  "per_sheet_recon_json": {
